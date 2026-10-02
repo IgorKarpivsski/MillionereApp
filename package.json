@@ -1,0 +1,22 @@
+{
+  "name": "football-millionaire",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @fm/mobile start",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "test:db": "bash tools/scripts/db-test.sh",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "^3.3.0",
+    "tsx": "^4.19.0",
+    "turbo": "^2.3.0",
+    "typescript": "^5.6.0"
+  }
+}

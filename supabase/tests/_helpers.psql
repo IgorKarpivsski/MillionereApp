@@ -1,0 +1,40 @@
+-- Shared helpers for SQL tests. Loaded before every test file.
+\set ON_ERROR_STOP 1
+set client_min_messages = warning;
+
+create schema if not exists test;
+
+create or replace function test.assert(cond boolean, msg text) returns void
+language plpgsql as $$
+begin
+  if cond is distinct from true then raise exception 'ASSERTION FAILED: %', msg; end if;
+end $$;
+
+-- Asserts that `sql` raises an error whose message contains `expected`.
+create or replace function test.assert_raises(sql text, expected text, msg text) returns void
+language plpgsql as $$
+begin
+  begin
+    execute sql;
+  exception when others then
+    if position(expected in sqlerrm) > 0 then return; end if;
+    raise exception 'ASSERTION FAILED: % (got error "%", expected "%")', msg, sqlerrm, expected;
+  end;
+  raise exception 'ASSERTION FAILED: % (no error raised, expected "%")', msg, expected;
+end $$;
+
+create or replace function test.new_user(anonymous boolean default true) returns uuid
+language sql as $$
+  insert into auth.users (is_anonymous) values (anonymous) returning id
+$$;
+
+-- Act as a signed-in client (same mechanism PostgREST uses).
+create or replace function test.login(uid uuid) returns void
+language plpgsql as $$
+begin
+  perform set_config('request.jwt.claims',
+    jsonb_build_object('sub', uid, 'role', 'authenticated')::text, false);
+end $$;
+
+grant usage on schema test to anon, authenticated;
+grant execute on all functions in schema test to anon, authenticated;

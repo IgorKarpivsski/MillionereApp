@@ -1,0 +1,38 @@
+# Supabase CLI config for local development (`supabase start`).
+# Production settings are configured in the Supabase dashboard; keep the two in sync.
+project_id = "football-millionaire"
+
+[api]
+port = 54321
+schemas = ["public"]
+max_rows = 200
+
+[db]
+port = 54322
+major_version = 15
+
+[auth]
+site_url = "footballmillionaire://"
+additional_redirect_urls = ["footballmillionaire://auth/callback", "exp://**"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+# Guests start as anonymous users and can link Apple/Google later.
+enable_anonymous_sign_ins = true
+enable_manual_linking = true
+
+[auth.rate_limit]
+anonymous_users = 30
+
+[auth.external.apple]
+enabled = true
+client_id = "env(SUPABASE_AUTH_APPLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_APPLE_SECRET)"
+
+[auth.external.google]
+enabled = true
+client_id = "env(SUPABASE_AUTH_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_GOOGLE_SECRET)"
+skip_nonce_check = true
+
+[functions.delete-account]
+verify_jwt = true

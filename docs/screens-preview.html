@@ -1,0 +1,252 @@
+<title>Football Millionaire Screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&family=Secular+One&display=swap">
+<style>
+/* Layout: phone frames side by side (wrapping), each a live-styled copy of a Phase 1 screen. Single dark look, same as the app. */
+:root {
+  --night950: #0F0B33; --night900: #1B1452; --night800: #251C6B; --night700: #30258A; --night600: #4334B0;
+  --chalk: #F7F4FF; --chalk-dim: #C9C3EE;
+  --pitch: #1FCB7F; --pitch-deep: #0E8F57; --gold: #FFC93C; --gold-deep: #C98A00;
+  --flare: #FF5D5D; --flare-deep: #C42E3A; --sky: #4FD8FF; --sky-deep: #1A93BE; --violet: #A877FF; --violet-deep: #6E3FD0;
+  --display: "Secular One", "Arial Hebrew", "Rubik", sans-serif;
+  --ui: "Rubik", "Arial Hebrew", system-ui, sans-serif;
+  --page: #120E3D;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--page); color: var(--chalk); font-family: var(--ui); margin: 0; padding-inline: 16px; padding-block: 28px 48px; }
+.intro { max-width: 1240px; margin: 0 auto 24px; display: grid; gap: 6px; }
+.intro h1 { font-family: var(--display); font-weight: 400; font-size: 30px; margin: 0; text-wrap: balance; }
+.intro p { margin: 0; color: var(--chalk-dim); max-width: 62ch; line-height: 1.55; }
+.phones { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; max-width: 1240px; margin: 0 auto; }
+figure { margin: 0; display: grid; gap: 10px; justify-items: center; }
+figcaption { color: var(--chalk-dim); font-size: 14px; }
+
+.phone { width: 300px; max-width: 100%; height: 640px; border-radius: 40px; border: 8px solid #06041c; background: var(--night900); position: relative; overflow: hidden; direction: rtl; }
+.phone svg.pitch { position: absolute; inset: 0; width: 100%; height: 100%; }
+.scroll { position: absolute; inset: 0; padding: 40px 14px 100px; display: flex; flex-direction: column; gap: 14px; overflow: hidden; }
+
+.t-title { font-family: var(--display); font-size: 23px; line-height: 1.2; margin: 0; }
+.t-heading { font-family: var(--display); font-size: 17px; line-height: 1.25; margin: 0; }
+.t-body { font-size: 13px; line-height: 1.5; color: var(--chalk-dim); margin: 0; }
+.t-label { font-weight: 700; font-size: 12px; margin: 0; }
+.num { font-family: var(--display); font-variant-numeric: tabular-nums; }
+
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.who { display: flex; align-items: center; gap: 7px; font-weight: 700; font-size: 12px; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--night950); border: 3px solid var(--chalk); display: grid; place-items: center; position: relative; flex: none; }
+.avatar .lvl { position: absolute; bottom: -5px; inset-inline-end: -6px; background: var(--gold); color: var(--night950); border: 2px solid var(--night950); border-radius: 9px; font: 900 10px/14px var(--ui); padding: 0 4px; }
+.pills { display: flex; gap: 5px; }
+.pill { display: flex; align-items: center; gap: 3px; height: 30px; padding-inline: 3px 9px; border-radius: 99px; background: var(--night950); border: 2px solid var(--night600); font-family: var(--display); font-size: 14px; }
+
+.card { position: relative; padding-bottom: 5px; }
+.card::before { content: ""; position: absolute; inset: 5px 0 0; border-radius: 20px; background: var(--night950); }
+.card .face { position: relative; border-radius: 20px; padding: 14px; border: 2px solid var(--night600); background: var(--night800); display: grid; gap: 6px; }
+.card.sticker .face { border: 3px solid var(--chalk); }
+.card.gold .face { background: var(--gold); color: var(--night950); }
+.card.gold .t-body { color: var(--night950); font-weight: 500; }
+.card.raised .face { background: var(--night700); }
+
+.btn { position: relative; height: 54px; display: block; }
+.btn .lip, .btn .bface { position: absolute; inset-inline: 0; height: 48px; border-radius: 16px; }
+.btn .lip { top: 6px; }
+.btn .bface { top: 0; display: flex; align-items: center; justify-content: center; gap: 7px; font: 900 16px var(--ui); color: var(--night950); }
+.btn.lg { height: 62px; } .btn.lg .lip, .btn.lg .bface { height: 56px; } .btn.lg .bface { font-size: 18px; }
+.btn.sm { height: 42px; } .btn.sm .lip, .btn.sm .bface { height: 38px; } .btn.sm .lip { top: 4px; } .btn.sm .bface { font-size: 13px; }
+.primary .bface { background: var(--pitch); } .primary .lip { background: var(--pitch-deep); }
+.danger .bface { background: var(--flare); } .danger .lip { background: var(--flare-deep); }
+.ghost .bface { background: var(--night700); color: var(--chalk); border: 2px solid var(--night600); } .ghost .lip { background: var(--night950); }
+.btn.pressed .bface { top: 6px; }
+
+.row { display: flex; gap: 10px; align-items: center; }
+.grow { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.stickers { display: flex; gap: 8px; }
+.slot { width: 76px; height: 100px; border-radius: 13px; border: 3px dashed var(--night600); background: var(--night950); display: grid; place-items: center; color: var(--chalk-dim); font: 400 26px var(--display); opacity: .7; }
+.rar { width: 76px; height: 100px; border-radius: 13px; border: 3px solid var(--chalk); padding: 4px; display: grid; grid-template-rows: 1fr auto; gap: 3px; }
+.rar .art { border-radius: 9px; display: grid; place-items: center; }
+.rar span { font-size: 10px; text-align: center; color: var(--chalk); }
+
+.ladder { display: grid; gap: 4px; }
+.rung { height: 27px; border-radius: 14px; background: var(--night950); display: flex; justify-content: space-between; align-items: center; padding-inline: 12px; font-family: var(--display); font-size: 14px; }
+.rung b { font-weight: 400; color: var(--gold); }
+.rung i { font-style: normal; color: var(--chalk-dim); }
+.rung.cp { background: var(--pitch); } .rung.top { background: var(--gold); }
+.rung.cp b, .rung.cp i, .rung.top b, .rung.top i { color: var(--night950); }
+
+.pack { display: flex; gap: 10px; align-items: center; }
+.pack .box { width: 50px; height: 60px; border-radius: 12px; border: 3px solid var(--chalk); display: grid; place-items: center; flex: none; }
+.price { display: flex; gap: 4px; align-items: center; color: var(--chalk-dim); font-family: var(--display); font-size: 14px; }
+.two { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+
+.bar { height: 12px; border-radius: 6px; background: var(--night950); border: 2px solid var(--night600); overflow: hidden; }
+.bar > div { height: 100%; border-radius: 6px; background: var(--gold); position: relative; }
+.bar > div::after { content: ""; position: absolute; top: 1px; inset-inline: 4px; height: 2px; background: rgba(255,255,255,.4); }
+
+.sheet { position: absolute; inset: auto 0 0; background: var(--night800); border-top: 3px solid var(--chalk); border-radius: 26px 26px 0 0; padding: 12px 18px 26px; display: grid; gap: 10px; z-index: 3; }
+.scrim { position: absolute; inset: 0; background: rgba(15,11,51,.72); z-index: 2; }
+.grab { width: 40px; height: 5px; border-radius: 3px; background: var(--night600); justify-self: center; }
+.odds { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.sw { width: 16px; height: 16px; border-radius: 5px; border: 2px solid var(--chalk); }
+
+.tabbar { position: absolute; inset: auto 10px 12px; background: var(--night950); border: 3px solid var(--night600); border-radius: 20px; display: flex; padding: 6px 2px; z-index: 1; }
+.tab { flex: 1; display: grid; justify-items: center; gap: 2px; font-size: 10px; color: var(--chalk-dim); }
+.tab .ic { width: 42px; height: 28px; border-radius: 14px; display: grid; place-items: center; }
+.tab.on { color: var(--chalk); } .tab.on .ic { transform: translateY(-3px); }
+.toast { position: absolute; top: 36px; inset-inline: 22px; background: var(--night950); border: 2px solid var(--pitch); border-radius: 16px; padding: 9px 12px; display: flex; gap: 8px; align-items: center; font-weight: 500; font-size: 13px; z-index: 4; }
+.toast i { width: 9px; height: 9px; border-radius: 50%; background: var(--pitch); flex: none; }
+@media (prefers-reduced-motion: no-preference) { .btn .bface { transition: top .09s; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="coin" viewBox="0 0 24 24"><circle cx="12" cy="13" r="10" fill="#C98A00"/><circle cx="12" cy="11" r="10" fill="#FFC93C"/><circle cx="12" cy="11" r="6.5" fill="none" stroke="#C98A00" stroke-width="2"/><path d="M12 7.5l1.1 2.3 2.5.3-1.8 1.7.5 2.5-2.3-1.2-2.3 1.2.5-2.5-1.8-1.7 2.5-.3z" fill="#C98A00"/></symbol>
+    <symbol id="gem" viewBox="0 0 24 24"><path d="M6 4h12l4 6-10 12L2 10z" fill="#1A93BE"/><path d="M6 3h12l4 6-10 12L2 9z" fill="#4FD8FF"/><path d="M2 9h20M8 3l4 18M16 3l-4 18M8 3L6 9M16 3l2 6" stroke="#1A93BE" stroke-width="1.3" fill="none"/></symbol>
+    <symbol id="flame" viewBox="0 0 48 48"><path d="M24 3c3 7 12 11 12 23a12 12 0 0 1-24 0c0-6 3-9 5-12 1 4 3 6 5 6-1-7 0-12 2-17z" fill="#FF5D5D"/><path d="M24 22c2 4 7 6 7 12a7 7 0 0 1-14 0c0-3 2-5 3-6 1 2 2 3 3 3 0-4 0-6 1-9z" fill="#FFC93C"/></symbol>
+    <symbol id="shirt" viewBox="0 0 48 48"><path d="M17 6l-11 6 4 9 5-2v23h18V19l5 2 4-9-11-6c-1 3-4 5-7 5s-6-2-7-5z" fill="#1FCB7F"/><path d="M17 6c1 3 4 5 7 5s6-2 7-5" stroke="#0E8F57" stroke-width="3" fill="none"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="currentColor"/></symbol>
+    <symbol id="i-ball" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8l3 2.2-1.2 3.6h-3.6L9 10.2z" fill="currentColor"/></symbol>
+    <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="5" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 14v6h14v-6M12 9v11M12 9c-2-4-6-4-6-1.5S10 9 12 9c2 0 6 1 6-1.5S14 5 12 9z" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-album" viewBox="0 0 24 24"><rect x="4" y="3" width="14" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 3v18" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="3" fill="currentColor"/><path d="M6.5 18c1.5-2.5 3.3-3.5 5.5-3.5s4 1 5.5 3.5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="pitchbg" viewBox="0 0 300 640"><line x1="0" y1="295" x2="300" y2="295" stroke="#30258A" stroke-width="2"/><circle cx="150" cy="295" r="96" fill="none" stroke="#30258A" stroke-width="2"/><circle cx="150" cy="295" r="4" fill="#30258A"/><rect x="60" y="556" width="180" height="120" fill="none" stroke="#30258A" stroke-width="2"/></symbol>
+  </defs>
+</svg>
+
+<header class="intro">
+  <h1>מיליונר הכדורגל · מסכי Phase 1</h1>
+  <p>תצוגה של העיצוב שנבנה באפליקציה: אותם צבעים, גופנים ורכיבים. הכפתורים והכרטיסים בנויים כמו מדבקות אלבום, עם שפה עבה שהכפתור נלחץ אליה. המשחק עצמו, החבילות והאלבום נפתחים בשלבים הבאים.</p>
+</header>
+
+<main class="phones">
+
+  <!-- HOME -->
+  <figure>
+    <div class="phone">
+      <svg class="pitch" viewBox="0 0 300 640" preserveAspectRatio="none" aria-hidden="true"><use href="#pitchbg"/></svg>
+      <div class="scroll">
+        <div class="topbar">
+          <div class="who"><div class="avatar"><svg width="26" height="26"><use href="#shirt"/></svg><span class="lvl">1</span></div>שחקן482913</div>
+          <div class="pills"><div class="pill"><svg width="20" height="20"><use href="#coin"/></svg>0</div><div class="pill"><svg width="20" height="20"><use href="#gem"/></svg>0</div></div>
+        </div>
+        <h2 class="t-title">ערב טוב, שחקן482913</h2>
+        <div class="card sticker gold"><div class="face">
+          <div class="row"><svg width="46" height="46"><use href="#coin"/></svg><div class="grow"><h3 class="t-heading">מתנת פתיחה</h3><p class="t-body">500 מטבעות כדי להתחיל.</p></div></div>
+          <div class="btn ghost sm"><div class="lip"></div><div class="bface">קבל את המתנה</div></div>
+        </div></div>
+        <div class="card raised"><div class="face">
+          <div class="row" style="align-items:flex-start"><svg width="44" height="44" style="filter:grayscale(1) brightness(.75)"><use href="#flame"/></svg><div class="grow"><h3 class="t-heading">האתגר היומי</h3><p class="t-body">10 שאלות. כל יום רצוף מגדיל את הפרס.</p><p class="t-label" style="color:var(--gold)">התחל רצף היום</p></div></div>
+          <div class="btn danger"><div class="lip"></div><div class="bface">לאתגר היומי</div></div>
+        </div></div>
+        <div class="btn primary lg"><div class="lip"></div><div class="bface"><svg width="22" height="22"><use href="#i-ball"/></svg>שחק עכשיו</div></div>
+      </div>
+      <nav class="tabbar">
+        <div class="tab on"><div class="ic" style="background:var(--pitch);color:var(--night950)"><svg width="20" height="20"><use href="#i-home"/></svg></div>בית</div>
+        <div class="tab"><div class="ic"><svg width="20" height="20"><use href="#i-ball"/></svg></div>שחק</div>
+        <div class="tab"><div class="ic"><svg width="20" height="20"><use href="#i-gift"/></svg></div>חבילות</div>
+        <div class="tab"><div class="ic"><svg width="20" height="20"><use href="#i-album"/></svg></div>אלבום</div>
+        <div class="tab"><div class="ic"><svg width="20" height="20"><use href="#i-user"/></svg></div>פרופיל</div>
+      </nav>
+    </div>
+    <figcaption>בית: מתנת פתיחה, אתגר יומי ופעולה אחת בולטת</figcaption>
+  </figure>
+
+  <!-- PLAY -->
+  <figure>
+    <div class="phone">
+      <svg class="pitch" viewBox="0 0 300 640" preserveAspectRatio="none" aria-hidden="true"><use href="#pitchbg"/></svg>
+      <div class="scroll">
+        <div class="topbar">
+          <div class="who"><div class="avatar"><svg width="26" height="26"><use href="#shirt"/></svg><span class="lvl">1</span></div>שחקן482913</div>
+          <div class="pills"><div class="pill"><svg width="20" height="20"><use href="#coin"/></svg>500</div><div class="pill"><svg width="20" height="20"><use href="#gem"/></svg>0</div></div>
+        </div>
+        <h2 class="t-title">בחר משחק</h2>
+        <div class="card sticker raised"><div class="face">
+          <h3 class="t-heading">הסולם</h3>
+          <p class="t-body">12 שאלות, מקל לקשה. עצור מתי שתרצה ושמור את מה שצברת.</p>
+          <div class="ladder" id="ladder"></div>
+        </div></div>
+      </div>
+      <nav class="tabbar">
+        <div class="tab"><div class="ic"><svg width="20" height="20"><use href="#i-home"/></svg></div>בית</div>
+        <div class="tab on"><div class="ic" style="background:var(--pitch);color:var(--night950)"><svg width="20" height="20"><use href="#i-ball"/></svg></div>שחק</div>
+        <div class="tab"><div class="ic"><svg width="20" height="20"><use href="#i-gift"/></svg></div>חבילות</div>
+        <div class="tab"><div class="ic"><svg width="20" height="20"><use href="#i-album"/></svg></div>אלבום</div>
+        <div class="tab"><div class="ic"><svg width="20" height="20"><use href="#i-user"/></svg></div>פרופיל</div>
+      </nav>
+    </div>
+    <figcaption>שחק: סולם הפרסים, נקודות ביטחון בשלבים 4 ו-8</figcaption>
+  </figure>
+
+  <!-- PACKS + ODDS -->
+  <figure>
+    <div class="phone">
+      <svg class="pitch" viewBox="0 0 300 640" preserveAspectRatio="none" aria-hidden="true"><use href="#pitchbg"/></svg>
+      <div class="scroll">
+        <h2 class="t-title">חבילות</h2>
+        <p class="t-body">פותחים חבילה, מקבלים מדבקות, משלימים אלבומים.</p>
+        <div class="card sticker"><div class="face">
+          <div class="pack"><div class="box" style="background:#D98A4E"><svg width="26" height="26" style="color:var(--night950)"><use href="#i-gift"/></svg></div><div class="grow"><h3 class="t-heading">חבילת ארד</h3><div class="price"><svg width="16" height="16"><use href="#coin"/></svg>500</div></div></div>
+        </div></div>
+        <div class="card sticker"><div class="face">
+          <div class="pack"><div class="box" style="background:var(--gold)"><svg width="26" height="26" style="color:var(--night950)"><use href="#i-gift"/></svg></div><div class="grow"><h3 class="t-heading">חבילת זהב</h3><div class="price"><svg width="16" height="16"><use href="#coin"/></svg>4,000</div></div></div>
+        </div></div>
+      </div>
+      <div class="scrim"></div>
+      <div class="sheet">
+        <div class="grab"></div>
+        <h3 class="t-heading">סיכויים: חבילת זהב</h3>
+        <div class="odds"><span class="sw" style="background:var(--pitch)"></span><span class="grow">לא שכיח</span><span class="num">40%</span></div>
+        <div class="odds"><span class="sw" style="background:var(--sky)"></span><span class="grow">נדיר</span><span class="num">40%</span></div>
+        <div class="odds"><span class="sw" style="background:var(--violet)"></span><span class="grow">אפי</span><span class="num">17%</span></div>
+        <div class="odds"><span class="sw" style="background:var(--gold)"></span><span class="grow">אגדי</span><span class="num">3%</span></div>
+        <p class="t-body" style="font-size:12px">5 פריטים בחבילה. הסיכוי הוא לכל פריט בנפרד.</p>
+        <div class="btn ghost sm"><div class="lip"></div><div class="bface">סגור</div></div>
+      </div>
+    </div>
+    <figcaption>חבילות: הסיכויים גלויים לפני כל רכישה</figcaption>
+  </figure>
+
+  <!-- PROFILE -->
+  <figure>
+    <div class="phone">
+      <svg class="pitch" viewBox="0 0 300 640" preserveAspectRatio="none" aria-hidden="true"><use href="#pitchbg"/></svg>
+      <div class="toast"><i></i>קיבלת 500 מטבעות</div>
+      <div class="scroll" style="padding-top:84px">
+        <div style="display:grid;justify-items:center;gap:8px">
+          <div class="avatar" style="width:78px;height:78px"><svg width="54" height="54"><use href="#shirt"/></svg><span class="lvl" style="font-size:12px">1</span></div>
+          <h2 class="t-title">מלך_השערים</h2>
+        </div>
+        <div class="card"><div class="face">
+          <div class="row" style="justify-content:space-between"><h3 class="t-heading">שלב 1</h3><span class="num" style="color:var(--chalk-dim);font-size:13px" dir="ltr">40 / 150 XP</span></div>
+          <div class="bar"><div style="width:27%"></div></div>
+        </div></div>
+        <div class="card sticker raised"><div class="face">
+          <h3 class="t-heading">אתה משחק כאורח</h3>
+          <p class="t-body">חבר חשבון כדי לשמור את ההתקדמות ולשחק מכל מכשיר.</p>
+          <div class="btn ghost sm"><div class="lip"></div><div class="bface">המשך עם Apple</div></div>
+          <div class="btn ghost sm"><div class="lip"></div><div class="bface">המשך עם Google</div></div>
+        </div></div>
+        <div class="stickers">
+          <div class="rar" style="background:var(--sky-deep)"><div class="art" style="background:var(--sky)"></div><span>נדיר</span></div>
+          <div class="rar" style="background:var(--violet-deep)"><div class="art" style="background:var(--violet)"></div><span>אפי</span></div>
+          <div class="slot">?</div>
+        </div>
+      </div>
+      <nav class="tabbar">
+        <div class="tab"><div class="ic"><svg width="20" height="20"><use href="#i-home"/></svg></div>בית</div>
+        <div class="tab"><div class="ic"><svg width="20" height="20"><use href="#i-ball"/></svg></div>שחק</div>
+        <div class="tab"><div class="ic"><svg width="20" height="20"><use href="#i-gift"/></svg></div>חבילות</div>
+        <div class="tab"><div class="ic"><svg width="20" height="20"><use href="#i-album"/></svg></div>אלבום</div>
+        <div class="tab on"><div class="ic" style="background:var(--violet);color:var(--night950)"><svg width="20" height="20"><use href="#i-user"/></svg></div>פרופיל</div>
+      </nav>
+    </div>
+    <figcaption>פרופיל: קישור חשבון אורח, שלב והתראה על פרס</figcaption>
+  </figure>
+</main>
+
+<script>
+  // Same values as packages/economy-config LADDER (prize points; checkpoints at 4 and 8).
+  const ladder = [[12,'500,000'],[11,'250,000'],[10,'100,000'],[9,'50,000'],[8,'25,000'],[7,'10,000'],[6,'5,000'],[5,'2,500'],[4,'1,000'],[3,'500'],[2,'250'],[1,'100']];
+  document.getElementById('ladder').innerHTML = ladder.map(([n, p]) =>
+    `<div class="rung${n === 12 ? ' top' : n === 4 || n === 8 ? ' cp' : ''}"><i>${n}</i><b>${p}</b></div>`).join('');
+</script>
