@@ -17,6 +17,8 @@ import {
 } from '@/design-system/components';
 import { colors, space } from '@/design-system/tokens';
 import { useDailyStatus, useLeaderboard } from '@/features/quiz/hooks';
+import { useCollection } from '@/features/collection/hooks';
+import { PackArt } from '@/features/collection/PackArt';
 import { useClaimWelcomeBonus, useMyState } from '@/features/profile/hooks';
 import { RpcError } from '@/features/profile/api';
 import { formatNumber } from '@/lib/format';
@@ -131,6 +133,9 @@ export default function HomeScreen() {
   const { data: board } = useLeaderboard();
   const streak = daily?.streak ?? 0;
   const rank = board?.me.rank;
+  const { data: coll } = useCollection();
+  const owned = coll ? coll.items.filter((i) => i.count > 0).length : 0;
+  const packsWaiting = coll ? Object.values(coll.tokens).reduce((a, b) => a + b, 0) : 0;
   const toast = useToast();
 
   return (
@@ -142,11 +147,25 @@ export default function HomeScreen() {
 
       <MatchOfTheDay />
       {daily?.state === 'done' ? null : <ClassicCard />}
+      {packsWaiting > 0 ? (
+        <Card kind="sticker" frame={colors.correct} padding={space.md}>
+          <View style={styles.seasonRow}>
+            <PackArt slug="silver" width={40} />
+            <View style={styles.flex}>
+              <AppText variant="label">{fmt(t.packsWaiting, { n: packsWaiting })}</AppText>
+              <AppText variant="caption" color={colors.textDim}>
+                {t.packsWaitingBody}
+              </AppText>
+            </View>
+            <StickerButton label={t.openPacks} size="sm" onPress={() => router.push('/(tabs)/packs')} />
+          </View>
+        </Card>
+      ) : null}
 
       <View style={styles.tiles}>
         <StatTile value={String(streak)} label={t.statStreak} color={colors.correct} />
         <StatTile value={rank ? `#${rank}` : '--'} label={t.statRank} color={colors.led} />
-        <StatTile value="0" label={t.statCollection} />
+        <StatTile value={String(owned)} label={t.statCollection} />
       </View>
 
       <Card kind="soft" padding={space.md}>

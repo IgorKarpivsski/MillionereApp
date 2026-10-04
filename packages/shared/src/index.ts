@@ -204,3 +204,56 @@ export const LeaderboardSchema = z.object({
   me: z.object({ rank: z.number().int().nullable(), points: z.number(), games: z.number().int() }),
 });
 export type Leaderboard = z.infer<typeof LeaderboardSchema>;
+
+export * from './legendArt';
+
+/* -------------------------------------------------------------------------- */
+/* Album ("אגדות") — mirrors supabase/migrations/*_collection.sql             */
+/* -------------------------------------------------------------------------- */
+export const RaritySchema = z.enum(['common', 'uncommon', 'rare', 'epic', 'legendary', 'iconic']);
+export const PackSlugSchema = z.enum(['bronze', 'silver', 'gold', 'epic', 'legendary']);
+export type PackSlug = z.infer<typeof PackSlugSchema>;
+
+export const CollectibleSchema = z.object({
+  id: z.string(),
+  album: z.string(),
+  number: z.number().int(),
+  rarity: RaritySchema,
+  name: z.string(),
+  position: z.enum(['GK', 'DEF', 'MID', 'FWD']),
+  era: z.enum(['70s', '80s', '90s', '00s', 'modern']),
+  bio: z.string(),
+  art_seed: z.number().int(),
+  count: z.number().int(),
+});
+export type Collectible = z.infer<typeof CollectibleSchema>;
+
+export const PackCatalogEntrySchema = z.object({
+  slug: PackSlugSchema,
+  items: z.number().int(),
+  coins: z.number().int().nullable(),
+  gems: z.number().int().nullable(),
+  odds: z.record(z.number()),
+  guaranteed: RaritySchema.nullable(),
+});
+export type PackCatalogEntry = z.infer<typeof PackCatalogEntrySchema>;
+
+export const CollectionStateSchema = z.object({
+  albums: z.array(z.object({ slug: z.string(), title: z.string(), blurb: z.string(), total: z.number().int(), owned: z.number().int(), claimed: z.boolean() })),
+  items: z.array(CollectibleSchema),
+  tokens: z.record(z.number().int()),
+  dust: z.number(),
+  pity_left: z.number().int(),
+  catalog: z.array(PackCatalogEntrySchema),
+  craft_cost: z.record(z.number().int()),
+  paid_blocked_regions: z.array(z.string()),
+});
+export type CollectionState = z.infer<typeof CollectionStateSchema>;
+
+export const OpenPackResultSchema = z.object({
+  pack: PackSlugSchema,
+  items: z.array(z.object({ id: z.string(), rarity: RaritySchema, new: z.boolean(), dust: z.number().int() })),
+  dust_gained: z.number().int(),
+  wallet: z.object({ coins: z.number(), gems: z.number(), dust: z.number() }),
+});
+export type OpenPackResult = z.infer<typeof OpenPackResultSchema>;

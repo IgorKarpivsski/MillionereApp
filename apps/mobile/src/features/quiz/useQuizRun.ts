@@ -98,6 +98,7 @@ export function useQuizRun(mode: QuizMode = 'classic') {
       void qc.invalidateQueries({ queryKey: queryKeys.myState });
       void qc.invalidateQueries({ queryKey: queryKeys.daily });
       void qc.invalidateQueries({ queryKey: queryKeys.leaderboard });
+      void qc.invalidateQueries({ queryKey: queryKeys.collection });
       const endedBy =
         summary.status === 'won' ? 'completed'
         : summary.status === 'cashed_out' ? 'walk_away'

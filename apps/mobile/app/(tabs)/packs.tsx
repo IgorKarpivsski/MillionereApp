@@ -1,7 +1,8 @@
-import { PACKS, type PackType, type Rarity } from '@fm/economy-config';
-import { Ionicons } from '@expo/vector-icons';
+import type { PackCatalogEntry, PackSlug } from '@fm/shared';
+import { getLocales } from 'expo-localization';
+import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import { TopBar } from '@/components/TopBar';
 import {
   AppText,
@@ -9,96 +10,120 @@ import {
   Card,
   CoinIcon,
   GemIcon,
+  Led,
   Screen,
+  Skeleton,
   StickerButton,
   useToast,
 } from '@/design-system/components';
-import { colors, palette, radius, rarityColors, space } from '@/design-system/tokens';
+import { colors, rarityColors, space, type RarityKey } from '@/design-system/tokens';
+import { PackArt, PACK_NAMES } from '@/features/collection/PackArt';
+import { useCollection } from '@/features/collection/hooks';
+import { useMyState } from '@/features/profile/hooks';
 import { formatNumber } from '@/lib/format';
-import { strings } from '@/lib/i18n';
+import { fmt, strings } from '@/lib/i18n';
 
-const PACK_NAMES: Record<PackType['slug'], string> = {
-  bronze: 'חבילת ארד',
-  silver: 'חבילת כסף',
-  gold: 'חבילת זהב',
-  epic: 'חבילה אפית',
-  legendary: 'חבילה אגדית',
-};
-const PACK_COLORS: Record<PackType['slug'], string> = {
-  bronze: '#D98A4E',
-  silver: '#C9CCE0',
-  gold: colors.prize,
-  epic: palette.violet,
-  legendary: colors.danger,
-};
+const t = strings.packs;
 
-function OddsTable({ pack }: { pack: PackType }) {
+function OddsTable({ pack }: { pack: PackCatalogEntry }) {
   return (
     <View style={styles.odds}>
-      {(Object.entries(pack.odds) as [Rarity, number][]).map(([rarity, pct]) => (
+      {(Object.entries(pack.odds) as [RarityKey, number][]).map(([rarity, pct]) => (
         <View key={rarity} style={styles.oddsRow}>
           <View style={[styles.swatch, { backgroundColor: rarityColors[rarity].fill }]} />
           <AppText style={styles.flex}>{rarityColors[rarity].label}</AppText>
-          <AppText variant="number">{pct}%</AppText>
+          <Led size="number" color={colors.text}>{`${pct}%`}</Led>
         </View>
       ))}
       <AppText variant="caption" color={colors.textMuted}>
-        {`${pack.items} פריטים בחבילה. הסיכוי הוא לכל פריט בנפרד.`}
+        {fmt(t.oddsNote, { n: pack.items })}
       </AppText>
+      {pack.guaranteed ? (
+        <AppText variant="caption" color={colors.correct}>
+          {fmt(t.guaranteed, { rarity: rarityColors[pack.guaranteed].label })}
+        </AppText>
+      ) : null}
     </View>
   );
 }
 
-function PackCard({ pack, onOdds }: { pack: PackType; onOdds: () => void }) {
-  const toast = useToast();
-  return (
-    <Card kind="sticker" padding={space.md}>
-      <View style={styles.packRow}>
-        <View style={[styles.packArt, { backgroundColor: PACK_COLORS[pack.slug] }]}>
-          <Ionicons name="gift" size={34} color={palette.night950} />
-        </View>
-        <View style={styles.flex}>
-          <AppText variant="heading">{PACK_NAMES[pack.slug]}</AppText>
-          <View style={styles.price}>
-            {pack.priceCoins ? <CoinIcon size={18} /> : pack.priceGems ? <GemIcon size={18} /> : null}
-            <AppText variant="number" color={colors.textMuted}>
-              {pack.priceCoins
-                ? formatNumber(pack.priceCoins)
-                : pack.priceGems
-                  ? formatNumber(pack.priceGems)
-                  : 'מאירועים בלבד'}
-            </AppText>
-          </View>
-        </View>
-      </View>
-      <View style={styles.packActions}>
-        <StickerButton
-          label={strings.common.soon}
-          size="sm"
-          icon="lock-closed"
-          style={styles.flex}
-          onPress={() => toast('פתיחת חבילות תגיע בקרוב.', 'info')}
-        />
-        <StickerButton label={strings.packs.odds} size="sm" tone="ghost" onPress={onOdds} />
-      </View>
-    </Card>
-  );
-}
-
 export default function PacksScreen() {
-  const [oddsFor, setOddsFor] = useState<PackType | null>(null);
+  const { data, isLoading, refetch, isRefetching } = useCollection();
+  const { data: me } = useMyState();
+  const [oddsFor, setOddsFor] = useState<PackCatalogEntry | null>(null);
+  const toast = useToast();
+  const region = getLocales()[0]?.regionCode ?? '';
+  const paidBlocked = !!data?.paid_blocked_regions.includes(region);
+
+  const open = (slug: PackSlug, pay: 'token' | 'coins' | 'gems') =>
+    router.push({ pathname: '/pack-open', params: { pack: slug, pay } });
+
+  const buy = (p: PackCatalogEntry) => {
+    const cur = p.coins ? 'coins' : 'gems';
+    const price = p.coins ?? p.gems ?? 0;
+    const have = cur === 'coins' ? me?.wallet.coins ?? 0 : me?.wallet.gems ?? 0;
+    if (have < price) {
+      toast(cur === 'coins' ? t.noCoins : t.noGems, 'error');
+      return;
+    }
+    Alert.alert(fmt(t.buyTitle, { name: PACK_NAMES[p.slug] }), fmt(cur === 'coins' ? t.buyCoins : t.buyGems, { n: formatNumber(price) }), [
+      { text: strings.common.cancel, style: 'cancel' },
+      { text: t.buyConfirm, onPress: () => open(p.slug, cur) },
+    ]);
+  };
+
   return (
-    <Screen header={<TopBar />}>
-      <AppText variant="title">{strings.packs.title}</AppText>
-      <AppText color={colors.textMuted}>{strings.packs.body}</AppText>
-      {PACKS.map((p) => (
-        <PackCard key={p.slug} pack={p} onOdds={() => setOddsFor(p)} />
-      ))}
-      <BottomSheet
-        visible={!!oddsFor}
-        onClose={() => setOddsFor(null)}
-        title={oddsFor ? `${strings.packs.odds}: ${PACK_NAMES[oddsFor.slug]}` : ''}
-      >
+    <Screen header={<TopBar />} onRefresh={() => void refetch()} refreshing={isRefetching}>
+      <AppText variant="title">{t.title}</AppText>
+      <AppText color={colors.textMuted}>{t.body}</AppText>
+      {data ? (
+        <AppText variant="caption" color={colors.led}>
+          {fmt(t.pity, { n: data.pity_left })}
+        </AppText>
+      ) : null}
+      {isLoading ? <Skeleton height={400} rounded={18} /> : null}
+
+      {data?.catalog.map((p) => {
+        const tokens = data.tokens[p.slug] ?? 0;
+        const price = p.coins ?? p.gems;
+        return (
+          <Card key={p.slug} kind={tokens > 0 ? 'sticker' : 'panel'} padding={space.md}>
+            <View style={styles.packRow}>
+              <PackArt slug={p.slug} width={70} />
+              <View style={styles.flex}>
+                <AppText variant="heading">{PACK_NAMES[p.slug]}</AppText>
+                <AppText variant="caption" color={colors.textDim}>
+                  {fmt(t.items, { n: p.items })}
+                </AppText>
+                {tokens > 0 ? (
+                  <AppText variant="label" color={colors.correct}>
+                    {fmt(t.owned, { n: tokens })}
+                  </AppText>
+                ) : (
+                  <View style={styles.price}>
+                    {p.coins ? <CoinIcon size={16} /> : p.gems ? <GemIcon size={16} /> : null}
+                    <AppText variant="caption" color={colors.textMuted}>
+                      {price ? formatNumber(price) : t.rewardsOnly}
+                    </AppText>
+                  </View>
+                )}
+              </View>
+            </View>
+            <View style={styles.actions}>
+              {tokens > 0 ? (
+                <StickerButton label={t.open} icon="gift" size="sm" style={styles.flex} onPress={() => open(p.slug, 'token')} />
+              ) : price && !paidBlocked ? (
+                <StickerButton label={t.buy} icon="cart" size="sm" tone="outline" style={styles.flex} onPress={() => buy(p)} />
+              ) : (
+                <View style={styles.flex} />
+              )}
+              <StickerButton label={t.odds} size="sm" tone="ghost" onPress={() => setOddsFor(p)} />
+            </View>
+          </Card>
+        );
+      })}
+
+      <BottomSheet visible={!!oddsFor} onClose={() => setOddsFor(null)} title={oddsFor ? `${t.odds}: ${PACK_NAMES[oddsFor.slug]}` : ''}>
         {oddsFor ? <OddsTable pack={oddsFor} /> : null}
         <StickerButton label={strings.common.close} tone="ghost" fullWidth onPress={() => setOddsFor(null)} />
       </BottomSheet>
@@ -109,18 +134,9 @@ export default function PacksScreen() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   packRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  packArt: {
-    width: 64,
-    height: 76,
-    borderRadius: radius.sticker,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: colors.sticker,
-  },
   price: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: space.xxs },
-  packActions: { flexDirection: 'row', gap: space.sm, marginTop: space.md },
+  actions: { flexDirection: 'row', gap: space.sm, marginTop: space.md },
   odds: { gap: space.sm },
   oddsRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  swatch: { width: 18, height: 18, borderRadius: 6, borderWidth: 2, borderColor: colors.sticker },
+  swatch: { width: 18, height: 18, borderRadius: 6 },
 });

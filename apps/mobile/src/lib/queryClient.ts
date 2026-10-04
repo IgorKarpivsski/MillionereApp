@@ -20,4 +20,5 @@ export const queryKeys = {
   myState: ['my-state'] as const,
   daily: ['daily-status'] as const,
   leaderboard: ['leaderboard-week'] as const,
+  collection: ['collection'] as const,
 };
