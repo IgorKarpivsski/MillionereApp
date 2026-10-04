@@ -81,8 +81,9 @@ def whistle(sec):
     return 0.4 * w * trill * env(len(x), 0.01, 0.05) + noise(sec, 2500, 3500, 0.04)
 
 
-def save(name, x):
-    x = x / max(1.0, np.max(np.abs(x)) / 0.9)
+def save(name, x, peak=0.5):
+    """Normalizes every cue to its own peak so nothing jumps out (UI cues stay quiet)."""
+    x = x / (np.max(np.abs(x)) + 1e-9) * peak
     wavfile.write(OUT / f"{name}.wav", SR, (x * 32767).astype(np.int16))
 
 
@@ -90,16 +91,23 @@ OUT.mkdir(parents=True, exist_ok=True)
 
 C5, E5, G5, C6, E6, G6 = 523.25, 659.25, 783.99, 1046.5, 1318.5, 1568.0
 
-save("tap", tone(1400, 0.03, "sine", 0.4, 0.001, 0.025))
-save("tick", tone(1000, 0.04, "square", 0.25, 0.001, 0.03))
-save("answer_lock", seq(tone(880, 0.07, "square", 0.3), tone(1320, 0.09, "square", 0.3), gap=0.015))
-save("whistle", seq(whistle(0.22), whistle(0.55), gap=0.08))
+save("tap", tone(1400, 0.03, "sine", 0.4, 0.001, 0.025), 0.25)
+save("tick", tone(880, 0.05, "sine", 0.4, 0.002, 0.04), 0.25)
+save("answer_lock", seq(tone(660, 0.07, "sine", 0.3), tone(990, 0.09, "sine", 0.3), gap=0.015), 0.35)
+# Kickoff: a soft two-note stadium chime over a low crowd murmur (no shrill whistle).
+G4 = 392.0
+save("whistle", mix(
+    seq(tone(G4, 0.32, "sine", 0.5, 0.03, 0.22), tone(523.25, 0.6, "sine", 0.5, 0.03, 0.45), gap=0.04),
+    seq(tone(G4 * 2, 0.32, "sine", 0.12, 0.03, 0.22), tone(1046.5, 0.6, "sine", 0.12, 0.03, 0.45), gap=0.04),
+    crowd(1.2, 0.5, 0.12, 200, 900),
+), 0.32)
 save(
     "answer_correct",
     mix(
         seq(*(tone(f, 0.09, "square", 0.32) for f in (C5, E5, G5)), tone(C6, 0.35, "square", 0.32, release=0.25)),
         np.concatenate([np.zeros(int(SR * 0.12)), crowd(1.5, 0.35, 0.38)]),
     ),
+    0.55,
 )
 save(
     "answer_wrong",
@@ -107,16 +115,18 @@ save(
         seq(tone(311, 0.16, "tri", 0.45), tone(233, 0.42, "tri", 0.45, release=0.3), gap=0.02),
         crowd(1.1, 0.15, 0.22, 120, 700),
     ),
+    0.45,
 )
-save("coins", seq(*(tone(f, 0.07, "sine", 0.35, release=0.06) for f in (G5, C6, E6, G6, C6 * 2)), gap=0.01))
+save("coins", seq(*(tone(f, 0.07, "sine", 0.35, release=0.06) for f in (G5, C6, E6, G6, C6 * 2)), gap=0.01), 0.4)
 save(
     "level_up",
     mix(
         seq(*(tone(f, 0.11, "square", 0.3) for f in (C5, G5, C6, E6)), tone(G6, 0.5, "square", 0.3, release=0.35)),
         np.concatenate([np.zeros(int(SR * 0.3)), crowd(1.4, 0.4, 0.3)]),
     ),
+    0.55,
 )
-save("var", seq(*(tone(f, 0.05, "sine", 0.3) for f in np.linspace(600, 1800, 10)), tone(1800, 0.2, "sine", 0.3)))
+save("var", seq(*(tone(f, 0.05, "sine", 0.3) for f in np.linspace(500, 1200, 10)), tone(1200, 0.2, "sine", 0.3)), 0.35)
 save("pack_open", seq(noise(0.25, 800, 6000, 0.35) * env(int(SR * 0.25), 0.01, 0.2), tone(G6, 0.3, "sine", 0.3)))
 save("rare_reveal", seq(*(tone(f, 0.08, "tri", 0.35) for f in (C6, E6, G6, C6 * 2)), tone(E6 * 2, 0.4, "tri", 0.3)))
 print("sounds written to", OUT)

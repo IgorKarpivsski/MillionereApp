@@ -1,0 +1,31 @@
+name: Fetch Hebrew Wikipedia data
+
+# Israeli football facts + pageviews from he.wikipedia for the question generator.
+# Commits data/hewiki/* to the data-fetch branch.
+on:
+  workflow_dispatch:
+  push:
+    branches: [data-fetch]
+    paths: ['tools/question-gen/fetch-hewiki.mjs', '.github/workflows/fetch-hewiki.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tools/question-gen/fetch-hewiki.mjs
+      - name: Commit data
+        if: always()
+        run: |
+          git config user.name "football-data-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/hewiki || true
+          git commit -m "hewiki snapshot $(date -u +%Y-%m-%dT%H:%MZ)" || echo "no changes"
+          git pull --rebase && git push
