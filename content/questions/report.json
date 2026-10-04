@@ -1,0 +1,420 @@
+{
+ "generator": "2026.10.1",
+ "total": 10256,
+ "by_category": [
+  [
+   "players",
+   5000
+  ],
+  [
+   "clubs",
+   1963
+  ],
+  [
+   "israeli_football",
+   1317
+  ],
+  [
+   "premier_league",
+   444
+  ],
+  [
+   "la_liga",
+   314
+  ],
+  [
+   "international",
+   222
+  ],
+  [
+   "serie_a",
+   195
+  ],
+  [
+   "world_cup",
+   183
+  ],
+  [
+   "ligue_1",
+   155
+  ],
+  [
+   "bundesliga",
+   134
+  ],
+  [
+   "stadiums",
+   129
+  ],
+  [
+   "champions_league",
+   117
+  ],
+  [
+   "legends",
+   83
+  ]
+ ],
+ "by_difficulty": [
+  [
+   "easy",
+   2564
+  ],
+  [
+   "medium",
+   2564
+  ],
+  [
+   "hard",
+   2564
+  ],
+  [
+   "expert",
+   1744
+  ],
+  [
+   "legendary",
+   820
+  ]
+ ],
+ "by_template": [
+  [
+   "player:club",
+   2116
+  ],
+  [
+   "club:which_player",
+   1510
+  ],
+  [
+   "player:position",
+   1500
+  ],
+  [
+   "player:national_team",
+   1300
+  ],
+  [
+   "player:birth_year",
+   1150
+  ],
+  [
+   "club:founded",
+   276
+  ],
+  [
+   "club:city",
+   188
+  ],
+  [
+   "winner:Q11151",
+   138
+  ],
+  [
+   "club:stadium",
+   129
+  ],
+  [
+   "winner:ENG",
+   123
+  ],
+  [
+   "winner:Q15804",
+   122
+  ],
+  [
+   "winner:Q483794",
+   120
+  ],
+  [
+   "winner:Q324867",
+   93
+  ],
+  [
+   "winner:Q1165593",
+   85
+  ],
+  [
+   "winner:Q13394",
+   83
+  ],
+  [
+   "wc:semifinalist",
+   80
+  ],
+  [
+   "won_when:Q11151",
+   78
+  ],
+  [
+   "winner:Q18756",
+   71
+  ],
+  [
+   "winner:ISR",
+   67
+  ],
+  [
+   "league:most_goals",
+   63
+  ],
+  [
+   "league:champion_points",
+   61
+  ],
+  [
+   "winner:Q82595",
+   58
+  ],
+  [
+   "league:best_defence",
+   55
+  ],
+  [
+   "won_when:ENG",
+   55
+  ],
+  [
+   "won_when:Q18756",
+   46
+  ],
+  [
+   "winner:Q178750",
+   45
+  ],
+  [
+   "award:ballon_dor",
+   44
+  ],
+  [
+   "won_when:Q1165593",
+   41
+  ],
+  [
+   "award:ballon_dor_when",
+   39
+  ],
+  [
+   "won_when:Q483794",
+   38
+  ],
+  [
+   "won_when:Q13394",
+   37
+  ],
+  [
+   "league:runner_up",
+   37
+  ],
+  [
+   "won_when:Q15804",
+   35
+  ],
+  [
+   "winner:Q83145",
+   34
+  ],
+  [
+   "won_when:ISR",
+   28
+  ],
+  [
+   "won_when:Q83145",
+   27
+  ],
+  [
+   "won_when:Q82595",
+   26
+  ],
+  [
+   "winner:Q19317",
+   23
+  ],
+  [
+   "wc:runner_up",
+   22
+  ],
+  [
+   "wc:final_goals",
+   22
+  ],
+  [
+   "won_when:Q324867",
+   20
+  ],
+  [
+   "winner:Q223366",
+   20
+  ],
+  [
+   "won_when:Q223366",
+   18
+  ],
+  [
+   "won_when:Q178750",
+   18
+  ],
+  [
+   "won_when:Q19317",
+   17
+  ],
+  [
+   "winner:Q18760",
+   16
+  ],
+  [
+   "winner:Q260858",
+   16
+  ],
+  [
+   "won_when:Q18760",
+   14
+  ],
+  [
+   "won_when:Q260858",
+   14
+  ],
+  [
+   "winner:Q1377843",
+   11
+  ],
+  [
+   "won_when:Q1377843",
+   8
+  ],
+  [
+   "wc:first_title",
+   8
+  ],
+  [
+   "wc:title_count",
+   8
+  ],
+  [
+   "wc:decided_how",
+   3
+  ]
+ ],
+ "verified_by": [
+  [
+   "wikidata",
+   9821
+  ],
+  [
+   "openfootball",
+   351
+  ],
+  [
+   "wikidata+openfootball",
+   76
+  ],
+  [
+   "openfootball+wikidata",
+   8
+  ]
+ ],
+ "volatile": 137,
+ "rejected": [
+  [
+   "answers",
+   486
+  ],
+  [
+   "ambiguous_text",
+   4
+  ],
+  [
+   "duplicate",
+   1
+  ]
+ ],
+ "notes": {
+  "wc_unmapped_team_years": 5,
+  "wc:runner_up": 22,
+  "wc:final_goals": 22,
+  "wc:decided_how": 3,
+  "wc:semifinalist": 80,
+  "wc:titles": 8,
+  "league:most_goals": 63,
+  "league:champion_points": 61,
+  "league:best_defence": 55,
+  "league:runner_up": 37,
+  "season_conflict_dropped": 48,
+  "crosscheck_agreed": 76,
+  "crosscheck_mismatch_dropped": 4,
+  "mismatch:2020/21:אליפות גרמניה:wikidata=Q97905919:openfootball=באיירן מינכן": 1,
+  "mismatch:2021/22:אליפות גרמניה:wikidata=Q97905919:openfootball=באיירן מינכן": 1,
+  "mismatch:2023/24:אליפות גרמניה:wikidata=Q97905892:openfootball=באייר לברקוזן": 1,
+  "mismatch:2024/25:אליפות גרמניה:wikidata=Q97905919:openfootball=באיירן מינכן": 1,
+  "winner:מונדיאל": 23,
+  "won_when:מונדיאל": 17,
+  "winner:אליפות העולם לקבוצות": 20,
+  "won_when:אליפות העולם לקבוצות": 18,
+  "winner:יורו": 16,
+  "won_when:יורו": 14,
+  "winner:אליפות ספרד": 93,
+  "won_when:אליפות ספרד": 20,
+  "winner:גביע המלך הספרדי": 120,
+  "won_when:גביע המלך הספרדי": 38,
+  "winner:הליגה האירופית": 16,
+  "won_when:הליגה האירופית": 14,
+  "winner:קופה אמריקה": 45,
+  "won_when:קופה אמריקה": 18,
+  "winner:ליגת האלופות": 71,
+  "won_when:ליגת האלופות": 46,
+  "winner:אליפות איטליה": 122,
+  "won_when:אליפות איטליה": 35,
+  "winner:גביע אפריקה לאומות": 34,
+  "won_when:גביע אפריקה לאומות": 27,
+  "winner:אליפות צרפת": 83,
+  "won_when:אליפות צרפת": 37,
+  "winner:אליפות אנגליה": 123,
+  "won_when:אליפות אנגליה": 55,
+  "winner:הגביע האנגלי": 138,
+  "won_when:הגביע האנגלי": 78,
+  "winner:אליפות גרמניה": 58,
+  "won_when:אליפות גרמניה": 26,
+  "winner:אליפות ישראל": 67,
+  "won_when:אליפות ישראל": 28,
+  "winner:גביע המדינה": 85,
+  "won_when:גביע המדינה": 41,
+  "winner:גביע הטוטו": 11,
+  "won_when:גביע הטוטו": 8,
+  "player_no_hewiki": 726,
+  "player_famous_for_other": 268,
+  "player_ambiguous_name": 71,
+  "player:national_team": 4789,
+  "player:club": 7889,
+  "player:birth_year": 6768,
+  "player:position": 6555,
+  "club:which_player": 3727,
+  "club:city": 674,
+  "club:founded": 278,
+  "club:stadium": 129,
+  "award:ballon_dor": 44,
+  "award:ballon_dor_when": 39,
+  "players_used": 8078
+ },
+ "unmapped": {
+  "unmapped:Dutch East Indies": 1,
+  "unmapped:Ireland": 3,
+  "unmapped:Bosnia & Herzegovina": 1,
+  "unmapped_club:Deportivo La Coruña": 5,
+  "unmapped_club:SPAL 2013 Ferrara": 3
+ },
+ "incomplete": [
+  "incomplete:fr.1:2019/20",
+  "incomplete:es.1:2024/25",
+  "incomplete:it.1:2024/25",
+  "incomplete:en.1:2025/26",
+  "incomplete:es.1:2025/26",
+  "incomplete:it.1:2025/26",
+  "incomplete:de.1:2025/26",
+  "incomplete:fr.1:2025/26",
+  "incomplete:en.1:2026/27",
+  "incomplete:es.1:2026/27",
+  "incomplete:it.1:2026/27",
+  "incomplete:de.1:2026/27",
+  "incomplete:fr.1:2026/27"
+ ]
+}
