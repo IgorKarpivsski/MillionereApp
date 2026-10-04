@@ -22,6 +22,7 @@ import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound, preloadSounds } from '@/design-system/feedback/sound';
 import { colors, radius, space } from '@/design-system/tokens';
 import { quizApi } from '@/features/quiz/api';
+import { useAdReward } from '@/features/store/hooks';
 import { AnswerTile, LifelineButton, type AnswerState } from '@/features/quiz/ui';
 import { useQuizRun, type QuizRunState } from '@/features/quiz/useQuizRun';
 import { formatNumber } from '@/lib/format';
@@ -194,8 +195,33 @@ function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => voi
       ) : (
         <StickerButton label={t.again} icon="refresh" size="lg" fullWidth onPress={onAgain} />
       )}
+      <DoubleCoins runId={s.payload?.run_id} coins={sum.coins} />
       <StickerButton label={t.home} tone="ghost" fullWidth onPress={() => router.back()} />
     </ScrollView>
+  );
+}
+
+function DoubleCoins({ runId, coins }: { runId?: string; coins: number }) {
+  const ad = useAdReward();
+  const toast = useToast();
+  const [done, setDone] = useState(false);
+  if (!runId || coins <= 0 || done) return null;
+  return (
+    <StickerButton
+      label={fmt(ad.adFree ? strings.store.doubleNoAd : strings.store.double, { n: formatNumber(ad.adFree ? coins : coins * 2) })}
+      icon={ad.adFree ? 'gift' : 'play-circle'}
+      tone="outline"
+      fullWidth
+      loading={ad.busy}
+      onPress={async () => {
+        const r = await ad.run('double_run', runId);
+        if (r) {
+          setDone(true);
+          playSound('coins');
+          toast(fmt(strings.store.doubled, { n: formatNumber(coins) }), 'success');
+        }
+      }}
+    />
   );
 }
 

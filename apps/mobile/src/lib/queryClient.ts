@@ -21,4 +21,5 @@ export const queryKeys = {
   daily: ['daily-status'] as const,
   leaderboard: ['leaderboard-week'] as const,
   collection: ['collection'] as const,
+  store: ['store'] as const,
 };

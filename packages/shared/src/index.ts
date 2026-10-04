@@ -292,3 +292,24 @@ export const MatchStateSchema = z.object({
 });
 export type MatchState = z.infer<typeof MatchStateSchema>;
 export const MatchRoomSchema = z.object({ room_id: z.string().uuid(), code: z.string() });
+
+/* -------------------------------------------------------------------------- */
+/* Store & ads                                                                */
+/* -------------------------------------------------------------------------- */
+export const StoreProductSchema = z.object({
+  sku: z.string(),
+  kind: z.enum(['coins', 'gems', 'no_ads', 'vip']),
+  amount: z.number().int(),
+  title: z.string(),
+  badge: z.string().optional(),
+});
+export type StoreProduct = z.infer<typeof StoreProductSchema>;
+export const StoreStateSchema = z.object({
+  products: z.array(StoreProductSchema),
+  no_ads: z.boolean(),
+  vip_until: z.string().nullable(),
+  free_pack_today: z.boolean(),
+  vip_daily_today: z.boolean(),
+  ad_free: z.boolean(),
+});
+export type StoreState = z.infer<typeof StoreStateSchema>;

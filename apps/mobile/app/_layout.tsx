@@ -23,6 +23,7 @@ import { initMonitoring, wrapRoot } from '@/lib/monitoring';
 import { bindOnlineManager } from '@/lib/network';
 import { queryClient } from '@/lib/queryClient';
 import { ensureRTL } from '@/lib/rtl';
+import { initAds } from '@/features/store/ads';
 
 ensureRTL();
 initMonitoring();
@@ -70,6 +71,7 @@ function Gate() {
         <Stack.Screen name="quiz" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="pack-open" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="match" options={{ gestureEnabled: false, animation: 'fade' }} />
+        <Stack.Screen name="shop" options={{ presentation: 'modal' }} />
       </Stack>
       <OfflineBanner />
     </>
@@ -79,6 +81,7 @@ function Gate() {
 function RootLayout() {
   useEffect(() => {
     track('app_open', { cold_start: true });
+    initAds();
     return bindOnlineManager();
   }, []);
 

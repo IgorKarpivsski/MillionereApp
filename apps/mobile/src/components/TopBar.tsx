@@ -51,7 +51,12 @@ export function TopBar() {
       ) : (
         <Skeleton width={140} height={40} />
       )}
-      <View style={styles.wallet}>
+      <Pressable
+        style={styles.wallet}
+        onPress={() => router.push('/shop')}
+        accessibilityRole="button"
+        accessibilityLabel={strings.store.title}
+      >
         {data ? (
           <>
             <Meter kind="coins" amount={data.wallet.coins} />
@@ -60,7 +65,7 @@ export function TopBar() {
         ) : (
           <Skeleton width={120} height={40} />
         )}
-      </View>
+      </Pressable>
     </View>
   );
 }

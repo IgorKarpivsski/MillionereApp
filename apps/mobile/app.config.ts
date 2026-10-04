@@ -8,6 +8,9 @@ import type { ExpoConfig, ConfigContext } from 'expo/config';
  */
 const APP_NAME = 'האלוף';
 const IS_PROD = process.env.APP_ENV === 'production';
+// AdMob: Google's public TEST app id until the real one is set in the build env.
+const ADMOB_ANDROID_APP_ID = process.env.ADMOB_ANDROID_APP_ID || 'ca-app-pub-3940256099942544~3347511713';
+const ADMOB_IOS_APP_ID = process.env.ADMOB_IOS_APP_ID || 'ca-app-pub-3940256099942544~1458002511';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -55,6 +58,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ['expo-localization', { supportedLocales: { ios: ['he'], android: ['he'] } }],
     ['expo-splash-screen', { image: './assets/images/splash-icon.png', imageWidth: 180, backgroundColor: '#0B2B22' }],
     '@sentry/react-native',
+    ['react-native-google-mobile-ads', { androidAppId: ADMOB_ANDROID_APP_ID, iosAppId: ADMOB_IOS_APP_ID }],
+    'expo-iap',
+    ['expo-build-properties', { android: { kotlinVersion: '2.2.0' } }],
   ],
   experiments: { typedRoutes: true },
   extra: {
