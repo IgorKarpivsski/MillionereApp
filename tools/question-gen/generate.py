@@ -8,6 +8,7 @@ import random
 from pathlib import Path
 
 import gen_competitions
+import gen_hewiki
 import gen_openfootball
 import gen_people
 from qcore import GEN_VERSION, HEB, LEVELS, Names, Q, normalize_he, stable_id
@@ -20,10 +21,12 @@ CAPS = {
     "club:city": 450, "club:stadium": 400,
 }
 CAPS_ISRAEL = {
+    "hw:player_club": 3000, "hw:club_which_player": 1400, "hw:position": 1100, "hw:birthplace": 500,
+    "hw:coached_club": 500, "hw:nt_coach": 40, "hw:nt_nt_goals": 120, "hw:nt_nt_caps": 120,
     "player:club": 1100, "club:which_player": 900, "player:position": 500,
     "player:birth_year": 350, "club:founded": 160, "club:city": 120, "club:stadium": 100,
 }
-MULTI_OK = {"player:club", "club:which_player", "wc:semifinalist", "award:ballon_dor_when"}
+MULTI_OK = {"player:club", "club:which_player", "hw:player_club", "hw:club_which_player", "hw:coached_club", "hw:nt_coach", "hw:nt_nt_goals", "hw:nt_nt_caps", "wc:semifinalist", "award:ballon_dor_when"}
 LEVEL_SHARE = [("easy", 0.25), ("medium", 0.25), ("hard", 0.25), ("expert", 0.17), ("legendary", 0.08)]
 
 
@@ -56,6 +59,7 @@ def main() -> None:
     for fn in (lambda: gen_openfootball.world_cup(names, rng, of_dir, crosscheck),
                lambda: gen_openfootball.leagues(names, rng, of_dir, crosscheck),
                lambda: gen_competitions.build(names, rng, crosscheck),
+               lambda: gen_hewiki.build(names, rng),
                lambda: gen_people.build(names, rng)):
         qs, st = fn()
         all_q.extend(qs)
@@ -120,6 +124,8 @@ def main() -> None:
                 "category": q.category,
                 "topic": q.topic,
                 "difficulty": lvl,
+                "obscurity": round(q.obscurity, 4),
+                "obscurity": round(q.obscurity, 4),
                 "tags": {k: v for k, v in q.tags.items() if v is not None},
                 "template": q.template,
                 "source_urls": q.sources,

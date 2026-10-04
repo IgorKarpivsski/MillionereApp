@@ -173,8 +173,32 @@ for (let i = 0; i < listTitles.length; i += 20) {
 save('lists', lists);
 log(`lists: ${Object.keys(lists).length}`);
 
+// ---------------------------------------------------------------- redirects
+// Infobox links often point at redirects (old club names); resolve them so the
+// generator can merge names and find the real article's pageviews.
+const targets = new Set();
+for (const v of Object.values(boxes)) for (const m of (v.box ?? '').matchAll(/\[\[([^\]|#]+)/g)) targets.add(m[1].trim());
+const redirects = have('redirects') ? read('redirects') : {};
+const rtodo = [...targets].filter((t) => !(t in redirects));
+log(`redirects: ${rtodo.length} to resolve`);
+for (let i = 0; i < rtodo.length; i += 50) {
+  const chunk = rtodo.slice(i, i + 50);
+  const r = await api({ action: 'query', titles: chunk.join('|'), redirects: '1' });
+  const norm = Object.fromEntries((r?.query?.normalized ?? []).map((x) => [x.from, x.to]));
+  const red = Object.fromEntries((r?.query?.redirects ?? []).map((x) => [x.from, x.to]));
+  const missing = new Set((r?.query?.pages ?? []).filter((p) => p.missing).map((p) => p.title));
+  for (const t of chunk) {
+    const n = norm[t] ?? t;
+    const to = red[n] ?? n;
+    redirects[t] = missing.has(to) ? null : to;
+  }
+  if ((i / 50) % 40 === 0) save('redirects', redirects);
+}
+save('redirects', redirects);
+
 // ---------------------------------------------------------------- pageviews
 const titles = new Set(Object.keys(boxes));
+for (const t of Object.values(redirects)) if (t) titles.add(t);
 for (const r of JSON.parse(readFileSync('data/wikidata/wiki_titles.json', 'utf8'))) if (r.he) titles.add(r.he);
 for (const v of Object.values(catMembers)) for (const t of v) if (israeliPlayers.has(t)) titles.add(t);
 const prev = existsSync(`${OUT}/pageviews.json`) ? JSON.parse(readFileSync(`${OUT}/pageviews.json`, 'utf8')) : {};
