@@ -257,3 +257,38 @@ export const OpenPackResultSchema = z.object({
   wallet: z.object({ coins: z.number(), gems: z.number(), dust: z.number() }),
 });
 export type OpenPackResult = z.infer<typeof OpenPackResultSchema>;
+
+/* -------------------------------------------------------------------------- */
+/* Friend match                                                               */
+/* -------------------------------------------------------------------------- */
+const PlayerMiniSchema = z.object({ username: z.string(), avatar_id: z.string(), level: z.number().int() });
+export const MatchStateSchema = z.object({
+  room_id: z.string().uuid(),
+  code: z.string(),
+  phase: z.enum(['waiting', 'countdown', 'question', 'reveal', 'done', 'expired']),
+  idx: z.number().int().nullable(),
+  total: z.number().int(),
+  seconds_left: z.number(),
+  server_now: z.number(),
+  is_host: z.boolean(),
+  me: PlayerMiniSchema,
+  opponent: PlayerMiniSchema.nullable(),
+  my_score: z.number().int(),
+  opp_score: z.number().int(),
+  my_answer: z.number().int().nullable(),
+  opp_answered: z.boolean(),
+  question: z
+    .object({
+      id: z.string(),
+      text: z.string(),
+      category_name: z.string().nullable(),
+      answers: z.array(z.object({ slot: z.number().int(), text: z.string() })),
+    })
+    .nullable(),
+  reveal: z
+    .object({ correct_slot: z.number().int(), explanation: z.string(), opp_slot: z.number().int().nullable() })
+    .nullable(),
+  result: z.object({ coins: z.number().nullable() }).nullable(),
+});
+export type MatchState = z.infer<typeof MatchStateSchema>;
+export const MatchRoomSchema = z.object({ room_id: z.string().uuid(), code: z.string() });

@@ -39,7 +39,9 @@ export function AnswerTile({
   expertPick,
   disabled,
   onPress,
+  fill = false,
 }: {
+  fill?: boolean;
   index: number;
   text: string;
   state: AnswerState;
@@ -54,7 +56,7 @@ export function AnswerTile({
   return (
     <Animated.View
       entering={reduced ? undefined : FadeInDown.delay(80 + index * 70).springify().damping(16)}
-      style={styles.tileWrap}
+      style={fill ? styles.fill : styles.tileWrap}
     >
       <Pressable
         onPress={onPress}
@@ -156,6 +158,7 @@ export function LifelineButton({
 
 const styles = StyleSheet.create({
   tileWrap: { width: '48.5%' },
+  fill: { width: '100%' },
   tile: {
     minHeight: 88,
     borderRadius: radius.control + 2,

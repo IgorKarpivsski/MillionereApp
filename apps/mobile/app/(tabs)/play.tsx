@@ -60,6 +60,30 @@ export default function PlayScreen() {
           onPress={() => router.push('/quiz')}
         />
       </Card>
+      <Card kind="soft" padding={space.md}>
+        <View style={styles.head}>
+          <AppText variant="heading" style={styles.flex}>
+            {strings.match.playCard}
+          </AppText>
+        </View>
+        <AppText color={colors.textMuted} style={styles.body}>
+          {strings.match.playCardBody}
+        </AppText>
+        <StickerButton label={strings.match.create} icon="people" tone="outline" fullWidth onPress={() => router.push('/match')} />
+      </Card>
+      <Card kind="soft" padding={space.md}>
+        <AppText variant="heading">{strings.home.matchTitle}</AppText>
+        <AppText color={colors.textMuted} style={styles.body}>
+          {strings.home.dailyBody}
+        </AppText>
+        <StickerButton
+          label={strings.home.kickoff}
+          icon="calendar"
+          tone="outline"
+          fullWidth
+          onPress={() => router.push({ pathname: '/quiz', params: { mode: 'daily' } })}
+        />
+      </Card>
     </Screen>
   );
 }

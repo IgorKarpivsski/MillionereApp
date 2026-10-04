@@ -69,6 +69,7 @@ function Gate() {
         <Stack.Screen name="design-system" />
         <Stack.Screen name="quiz" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="pack-open" options={{ gestureEnabled: false, animation: 'fade' }} />
+        <Stack.Screen name="match" options={{ gestureEnabled: false, animation: 'fade' }} />
       </Stack>
       <OfflineBanner />
     </>
