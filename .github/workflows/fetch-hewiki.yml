@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node tools/question-gen/fetch-hewiki.mjs
+      - run: tools/scripts/ci-run.sh hewiki node tools/question-gen/fetch-hewiki.mjs
       - name: Commit data
         if: always()
         run: |
