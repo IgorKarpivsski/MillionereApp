@@ -1,0 +1,46 @@
+{
+  "Liga Leumit": [
+    {
+      "id": "Q1824581",
+      "label": "Liga Leumit",
+      "description": "second division of the football league in Israel"
+    },
+    {
+      "id": "Q2625903",
+      "label": "Liga Leumit",
+      "description": "basketball league"
+    },
+    {
+      "id": "Q6706552",
+      "label": "Liga Leumit (women's basketball)"
+    },
+    {
+      "id": "Q2057364",
+      "label": "1980–81 Liga Leumit",
+      "description": "football league season"
+    },
+    {
+      "id": "Q2057317",
+      "label": "1993–94 Liga Leumit",
+      "description": "football league season"
+    }
+  ],
+  "Liga Alef": [
+    {
+      "id": "Q6545712",
+      "label": "Liga Alef",
+      "description": "the third tier of the Israeli football league"
+    },
+    {
+      "id": "Q2054623",
+      "label": "1951–52 Liga Alef",
+      "description": "football league season"
+    },
+    {
+      "id": "Q2054658",
+      "label": "1953–54 Liga Alef",
+      "description": "football tournament edition"
+    }
+  ],
+  "Israeli Super Cup": []
+}

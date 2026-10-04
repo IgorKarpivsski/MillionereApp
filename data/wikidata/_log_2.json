@@ -1,0 +1,665 @@
+{
+  "fetchedAt": "2026-10-04T13:04:36.096Z",
+  "log": [
+    {
+      "name": "wiki_titles.0",
+      "rows": 250,
+      "ms": 946,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.1",
+      "rows": 250,
+      "ms": 768,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.2",
+      "rows": 250,
+      "ms": 356,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.3",
+      "rows": 250,
+      "ms": 339,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.4",
+      "rows": 250,
+      "ms": 294,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.5",
+      "rows": 250,
+      "ms": 737,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.6",
+      "rows": 250,
+      "ms": 3739,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.7",
+      "rows": 250,
+      "ms": 692,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.8",
+      "rows": 250,
+      "ms": 1815,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.9",
+      "rows": 250,
+      "ms": 714,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.10",
+      "rows": 250,
+      "ms": 352,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.11",
+      "rows": 250,
+      "ms": 2123,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.12",
+      "rows": 250,
+      "ms": 875,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.13",
+      "rows": 250,
+      "ms": 742,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.14",
+      "rows": 250,
+      "ms": 527,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.15",
+      "rows": 250,
+      "ms": 1630,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.16",
+      "rows": 250,
+      "ms": 592,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.17",
+      "rows": 250,
+      "ms": 452,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.18",
+      "rows": 250,
+      "ms": 518,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.19",
+      "rows": 250,
+      "ms": 840,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.20",
+      "rows": 250,
+      "ms": 541,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.21",
+      "rows": 250,
+      "ms": 781,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.22",
+      "rows": 250,
+      "ms": 474,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.23",
+      "rows": 250,
+      "ms": 1451,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.24",
+      "rows": 250,
+      "ms": 377,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.25",
+      "rows": 250,
+      "ms": 317,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.26",
+      "rows": 250,
+      "ms": 728,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.27",
+      "rows": 250,
+      "ms": 1215,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.28",
+      "rows": 250,
+      "ms": 388,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.29",
+      "rows": 250,
+      "ms": 710,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.30",
+      "rows": 250,
+      "ms": 384,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.31",
+      "rows": 250,
+      "ms": 371,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.32",
+      "rows": 250,
+      "ms": 625,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.33",
+      "rows": 250,
+      "ms": 240,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.34",
+      "rows": 250,
+      "ms": 397,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.35",
+      "rows": 250,
+      "ms": 212,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.36",
+      "rows": 250,
+      "ms": 448,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.37",
+      "rows": 250,
+      "ms": 549,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.38",
+      "rows": 250,
+      "ms": 363,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.39",
+      "rows": 250,
+      "ms": 407,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.40",
+      "rows": 250,
+      "ms": 2414,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.41",
+      "rows": 250,
+      "ms": 860,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.42",
+      "rows": 250,
+      "ms": 279,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.43",
+      "rows": 250,
+      "ms": 765,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.44",
+      "rows": 250,
+      "ms": 364,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.45",
+      "rows": 250,
+      "ms": 763,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.46",
+      "rows": 250,
+      "ms": 517,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.47",
+      "rows": 250,
+      "ms": 438,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.48",
+      "rows": 250,
+      "ms": 408,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.49",
+      "rows": 250,
+      "ms": 499,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.50",
+      "rows": 250,
+      "ms": 384,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.51",
+      "rows": 250,
+      "ms": 447,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.52",
+      "rows": 250,
+      "ms": 324,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.53",
+      "rows": 250,
+      "ms": 821,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.54",
+      "rows": 250,
+      "ms": 283,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.55",
+      "rows": 250,
+      "ms": 212,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.56",
+      "rows": 250,
+      "ms": 284,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.57",
+      "rows": 250,
+      "ms": 294,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.58",
+      "rows": 250,
+      "ms": 214,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.59",
+      "rows": 250,
+      "ms": 215,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.60",
+      "rows": 250,
+      "ms": 317,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.61",
+      "rows": 250,
+      "ms": 282,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.62",
+      "rows": 250,
+      "ms": 441,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.63",
+      "rows": 250,
+      "ms": 351,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.64",
+      "rows": 250,
+      "ms": 948,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.65",
+      "rows": 250,
+      "ms": 403,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.66",
+      "rows": 250,
+      "ms": 581,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.67",
+      "rows": 250,
+      "ms": 2324,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.68",
+      "rows": 250,
+      "ms": 1324,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.69",
+      "rows": 250,
+      "ms": 582,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.70",
+      "rows": 250,
+      "ms": 1067,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.71",
+      "rows": 250,
+      "ms": 581,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.72",
+      "rows": 250,
+      "ms": 735,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.73",
+      "rows": 250,
+      "ms": 514,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.74",
+      "rows": 250,
+      "ms": 809,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.75",
+      "rows": 250,
+      "ms": 1580,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.76",
+      "rows": 250,
+      "ms": 1068,
+      "attempt": 1
+    },
+    {
+      "name": "wiki_titles.77",
+      "rows": 170,
+      "ms": 823,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.0",
+      "rows": 534,
+      "ms": 47,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.1",
+      "rows": 473,
+      "ms": 107,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.2",
+      "rows": 507,
+      "ms": 64,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.3",
+      "rows": 489,
+      "ms": 141,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.4",
+      "rows": 486,
+      "ms": 148,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.5",
+      "rows": 455,
+      "ms": 74,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.6",
+      "rows": 464,
+      "ms": 71,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.7",
+      "rows": 483,
+      "ms": 54,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.8",
+      "rows": 486,
+      "ms": 60,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.9",
+      "rows": 424,
+      "ms": 83,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.10",
+      "rows": 455,
+      "ms": 76,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.11",
+      "rows": 446,
+      "ms": 52,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.12",
+      "rows": 454,
+      "ms": 88,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.13",
+      "rows": 427,
+      "ms": 88,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.14",
+      "rows": 418,
+      "ms": 57,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.15",
+      "rows": 415,
+      "ms": 323,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.16",
+      "rows": 433,
+      "ms": 78,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.17",
+      "rows": 422,
+      "ms": 52,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.18",
+      "rows": 375,
+      "ms": 119,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.19",
+      "rows": 393,
+      "ms": 58,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.20",
+      "rows": 345,
+      "ms": 144,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.21",
+      "rows": 303,
+      "ms": 70,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.22",
+      "rows": 315,
+      "ms": 186,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.23",
+      "rows": 307,
+      "ms": 54,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.24",
+      "rows": 509,
+      "ms": 43,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.25",
+      "rows": 400,
+      "ms": 194,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.26",
+      "rows": 403,
+      "ms": 194,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.27",
+      "rows": 381,
+      "ms": 141,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.28",
+      "rows": 335,
+      "ms": 224,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.29",
+      "rows": 322,
+      "ms": 331,
+      "attempt": 1
+    },
+    {
+      "name": "player_occupations.30",
+      "rows": 164,
+      "ms": 82,
+      "attempt": 1
+    },
+    {
+      "name": "seasons_israel_history",
+      "rows": 77,
+      "ms": 229,
+      "attempt": 1
+    }
+  ]
+}
