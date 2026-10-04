@@ -38,5 +38,8 @@ its source and license. Nothing goes into `apps/mobile/assets` without a row.
 
 ## Audio
 
-None yet. Sound cues are defined in `src/design-system/feedback/sound.ts`;
-each file added must be original (commissioned) or CC0 with its source URL here.
+| Asset | Source | License |
+| --- | --- | --- |
+| `apps/mobile/assets/sounds/*.wav` (tap, tick, whistle, answer_lock, answer_correct, answer_wrong, var, coins, level_up, pack_open, rare_reveal) | Synthesized by `tools/scripts/gen-sounds.py` from sine/square waves and filtered noise. No samples. | Original |
+
+Any new file must be original (commissioned or generated) or CC0 with its source URL here.

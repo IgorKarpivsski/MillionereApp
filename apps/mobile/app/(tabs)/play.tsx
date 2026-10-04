@@ -1,7 +1,8 @@
 import { LADDER } from '@fm/economy-config';
+import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { TopBar } from '@/components/TopBar';
-import { AppText, Card, Led, Screen, StickerButton, TrophyLogo, useToast } from '@/design-system/components';
+import { AppText, Card, Led, Screen, StickerButton, TrophyLogo } from '@/design-system/components';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { formatNumber } from '@/lib/format';
 import { strings } from '@/lib/i18n';
@@ -38,7 +39,6 @@ function LadderPreview() {
 }
 
 export default function PlayScreen() {
-  const toast = useToast();
   return (
     <Screen header={<TopBar />}>
       <AppText variant="title">{t.title}</AppText>
@@ -52,11 +52,12 @@ export default function PlayScreen() {
         </AppText>
         <LadderPreview />
         <StickerButton
-          label={strings.common.soon}
-          icon="lock-closed"
+          label={t.kickoff}
+          icon="football"
+          size="lg"
           fullWidth
           style={styles.cta}
-          onPress={() => toast(t.soonBody, 'info')}
+          onPress={() => router.push('/quiz')}
         />
       </Card>
     </Screen>

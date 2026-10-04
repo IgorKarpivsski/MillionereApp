@@ -19,7 +19,7 @@ export class RpcError extends Error {
   }
 }
 
-async function rpc<T>(fn: string, args: Record<string, unknown> | undefined, parse: (x: unknown) => T): Promise<T> {
+export async function rpc<T>(fn: string, args: Record<string, unknown> | undefined, parse: (x: unknown) => T): Promise<T> {
   const { data, error } = await supabase.rpc(fn, args);
   if (error) {
     const network = /fetch|network/i.test(error.message);

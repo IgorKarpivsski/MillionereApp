@@ -71,6 +71,7 @@ export const RPC_ERRORS = {
   username_taken: 'username_taken',
   invalid_input: 'invalid_input',
   not_authenticated: 'not_authenticated',
+  invalid_state: 'invalid_state',
 } as const;
 export type RpcErrorCode = keyof typeof RPC_ERRORS;
 
@@ -79,3 +80,94 @@ export function parseRpcError(message: string | undefined): RpcErrorCode | 'unkn
   const code = Object.keys(RPC_ERRORS).find((k) => message.includes(k));
   return (code as RpcErrorCode | undefined) ?? 'unknown';
 }
+
+/* -------------------------------------------------------------------------- */
+/* Quiz (classic run). Mirrors supabase/migrations/*_quiz_runs.sql.            */
+/* -------------------------------------------------------------------------- */
+
+export const LifelineKindSchema = z.enum(['fifty', 'expert', 'fans', 'var']);
+export type LifelineKind = z.infer<typeof LifelineKindSchema>;
+
+export const QuizRunStatusSchema = z.enum(['active', 'won', 'lost', 'cashed_out', 'timed_out', 'abandoned']);
+export type QuizRunStatus = z.infer<typeof QuizRunStatusSchema>;
+
+const SlotSchema = z.number().int().min(0).max(3);
+
+export const QuizHintsSchema = z
+  .object({
+    fifty: z.object({ removed: z.array(SlotSchema) }).optional(),
+    expert: z.object({ slot: SlotSchema, confidence: z.enum(['sure', 'think', 'guess']) }).optional(),
+    fans: z.object({ percents: z.array(z.number().int()).length(4) }).optional(),
+    var: z.object({ armed: z.boolean() }).optional(),
+  })
+  .passthrough();
+export type QuizHints = z.infer<typeof QuizHintsSchema>;
+
+export const QuizQuestionSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  category: z.string(),
+  category_name: z.string().nullable(),
+  difficulty: z.enum(['easy', 'medium', 'hard', 'expert', 'legendary']),
+  answers: z.array(z.object({ slot: SlotSchema, text: z.string() })).length(4),
+  removed: z.array(SlotSchema),
+  wrong_slots: z.array(SlotSchema),
+  var_armed: z.boolean(),
+  hints: QuizHintsSchema,
+  answered: z.boolean(),
+  seconds_left: z.number().int().min(0),
+});
+export type QuizQuestion = z.infer<typeof QuizQuestionSchema>;
+
+export const QuizPayloadSchema = z.object({
+  run_id: z.string().uuid(),
+  status: QuizRunStatusSchema,
+  rung: z.number().int().min(1).max(12),
+  correct: z.number().int().min(0).max(12),
+  lifelines_used: z.array(LifelineKindSchema),
+  question: QuizQuestionSchema.nullable(),
+});
+export type QuizPayload = z.infer<typeof QuizPayloadSchema>;
+
+export const QuizSummarySchema = z.object({
+  status: QuizRunStatusSchema,
+  correct: z.number().int(),
+  coins: z.number().int(),
+  prize_points: z.number().int(),
+  xp: z.number().int(),
+  level: z.number().int(),
+  leveled_up: z.boolean(),
+  balance: z.number(),
+});
+export type QuizSummary = z.infer<typeof QuizSummarySchema>;
+
+export const QuizAnswerResultSchema = z.discriminatedUnion('result', [
+  z.object({
+    result: z.literal('correct'),
+    correct_slot: SlotSchema,
+    explanation: z.string(),
+    summary: QuizSummarySchema.nullable(),
+  }),
+  z.object({
+    result: z.enum(['wrong', 'timeout']),
+    correct_slot: SlotSchema,
+    explanation: z.string(),
+    summary: QuizSummarySchema,
+  }),
+  z.object({
+    result: z.literal('var_overturned'),
+    wrong_slot: SlotSchema,
+    payload: QuizPayloadSchema,
+  }),
+]);
+export type QuizAnswerResult = z.infer<typeof QuizAnswerResultSchema>;
+
+export const QuizLifelineResultSchema = z.object({
+  kind: LifelineKindSchema,
+  result: z.record(z.unknown()),
+});
+
+export const ReportReasonSchema = z.enum(['wrong_answer', 'typo', 'unclear', 'other']);
+export type ReportReason = z.infer<typeof ReportReasonSchema>;
+
+export const QuizCashOutResultSchema = z.object({ summary: QuizSummarySchema });

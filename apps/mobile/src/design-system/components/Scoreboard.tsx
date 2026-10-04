@@ -61,14 +61,14 @@ export function Led({
 }
 
 /* ------------------------------------------------------------------ */
-/* Score line: "אתה  3 : 1  הפרשן"                                       */
+/* Score line: "אתה  3 : 1  האלוף"                                       */
 /* ------------------------------------------------------------------ */
 
 export function ScoreLine({
   you,
   them,
   youLabel = 'אתה',
-  themLabel = 'הפרשן',
+  themLabel = 'האלוף',
   size = 'ledL',
   color = colors.led,
 }: {

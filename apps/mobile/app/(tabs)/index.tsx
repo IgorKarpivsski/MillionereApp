@@ -82,13 +82,13 @@ function MatchOfTheDay() {
           <Led size="ledXL" color={colors.text}>0</Led>
         </View>
         <View style={styles.side}>
-          <AppText variant="caption" style={styles.sideTight}>הפרשן</AppText>
+          <AppText variant="caption" style={styles.sideTight}>האלוף</AppText>
         </View>
       </View>
       <AppText color={colors.textMuted} align="center">
         {t.matchBody}
       </AppText>
-      <StickerButton label={t.kickoff} size="lg" fullWidth onPress={() => router.push('/(tabs)/play')} />
+      <StickerButton label={t.kickoff} icon="football" size="lg" fullWidth onPress={() => router.push('/quiz')} />
     </Card>
   );
 }

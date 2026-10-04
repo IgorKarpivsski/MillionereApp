@@ -27,7 +27,7 @@ test('every Hebrew string is non-empty and has no stray Latin-only text', () => 
       if (typeof v === 'object') walk(v as object, [...path, k]);
       else {
         assert.ok(typeof v === 'string' && v.trim().length > 0, `empty: ${[...path, k].join('.')}`);
-        const allowedLatin = /Apple|Google|K|M/;
+        const allowedLatin = /Apple|Google|K|M|VAR|50:50|GOAL/;
         if (!/[֐-׿]/.test(v)) assert.ok(allowedLatin.test(v), `not Hebrew: ${[...path, k].join('.')}`);
       }
     }
