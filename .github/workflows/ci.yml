@@ -14,8 +14,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile=false
+      - run: pnpm install --no-frozen-lockfile
       - name: Align Expo package versions with the SDK
         run: pnpm --filter @fm/mobile exec npx expo install --check
       - run: pnpm typecheck
