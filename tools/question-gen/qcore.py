@@ -31,7 +31,7 @@ import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
 
-GEN_VERSION = "2026.10.1"
+GEN_VERSION = "2026.10.2"
 DATA = Path("data/wikidata")
 HEB = re.compile(r"[֐-׿]")
 

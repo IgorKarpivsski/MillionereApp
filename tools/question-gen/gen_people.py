@@ -152,7 +152,8 @@ def build(names: Names, rng: random.Random) -> tuple[list[Q], dict]:
                 stats["player:national_team"] += 1
 
         # Clubs he played for (referenced career entries only)
-        ref_clubs = [c for c, v in p["clubs"].items() if v["referenced"] and names.get(c)]
+        # Answer clubs need a cited AND dated career entry (undated entries are often junk).
+        ref_clubs = [c for c, v in p["clubs"].items() if v["referenced"] and v["start"] and names.get(c)]
         ref_clubs.sort(key=lambda c: -names.e[c].sitelinks)
         for cq in ref_clubs[:2]:
             cname = names.he(cq)
@@ -192,7 +193,7 @@ def build(names: Names, rng: random.Random) -> tuple[list[Q], dict]:
     by_club = collections.defaultdict(list)
     for pid, p in players.items():
         for cq, v in p["clubs"].items():
-            if v["referenced"]:
+            if v["referenced"] and v["start"]:
                 by_club[cq].append(pid)
     for cq, pids in by_club.items():
         cname = names.he(cq)

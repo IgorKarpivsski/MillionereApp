@@ -1,6 +1,6 @@
 {
- "generator": "2026.10.1",
- "total": 10256,
+ "generator": "2026.10.2",
+ "total": 10237,
  "by_category": [
   [
    "players",
@@ -12,7 +12,7 @@
   ],
   [
    "israeli_football",
-   1317
+   1298
   ],
   [
    "premier_league",
@@ -57,30 +57,30 @@
  ],
  "by_difficulty": [
   [
-   "easy",
-   2564
+   "hard",
+   2560
   ],
   [
    "medium",
-   2564
+   2559
   ],
   [
-   "hard",
-   2564
+   "easy",
+   2559
   ],
   [
    "expert",
-   1744
+   1740
   ],
   [
    "legendary",
-   820
+   819
   ]
  ],
  "by_template": [
   [
    "player:club",
-   2116
+   2097
   ],
   [
    "club:which_player",
@@ -231,19 +231,19 @@
    23
   ],
   [
-   "wc:runner_up",
-   22
-  ],
-  [
    "wc:final_goals",
    22
   ],
   [
-   "won_when:Q324867",
-   20
+   "wc:runner_up",
+   22
   ],
   [
    "winner:Q223366",
+   20
+  ],
+  [
+   "won_when:Q324867",
    20
   ],
   [
@@ -298,7 +298,7 @@
  "verified_by": [
   [
    "wikidata",
-   9821
+   9802
   ],
   [
    "openfootball",
@@ -384,10 +384,10 @@
   "player_famous_for_other": 268,
   "player_ambiguous_name": 71,
   "player:national_team": 4789,
-  "player:club": 7889,
+  "player:club": 7567,
   "player:birth_year": 6768,
   "player:position": 6555,
-  "club:which_player": 3727,
+  "club:which_player": 3679,
   "club:city": 674,
   "club:founded": 278,
   "club:stadium": 129,
