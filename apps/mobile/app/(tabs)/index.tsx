@@ -11,10 +11,12 @@ import {
   Skeleton,
   StatTile,
   StickerButton,
+  TrophyLogo,
   useCountdownToMidnight,
   useToast,
 } from '@/design-system/components';
 import { colors, space } from '@/design-system/tokens';
+import { useDailyStatus, useLeaderboard } from '@/features/quiz/hooks';
 import { useClaimWelcomeBonus, useMyState } from '@/features/profile/hooks';
 import { RpcError } from '@/features/profile/api';
 import { formatNumber } from '@/lib/format';
@@ -64,6 +66,9 @@ function WelcomeBonus() {
 
 function MatchOfTheDay() {
   const countdown = useCountdownToMidnight();
+  const { data: daily } = useDailyStatus();
+  const done = daily?.state === 'done';
+  const missed = done ? 10 - (daily?.correct ?? 0) : 0;
   return (
     <Card kind="sticker" padding={space.lg} style={styles.match}>
       <View style={styles.matchHead}>
@@ -77,25 +82,55 @@ function MatchOfTheDay() {
           <AppText variant="label">אתה</AppText>
         </View>
         <View style={styles.matchDigits}>
-          <Led size="ledXL" color={colors.text}>0</Led>
+          <Led size="ledXL" color={colors.text}>{done ? daily?.correct ?? 0 : 0}</Led>
           <Led size="ledXL" color={colors.text}>:</Led>
-          <Led size="ledXL" color={colors.text}>0</Led>
+          <Led size="ledXL" color={done && missed > (daily?.correct ?? 0) ? colors.danger : colors.text}>{missed}</Led>
         </View>
         <View style={styles.side}>
           <AppText variant="caption" style={styles.sideTight}>האלוף</AppText>
         </View>
       </View>
       <AppText color={colors.textMuted} align="center">
-        {t.matchBody}
+        {done ? fmt(t.dailyDone, { n: daily?.coins ?? 0 }) : t.dailyBody}
       </AppText>
-      <StickerButton label={t.kickoff} icon="football" size="lg" fullWidth onPress={() => router.push('/quiz')} />
+      {done ? (
+        <StickerButton label={t.playClassic} icon="football" tone="outline" size="lg" fullWidth onPress={() => router.push('/quiz')} />
+      ) : (
+        <StickerButton
+          label={daily?.state === 'in_progress' ? t.dailyContinue : t.kickoff}
+          icon="football"
+          size="lg"
+          fullWidth
+          onPress={() => router.push({ pathname: '/quiz', params: { mode: 'daily' } })}
+        />
+      )}
+    </Card>
+  );
+}
+
+function ClassicCard() {
+  return (
+    <Card kind="soft" padding={space.md}>
+      <View style={styles.seasonRow}>
+        <TrophyLogo size={36} />
+        <View style={styles.flex}>
+          <AppText variant="label">{t.classicTitle}</AppText>
+          <AppText variant="caption" color={colors.textDim}>
+            {t.classicBody}
+          </AppText>
+        </View>
+        <StickerButton label={t.play} size="sm" onPress={() => router.push('/quiz')} />
+      </View>
     </Card>
   );
 }
 
 export default function HomeScreen() {
   const { data, isLoading, refetch, isRefetching } = useMyState();
-  const streak = 0; // daily streaks arrive in Phase 7
+  const { data: daily } = useDailyStatus();
+  const { data: board } = useLeaderboard();
+  const streak = daily?.streak ?? 0;
+  const rank = board?.me.rank;
   const toast = useToast();
 
   return (
@@ -106,10 +141,11 @@ export default function HomeScreen() {
       {data && !data.welcome_bonus_claimed ? <WelcomeBonus /> : null}
 
       <MatchOfTheDay />
+      {daily?.state === 'done' ? null : <ClassicCard />}
 
       <View style={styles.tiles}>
         <StatTile value={String(streak)} label={t.statStreak} color={colors.correct} />
-        <StatTile value="--" label={t.statRank} color={colors.led} />
+        <StatTile value={rank ? `#${rank}` : '--'} label={t.statRank} color={colors.led} />
         <StatTile value="0" label={t.statCollection} />
       </View>
 

@@ -126,6 +126,8 @@ export const QuizPayloadSchema = z.object({
   correct: z.number().int().min(0).max(12),
   lifelines_used: z.array(LifelineKindSchema),
   question: QuizQuestionSchema.nullable(),
+  mode: z.enum(['classic', 'daily']).optional(),
+  total: z.number().int().optional(),
 });
 export type QuizPayload = z.infer<typeof QuizPayloadSchema>;
 
@@ -138,6 +140,9 @@ export const QuizSummarySchema = z.object({
   level: z.number().int(),
   leveled_up: z.boolean(),
   balance: z.number(),
+  mode: z.enum(['classic', 'daily']).optional(),
+  streak: z.number().int().optional(),
+  streak_best: z.number().int().optional(),
 });
 export type QuizSummary = z.infer<typeof QuizSummarySchema>;
 
@@ -152,7 +157,8 @@ export const QuizAnswerResultSchema = z.discriminatedUnion('result', [
     result: z.enum(['wrong', 'timeout']),
     correct_slot: SlotSchema,
     explanation: z.string(),
-    summary: QuizSummarySchema,
+    // null in the daily challenge, where a miss doesn't end the run
+    summary: QuizSummarySchema.nullable(),
   }),
   z.object({
     result: z.literal('var_overturned'),
@@ -171,3 +177,30 @@ export const ReportReasonSchema = z.enum(['wrong_answer', 'typo', 'unclear', 'ot
 export type ReportReason = z.infer<typeof ReportReasonSchema>;
 
 export const QuizCashOutResultSchema = z.object({ summary: QuizSummarySchema });
+
+export const DailyStatusSchema = z.object({
+  day: z.string(),
+  state: z.enum(['open', 'in_progress', 'done']),
+  correct: z.number().int().nullable(),
+  coins: z.number().int().nullable(),
+  streak: z.number().int(),
+  streak_best: z.number().int(),
+  seconds_to_reset: z.number().int(),
+});
+export type DailyStatus = z.infer<typeof DailyStatusSchema>;
+
+export const LeaderboardSchema = z.object({
+  week_start: z.string(),
+  rows: z.array(
+    z.object({
+      rank: z.number().int(),
+      username: z.string(),
+      avatar_id: z.string(),
+      level: z.number().int(),
+      points: z.number(),
+      me: z.boolean(),
+    }),
+  ),
+  me: z.object({ rank: z.number().int().nullable(), points: z.number(), games: z.number().int() }),
+});
+export type Leaderboard = z.infer<typeof LeaderboardSchema>;

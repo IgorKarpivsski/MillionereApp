@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches: [data-fetch]
-    paths: ['tools/question-gen/fetch-*.mjs', '.github/workflows/fetch-football-data.yml']
+    paths: ['tools/question-gen/fetch-wikidata*.mjs', '.github/workflows/fetch-football-data.yml']
 
 permissions:
   contents: write

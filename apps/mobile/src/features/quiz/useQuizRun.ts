@@ -6,7 +6,9 @@ import { playSound } from '@/design-system/feedback/sound';
 import { track } from '@/lib/analytics';
 import { queryKeys } from '@/lib/queryClient';
 import { RpcError } from '@/features/profile/api';
-import { quizApi } from './api';
+import { dailyApi, quizApi } from './api';
+
+export type QuizMode = 'classic' | 'daily';
 
 export type QuizPhase = 'loading' | 'question' | 'locked' | 'reveal' | 'finished' | 'error';
 
@@ -22,6 +24,8 @@ export interface QuizRunState {
   payload: QuizPayload | null;
   /** Correct answers so far (the "you" score). */
   score: number;
+  /** Misses so far — the rival's goals in the daily challenge. */
+  misses: number;
   picked: number | null;
   reveal: Reveal | null;
   summary: QuizSummary | null;
@@ -35,6 +39,7 @@ const initial: QuizRunState = {
   phase: 'loading',
   payload: null,
   score: 0,
+  misses: 0,
   picked: null,
   reveal: null,
   summary: null,
@@ -49,6 +54,7 @@ function withQuestion(s: QuizRunState, p: QuizPayload): QuizRunState {
     phase: p.question ? 'question' : 'loading',
     payload: p,
     score: p.correct,
+    misses: Math.max(0, p.rung - 1 - p.correct),
     picked: null,
     reveal: null,
     deadlineAt: p.question ? Date.now() + p.question.seconds_left * 1000 : null,
@@ -60,8 +66,9 @@ function withQuestion(s: QuizRunState, p: QuizPayload): QuizRunState {
  * Drives one classic run. The server decides everything (correctness, payouts,
  * the clock); this hook only sequences calls and keeps the UI state.
  */
-export function useQuizRun() {
+export function useQuizRun(mode: QuizMode = 'classic') {
   const [s, setS] = useState<QuizRunState>(initial);
+  const engine = mode === 'daily' ? dailyApi : quizApi;
   const qc = useQueryClient();
   const live = useRef(true);
   const sRef = useRef(s);
@@ -89,6 +96,8 @@ export function useQuizRun() {
   const finish = useCallback(
     (summary: QuizSummary) => {
       void qc.invalidateQueries({ queryKey: queryKeys.myState });
+      void qc.invalidateQueries({ queryKey: queryKeys.daily });
+      void qc.invalidateQueries({ queryKey: queryKeys.leaderboard });
       const endedBy =
         summary.status === 'won' ? 'completed'
         : summary.status === 'cashed_out' ? 'walk_away'
@@ -103,10 +112,10 @@ export function useQuizRun() {
   const start = useCallback(async () => {
     set(() => initial);
     try {
-      const p = await quizApi.start();
+      const p = await engine.start();
       playSound('whistle');
       haptic('heavy');
-      track('quiz_started', { mode: 'classic' });
+      track('quiz_started', { mode });
       set((x) => withQuestion(x, p));
     } catch (e) {
       fail(e);
@@ -122,7 +131,7 @@ export function useQuizRun() {
       haptic('tap');
       set((x) => ({ ...x, phase: 'locked', picked: slot }));
       try {
-        const r = await quizApi.answer(run_id, rung, slot);
+        const r = await engine.answer(run_id, rung, slot);
         if (r.result === 'var_overturned') {
           playSound('var');
           haptic('heavy');
@@ -143,6 +152,7 @@ export function useQuizRun() {
           ...x,
           phase: 'reveal',
           score: good ? x.score + 1 : x.score,
+          misses: good ? x.misses : x.misses + 1,
           reveal: { result: r.result, correctSlot: r.correct_slot, pickedSlot: slot, explanation: r.explanation },
           summary,
         }));
@@ -161,14 +171,15 @@ export function useQuizRun() {
     // The device clock may run slightly ahead of the server's; retry briefly.
     for (let attempt = 0; attempt < 6; attempt++) {
       try {
-        const r = await quizApi.timeout(runId);
+        const r = await engine.timeout(runId);
         if (r.result !== 'timeout') return;
-        const summary = finish(r.summary);
+        const summary = r.summary ? finish(r.summary) : null;
         playSound('answer_wrong');
         haptic('error');
         set((x) => ({
           ...x,
           phase: 'reveal',
+          misses: x.misses + 1,
           reveal: { result: 'timeout', correctSlot: r.correct_slot, pickedSlot: null, explanation: r.explanation },
           summary,
         }));
@@ -196,7 +207,7 @@ export function useQuizRun() {
     }
     set((x) => ({ ...x, phase: 'loading' }));
     try {
-      const p = await quizApi.next(cur.payload.run_id);
+      const p = await engine.next(cur.payload.run_id);
       set((x) => withQuestion(x, p));
     } catch (e) {
       fail(e);

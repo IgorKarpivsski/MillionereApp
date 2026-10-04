@@ -16,7 +16,10 @@ const ICONS: Record<string, { on: IconName; off: IconName }> = {
   packs: { on: 'gift', off: 'gift-outline' },
   collection: { on: 'albums', off: 'albums-outline' },
   profile: { on: 'person-circle', off: 'person-circle-outline' },
+  leaderboard: { on: 'podium', off: 'podium-outline' },
 };
+/** Routes reachable from elsewhere (e.g. the profile from the top bar) but not shown as tabs. */
+const HIDDEN = new Set(['profile']);
 
 function Tab({
   label,
@@ -62,6 +65,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     <View style={[styles.outer, { paddingBottom: Math.max(insets.bottom, space.sm) }]}>
       <View style={styles.bar} accessibilityRole="tablist">
         {state.routes.map((route, i) => {
+          if (HIDDEN.has(route.name)) return null;
           const options = descriptors[route.key]?.options;
           const label = typeof options?.title === 'string' ? options.title : route.name;
           const focused = state.index === i;

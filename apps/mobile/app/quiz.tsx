@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LADDER } from '@fm/economy-config';
 import type { LifelineKind, ReportReason } from '@fm/shared';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeOut, ZoomIn } from 'react-native-reanimated';
@@ -86,11 +86,12 @@ function useSecondsLeft(deadlineAt: number | null, running: boolean, onZero: () 
 /* Scoreboard header                                                   */
 /* ------------------------------------------------------------------ */
 
-function Board({ s, onExit }: { s: QuizRunState; onExit: () => void }) {
+function Board({ s, onExit, daily }: { s: QuizRunState; onExit: () => void; daily: boolean }) {
   const reduced = useReducedMotion();
   const rung = s.payload?.rung ?? 1;
-  const rival = s.reveal && s.reveal.result !== 'correct' ? 1 : 0;
-  const minute = Math.min(90, Math.round(rung * 7.5));
+  // Classic: the champion scores once, when you miss. Daily: every miss is his goal.
+  const rival = daily ? s.misses : s.reveal && s.reveal.result !== 'correct' ? 1 : 0;
+  const minute = Math.min(90, Math.round(rung * (daily ? 9 : 7.5)));
   return (
     <View style={styles.board}>
       <Pressable onPress={onExit} hitSlop={12} accessibilityRole="button" accessibilityLabel={t.exit}>
@@ -120,22 +121,28 @@ function Board({ s, onExit }: { s: QuizRunState; onExit: () => void }) {
 /* Result                                                              */
 /* ------------------------------------------------------------------ */
 
-function ResultView({ s, onAgain }: { s: QuizRunState; onAgain: () => void }) {
+function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => void; daily: boolean }) {
   const reduced = useReducedMotion();
   const sum = s.summary!;
-  const won = sum.status === 'won';
-  const rival = sum.status === 'lost' || sum.status === 'timed_out' ? 1 : 0;
+  const won = daily ? sum.correct >= 6 : sum.status === 'won';
+  const rival = daily ? 10 - sum.correct : sum.status === 'lost' || sum.status === 'timed_out' ? 1 : 0;
   return (
     <ScrollView contentContainerStyle={styles.result}>
       <Animated.View entering={reduced ? undefined : ZoomIn.springify().damping(12)}>
         <TrophyLogo size={won ? 120 : 84} color={won ? colors.led : colors.border} />
       </Animated.View>
       <AppText variant="title" align="center">
-        {t.result[sum.status]}
+        {daily ? (won ? t.dailyWin : t.dailyLose) : t.result[sum.status]}
       </AppText>
       <AppText color={colors.textMuted} align="center">
-        {t.resultBody[sum.status]}
+        {daily ? fmt(t.dailyBody, { n: sum.correct }) : t.resultBody[sum.status]}
       </AppText>
+      {daily && sum.streak ? (
+        <View style={styles.streakRow}>
+          <Ionicons name="flame" size={22} color={colors.danger} />
+          <AppText variant="heading">{fmt(t.streakNow, { n: sum.streak })}</AppText>
+        </View>
+      ) : null}
 
       <Card kind="sticker" style={styles.finalCard}>
         <View style={styles.finalScore}>
@@ -182,7 +189,11 @@ function ResultView({ s, onAgain }: { s: QuizRunState; onAgain: () => void }) {
         ) : null}
       </Card>
 
-      <StickerButton label={t.again} icon="refresh" size="lg" fullWidth onPress={onAgain} />
+      {daily ? (
+        <StickerButton label={t.toClassic} icon="football" size="lg" fullWidth onPress={() => router.replace('/quiz')} />
+      ) : (
+        <StickerButton label={t.again} icon="refresh" size="lg" fullWidth onPress={onAgain} />
+      )}
       <StickerButton label={t.home} tone="ghost" fullWidth onPress={() => router.back()} />
     </ScrollView>
   );
@@ -193,7 +204,10 @@ function ResultView({ s, onAgain }: { s: QuizRunState; onAgain: () => void }) {
 /* ------------------------------------------------------------------ */
 
 export default function QuizScreen() {
-  const { state: s, start, pick, next, lifeline, cashOut, whistle } = useQuizRun();
+  const params = useLocalSearchParams<{ mode?: string }>();
+  const daily = params.mode === 'daily';
+  const total = daily ? 10 : 12;
+  const { state: s, start, pick, next, lifeline, cashOut, whistle } = useQuizRun(daily ? 'daily' : 'classic');
   const toast = useToast();
   const reduced = useReducedMotion();
   const [reportOpen, setReportOpen] = useState(false);
@@ -226,6 +240,13 @@ export default function QuizScreen() {
       void next();
       return true;
     }
+    if (daily) {
+      Alert.alert(t.exitTitle, t.dailyExitBody, [
+        { text: t.keepPlaying, style: 'cancel' },
+        { text: t.exit, onPress: () => router.back() },
+      ]);
+      return true;
+    }
     const coins = coinsAt(s.score);
     if (coins > 0) {
       Alert.alert(t.cashOutTitle, fmt(t.cashOutBody, { n: formatNumber(coins) }), [
@@ -246,7 +267,7 @@ export default function QuizScreen() {
       ]);
     }
     return true;
-  }, [s.phase, s.payload, s.summary, s.score, next, cashOut]);
+  }, [s.phase, s.payload, s.summary, s.score, next, cashOut, daily]);
 
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', exit);
@@ -275,7 +296,7 @@ export default function QuizScreen() {
   if (s.phase === 'finished' && s.summary) {
     return (
       <SafeAreaView style={styles.root}>
-        <ResultView s={s} onAgain={() => void start()} />
+        <ResultView s={s} daily={daily} onAgain={() => void start()} />
       </SafeAreaView>
     );
   }
@@ -324,16 +345,18 @@ export default function QuizScreen() {
 
   return (
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
-      <Board s={s} onExit={exit} />
+      <Board s={s} daily={daily} onExit={exit} />
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-        <ProgressBar value={(rung - 1 + (reveal?.result === 'correct' ? 1 : 0)) / 12} accessibilityLabel={fmt(t.questionOf, { n: rung })} />
+        <ProgressBar value={(rung - 1 + (reveal ? 1 : 0)) / total} accessibilityLabel={fmt(t.questionOf, { n: rung, total })} />
         <View style={styles.infoRow}>
           <AppText variant="caption" color={colors.textDim}>
-            {fmt(t.questionOf, { n: rung })} · {t.onTheLine}{' '}
-            <AppText variant="caption" color={colors.led} style={styles.bold}>
-              {formatNumber(LADDER[rung - 1]?.prizePoints ?? 0)}
-            </AppText>
+            {fmt(t.questionOf, { n: rung, total })} · {daily ? t.dailyTag : t.onTheLine}{' '}
+            {daily ? null : (
+              <AppText variant="caption" color={colors.led} style={styles.bold}>
+                {formatNumber(LADDER[rung - 1]?.prizePoints ?? 0)}
+              </AppText>
+            )}
           </AppText>
           <View style={styles.clock}>
             <Led size="ledM" color={secs <= 10 && answering ? colors.danger : colors.text}>
@@ -426,7 +449,7 @@ export default function QuizScreen() {
           />
         ) : (
           <>
-            <View style={styles.lifelines}>
+            <View style={[styles.lifelines, daily && styles.hidden]}>
               {LIFELINES.map((l) => (
                 <LifelineButton
                   key={l.kind}
@@ -443,7 +466,7 @@ export default function QuizScreen() {
                 />
               ))}
             </View>
-            {s.score > 0 ? (
+            {s.score > 0 && !daily ? (
               <StickerButton
                 label={fmt(t.cashOut, { n: formatNumber(coinsAt(s.score)) })}
                 tone="outline"
@@ -535,6 +558,8 @@ const styles = StyleSheet.create({
   link: { textDecorationLine: 'underline', marginTop: space.xs },
   footer: { paddingHorizontal: space.md, paddingBottom: space.sm, paddingTop: space.xs, gap: space.sm },
   lifelines: { flexDirection: 'row', gap: space.sm },
+  hidden: { display: 'none' },
+  streakRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   goal: {
     position: 'absolute',
     top: '30%',

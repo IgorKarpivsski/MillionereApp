@@ -9,7 +9,8 @@ export default function TabsLayout() {
       <Tabs.Screen name="play" options={{ title: strings.tabs.play }} />
       <Tabs.Screen name="packs" options={{ title: strings.tabs.packs }} />
       <Tabs.Screen name="collection" options={{ title: strings.tabs.collection }} />
-      <Tabs.Screen name="profile" options={{ title: strings.tabs.profile }} />
+      <Tabs.Screen name="leaderboard" options={{ title: strings.tabs.leaderboard }} />
+      <Tabs.Screen name="profile" options={{ title: strings.tabs.profile, href: null }} />
     </Tabs>
   );
 }

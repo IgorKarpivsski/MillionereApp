@@ -71,6 +71,11 @@ def build(names: Names, rng: random.Random) -> tuple[list[Q], dict]:
     israeli = set(extra.get("כדורגלנים ישראלים", [])) | women
     nt_coaches = set(extra.get("מאמני נבחרת ישראל בכדורגל", []))
     isr_coaches = set(extra.get("מאמני כדורגל ישראלים", []))
+    rp = HW / "redirects.json"
+    redirects = json.loads(rp.read_text(encoding="utf-8")) if rp.exists() else {}
+
+    def canon(t: str | None) -> str | None:
+        return (redirects.get(t) or t) if t else t
 
     title_to_qid = {e.he_title: q for q, e in names.e.items() if e.he_title}
     isr_club_titles = {r["he"] for r in load("clubs_israeli") if r.get("he")}
@@ -93,13 +98,13 @@ def build(names: Names, rng: random.Random) -> tuple[list[Q], dict]:
         clubs = []
         yrs = items(f.get("שנים כשחקן", ""))
         for i, it in enumerate(items(f.get("מועדונים כשחקן", ""))):
-            t = first_link(it)
+            t = canon(first_link(it))
             if not t or YOUTH.search(it) or YOUTH.search(t) or "נבחרת" in t:
                 continue
             clubs.append({"t": t, "years": (yrs[i] if i < len(yrs) else "").replace("'''", "").strip()})
         coach = []
         for it in items(f.get("קבוצות כמאמן", "")):
-            t = first_link(it)
+            t = canon(first_link(it))
             if not t or re.search(r"(עוזר|נוער|עד גיל|זמני|מנהל|סקאוט|מאמן שוערים|כושר)", it) or YOUTH.search(t):
                 continue
             coach.append(t)
@@ -122,7 +127,7 @@ def build(names: Names, rng: random.Random) -> tuple[list[Q], dict]:
         players[title] = {
             "name": clean_he_title(title), "qid": rec.get("qid"), "pv": pv.get(title, 0), "fem": title in women,
             "clubs": clubs, "coach": coach, "pos": next(iter(groups)) if len(groups) == 1 else None,
-            "born": year(f.get("תאריך לידה", "")), "birthplace": first_link(f.get("מקום לידה", "")),
+            "born": year(f.get("תאריך לידה", "")), "birthplace": canon(first_link(f.get("מקום לידה", ""))),
             "nt_caps": num("הופעות בנבחרת כשחקן") if nt_end else None,
             "nt_goals": num("שערים בנבחרת כשחקן") if nt_end else None, "nt_end": nt_end,
             "bases": {base(c["t"]) for c in clubs},
@@ -159,8 +164,13 @@ def build(names: Names, rng: random.Random) -> tuple[list[Q], dict]:
         for c in uniq[:3]:
             isr = is_isr_club(c["t"])
             cname = clean_he_title(c["t"])
-            pool = [clean_he_title(x) for x in (isr_pool if isr else foreign_pool) if base(x) not in p["bases"]]
-            wrong = pick_distractors(rng, pool, {cname})
+            src_pool = isr_pool if isr else foreign_pool
+            n = club_count[c["t"]]
+            # Distractors from the same tier, so the answer isn't simply "the big club".
+            tier = [x for x in src_pool if n / 3 <= club_count[x] <= n * 3 and base(x) not in p["bases"]]
+            if len(tier) < 6:
+                tier = sorted((x for x in src_pool if base(x) not in p["bases"]), key=lambda x: abs(club_count[x] - n))[:12]
+            wrong = pick_distractors(rng, [clean_he_title(x) for x in tier], {cname})
             if not wrong:
                 continue
             cq = title_to_qid.get(c["t"])
@@ -247,7 +257,11 @@ def build(names: Names, rng: random.Random) -> tuple[list[Q], dict]:
         cb = {base(t) for t in p["coach"]}
         for t in sorted(coached, key=lambda x: -pv.get(x, 0))[:2]:
             cname = clean_he_title(t)
-            wrong = pick_distractors(rng, [clean_he_title(x) for x in coach_club_pool if base(x) not in cb], {cname})
+            n = coach_count[t]
+            tier = [x for x in coach_club_pool if base(x) not in cb and n / 3 <= coach_count[x] <= n * 3]
+            if len(tier) < 6:
+                tier = [x for x in coach_club_pool if base(x) not in cb]
+            wrong = pick_distractors(rng, [clean_he_title(x) for x in tier], {cname})
             if not wrong:
                 continue
             verb = "אימנה" if p["fem"] else "אימן"
