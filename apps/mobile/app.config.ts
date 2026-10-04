@@ -50,6 +50,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     'expo-router',
     'expo-font',
+    'expo-audio',
     'expo-web-browser',
     ['expo-localization', { supportedLocales: { ios: ['he'], android: ['he'] } }],
     ['expo-splash-screen', { image: './assets/images/splash-icon.png', imageWidth: 180, backgroundColor: '#0B2B22' }],
