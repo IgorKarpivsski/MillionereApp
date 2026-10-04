@@ -14,7 +14,13 @@ begin
 
   perform test.assert((select is_guest from public.profiles where id = g), 'function-made guest is a guest');
   perform test.assert(not (select is_guest from public.profiles where id = r), 'regular user is not a guest');
+  r := null;
   perform test.assert(exists (select 1 from public.wallets where user_id = g), 'guest gets a wallet');
+
+  -- Real Auth writes app_metadata after the insert: the flag must still land.
+  insert into auth.users (is_anonymous, raw_app_meta_data) values (false, '{}') returning id into r;
+  update auth.users set raw_app_meta_data = '{"guest": true}' where id = r;
+  perform test.assert((select is_guest from public.profiles where id = r), 'guest flag set by a later update');
 
   for i in 1..3 loop
     perform test.assert(public.guest_signup_allowed('ip-a', 3), 'under the cap is allowed');

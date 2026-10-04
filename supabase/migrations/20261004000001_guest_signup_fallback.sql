@@ -53,3 +53,8 @@ revoke all on public.guest_signups from anon, authenticated;
 revoke execute on function public.guest_signup_allowed(text, integer) from public, anon, authenticated;
 revoke execute on function public.mark_function_guest() from public, anon, authenticated;
 grant execute on function public.guest_signup_allowed(text, integer) to service_role;
+
+-- Auth sets app_metadata after the INSERT, so also react to its UPDATE
+-- (applied to production as mark_function_guest_on_update).
+create trigger on_auth_user_meta_mark_guest after update of raw_app_meta_data on auth.users
+  for each row execute function public.mark_function_guest();
