@@ -16,7 +16,8 @@ jobs:
           node-version: 22
       - run: pnpm install --no-frozen-lockfile
       - name: Align Expo package versions with the SDK
-        run: pnpm --filter @fm/mobile exec npx expo install --check
+        working-directory: apps/mobile
+        run: npx expo install --fix
       - run: pnpm typecheck
       - run: pnpm test
 
