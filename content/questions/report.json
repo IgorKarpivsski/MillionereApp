@@ -1,7 +1,11 @@
 {
- "generator": "2026.10.2",
- "total": 10237,
+ "generator": "2026.10.3",
+ "total": 16354,
  "by_category": [
+  [
+   "israeli_football",
+   7415
+  ],
   [
    "players",
    5000
@@ -9,10 +13,6 @@
   [
    "clubs",
    1963
-  ],
-  [
-   "israeli_football",
-   1298
   ],
   [
    "premier_league",
@@ -58,45 +58,65 @@
  "by_difficulty": [
   [
    "hard",
-   2560
+   4089
   ],
   [
    "medium",
-   2559
+   4089
   ],
   [
    "easy",
-   2559
+   4088
   ],
   [
    "expert",
-   1740
+   2780
   ],
   [
    "legendary",
-   819
+   1308
   ]
  ],
  "by_template": [
   [
+   "hw:player_club",
+   3000
+  ],
+  [
    "player:club",
-   2097
+   2071
   ],
   [
    "club:which_player",
-   1510
+   1508
   ],
   [
-   "player:position",
-   1500
+   "hw:club_which_player",
+   1400
   ],
   [
    "player:national_team",
    1300
   ],
   [
+   "player:position",
+   1291
+  ],
+  [
    "player:birth_year",
    1150
+  ],
+  [
+   "hw:position",
+   988
+  ],
+  [
+   "hw:birthplace",
+   500
+  ],
+  [
+   "hw:coached_club",
+   355
   ],
   [
    "club:founded",
@@ -167,12 +187,16 @@
    58
   ],
   [
+   "won_when:ENG",
+   55
+  ],
+  [
    "league:best_defence",
    55
   ],
   [
-   "won_when:ENG",
-   55
+   "hw:nt_nt_caps",
+   53
   ],
   [
    "won_when:Q18756",
@@ -215,8 +239,16 @@
    34
   ],
   [
+   "hw:nt_nt_goals",
+   31
+  ],
+  [
    "won_when:ISR",
    28
+  ],
+  [
+   "hw:nt_coach",
+   27
   ],
   [
    "won_when:Q83145",
@@ -239,11 +271,11 @@
    22
   ],
   [
-   "winner:Q223366",
+   "won_when:Q324867",
    20
   ],
   [
-   "won_when:Q324867",
+   "winner:Q223366",
    20
   ],
   [
@@ -279,7 +311,7 @@
    11
   ],
   [
-   "won_when:Q1377843",
+   "wc:title_count",
    8
   ],
   [
@@ -287,7 +319,7 @@
    8
   ],
   [
-   "wc:title_count",
+   "won_when:Q1377843",
    8
   ],
   [
@@ -298,7 +330,15 @@
  "verified_by": [
   [
    "wikidata",
-   9802
+   9565
+  ],
+  [
+   "hewiki",
+   4798
+  ],
+  [
+   "hewiki+wikidata",
+   1556
   ],
   [
    "openfootball",
@@ -316,16 +356,16 @@
  "volatile": 137,
  "rejected": [
   [
+   "duplicate",
+   815
+  ],
+  [
    "answers",
    486
   ],
   [
    "ambiguous_text",
    4
-  ],
-  [
-   "duplicate",
-   1
   ]
  ],
  "notes": {
@@ -380,16 +420,25 @@
   "won_when:גביע המדינה": 41,
   "winner:גביע הטוטו": 11,
   "won_when:גביע הטוטו": 8,
+  "hw_players": 1247,
+  "hw:player_club": 3248,
+  "hw:club_which_player": 1811,
+  "hw:position": 988,
+  "hw:birthplace": 737,
+  "hw:nt_coach": 27,
+  "hw:coached_club": 355,
+  "hw:nt_goals": 117,
+  "hw:nt_caps": 120,
   "player_no_hewiki": 726,
   "player_famous_for_other": 268,
   "player_ambiguous_name": 71,
+  "player:birth_year": 6767,
+  "player:position": 6555,
   "player:national_team": 4789,
   "player:club": 7567,
-  "player:birth_year": 6768,
-  "player:position": 6555,
-  "club:which_player": 3679,
-  "club:city": 674,
+  "club:which_player": 3678,
   "club:founded": 278,
+  "club:city": 674,
   "club:stadium": 129,
   "award:ballon_dor": 44,
   "award:ballon_dor_when": 39,

@@ -21,4 +21,4 @@ jobs:
           set -a; . apps/mobile/public-config.env; set +a
           node tools/question-gen/import.mjs
         env:
-          IMPORT_TOKEN: d15e9555d106092eaedcc7bc2b4ad86d8fc1158dba7fc878
+          IMPORT_TOKEN: 2c889e119526ff07dbc51fb1e7c65c349d2b66f908f6253b
