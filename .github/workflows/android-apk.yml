@@ -3,16 +3,16 @@ name: Android APK
 # Builds an installable APK in the cloud and publishes it as a GitHub Release,
 # so it can be downloaded and installed straight from a phone.
 #
-# Needs two repository variables (Settings → Secrets and variables → Actions → Variables):
-#   SUPABASE_URL        the Project URL
-#   SUPABASE_ANON_KEY   the anon public key (safe to ship in the app; RLS protects data)
-# Never put the service_role key here.
+# Server address comes from apps/mobile/public-config.env (Project URL + anon
+# public key). Both are public by design: they ship inside the app, and RLS
+# protects the data. Never put the service_role key or a database password there.
+# Repository variables SUPABASE_URL / SUPABASE_ANON_KEY override the file if set.
 
 on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['apps/mobile/**', 'packages/**', '.github/workflows/android-apk.yml']
+    paths: ['apps/mobile/**', 'packages/**', '.npmrc', 'package.json', '.github/workflows/android-apk.yml']
 
 permissions:
   contents: write
@@ -33,16 +33,6 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Check Supabase settings
-        env:
-          URL: ${{ vars.SUPABASE_URL }}
-          KEY: ${{ vars.SUPABASE_ANON_KEY }}
-        run: |
-          if [ -z "$URL" ] || [ -z "$KEY" ]; then
-            echo "::error::Set SUPABASE_URL and SUPABASE_ANON_KEY under Settings → Secrets and variables → Actions → Variables"
-            exit 1
-          fi
-
       - name: Install
         run: pnpm install --no-frozen-lockfile
 
@@ -52,11 +42,18 @@ jobs:
 
       - name: Write app config
         working-directory: apps/mobile
+        env:
+          VAR_URL: ${{ vars.SUPABASE_URL }}
+          VAR_KEY: ${{ vars.SUPABASE_ANON_KEY }}
         run: |
-          cat > .env.local <<EOF
-          EXPO_PUBLIC_SUPABASE_URL=${{ vars.SUPABASE_URL }}
-          EXPO_PUBLIC_SUPABASE_ANON_KEY=${{ vars.SUPABASE_ANON_KEY }}
-          EOF
+          set -a; [ -f public-config.env ] && . ./public-config.env; set +a
+          URL="${VAR_URL:-${SUPABASE_URL:-}}"
+          KEY="${VAR_KEY:-${SUPABASE_ANON_KEY:-}}"
+          if [ -z "$URL" ] || [ -z "$KEY" ]; then
+            echo "::warning::No Supabase settings yet. Building anyway; the app will open on the 'no connection' screen."
+            URL="https://not-configured.invalid"; KEY="not-configured"
+          fi
+          printf 'EXPO_PUBLIC_SUPABASE_URL=%s\nEXPO_PUBLIC_SUPABASE_ANON_KEY=%s\n' "$URL" "$KEY" > .env.local
 
       - name: Generate native Android project
         working-directory: apps/mobile
