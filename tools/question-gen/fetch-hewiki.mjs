@@ -16,19 +16,29 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const save = (name, data) => writeFileSync(`${OUT}/${name}.json`, JSON.stringify(data));
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), ...a);
 
-async function get(url, tries = 5) {
+// Polite client: one request at a time per host family, backs off on 429.
+let gap = 120;
+async function get(url, tries = 10) {
   for (let i = 1; i <= tries; i++) {
     try {
+      await sleep(gap);
       const res = await fetch(url, { headers: { 'User-Agent': UA, 'Api-User-Agent': UA } });
       if (res.status === 404) return null;
-      if (res.status === 429 || res.status >= 500) throw new Error(`HTTP ${res.status}`);
+      if (res.status === 429 || res.status >= 500) {
+        const ra = Number(res.headers.get('retry-after')) || 0;
+        gap = Math.min(2000, gap * 2);
+        await sleep(Math.max(ra * 1000, 3000 * i));
+        throw new Error(`HTTP ${res.status}`);
+      }
+      gap = Math.max(60, gap * 0.95);
       return await res.json();
     } catch (e) {
       if (i === tries) throw e;
-      await sleep(1500 * i);
     }
   }
 }
+const have = (name) => existsSync(`${OUT}/${name}.json`);
+const read = (name) => JSON.parse(readFileSync(`${OUT}/${name}.json`, 'utf8'));
 
 async function api(params) {
   const u = new URL(API);
@@ -79,9 +89,11 @@ save('categories_index', cats);
 const OTHER_SPORT = /(כדורסל|כדוריד|כדורעף|הוקי|פוטסל|כדור מים|טניס|שחמט|בייסבול|פוטבול|רוגבי|קריקט)/;
 const playerCats = cats.filter((c) => c.pages > 0 && !OTHER_SPORT.test(c.title));
 log(`player categories: ${playerCats.length} of ${cats.length}`);
-const catMembers = {};
-await pool(playerCats, 6, async (c) => {
+const catMembers = have('category_members') ? read('category_members') : {};
+let n = 0;
+await pool(playerCats.filter((c) => !(c.title in catMembers)), 1, async (c) => {
   catMembers[c.title] = await members(c.title);
+  if (++n % 50 === 0) save('category_members', catMembers);
 });
 save('category_members', catMembers);
 
@@ -123,7 +135,9 @@ log(`infobox pages: ${uniq.length}`);
 const boxes = {};
 const batches = [];
 for (let i = 0; i < uniq.length; i += 40) batches.push(uniq.slice(i, i + 40));
-await pool(batches, 3, async (b) => {
+const boxesPrev = have('infoboxes') ? read('infoboxes') : null;
+if (boxesPrev) Object.assign(boxes, boxesPrev);
+else await pool(batches, 1, async (b) => {
   const r = await api({ action: 'query', prop: 'revisions|pageprops', rvprop: 'content', rvslots: 'main', titles: b.join('|'), redirects: '1', ppprop: 'wikibase_item' });
   for (const p of r?.query?.pages ?? []) {
     const text = p.revisions?.[0]?.slots?.main?.content;
@@ -167,7 +181,7 @@ const prev = existsSync(`${OUT}/pageviews.json`) ? JSON.parse(readFileSync(`${OU
 const todo = [...titles].filter((t) => !(t in prev));
 log(`pageviews: ${todo.length} to fetch`);
 let done = 0;
-await pool(todo, 12, async (t) => {
+await pool(todo, 4, async (t) => {
   const art = encodeURIComponent(t.replace(/ /g, '_'));
   const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/he.wikipedia/all-access/user/${art}/monthly/2025090100/2026083100`;
   try {
