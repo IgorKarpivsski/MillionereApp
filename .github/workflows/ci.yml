@@ -17,9 +17,9 @@ jobs:
       - run: pnpm install --no-frozen-lockfile
       - name: Align Expo package versions with the SDK
         working-directory: apps/mobile
-        run: npx expo install --fix
-      - run: pnpm typecheck
-      - run: pnpm test
+        run: ../../tools/scripts/ci-run.sh "expo install" npx expo install --fix
+      - run: tools/scripts/ci-run.sh typecheck pnpm typecheck
+      - run: tools/scripts/ci-run.sh tests pnpm test
 
   database:
     runs-on: ubuntu-latest
