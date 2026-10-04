@@ -38,7 +38,7 @@ export function AvatarBadge({ avatarId, level, size = 52 }: { avatarId: string; 
         </Svg>
       </View>
       <View style={[styles.level, { minWidth: size * 0.46 }]}>
-        <AppText variant="caption" color={colors.textOnBright} style={styles.levelText}>
+        <AppText variant="ledS" color={colors.textOnBright} style={styles.levelText}>
           {level}
         </AppText>
       </View>
@@ -49,8 +49,8 @@ export function AvatarBadge({ avatarId, level, size = 52 }: { avatarId: string; 
 const styles = StyleSheet.create({
   circle: {
     backgroundColor: palette.night950,
-    borderWidth: 3,
-    borderColor: colors.sticker,
+    borderWidth: 2,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -67,5 +67,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  levelText: { fontFamily: 'Rubik_900Black', lineHeight: 15 },
+  levelText: { lineHeight: 15 },
 });

@@ -1,11 +1,12 @@
 import type { ExpoConfig, ConfigContext } from 'expo/config';
 
 /**
- * Working name only. "Millionaire" overlaps an existing TV format trademark —
- * the final name must pass a trademark check before submission (doc §11).
+ * Product name: "האלוף" (chosen 2026-10). It still needs a formal trademark
+ * check before store submission (doc §11).
  * Change it here and in src/lib/brand.ts; nothing else hard-codes it.
+ * The package id / slug stay as-is so installed builds update in place.
  */
-const APP_NAME = 'מיליונר הכדורגל';
+const APP_NAME = 'האלוף';
 const IS_PROD = process.env.APP_ENV === 'production';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
@@ -17,12 +18,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   orientation: 'portrait',
   icon: './assets/images/icon.png',
   userInterfaceStyle: 'dark',
-  backgroundColor: '#1B1452',
+  backgroundColor: '#0B2B22',
   newArchEnabled: true,
   splash: {
     image: './assets/images/splash-icon.png',
     resizeMode: 'contain',
-    backgroundColor: '#1B1452',
+    backgroundColor: '#0B2B22',
   },
   ios: {
     bundleIdentifier: IS_PROD ? 'com.footballmillionaire.app' : 'com.footballmillionaire.app.dev',
@@ -44,14 +45,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     package: IS_PROD ? 'com.footballmillionaire.app' : 'com.footballmillionaire.app.dev',
-    adaptiveIcon: { foregroundImage: './assets/images/adaptive-icon.png', backgroundColor: '#1B1452' },
+    adaptiveIcon: { foregroundImage: './assets/images/adaptive-icon.png', backgroundColor: '#0B2B22' },
   },
   plugins: [
     'expo-router',
     'expo-font',
     'expo-web-browser',
     ['expo-localization', { supportedLocales: { ios: ['he'], android: ['he'] } }],
-    ['expo-splash-screen', { image: './assets/images/splash-icon.png', imageWidth: 180, backgroundColor: '#1B1452' }],
+    ['expo-splash-screen', { image: './assets/images/splash-icon.png', imageWidth: 180, backgroundColor: '#0B2B22' }],
     '@sentry/react-native',
   ],
   experiments: { typedRoutes: true },

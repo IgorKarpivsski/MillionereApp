@@ -12,7 +12,7 @@ export interface ProgressBarProps {
   accessibilityLabel: string;
 }
 
-export function ProgressBar({ value, color = colors.primary, height = 12, accessibilityLabel }: ProgressBarProps) {
+export function ProgressBar({ value, color = colors.led, height = 10, accessibilityLabel }: ProgressBarProps) {
   const clamped = Math.max(0, Math.min(1, value));
   const width = useSharedValue(0);
   const d = useDuration('reveal');
@@ -31,15 +31,12 @@ export function ProgressBar({ value, color = colors.primary, height = 12, access
       accessibilityValue={{ min: 0, max: 100, now: Math.round(clamped * 100) }}
       style={[styles.track, { height, borderRadius: height / 2 }]}
     >
-      <Animated.View style={[styles.fill, { backgroundColor: color, borderRadius: height / 2 }, fill]}>
-        <View style={[styles.shine, { borderRadius: height / 2 }]} />
-      </Animated.View>
+      <Animated.View style={[styles.fill, { backgroundColor: color, borderRadius: height / 2 }, fill]} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  track: { backgroundColor: palette.night950, overflow: 'hidden', borderWidth: 2, borderColor: colors.border },
+  track: { backgroundColor: palette.night950, overflow: 'hidden' },
   fill: { height: '100%' },
-  shine: { position: 'absolute', top: 2, start: 4, end: 4, height: 3, backgroundColor: 'rgba(255,255,255,0.35)' },
 });

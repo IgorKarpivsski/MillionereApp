@@ -2,20 +2,20 @@ import { Ionicons } from '@expo/vector-icons';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
-import { colors, palette, radius, space, spring } from '@/design-system/tokens';
+import { colors, palette, radius, space } from '@/design-system/tokens';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
-const ICONS: Record<string, { on: IconName; off: IconName; accent: string }> = {
-  index: { on: 'home', off: 'home-outline', accent: colors.primary },
-  play: { on: 'football', off: 'football-outline', accent: colors.primary },
-  packs: { on: 'gift', off: 'gift-outline', accent: colors.prize },
-  collection: { on: 'albums', off: 'albums-outline', accent: colors.gem },
-  profile: { on: 'person-circle', off: 'person-circle-outline', accent: palette.violet },
+const ICONS: Record<string, { on: IconName; off: IconName }> = {
+  index: { on: 'home', off: 'home-outline' },
+  play: { on: 'football', off: 'football-outline' },
+  packs: { on: 'gift', off: 'gift-outline' },
+  collection: { on: 'albums', off: 'albums-outline' },
+  profile: { on: 'person-circle', off: 'person-circle-outline' },
 };
 
 function Tab({
@@ -31,9 +31,10 @@ function Tab({
 }) {
   const icon = ICONS[name] ?? ICONS.index!;
   const reduced = useReducedMotion();
-  const lift = useAnimatedStyle(() => ({
-    transform: [{ translateY: reduced ? 0 : withSpring(focused ? -4 : 0, spring.pop) }],
+  const glow = useAnimatedStyle(() => ({
+    opacity: reduced ? (focused ? 1 : 0) : withTiming(focused ? 1 : 0, { duration: 180 }),
   }));
+  const tint = focused ? colors.led : colors.textDim;
   return (
     <Pressable
       onPress={() => {
@@ -45,17 +46,16 @@ function Tab({
       accessibilityLabel={label}
       style={styles.tab}
     >
-      <Animated.View style={[styles.iconWrap, focused && { backgroundColor: icon.accent }, lift]}>
-        <Ionicons name={focused ? icon.on : icon.off} size={24} color={focused ? colors.textOnBright : colors.textMuted} />
-      </Animated.View>
-      <AppText variant="caption" color={focused ? colors.text : colors.textMuted} numberOfLines={1}>
+      <Animated.View style={[styles.lamp, glow]} />
+      <Ionicons name={focused ? icon.on : icon.off} size={23} color={tint} />
+      <AppText variant="caption" color={tint} numberOfLines={1} style={focused ? styles.on : null}>
         {label}
       </AppText>
     </Pressable>
   );
 }
 
-/** Chunky sticker-style tab bar. Order follows the route order (rightmost first in RTL). */
+/** Scoreboard tab bar: the active tab lights up in LED amber. Order follows the route order (rightmost first in RTL). */
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   return (
@@ -89,11 +89,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: palette.night950,
     borderRadius: radius.card,
-    borderWidth: 3,
+    borderWidth: 2,
     borderColor: colors.border,
     paddingVertical: space.sm,
     paddingHorizontal: space.xs,
   },
-  tab: { flex: 1, alignItems: 'center', gap: 2, minHeight: 56 },
-  iconWrap: { width: 52, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
+  tab: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2, minHeight: 52 },
+  lamp: {
+    position: 'absolute',
+    top: -space.sm - 1,
+    width: 28,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: colors.led,
+  },
+  on: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
 });

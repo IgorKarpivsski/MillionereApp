@@ -7,7 +7,7 @@ import { useReducedMotion } from '../feedback/reducedMotion';
 import { colors, hitTarget, lip as lipDepth, palette, radius, space, spring } from '../tokens';
 import { AppText } from './AppText';
 
-type Tone = 'primary' | 'prize' | 'danger' | 'gem' | 'ghost';
+type Tone = 'primary' | 'prize' | 'danger' | 'gem' | 'ghost' | 'outline';
 type Size = 'lg' | 'md' | 'sm';
 
 const tones: Record<Tone, { face: string; lip: string; label: string; border?: string }> = {
@@ -15,10 +15,11 @@ const tones: Record<Tone, { face: string; lip: string; label: string; border?: s
   prize: { face: colors.prize, lip: colors.prizeLip, label: colors.textOnBright },
   danger: { face: colors.danger, lip: colors.dangerLip, label: colors.textOnBright },
   gem: { face: colors.gem, lip: colors.gemLip, label: colors.textOnBright },
-  ghost: { face: colors.surfaceRaised, lip: palette.night950, label: colors.text, border: colors.border },
+  ghost: { face: colors.board, lip: palette.night950, label: colors.text, border: colors.border },
+  outline: { face: colors.board, lip: palette.night950, label: colors.led, border: colors.led },
 };
 
-const heights: Record<Size, number> = { lg: 62, md: 52, sm: hitTarget };
+const heights: Record<Size, number> = { lg: 58, md: 50, sm: hitTarget };
 
 export interface StickerButtonProps {
   label: string;
@@ -34,7 +35,7 @@ export interface StickerButtonProps {
 }
 
 /**
- * The signature control: a chunky sticker with a solid "lip" underneath.
+ * The main control: a lit scoreboard key with a short solid "lip" underneath.
  * Pressing pushes the face down onto the lip — a physical click, no shadows.
  */
 export function StickerButton({

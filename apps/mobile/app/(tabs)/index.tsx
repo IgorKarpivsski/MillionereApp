@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { TopBar } from '@/components/TopBar';
@@ -6,14 +5,16 @@ import {
   AppText,
   Card,
   CoinIcon,
-  RarityFrame,
+  Led,
+  LiveTicker,
   Screen,
   Skeleton,
+  StatTile,
   StickerButton,
-  StreakFlame,
+  useCountdownToMidnight,
   useToast,
 } from '@/design-system/components';
-import { colors, palette, space } from '@/design-system/tokens';
+import { colors, space } from '@/design-system/tokens';
 import { useClaimWelcomeBonus, useMyState } from '@/features/profile/hooks';
 import { RpcError } from '@/features/profile/api';
 import { formatNumber } from '@/lib/format';
@@ -29,7 +30,7 @@ function WelcomeBonus() {
   const amount = 500; // display only; the server decides what is actually paid
 
   return (
-    <Card kind="sticker" tint={colors.prize}>
+    <Card tint={colors.prize} style={styles.noBorder}>
       <View style={styles.welcomeRow}>
         <CoinIcon size={56} />
         <View style={styles.flex}>
@@ -45,6 +46,7 @@ function WelcomeBonus() {
         label={t.welcomeCta}
         tone="ghost"
         fullWidth
+        size="md"
         loading={claim.isPending}
         disabled={!online}
         style={styles.welcomeBtn}
@@ -60,52 +62,68 @@ function WelcomeBonus() {
   );
 }
 
+function MatchOfTheDay() {
+  const countdown = useCountdownToMidnight();
+  return (
+    <Card kind="sticker" padding={space.lg} style={styles.match}>
+      <View style={styles.matchHead}>
+        <AppText variant="label" color={colors.led}>
+          {t.matchTitle}
+        </AppText>
+        <Led color={colors.led} size="number">{countdown}</Led>
+      </View>
+      <View style={styles.matchRow}>
+        <View style={styles.side}>
+          <AppText variant="label">אתה</AppText>
+        </View>
+        <View style={styles.matchDigits}>
+          <Led size="ledXL" color={colors.text}>0</Led>
+          <Led size="ledXL" color={colors.text}>:</Led>
+          <Led size="ledXL" color={colors.text}>0</Led>
+        </View>
+        <View style={styles.side}>
+          <AppText variant="caption" style={styles.sideTight}>הפרשן</AppText>
+        </View>
+      </View>
+      <AppText color={colors.textMuted} align="center">
+        {t.matchBody}
+      </AppText>
+      <StickerButton label={t.kickoff} size="lg" fullWidth onPress={() => router.push('/(tabs)/play')} />
+    </Card>
+  );
+}
+
 export default function HomeScreen() {
   const { data, isLoading, refetch, isRefetching } = useMyState();
   const streak = 0; // daily streaks arrive in Phase 7
+  const toast = useToast();
 
   return (
     <Screen header={<TopBar />} onRefresh={() => void refetch()} refreshing={isRefetching}>
-      <AppText variant="title">{data ? fmt(t.greeting, { name: data.profile.username }) : ' '}</AppText>
+      <LiveTicker items={t.ticker} />
 
-      {isLoading ? <Skeleton height={140} rounded={22} /> : null}
+      {isLoading ? <Skeleton height={140} rounded={18} /> : null}
       {data && !data.welcome_bonus_claimed ? <WelcomeBonus /> : null}
 
-      <Card tint={palette.night700}>
-        <View style={styles.dailyRow}>
-          <StreakFlame count={streak} />
+      <MatchOfTheDay />
+
+      <View style={styles.tiles}>
+        <StatTile value={String(streak)} label={t.statStreak} color={colors.correct} />
+        <StatTile value="--" label={t.statRank} color={colors.led} />
+        <StatTile value="0" label={t.statCollection} />
+      </View>
+
+      <Card kind="soft" padding={space.md}>
+        <View style={styles.seasonRow}>
           <View style={styles.flex}>
-            <AppText variant="heading">{t.dailyTitle}</AppText>
-            <AppText color={colors.textMuted}>{t.dailyBody}</AppText>
-            <AppText variant="label" color={streak > 0 ? colors.danger : colors.prize} style={styles.streakLabel}>
-              {streak > 0 ? fmt(t.streakDays, { n: streak }) : t.streakNone}
+            <AppText variant="label">{t.seasonTitle}</AppText>
+            <AppText variant="caption" color={colors.textDim}>
+              {t.seasonBody}
             </AppText>
           </View>
+          <StickerButton label={strings.common.soon} tone="outline" size="sm" onPress={() => toast(t.seasonBody, 'info')} />
         </View>
-        <StickerButton
-          label={t.dailyCta}
-          tone="danger"
-          icon="calendar"
-          fullWidth
-          style={styles.dailyBtn}
-          onPress={() => router.push('/(tabs)/play')}
-        />
       </Card>
-
-      <StickerButton label={t.playCta} icon="football" size="lg" fullWidth onPress={() => router.push('/(tabs)/play')} />
-
-      <View style={styles.sectionHead}>
-        <AppText variant="heading">{t.albumTitle}</AppText>
-        <Ionicons name="albums" size={22} color={colors.gem} />
-      </View>
-      <View style={styles.stickers}>
-        {[0, 1, 2].map((i) => (
-          <RarityFrame key={i} rarity="common" locked width={96}>
-            <Ionicons name="help" size={34} color={colors.textMuted} />
-          </RarityFrame>
-        ))}
-      </View>
-      <AppText color={colors.textMuted}>{t.albumEmpty}</AppText>
     </Screen>
   );
 }
@@ -114,9 +132,20 @@ const styles = StyleSheet.create({
   flex: { flex: 1, gap: space.xxs },
   welcomeRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   welcomeBtn: { marginTop: space.md },
-  dailyRow: { flexDirection: 'row', gap: space.md, alignItems: 'flex-start' },
-  streakLabel: { marginTop: space.xs },
-  dailyBtn: { marginTop: space.lg },
-  sectionHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: space.sm },
-  stickers: { flexDirection: 'row', gap: space.md },
+  noBorder: { borderWidth: 0 },
+  match: { gap: space.md },
+  matchHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  matchRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  matchDigits: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  side: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sideTight: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
+  tiles: { flexDirection: 'row', gap: space.sm },
+  seasonRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
 });

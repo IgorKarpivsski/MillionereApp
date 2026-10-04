@@ -1,5 +1,9 @@
-import { Rubik_400Regular, Rubik_500Medium, Rubik_700Bold, Rubik_900Black } from '@expo-google-fonts/rubik';
-import { SecularOne_400Regular } from '@expo-google-fonts/secular-one';
+import { DotGothic16_400Regular } from '@expo-google-fonts/dotgothic16';
+import {
+  IBMPlexSansHebrew_400Regular,
+  IBMPlexSansHebrew_600SemiBold,
+  IBMPlexSansHebrew_700Bold,
+} from '@expo-google-fonts/ibm-plex-sans-hebrew';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -29,11 +33,10 @@ void SplashScreen.preventAutoHideAsync();
 function Gate() {
   const { booting, bootError, retryBoot } = useAuth();
   const [fontsLoaded, fontError] = useFonts({
-    Rubik_400Regular,
-    Rubik_500Medium,
-    Rubik_700Bold,
-    Rubik_900Black,
-    SecularOne_400Regular,
+    IBMPlexSansHebrew_400Regular,
+    IBMPlexSansHebrew_600SemiBold,
+    IBMPlexSansHebrew_700Bold,
+    DotGothic16_400Regular,
   });
   const ready = (fontsLoaded || !!fontError) && !booting;
 

@@ -33,3 +33,11 @@ test('every rarity frame is distinguishable from the surface', () => {
     assert.ok(r.label.length > 0, `${name} has a Hebrew label`);
   }
 });
+
+test('scoreboard captions and the question card stay readable', () => {
+  assert.ok(contrastRatio(colors.textDim, colors.board) >= AA_TEXT, 'dim caption on board');
+  assert.ok(contrastRatio(colors.led, colors.board) >= AA_TEXT, 'LED digits on board');
+  assert.ok(contrastRatio(colors.cardText, colors.card) >= AA_TEXT, 'question text on card');
+  assert.ok(contrastRatio(colors.cardMuted, colors.card) >= AA_TEXT, 'card caption');
+  assert.ok(contrastRatio(colors.text, colors.correctFill) >= AA_TEXT, 'answer text on correct fill');
+});

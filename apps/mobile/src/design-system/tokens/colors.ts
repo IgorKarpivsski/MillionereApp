@@ -1,51 +1,60 @@
 /**
- * Color tokens — "floodlit sticker album".
+ * Color tokens — "האלוף": a stadium at night, read off the scoreboard.
  *
  * Every hue has one job. Don't use a color for decoration:
- *   pitch  = go / correct / primary action
- *   gold   = coins, prizes, the ladder
- *   flare  = streaks, wrong answers, urgency
+ *   led    = the scoreboard amber: primary action, coins, prizes, the ladder
+ *   pitch  = correct answers, goals, "go" states
+ *   flare  = wrong answers, streak danger, urgency
  *   sky    = gems (premium currency)
- *   night  = surfaces
+ *   night  = grass-at-night surfaces; `board` is the black LED panel
+ *   chalk  = floodlight white (text, the question card)
+ *
+ * Palette keys keep their old names so every screen picks up the new theme.
  */
 export const palette = {
-  night950: '#0F0B33',
-  night900: '#1B1452',
-  night800: '#251C6B',
-  night700: '#30258A',
-  night600: '#4334B0',
-  night300: '#9C93D9',
-  chalk: '#F7F4FF',
-  chalkDim: '#C9C3EE',
+  night950: '#06130F', // scoreboard panel
+  night900: '#0B2B22', // grass at night (screen background)
+  night800: '#0F3428',
+  night700: '#133D30', // secondary card
+  night600: '#1F4A3C', // panel borders
+  night300: '#8FA79B', // dim captions
+  chalk: '#F2F5EF', // floodlight white
+  chalkDim: '#B8C9C0',
   white: '#FFFFFF',
 
-  pitch: '#1FCB7F',
-  pitchDeep: '#0E8F57',
-  gold: '#FFC93C',
-  goldDeep: '#C98A00',
-  flare: '#FF5D5D',
-  flareDeep: '#C42E3A',
-  sky: '#4FD8FF',
-  skyDeep: '#1A93BE',
-  violet: '#A877FF',
-  violetDeep: '#6E3FD0',
+  pitch: '#3DDC84',
+  pitchDeep: '#1E9E5A',
+  gold: '#FFB000', // LED amber
+  goldDeep: '#B87A00',
+  flare: '#FF5A4E',
+  flareDeep: '#B8322A',
+  sky: '#7FD1FF',
+  skyDeep: '#3B95C4',
+  violet: '#B49CFF',
+  violetDeep: '#7559D6',
 } as const;
 
 export const colors = {
   bg: palette.night900,
   bgDeep: palette.night950,
-  surface: palette.night800,
+  board: palette.night950,
+  surface: palette.night950,
   surfaceRaised: palette.night700,
   border: palette.night600,
 
   text: palette.chalk,
   textMuted: palette.chalkDim,
+  textDim: palette.night300,
   textOnBright: palette.night950,
 
-  primary: palette.pitch,
-  primaryLip: palette.pitchDeep,
+  /** The LED amber. Primary buttons, coin digits, the active tab. */
+  led: palette.gold,
+  primary: palette.gold,
+  primaryLip: palette.goldDeep,
   prize: palette.gold,
   prizeLip: palette.goldDeep,
+  correct: palette.pitch,
+  correctFill: '#0F4A33',
   danger: palette.flare,
   dangerLip: palette.flareDeep,
   gem: palette.sky,
@@ -55,12 +64,17 @@ export const colors = {
   error: palette.flare,
   focus: palette.sky,
 
-  sticker: palette.white,
-  overlay: 'rgba(15, 11, 51, 0.72)',
+  /** The bright question card ("floodlight"). */
+  card: palette.chalk,
+  cardText: palette.night950,
+  cardMuted: '#4E6A5E',
+
+  sticker: palette.chalk,
+  overlay: 'rgba(6, 19, 15, 0.78)',
 } as const;
 
 export const rarityColors = {
-  common: { fill: '#8E8AB8', lip: '#5F5B8A', label: 'רגיל' },
+  common: { fill: '#9DB3A8', lip: '#5E7569', label: 'רגיל' },
   uncommon: { fill: palette.pitch, lip: palette.pitchDeep, label: 'לא שכיח' },
   rare: { fill: palette.sky, lip: palette.skyDeep, label: 'נדיר' },
   epic: { fill: palette.violet, lip: palette.violetDeep, label: 'אפי' },

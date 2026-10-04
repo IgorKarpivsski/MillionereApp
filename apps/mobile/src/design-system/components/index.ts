@@ -12,3 +12,4 @@ export * from './Skeleton';
 export * from './EmptyState';
 export * from './Screen';
 export * from './BottomSheet';
+export * from './Scoreboard';

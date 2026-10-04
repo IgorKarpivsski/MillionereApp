@@ -13,8 +13,8 @@
     "doctor": "npx expo-doctor"
   },
   "dependencies": {
-    "@expo-google-fonts/rubik": "^0.4.1",
-    "@expo-google-fonts/secular-one": "^0.4.1",
+    "@expo-google-fonts/dotgothic16": "^0.4.0",
+    "@expo-google-fonts/ibm-plex-sans-hebrew": "^0.4.0",
     "@expo/vector-icons": "^15.0.2",
     "@fm/analytics-events": "workspace:*",
     "@fm/economy-config": "workspace:*",

@@ -1,46 +1,35 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
-import { colors, lip, palette, radius, space, stickerBorder } from '../tokens';
+import { colors, radius, space, stickerBorder } from '../tokens';
 
 export interface CardProps {
   children: ReactNode;
-  /** `panel` for containers; `sticker` adds the white die-cut edge for featured items. */
-  kind?: 'panel' | 'sticker';
-  /** Accent fill for featured cards (e.g. the daily challenge). */
+  /**
+   * `panel` — the black scoreboard board (default).
+   * `sticker` — a featured panel with the LED-amber frame (one per screen).
+   * `soft` — the secondary grass-green card.
+   */
+  kind?: 'panel' | 'sticker' | 'soft';
+  /** Fill override for special cards (e.g. the welcome gift). */
   tint?: string;
+  /** Frame color override for `sticker`. */
+  frame?: string;
   style?: ViewStyle;
   padding?: number;
 }
 
-export function Card({ children, kind = 'panel', tint, style, padding = space.lg }: CardProps) {
-  const isSticker = kind === 'sticker';
-  return (
-    <View style={[styles.wrap, style]}>
-      <View style={[styles.lip, { top: lip.card }]} />
-      <View
-        style={[
-          styles.face,
-          { padding, backgroundColor: tint ?? colors.surface },
-          isSticker
-            ? { borderWidth: stickerBorder, borderColor: colors.sticker }
-            : { borderWidth: 2, borderColor: colors.border },
-        ]}
-      >
-        {children}
-      </View>
-    </View>
-  );
+/** Flat scoreboard panel. No shadows: depth comes from the dark board on the grass. */
+export function Card({ children, kind = 'panel', tint, frame, style, padding = space.lg }: CardProps) {
+  const fill = tint ?? (kind === 'soft' ? colors.surfaceRaised : colors.board);
+  const border =
+    kind === 'sticker'
+      ? { borderWidth: stickerBorder - 1, borderColor: frame ?? colors.led }
+      : kind === 'panel'
+        ? { borderWidth: 2, borderColor: colors.border }
+        : null;
+  return <View style={[styles.face, { padding, backgroundColor: fill }, border, style]}>{children}</View>;
 }
 
 const styles = StyleSheet.create({
-  wrap: { paddingBottom: lip.card },
-  lip: {
-    position: 'absolute',
-    start: 0,
-    end: 0,
-    bottom: 0,
-    borderRadius: radius.card,
-    backgroundColor: palette.night950,
-  },
   face: { borderRadius: radius.card, overflow: 'hidden' },
 });

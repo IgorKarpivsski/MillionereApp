@@ -13,21 +13,22 @@ export const space = {
 /** Radius by hierarchy, not one value everywhere. */
 export const radius = {
   chip: 999,
-  control: 18,
-  card: 22,
-  sheet: 28,
-  sticker: 14,
+  control: 14,
+  card: 18,
+  sheet: 24,
+  sticker: 12,
+  board: 14,
 } as const;
 
-/** Depth of the pressable "lip" under sticker buttons and cards. */
+/** Depth of the pressable "lip" under buttons. Panels are flat (scoreboard style). */
 export const lip = {
-  button: 6,
-  card: 5,
-  small: 4,
+  button: 4,
+  card: 0,
+  small: 3,
 } as const;
 
 /** Minimum touch target (Apple HIG). */
 export const hitTarget = 44;
 
-/** Width of the white die-cut border on stickers. */
+/** Border width of featured panels and stickers. */
 export const stickerBorder = 3;

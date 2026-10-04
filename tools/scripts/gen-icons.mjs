@@ -1,73 +1,79 @@
-// Generates the placeholder app icon and splash from original vector art.
-// Run: node tools/scripts/gen-icons.mjs   (needs `sharp`)
-// The art is our own: an album sticker with a generic ball and a prize star.
+// Generates the app icon, Android adaptive icon and splash from original vector art.
+// Run: node tools/scripts/gen-icons.mjs   (needs `sharp`; set SHARP_PATH to use a global copy)
+// The art is our own: the "האלוף" trophy drawn as lit dots on a stadium LED board.
 // No club, league, competition or TV-show marks.
-import sharp from 'sharp';
 import { mkdirSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+const sharp = await import('sharp')
+  .then((m) => m.default)
+  .catch(() => createRequire(import.meta.url)(process.env.SHARP_PATH ?? 'sharp'));
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const out = resolve(root, 'apps/mobile/assets/images');
 mkdirSync(out, { recursive: true });
 
-const NIGHT = '#1B1452', NIGHT_DEEP = '#0F0B33', GOLD = '#FFC93C', GOLD_DEEP = '#C98A00',
-  PITCH = '#1FCB7F', CHALK = '#F7F4FF', FLARE = '#FF5D5D';
+const GRASS = '#0B2B22', BOARD = '#06130F', EDGE = '#1F4A3C', LED = '#FFB000', OFF = '#132A20';
 
-// Generic ball: white circle, one central pentagon, five short seams.
-const ball = (cx, cy, r) => {
-  const pent = Array.from({ length: 5 }, (_, i) => {
-    const a = -Math.PI / 2 + (i * 2 * Math.PI) / 5;
-    return `${cx + Math.cos(a) * r * 0.36},${cy + Math.sin(a) * r * 0.36}`;
-  }).join(' ');
-  const seams = Array.from({ length: 5 }, (_, i) => {
-    const a = -Math.PI / 2 + (i * 2 * Math.PI) / 5;
-    const x1 = cx + Math.cos(a) * r * 0.36, y1 = cy + Math.sin(a) * r * 0.36;
-    const x2 = cx + Math.cos(a) * r * 0.74, y2 = cy + Math.sin(a) * r * 0.74;
-    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${NIGHT_DEEP}" stroke-width="${r * 0.09}" stroke-linecap="round"/>`;
-  }).join('');
-  // Five outer pentagons, clipped by the ball outline.
-  const outer = Array.from({ length: 5 }, (_, i) => {
-    const a = -Math.PI / 2 + (i * 2 * Math.PI) / 5;
-    const ox = cx + Math.cos(a) * r * 1.02, oy = cy + Math.sin(a) * r * 1.02;
-    const pts = Array.from({ length: 5 }, (_, j) => {
-      const b = a + Math.PI + (j * 2 * Math.PI) / 5;
-      return `${ox + Math.cos(b) * r * 0.3},${oy + Math.sin(b) * r * 0.3}`;
-    }).join(' ');
-    return `<polygon points="${pts}" fill="${NIGHT_DEEP}"/>`;
-  }).join('');
-  return `<defs><clipPath id="ballclip"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath></defs>
-    <circle cx="${cx}" cy="${cy + r * 0.08}" r="${r}" fill="${NIGHT_DEEP}"/>
-    <circle cx="${cx}" cy="${cy}" r="${r}" fill="${CHALK}"/>
-    <g clip-path="url(#ballclip)">${outer}</g>
-    <polygon points="${pent}" fill="${NIGHT_DEEP}"/>${seams}
-    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${NIGHT_DEEP}" stroke-width="${r * 0.06}"/>`;
-};
+// Same dot map as src/design-system/components/Scoreboard.tsx (TROPHY_DOTS).
+const LIT = [
+  [30, 20], [46, 20], [62, 20], [78, 20], [94, 20], [110, 20],
+  [14, 36], [30, 36], [46, 36], [62, 36], [78, 36], [94, 36], [110, 36], [126, 36],
+  [14, 52], [46, 52], [62, 52], [78, 52], [94, 52], [126, 52],
+  [30, 68], [46, 68], [62, 68], [78, 68], [94, 68], [110, 68],
+  [62, 84], [78, 84],
+  [62, 100], [78, 100],
+  [46, 116], [62, 116], [78, 116], [94, 116],
+];
+const lit = new Set(LIT.map(([x, y]) => `${x},${y}`));
 
-const star = (cx, cy, r, fill) => {
-  const pts = Array.from({ length: 10 }, (_, i) => {
-    const a = -Math.PI / 2 + (i * Math.PI) / 5, rr = i % 2 ? r * 0.45 : r;
-    return `${cx + Math.cos(a) * rr},${cy + Math.sin(a) * rr}`;
-  }).join(' ');
-  return `<polygon points="${pts}" fill="${fill}" stroke="${NIGHT_DEEP}" stroke-width="${r * 0.12}" stroke-linejoin="round"/>`;
-};
+/** The LED matrix (unlit dots + lit trophy), centered on (cx, cy), `scale` px per unit. */
+function trophy(cx, cy, scale, { matrix = true } = {}) {
+  const ox = cx - 70 * scale, oy = cy - 68 * scale, r = 6 * scale;
+  let off = '', on = '';
+  for (let y = 20; y <= 116; y += 16)
+    for (let x = 14; x <= 126; x += 16) {
+      const px = ox + x * scale, py = oy + y * scale;
+      if (lit.has(`${x},${y}`)) on += `<circle cx="${px}" cy="${py}" r="${r}"/>`;
+      else if (matrix) off += `<circle cx="${px}" cy="${py}" r="${r}"/>`;
+    }
+  return `
+    <g fill="${OFF}">${off}</g>
+    <g fill="${LED}" filter="url(#glow)" opacity="0.55">${on}</g>
+    <g fill="${LED}">${on}</g>`;
+}
 
-const sticker = (size, withBg) => `
-<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 1024 1024">
-  ${withBg ? `<rect width="1024" height="1024" fill="${NIGHT}"/>
-  <circle cx="512" cy="512" r="380" fill="none" stroke="#30258A" stroke-width="18"/>` : ''}
-  <g transform="rotate(-6 512 512)">
-    <rect x="212" y="232" width="600" height="600" rx="96" fill="${GOLD_DEEP}"/>
-    <rect x="212" y="196" width="600" height="600" rx="96" fill="${CHALK}"/>
-    <rect x="244" y="228" width="536" height="536" rx="72" fill="${GOLD}"/>
-    <path d="M244 560h536v132a72 72 0 0 1-72 72H316a72 72 0 0 1-72-72z" fill="${PITCH}"/>
-    <path d="M244 560h536" stroke="${CHALK}" stroke-width="14"/>
-    ${ball(512, 470, 165)}
-    ${star(694, 318, 70, FLARE)}
-  </g>
+const defs = `<defs>
+  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
+  <radialGradient id="flood" cx="50%" cy="0%" r="75%">
+    <stop offset="0" stop-color="#FFF0C8" stop-opacity="0.22"/><stop offset="1" stop-color="#FFF0C8" stop-opacity="0"/>
+  </radialGradient>
+</defs>`;
+
+const stripes = Array.from({ length: 8 }, (_, i) =>
+  i % 2 ? `<rect x="${i * 128}" y="0" width="128" height="1024" fill="#FFFFFF" fill-opacity="0.035"/>` : '',
+).join('');
+
+const icon = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">${defs}
+  <rect width="1024" height="1024" fill="${GRASS}"/>${stripes}
+  <rect width="1024" height="1024" fill="url(#flood)"/>
+  <rect x="152" y="152" width="720" height="720" rx="120" fill="${BOARD}" stroke="${EDGE}" stroke-width="16"/>
+  ${trophy(512, 512, 4.1)}
 </svg>`;
 
-await sharp(Buffer.from(sticker(1024, true))).png().toFile(resolve(out, 'icon.png'));
-await sharp(Buffer.from(sticker(1024, false))).png().toFile(resolve(out, 'splash-icon.png'));
-await sharp(Buffer.from(sticker(1024, false))).png().toFile(resolve(out, 'adaptive-icon.png'));
+// Adaptive foreground: keep the art inside the 66% safe zone; background color comes from app.config.
+const adaptive = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">${defs}
+  <rect x="232" y="232" width="560" height="560" rx="96" fill="${BOARD}" stroke="${EDGE}" stroke-width="12"/>
+  ${trophy(512, 512, 3.1)}
+</svg>`;
+
+const splash = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">${defs}
+  ${trophy(512, 512, 5.2, { matrix: false })}
+</svg>`;
+
+await sharp(Buffer.from(icon)).png().toFile(resolve(out, 'icon.png'));
+await sharp(Buffer.from(adaptive)).png().toFile(resolve(out, 'adaptive-icon.png'));
+await sharp(Buffer.from(splash)).png().toFile(resolve(out, 'splash-icon.png'));
 console.log('icons written to', out);
