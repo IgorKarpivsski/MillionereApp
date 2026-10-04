@@ -22,6 +22,30 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 /**
+ * New player → guest account. Uses Supabase anonymous sign-in when that
+ * provider is on; otherwise the `guest-signup` Edge Function creates a guest
+ * server-side and returns its session.
+ */
+async function createGuestSession(): Promise<Session> {
+  const anon = await supabase.auth.signInAnonymously();
+  if (!anon.error && anon.data.session) return anon.data.session;
+
+  const { data, error } = await supabase.functions.invoke<{ access_token: string; refresh_token: string }>(
+    'guest-signup',
+    { body: {} },
+  );
+  if (error || !data?.access_token || !data.refresh_token) {
+    throw new Error(error?.message ?? anon.error?.message ?? 'guest signup failed');
+  }
+  const set = await supabase.auth.setSession({
+    access_token: data.access_token,
+    refresh_token: data.refresh_token,
+  });
+  if (set.error || !set.data.session) throw new Error(set.error?.message ?? 'no session');
+  return set.data.session;
+}
+
+/**
  * Every player has an account from the first second: if there is no session
  * we create an anonymous (guest) user. Linking Apple/Google later upgrades the
  * same user in place (see supabase trigger handle_user_upgraded).
@@ -41,16 +65,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data } = await supabase.auth.getSession();
       let current = data.session;
       if (!current) {
-        const { data: anon, error } = await supabase.auth.signInAnonymously();
-        if (error) {
+        try {
+          current = await createGuestSession();
+          track('auth_guest_created', {});
+        } catch (e) {
           if (!cancelled) {
-            setBootError(error.message);
+            setBootError(e instanceof Error ? e.message : String(e));
             setBooting(false);
           }
           return;
         }
-        current = anon.session;
-        track('auth_guest_created', {});
       }
       if (!cancelled) {
         setSession(current);
@@ -98,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AuthContextValue>(
     () => ({
       session,
-      isGuest: session?.user.is_anonymous ?? true,
+      isGuest: !session || session.user.is_anonymous === true || session.user.app_metadata?.guest === true,
       booting,
       bootError,
       retryBoot: () => setAttempt((n) => n + 1),
