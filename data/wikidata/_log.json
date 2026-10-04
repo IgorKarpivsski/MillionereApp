@@ -1,0 +1,947 @@
+{
+  "fetchedAt": "2026-10-04T12:59:26.684Z",
+  "log": [
+    {
+      "name": "competition_labels",
+      "rows": 18,
+      "ms": 535,
+      "attempt": 1
+    },
+    {
+      "name": "seasons",
+      "rows": 1320,
+      "ms": 3861,
+      "attempt": 1
+    },
+    {
+      "name": "awards",
+      "rows": 167,
+      "ms": 628,
+      "attempt": 1
+    },
+    {
+      "name": "players_famous",
+      "rows": 7539,
+      "ms": 13871,
+      "attempt": 1
+    },
+    {
+      "name": "players_israeli",
+      "rows": 1634,
+      "ms": 3348,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.0",
+      "rows": 178,
+      "ms": 1110,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.1",
+      "rows": 172,
+      "ms": 768,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.2",
+      "rows": 172,
+      "ms": 3616,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.3",
+      "rows": 181,
+      "ms": 685,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.4",
+      "rows": 165,
+      "ms": 752,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.5",
+      "rows": 177,
+      "ms": 699,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.6",
+      "rows": 178,
+      "ms": 1400,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.7",
+      "rows": 177,
+      "ms": 744,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.8",
+      "rows": 179,
+      "ms": 1767,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.9",
+      "rows": 195,
+      "ms": 1401,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.10",
+      "rows": 172,
+      "ms": 710,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.11",
+      "rows": 193,
+      "ms": 1413,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.12",
+      "rows": 182,
+      "ms": 722,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.13",
+      "rows": 180,
+      "ms": 1044,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.14",
+      "rows": 178,
+      "ms": 590,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.15",
+      "rows": 169,
+      "ms": 632,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.16",
+      "rows": 196,
+      "ms": 608,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.17",
+      "rows": 169,
+      "ms": 1212,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.18",
+      "rows": 178,
+      "ms": 1025,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.19",
+      "rows": 173,
+      "ms": 725,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.20",
+      "rows": 198,
+      "ms": 821,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.21",
+      "rows": 166,
+      "ms": 1602,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.22",
+      "rows": 170,
+      "ms": 784,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.23",
+      "rows": 163,
+      "ms": 913,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.24",
+      "rows": 165,
+      "ms": 841,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.25",
+      "rows": 179,
+      "ms": 763,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.26",
+      "rows": 162,
+      "ms": 630,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.27",
+      "rows": 191,
+      "ms": 1392,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.28",
+      "rows": 171,
+      "ms": 2107,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.29",
+      "rows": 169,
+      "ms": 619,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.30",
+      "rows": 165,
+      "ms": 565,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.31",
+      "rows": 168,
+      "ms": 626,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.32",
+      "rows": 167,
+      "ms": 683,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.33",
+      "rows": 171,
+      "ms": 595,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.34",
+      "rows": 170,
+      "ms": 605,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.35",
+      "rows": 179,
+      "ms": 625,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.36",
+      "rows": 167,
+      "ms": 641,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.37",
+      "rows": 187,
+      "ms": 761,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.38",
+      "rows": 178,
+      "ms": 2546,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.39",
+      "rows": 180,
+      "ms": 1372,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.40",
+      "rows": 185,
+      "ms": 821,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.41",
+      "rows": 164,
+      "ms": 1162,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.42",
+      "rows": 162,
+      "ms": 808,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.43",
+      "rows": 177,
+      "ms": 930,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.44",
+      "rows": 162,
+      "ms": 1705,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.45",
+      "rows": 172,
+      "ms": 725,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.46",
+      "rows": 170,
+      "ms": 857,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.47",
+      "rows": 160,
+      "ms": 845,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.48",
+      "rows": 165,
+      "ms": 513,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.49",
+      "rows": 179,
+      "ms": 563,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.50",
+      "rows": 197,
+      "ms": 466,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.51",
+      "rows": 212,
+      "ms": 444,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.52",
+      "rows": 187,
+      "ms": 353,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.53",
+      "rows": 205,
+      "ms": 893,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.54",
+      "rows": 189,
+      "ms": 597,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.55",
+      "rows": 203,
+      "ms": 373,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.56",
+      "rows": 214,
+      "ms": 632,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.57",
+      "rows": 204,
+      "ms": 429,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.58",
+      "rows": 202,
+      "ms": 504,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.59",
+      "rows": 213,
+      "ms": 470,
+      "attempt": 1
+    },
+    {
+      "name": "player_facts.60",
+      "rows": 255,
+      "ms": 563,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.0",
+      "rows": 1092,
+      "ms": 1019,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.1",
+      "rows": 1174,
+      "ms": 2331,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.2",
+      "rows": 1037,
+      "ms": 840,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.3",
+      "rows": 1161,
+      "ms": 2832,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.4",
+      "rows": 1170,
+      "ms": 1941,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.5",
+      "rows": 1007,
+      "ms": 3456,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.6",
+      "rows": 1034,
+      "ms": 1096,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.7",
+      "rows": 1126,
+      "ms": 4112,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.8",
+      "rows": 1137,
+      "ms": 1727,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.9",
+      "rows": 1133,
+      "ms": 4270,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.10",
+      "rows": 1105,
+      "ms": 1513,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.11",
+      "rows": 1125,
+      "ms": 1233,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.12",
+      "rows": 1145,
+      "ms": 889,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.13",
+      "rows": 1034,
+      "ms": 1498,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.14",
+      "rows": 1132,
+      "ms": 1481,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.15",
+      "rows": 1273,
+      "ms": 1148,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.16",
+      "rows": 994,
+      "ms": 2190,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.17",
+      "rows": 1014,
+      "ms": 4637,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.18",
+      "rows": 1086,
+      "ms": 1148,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.19",
+      "rows": 1042,
+      "ms": 1321,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.20",
+      "rows": 1130,
+      "ms": 1462,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.21",
+      "rows": 1106,
+      "ms": 2587,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.22",
+      "rows": 1129,
+      "ms": 1411,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.23",
+      "rows": 1104,
+      "ms": 779,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.24",
+      "rows": 1100,
+      "ms": 1629,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.25",
+      "rows": 1032,
+      "ms": 4704,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.26",
+      "rows": 1032,
+      "ms": 886,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.27",
+      "rows": 952,
+      "ms": 3202,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.28",
+      "rows": 970,
+      "ms": 1621,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.29",
+      "rows": 1023,
+      "ms": 1773,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.30",
+      "rows": 1069,
+      "ms": 2208,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.31",
+      "rows": 1017,
+      "ms": 873,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.32",
+      "rows": 978,
+      "ms": 843,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.33",
+      "rows": 956,
+      "ms": 1829,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.34",
+      "rows": 1002,
+      "ms": 1329,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.35",
+      "rows": 1017,
+      "ms": 1943,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.36",
+      "rows": 999,
+      "ms": 38322,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.37",
+      "rows": 952,
+      "ms": 2031,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.38",
+      "rows": 926,
+      "ms": 1564,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.39",
+      "rows": 956,
+      "ms": 1384,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.40",
+      "rows": 953,
+      "ms": 876,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.41",
+      "rows": 943,
+      "ms": 1909,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.42",
+      "rows": 958,
+      "ms": 857,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.43",
+      "rows": 951,
+      "ms": 970,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.44",
+      "rows": 979,
+      "ms": 873,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.45",
+      "rows": 892,
+      "ms": 883,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.46",
+      "rows": 918,
+      "ms": 1271,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.47",
+      "rows": 884,
+      "ms": 1586,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.48",
+      "rows": 901,
+      "ms": 2494,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.49",
+      "rows": 774,
+      "ms": 1551,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.50",
+      "rows": 920,
+      "ms": 3388,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.51",
+      "rows": 774,
+      "ms": 1622,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.52",
+      "rows": 688,
+      "ms": 873,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.53",
+      "rows": 693,
+      "ms": 1974,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.54",
+      "rows": 686,
+      "ms": 1793,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.55",
+      "rows": 586,
+      "ms": 1985,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.56",
+      "rows": 488,
+      "ms": 3134,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.57",
+      "rows": 526,
+      "ms": 1448,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.58",
+      "rows": 495,
+      "ms": 3204,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.59",
+      "rows": 499,
+      "ms": 781,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.60",
+      "rows": 651,
+      "ms": 1403,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.61",
+      "rows": 1117,
+      "ms": 2128,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.62",
+      "rows": 975,
+      "ms": 2080,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.63",
+      "rows": 722,
+      "ms": 1198,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.64",
+      "rows": 817,
+      "ms": 911,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.65",
+      "rows": 407,
+      "ms": 510,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.66",
+      "rows": 444,
+      "ms": 588,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.67",
+      "rows": 784,
+      "ms": 866,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.68",
+      "rows": 632,
+      "ms": 1022,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.69",
+      "rows": 533,
+      "ms": 1316,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.70",
+      "rows": 502,
+      "ms": 586,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.71",
+      "rows": 347,
+      "ms": 614,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.72",
+      "rows": 192,
+      "ms": 1002,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.73",
+      "rows": 138,
+      "ms": 543,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.74",
+      "rows": 133,
+      "ms": 387,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.75",
+      "rows": 154,
+      "ms": 831,
+      "attempt": 1
+    },
+    {
+      "name": "player_teams.76",
+      "rows": 59,
+      "ms": 367,
+      "attempt": 1
+    },
+    {
+      "name": "clubs_israeli",
+      "rows": 208,
+      "ms": 4171,
+      "attempt": 1
+    },
+    {
+      "name": "clubs_top",
+      "rows": 1195,
+      "ms": 5844,
+      "attempt": 1
+    },
+    {
+      "name": "club_facts.0",
+      "rows": 158,
+      "ms": 989,
+      "attempt": 1
+    },
+    {
+      "name": "club_facts.1",
+      "rows": 172,
+      "ms": 842,
+      "attempt": 1
+    },
+    {
+      "name": "club_facts.2",
+      "rows": 176,
+      "ms": 1388,
+      "attempt": 1
+    },
+    {
+      "name": "club_facts.3",
+      "rows": 187,
+      "ms": 6981,
+      "attempt": 1
+    },
+    {
+      "name": "club_facts.4",
+      "rows": 172,
+      "ms": 2007,
+      "attempt": 1
+    },
+    {
+      "name": "club_facts.5",
+      "rows": 166,
+      "ms": 5812,
+      "attempt": 1
+    },
+    {
+      "name": "club_facts.6",
+      "rows": 172,
+      "ms": 5061,
+      "attempt": 1
+    },
+    {
+      "name": "club_facts.7",
+      "rows": 197,
+      "ms": 823,
+      "attempt": 1
+    },
+    {
+      "name": "club_facts.8",
+      "rows": 175,
+      "ms": 841,
+      "attempt": 1
+    },
+    {
+      "name": "club_facts.9",
+      "rows": 39,
+      "ms": 401,
+      "attempt": 1
+    },
+    {
+      "name": "countries",
+      "rows": 4726,
+      "ms": 2076,
+      "attempt": 1
+    },
+    {
+      "name": "national_teams",
+      "rows": 141,
+      "ms": 850,
+      "attempt": 1
+    }
+  ]
+}

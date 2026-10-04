@@ -1,0 +1,248 @@
+{
+  "known": {
+    "world_cup": "Q19317",
+    "euro": "Q260858",
+    "champions_league": "Q18756",
+    "europa_league": "Q18760",
+    "premier_league": "Q9448",
+    "la_liga": "Q324867",
+    "serie_a": "Q15804",
+    "bundesliga": "Q82595",
+    "ligue_1": "Q13394"
+  },
+  "searched": {
+    "israeli_premier_league": [
+      {
+        "id": "Q477309",
+        "label": "Israeli Premier League",
+        "description": "men's association football top division of Israel"
+      },
+      {
+        "id": "Q119421440",
+        "label": "2023–24 Israeli Premier League",
+        "description": "football competition"
+      }
+    ],
+    "israel_state_cup": [
+      {
+        "id": "Q1165593",
+        "label": "Israel State Cup",
+        "description": "football tournament"
+      }
+    ],
+    "israel_toto_cup": [
+      {
+        "id": "Q1377843",
+        "label": "Toto Cup",
+        "description": "Israeli soccer tournaments"
+      },
+      {
+        "id": "Q182068",
+        "label": "UEFA Intertoto Cup",
+        "description": "European association football tournament for clubs"
+      },
+      {
+        "id": "Q385054",
+        "label": "2008 UEFA Intertoto Cup",
+        "description": "international football competition"
+      },
+      {
+        "id": "Q37652542",
+        "label": "2017–18 Israel Toto Cup (Ligat Ha'Al)",
+        "description": "association football tournament season in Israel"
+      },
+      {
+        "id": "Q98190525",
+        "label": "2020–21 Israel Toto Cup (Ligat Ha'Al)",
+        "description": "association football tournament season in Israel"
+      }
+    ],
+    "england_first_division": [
+      {
+        "id": "Q754839",
+        "label": "Football League First Division",
+        "description": "former division of football league in England"
+      },
+      {
+        "id": "Q5465864",
+        "label": "Football League First Division Manager of the Month"
+      },
+      {
+        "id": "Q30681815",
+        "label": "Football League First Division Player of the Month",
+        "description": "English football award"
+      },
+      {
+        "id": "Q63356",
+        "label": "1987–88 Football League",
+        "description": "89th season of The Football League"
+      },
+      {
+        "id": "Q9260067",
+        "label": "1989–90 Football League",
+        "description": "91st season of The Football League"
+      }
+    ],
+    "copa_america": [
+      {
+        "id": "Q178750",
+        "label": "Copa América",
+        "description": "South American association football tournament for men's national teams"
+      },
+      {
+        "id": "Q576136",
+        "label": "Copa América",
+        "description": "2016 edition of the Copa América association football competition"
+      },
+      {
+        "id": "Q944896",
+        "label": "Copa América de Ciclismo"
+      },
+      {
+        "id": "Q4630358",
+        "label": "2019 Copa América",
+        "description": "Edition's XLVI Copa America"
+      },
+      {
+        "id": "Q611946",
+        "label": "Copa América de Futsal",
+        "description": "South American futsal tournament for national teams"
+      }
+    ],
+    "africa_cup": [
+      {
+        "id": "Q83145",
+        "label": "Africa Cup of Nations",
+        "description": "African association football tournament for men's national teams"
+      },
+      {
+        "id": "Q11831154",
+        "label": "2019 Africa Cup of Nations",
+        "description": "32nd edition of the Africa Cup of Nations"
+      },
+      {
+        "id": "Q218208",
+        "label": "2012 Africa Cup of Nations",
+        "description": "28th edition of the Africa Cup of Nations"
+      },
+      {
+        "id": "Q688351",
+        "label": "2013 Africa Cup of Nations",
+        "description": "29th edition of the Africa Cup of Nations"
+      },
+      {
+        "id": "Q18113389",
+        "label": "2021 Africa Cup of Nations",
+        "description": "33rd edition of the Africa Cup of Nations"
+      }
+    ],
+    "club_world_cup": [
+      {
+        "id": "Q223366",
+        "label": "FIFA Club World Cup",
+        "description": "association football tournament for clubs"
+      },
+      {
+        "id": "Q137859",
+        "label": "2006 FIFA Club World Cup",
+        "description": "2006 edition of the FIFA Club World Cup"
+      },
+      {
+        "id": "Q137920",
+        "label": "2009 FIFA Club World Cup",
+        "description": "2009 edition of the FIFA Club World Cup"
+      },
+      {
+        "id": "Q16839196",
+        "label": "2016 FIFA Club World Cup",
+        "description": "2016 edition of the FIFA Club World Cup"
+      },
+      {
+        "id": "Q16839204",
+        "label": "2018 FIFA Club World Cup",
+        "description": "2018 edition of the FIFA Club World Cup"
+      }
+    ],
+    "fa_cup": [
+      {
+        "id": "Q11151",
+        "label": "FA Cup",
+        "description": "annual knockout football competition"
+      },
+      {
+        "id": "Q4484477",
+        "label": "FA Cup Final",
+        "description": "last match in the Football Association Challenge Cup"
+      },
+      {
+        "id": "Q4484517",
+        "label": "1990 FA Cup Final",
+        "description": "football match"
+      },
+      {
+        "id": "Q3000209",
+        "label": "FA Cup Malaysia",
+        "description": "football tournament"
+      },
+      {
+        "id": "Q308822",
+        "label": "Scottish Cup",
+        "description": "competition for men's association football clubs in Scotland"
+      }
+    ],
+    "copa_del_rey": [
+      {
+        "id": "Q483794",
+        "label": "Copa del Rey",
+        "description": "Spanish association football tournament"
+      },
+      {
+        "id": "Q1130925",
+        "label": "Copa del Rey de Baloncesto",
+        "description": "Spanish basketball competition"
+      },
+      {
+        "id": "Q96612867",
+        "label": "2020–2021 Copa del Rey",
+        "description": "Play-Offs Tournament"
+      },
+      {
+        "id": "Q1130628",
+        "label": "Copa del Rey",
+        "description": "national ice hockey cup competition in Spain"
+      },
+      {
+        "id": "Q2698718",
+        "label": "Copa del Rey de Voleibol",
+        "description": "sports competition"
+      }
+    ],
+    "israel_national_team": [
+      {
+        "id": "Q191406",
+        "label": "Israel men's national football team",
+        "description": "men's national association football team representing Israel"
+      },
+      {
+        "id": "Q5869587",
+        "label": "history of the Israel national football team",
+        "description": "aspect of history"
+      },
+      {
+        "id": "Q108366300",
+        "label": "Israel national football team results (1934–1959)",
+        "description": "Wikimedia list article"
+      },
+      {
+        "id": "Q106103981",
+        "label": "Israel national football team results (2020–present)",
+        "description": "Wikimedia list article"
+      },
+      {
+        "id": "Q108415990",
+        "label": "Israel national football team results (1990-2019)",
+        "description": "Wikimedia list article"
+      }
+    ]
+  }
+}
