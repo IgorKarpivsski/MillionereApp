@@ -312,7 +312,7 @@ export const he = {
     spinning: 'מסתובב…',
     nextFree: 'סיבוב חינם בעוד {t}',
     odds: 'סיכויי הזכייה',
-    oddsLine: '{label} · {p}%',
+    oddsLine: '{label} · סיכוי {p}%',
     won: 'זכית: {label}!',
     wheelBlocked: 'סיבובים בתשלום לא זמינים באזור שלך.',
     paidLeft: 'נשארו {n} סיבובים בתשלום היום',
@@ -351,8 +351,7 @@ export const he = {
       gems: '{n} יהלומים',
       dust: '{n} אבקה',
       tickets: '{n} כרטיסים',
-      pack: '{p}',
-      packs: '{n} × {p}',
+      packs: '{p} · {n} יחידות',
     },
     cosmetics: {
       frame_neon: 'מסגרת ניאון',

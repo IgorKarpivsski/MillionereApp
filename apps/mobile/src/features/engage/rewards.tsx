@@ -18,7 +18,7 @@ export function rewardLabel(r: Reward): string {
       return fmt(t.rewards[r.kind], { n: formatNumber(r.amount) });
     case 'pack': {
       const p = PACK_NAMES[r.pack ?? 'bronze'];
-      return r.amount > 1 ? fmt(t.rewards.packs, { n: r.amount, p }) : fmt(t.rewards.pack, { p });
+      return r.amount > 1 ? fmt(t.rewards.packs, { n: r.amount, p }) : p;
     }
     case 'cosmetic':
       return (t.cosmetics as Record<string, string>)[r.item ?? ''] ?? t.premium;
