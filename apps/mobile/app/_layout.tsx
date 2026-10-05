@@ -76,6 +76,9 @@ function Gate() {
         <Stack.Screen name="shop" options={{ presentation: 'modal' }} />
         <Stack.Screen name="wheel" options={{ presentation: 'modal' }} />
         <Stack.Screen name="pass" />
+        <Stack.Screen name="friends" />
+        <Stack.Screen name="chat/[id]" />
+        <Stack.Screen name="trade/[id]" options={{ presentation: 'modal' }} />
       </Stack>
       <EnergySheet />
       <DealPopup />

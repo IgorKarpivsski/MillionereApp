@@ -380,3 +380,44 @@ export const PassStateSchema = z.union([
   }),
 ]);
 export type PassState = z.infer<typeof PassStateSchema>;
+
+/* -------------------------------------------------------------------------- */
+/* Friends, chat, trading — mirrors *_social.sql                              */
+/* -------------------------------------------------------------------------- */
+export const FriendSchema = z.object({
+  id: z.string().uuid(),
+  username: z.string(),
+  avatar_id: z.string(),
+  level: z.number().int(),
+  status: z.enum(['pending', 'accepted']),
+  incoming: z.boolean(),
+  unread: z.number().int(),
+  last_at: z.string().nullable(),
+});
+export type Friend = z.infer<typeof FriendSchema>;
+export const TradeSchema = z.object({
+  id: z.string().uuid(),
+  incoming: z.boolean(),
+  peer: z.string().uuid(),
+  peer_name: z.string(),
+  give: z.string(),
+  want: z.string().nullable(),
+  created_at: z.string(),
+});
+export type Trade = z.infer<typeof TradeSchema>;
+export const FriendsStateSchema = z.object({
+  code: z.string(),
+  friends: z.array(FriendSchema),
+  trades: z.array(TradeSchema),
+  blocked: z.array(z.object({ id: z.string().uuid(), username: z.string() })),
+});
+export type FriendsState = z.infer<typeof FriendsStateSchema>;
+export const ChatMessageSchema = z.object({ id: z.number().int(), mine: z.boolean(), body: z.string(), at: z.string() });
+export type ChatMessage = z.infer<typeof ChatMessageSchema>;
+export const ChatHistorySchema = z.object({ messages: z.array(ChatMessageSchema), can_send: z.boolean() });
+export type ChatHistory = z.infer<typeof ChatHistorySchema>;
+export const FriendDupeSchema = z.object({ id: z.string(), count: z.number().int(), mine: z.number().int() });
+export type FriendDupe = z.infer<typeof FriendDupeSchema>;
+export const ChatReportReasonSchema = z.enum(['rude', 'bullying', 'personal_info', 'spam', 'other']);
+export type ChatReportReason = z.infer<typeof ChatReportReasonSchema>;
+export const FriendDupesSchema = z.array(FriendDupeSchema);

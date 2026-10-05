@@ -20,6 +20,7 @@ import { colors, space } from '@/design-system/tokens';
 import { usePlayClassic } from '@/features/engage/EnergySheet';
 import { useCountdownTo, usePass, useWheel } from '@/features/engage/hooks';
 import { useDailyStatus, useLeaderboard } from '@/features/quiz/hooks';
+import { useUnreadTotal } from '@/features/social/hooks';
 import { useCollection } from '@/features/collection/hooks';
 import { PackArt } from '@/features/collection/PackArt';
 import { useClaimWelcomeBonus, useMyState } from '@/features/profile/hooks';
@@ -171,6 +172,31 @@ function DailyExtras() {
   );
 }
 
+function FriendsEntry() {
+  const unread = useUnreadTotal();
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.friends, pressed && styles.pressed]}
+      onPress={() => router.push('/friends')}
+      accessibilityRole="button"
+      accessibilityLabel={unread > 0 ? `${strings.social.entry}, ${unread}` : strings.social.entry}
+    >
+      <Ionicons name="people" size={26} color={colors.correct} />
+      <AppText variant="label" style={styles.flex}>
+        {strings.social.entry}
+      </AppText>
+      {unread > 0 ? (
+        <View style={styles.count}>
+          <AppText variant="caption" color={colors.text} style={styles.sideTight}>
+            {String(unread)}
+          </AppText>
+        </View>
+      ) : null}
+      <Ionicons name="chevron-back" size={20} color={colors.textDim} />
+    </Pressable>
+  );
+}
+
 export default function HomeScreen() {
   const { data, isLoading, refetch, isRefetching } = useMyState();
   const { data: daily } = useDailyStatus();
@@ -190,6 +216,7 @@ export default function HomeScreen() {
 
       <MatchOfTheDay />
       <DailyExtras />
+      <FriendsEntry />
       {daily?.state === 'done' ? null : <ClassicCard />}
       {packsWaiting > 0 ? (
         <Card kind="sticker" frame={colors.correct} padding={space.md}>
@@ -241,4 +268,15 @@ const styles = StyleSheet.create({
   extraPass: { backgroundColor: '#1B1640', borderColor: colors.gem },
   dot: { position: 'absolute', top: 8, end: 8, width: 12, height: 12, borderRadius: 6, backgroundColor: colors.danger },
   pressed: { transform: [{ scale: 0.97 }] },
+  friends: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    padding: space.md,
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: colors.correct,
+    backgroundColor: '#0E3A2A',
+  },
+  count: { minWidth: 24, height: 24, borderRadius: 12, backgroundColor: colors.danger, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
 });
