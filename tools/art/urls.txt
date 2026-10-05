@@ -1,3 +1,15 @@
 art/test/gpt_popart.png https://d8j0ntlcm91z4.cloudfront.net/user_2x1UegQvignkIVXKpKcIQL2jkLf/hf_20261005_024643_1f5875d8-d79c-40d3-b1fb-541ac3e81306.png
 art/test/z_popart.png https://d8j0ntlcm91z4.cloudfront.net/user_2x1UegQvignkIVXKpKcIQL2jkLf/hf_20261005_025348_767765f6-6b99-49e9-ba3f-1e7e8b7ac4bf.png
 art/test/pollinations_popart.jpg https://image.pollinations.ai/prompt/Bold%20pop-art%20comic%20caricature%2C%20thick%20ink%20outlines%2C%20Ben-Day%20dots%2C%20vibrant%20flat%20colors%2C%20of%20an%20original%20fictional%20footballer%3A%20exaggerated%20big%20head%2C%20thick%20black%20curly%20hair%2C%20huge%2070s%20moustache%2C%20sideburns%2C%20cheeky%20grin%2C%20plain%20red%20and%20white%20vertical-striped%20retro%20jersey%20with%20no%20logos%2C%20fist%20up%20celebrating.%20Dynamic%20speed%20lines%20background%20in%20electric%20blue%20and%20yellow.%20No%20text?width=768&height=1024&model=flux&nologo=true&seed=7
+apps/mobile/assets/cards/seventies_01.webp https://d8j0ntlcm91z4.cloudfront.net/user_2x1UegQvignkIVXKpKcIQL2jkLf/hf_20261005_025935_026d4003-8c1e-4982-9406-49a777c5cfdc.png
+apps/mobile/assets/cards/seventies_02.webp https://d8j0ntlcm91z4.cloudfront.net/user_2x1UegQvignkIVXKpKcIQL2jkLf/hf_20261005_025934_b56b4b87-a445-4c10-a923-594ec479694b.png
+apps/mobile/assets/cards/seventies_03.webp https://d8j0ntlcm91z4.cloudfront.net/user_2x1UegQvignkIVXKpKcIQL2jkLf/hf_20261005_025933_6e0fbaf3-3942-4991-9bea-766e7bc5d8fb.png
+apps/mobile/assets/cards/seventies_04.webp https://d8j0ntlcm91z4.cloudfront.net/user_2x1UegQvignkIVXKpKcIQL2jkLf/hf_20261005_025934_1259ab8f-dfd3-431f-a613-3bd52f117fc8.png
+apps/mobile/assets/cards/seventies_05.webp https://d8j0ntlcm91z4.cloudfront.net/user_2x1UegQvignkIVXKpKcIQL2jkLf/hf_20261005_025934_5d427a2c-0276-4d0d-8a01-a4c58d7adfea.png
+apps/mobile/assets/cards/seventies_06.webp https://d8j0ntlcm91z4.cloudfront.net/user_2x1UegQvignkIVXKpKcIQL2jkLf/hf_20261005_025935_a0287097-e585-465b-be50-2f08ca9001a3.png
+apps/mobile/assets/cards/seventies_07.webp https://d8j0ntlcm91z4.cloudfront.net/user_2x1UegQvignkIVXKpKcIQL2jkLf/hf_20261005_025934_6351977d-acc6-4d46-bd4b-90690518ae27.png
+apps/mobile/assets/cards/seventies_08.webp https://d8j0ntlcm91z4.cloudfront.net/user_2x1UegQvignkIVXKpKcIQL2jkLf/hf_20261005_025934_22992ef7-0949-413d-8f2e-0fe170683be7.png
+apps/mobile/assets/cards/seventies_09.webp https://d8j0ntlcm91z4.cloudfront.net/user_2x1UegQvignkIVXKpKcIQL2jkLf/hf_20261005_025934_41160158-8408-43a6-839a-5fd703591f97.png
+apps/mobile/assets/cards/seventies_10.webp https://d8j0ntlcm91z4.cloudfront.net/user_2x1UegQvignkIVXKpKcIQL2jkLf/hf_20261005_025934_8f943620-b0cf-4ae3-ae50-6d6bdfd897f9.png
+apps/mobile/assets/cards/seventies_11.webp https://d8j0ntlcm91z4.cloudfront.net/user_2x1UegQvignkIVXKpKcIQL2jkLf/hf_20261005_025934_cec00e52-e8a9-4204-8294-907afedcfcc3.png
+apps/mobile/assets/cards/seventies_12.webp https://d8j0ntlcm91z4.cloudfront.net/user_2x1UegQvignkIVXKpKcIQL2jkLf/hf_20261005_025934_11875d41-7cbe-4214-9070-77632a16d3ac.png

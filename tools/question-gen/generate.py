@@ -17,14 +17,14 @@ from qcore import GEN_VERSION, HEB, LEVELS, Names, Q, normalize_he, stable_id
 # Separate caps for Israeli football so world football doesn't crowd it out.
 CAPS = {
     "player:club": 1900, "club:which_player": 1500, "player:national_team": 1300,
-    "player:position": 1000, "player:birth_year": 800, "club:founded": 550,
+    "player:position": 1000, "player:birth_year": 60, "club:founded": 30,
     "club:city": 450, "club:stadium": 400,
 }
 CAPS_ISRAEL = {
     "hw:player_club": 3000, "hw:club_which_player": 1400, "hw:position": 1100, "hw:birthplace": 500,
     "hw:coached_club": 500, "hw:nt_coach": 40, "hw:nt_nt_goals": 120, "hw:nt_nt_caps": 120,
     "player:club": 1100, "club:which_player": 900, "player:position": 500,
-    "player:birth_year": 350, "club:founded": 160, "club:city": 120, "club:stadium": 100,
+    "player:birth_year": 20, "club:founded": 10, "club:city": 120, "club:stadium": 100,
 }
 MULTI_OK = {"player:club", "club:which_player", "hw:player_club", "hw:club_which_player", "hw:coached_club", "hw:nt_coach", "hw:nt_nt_goals", "hw:nt_nt_caps", "wc:semifinalist", "award:ballon_dor_when"}
 LEVEL_SHARE = [("easy", 0.25), ("medium", 0.25), ("hard", 0.25), ("expert", 0.17), ("legendary", 0.08)]
@@ -102,6 +102,11 @@ def main() -> None:
         qs.sort(key=lambda q: q.obscurity)
         cap = (CAPS_ISRAEL if isr else CAPS).get(tpl)
         final.extend(qs[:cap] if cap else qs)
+
+    # Players find "which year/season" questions dull: keep only the best-known 120.
+    years = sorted((q for q in final if q.template.startswith("won_when")), key=lambda q: q.obscurity)
+    drop = {id(q) for q in years[120:]}
+    final = [q for q in final if id(q) not in drop]
 
     # Difficulty from obscurity quantiles
     final.sort(key=lambda q: (q.obscurity, q.key))
