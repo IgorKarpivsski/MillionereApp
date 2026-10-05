@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText, AvatarBadge, CoinIcon, GemIcon, Led, Skeleton, TicketIcon } from '@/design-system/components';
@@ -5,6 +6,8 @@ import { colors, radius, space } from '@/design-system/tokens';
 import { useEnergySheet } from '@/features/engage/EnergySheet';
 import { useCountdownTo, useEnergy } from '@/features/engage/hooks';
 import { useMyState } from '@/features/profile/hooks';
+import { useToggleSetting } from '@/features/settings/hooks';
+import { useSettingsStore } from '@/features/settings/store';
 import { formatCompact, formatNumber } from '@/lib/format';
 import { fmt, strings } from '@/lib/i18n';
 import { rankTitle } from '@/lib/rank';
@@ -54,6 +57,24 @@ function Tickets() {
   );
 }
 
+/** One-tap music mute, always within reach. */
+function MusicToggle() {
+  const on = useSettingsStore((s) => s.music);
+  const toggle = useToggleSetting();
+  return (
+    <Pressable
+      onPress={() => toggle.mutate({ key: 'music', value: !on })}
+      hitSlop={10}
+      style={styles.mute}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: on }}
+      accessibilityLabel={strings.settings.music}
+    >
+      <Ionicons name={on ? 'musical-notes' : 'volume-mute'} size={18} color={on ? colors.led : colors.textDim} />
+    </Pressable>
+  );
+}
+
 /** The scoreboard header: player on the right (start), LED wallet on the left (end). */
 export function TopBar() {
   const { data } = useMyState();
@@ -79,6 +100,7 @@ export function TopBar() {
       ) : (
         <Skeleton width={140} height={40} />
       )}
+      <MusicToggle />
       <Tickets />
       <Pressable
         style={styles.wallet}
@@ -118,5 +140,6 @@ const styles = StyleSheet.create({
   whoText: { flexShrink: 1 },
   wallet: { flexDirection: 'row', gap: space.md },
   meter: { alignItems: 'center' },
+  mute: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
   meterRow: { flexDirection: 'row', alignItems: 'center', gap: space.xs },
 });

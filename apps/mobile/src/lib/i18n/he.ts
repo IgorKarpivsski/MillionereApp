@@ -230,6 +230,11 @@ export const he = {
     toAlbum: 'להדביק באלבום',
     openAnother: 'עוד חבילה',
     dustTotal: 'הכפולות הפכו ל-{n} אבקה',
+    tapMore: 'עוד לחיצה…',
+    tapLast: 'עוד אחת — והיא נפתחת!',
+    revealAll: 'חשוף הכל',
+    stamp: { rare: 'נדיר!', epic: 'אפי!', legendary: 'אגדי!', iconic: 'מיתי!!!' },
+    walkoutHint: 'משהו מיוחד מחכה בפנים…',
   },
   collection: {
     title: 'אלבום האגדות',

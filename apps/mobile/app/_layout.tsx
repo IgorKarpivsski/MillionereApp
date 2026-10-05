@@ -24,6 +24,7 @@ import { bindOnlineManager } from '@/lib/network';
 import { queryClient } from '@/lib/queryClient';
 import { ensureRTL } from '@/lib/rtl';
 import { initAds } from '@/features/store/ads';
+import { useBackgroundMusic } from '@/design-system/feedback/music';
 import { EnergySheet } from '@/features/engage/EnergySheet';
 import { DealPopup } from '@/features/engage/DealPopup';
 
@@ -47,6 +48,7 @@ function Gate() {
     if (ready) void SplashScreen.hideAsync();
   }, [ready]);
 
+  useBackgroundMusic();
   if (!ready) return null;
 
   if (bootError) {
