@@ -1,5 +1,7 @@
 -- The classic run: serving, answering, lifelines, payouts, cheating attempts.
 begin;
+-- Energy is covered by 13_engagement; give these runs plenty of tickets.
+update public.app_config set value = value || '{"max":99}' where key = 'energy';
 
 -- 3 questions per difficulty on alternating categories (+ extras for repeats).
 do $$

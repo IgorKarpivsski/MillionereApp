@@ -87,7 +87,7 @@ export function useQuizRun(mode: QuizMode = 'classic') {
 
   const fail = useCallback(
     (e: unknown) => {
-      const code = e instanceof RpcError ? e.code : 'unknown';
+      const code = e instanceof RpcError ? (e.message.includes('no_energy') ? 'no_energy' : e.code) : 'unknown';
       set((x) => ({ ...x, phase: 'error', notice: code }));
     },
     [set],
@@ -99,6 +99,8 @@ export function useQuizRun(mode: QuizMode = 'classic') {
       void qc.invalidateQueries({ queryKey: queryKeys.daily });
       void qc.invalidateQueries({ queryKey: queryKeys.leaderboard });
       void qc.invalidateQueries({ queryKey: queryKeys.collection });
+      void qc.invalidateQueries({ queryKey: queryKeys.energy });
+      void qc.invalidateQueries({ queryKey: queryKeys.pass });
       const endedBy =
         summary.status === 'won' ? 'completed'
         : summary.status === 'cashed_out' ? 'walk_away'
@@ -114,6 +116,7 @@ export function useQuizRun(mode: QuizMode = 'classic') {
     set(() => initial);
     try {
       const p = await engine.start();
+      void qc.invalidateQueries({ queryKey: queryKeys.energy });
       playSound('whistle');
       haptic('heavy');
       track('quiz_started', { mode });
@@ -121,7 +124,7 @@ export function useQuizRun(mode: QuizMode = 'classic') {
     } catch (e) {
       fail(e);
     }
-  }, [fail, set]);
+  }, [fail, set, qc]);
 
   const pick = useCallback(
     async (slot: number) => {

@@ -22,4 +22,8 @@ export const queryKeys = {
   leaderboard: ['leaderboard-week'] as const,
   collection: ['collection'] as const,
   store: ['store'] as const,
+  energy: ['energy'] as const,
+  wheel: ['wheel'] as const,
+  deals: ['deals'] as const,
+  pass: ['pass'] as const,
 };

@@ -11,6 +11,8 @@ import { colors, radius, space } from '@/design-system/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { storeApi } from '@/features/store/api';
 import { useAdReward, useStore } from '@/features/store/hooks';
+import { DealCard } from '@/features/engage/DealCard';
+import { useDeals } from '@/features/engage/hooks';
 import { formatNumber } from '@/lib/format';
 import { queryKeys } from '@/lib/queryClient';
 import { fmt, strings } from '@/lib/i18n';
@@ -21,6 +23,7 @@ const CONSUMABLE = new Set(['coins_2000', 'coins_6000', 'coins_16000', 'gems_80'
 
 export default function ShopScreen() {
   const { data: store } = useStore();
+  const { data: deals } = useDeals();
   const { session } = useAuth();
   const toast = useToast();
   const qc = useQueryClient();
@@ -167,6 +170,8 @@ export default function ShopScreen() {
             }}
           />
         ) : null}
+
+        {deals ? <DealCard state={deals} /> : null}
 
         <AppText variant="heading">{t.vipTitle}</AppText>
         {store?.products.filter((p) => p.kind === 'vip').map((p) => <Item key={p.sku} p={p} />)}

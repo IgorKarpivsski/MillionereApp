@@ -314,3 +314,69 @@ export const StoreStateSchema = z.object({
   ad_free: z.boolean(),
 });
 export type StoreState = z.infer<typeof StoreStateSchema>;
+
+/* -------------------------------------------------------------------------- */
+/* Energy, wheel, deals, season pass — mirrors *_engagement.sql               */
+/* -------------------------------------------------------------------------- */
+export const RewardSchema = z.object({
+  kind: z.enum(['coins', 'gems', 'dust', 'pack', 'tickets', 'cosmetic']),
+  amount: z.number().int().default(1),
+  pack: PackSlugSchema.optional(),
+  item: z.string().optional(),
+});
+export type Reward = z.infer<typeof RewardSchema>;
+
+export const EnergyStateSchema = z.object({
+  tickets: z.number().int(),
+  max: z.number().int(),
+  refill_minutes: z.number().int(),
+  next_at: z.string().nullable(),
+  unlimited: z.boolean(),
+  gem_refill: z.number().int(),
+  ad_left: z.number().int(),
+});
+export type EnergyState = z.infer<typeof EnergyStateSchema>;
+
+export const WheelSegmentSchema = RewardSchema.extend({ id: z.string(), pct: z.number().optional() });
+export const WheelStateSchema = z.object({
+  free_available: z.boolean(),
+  next_free_at: z.string().nullable(),
+  spin_gems: z.number().int(),
+  paid_left: z.number().int(),
+  blocked: z.boolean(),
+  segments: z.array(WheelSegmentSchema),
+});
+export type WheelState = z.infer<typeof WheelStateSchema>;
+export const WheelSpinSchema = z.object({ index: z.number().int(), segment: WheelSegmentSchema });
+export type WheelSpin = z.infer<typeof WheelSpinSchema>;
+
+export const DealSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  body: z.string(),
+  price: z.object({ currency: z.enum(['coins', 'gems']), amount: z.number().int() }),
+  was: z.number().int(),
+  rewards: z.array(RewardSchema),
+});
+export type Deal = z.infer<typeof DealSchema>;
+export const DealsStateSchema = z.object({ window: z.number().int(), ends_at: z.string(), deal: DealSchema, bought: z.boolean() });
+export type DealsState = z.infer<typeof DealsStateSchema>;
+
+export const PassStateSchema = z.union([
+  z.object({ active: z.literal(false) }),
+  z.object({
+    active: z.literal(true),
+    id: z.string(),
+    title: z.string(),
+    ends: z.string(),
+    xp_per_tier: z.number().int(),
+    premium_gems: z.number().int(),
+    xp: z.number().int(),
+    premium: z.boolean(),
+    tier: z.number().int(),
+    claimed_free: z.array(z.number().int()),
+    claimed_premium: z.array(z.number().int()),
+    tiers: z.array(z.object({ tier: z.number().int(), free: RewardSchema, premium: RewardSchema })),
+  }),
+]);
+export type PassState = z.infer<typeof PassStateSchema>;

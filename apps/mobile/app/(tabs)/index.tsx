@@ -1,5 +1,6 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { TopBar } from '@/components/TopBar';
 import {
   AppText,
@@ -16,6 +17,8 @@ import {
   useToast,
 } from '@/design-system/components';
 import { colors, space } from '@/design-system/tokens';
+import { usePlayClassic } from '@/features/engage/EnergySheet';
+import { useCountdownTo, usePass, useWheel } from '@/features/engage/hooks';
 import { useDailyStatus, useLeaderboard } from '@/features/quiz/hooks';
 import { useCollection } from '@/features/collection/hooks';
 import { PackArt } from '@/features/collection/PackArt';
@@ -67,6 +70,7 @@ function WelcomeBonus() {
 }
 
 function MatchOfTheDay() {
+  const playClassic = usePlayClassic();
   const countdown = useCountdownToMidnight();
   const { data: daily } = useDailyStatus();
   const done = daily?.state === 'done';
@@ -96,7 +100,7 @@ function MatchOfTheDay() {
         {done ? fmt(t.dailyDone, { n: daily?.coins ?? 0 }) : t.dailyBody}
       </AppText>
       {done ? (
-        <StickerButton label={t.playClassic} icon="football" tone="outline" size="lg" fullWidth onPress={() => router.push('/quiz')} />
+        <StickerButton label={t.playClassic} icon="football" tone="outline" size="lg" fullWidth onPress={playClassic} />
       ) : (
         <StickerButton
           label={daily?.state === 'in_progress' ? t.dailyContinue : t.kickoff}
@@ -111,6 +115,7 @@ function MatchOfTheDay() {
 }
 
 function ClassicCard() {
+  const playClassic = usePlayClassic();
   return (
     <Card kind="soft" padding={space.md}>
       <View style={styles.seasonRow}>
@@ -121,9 +126,48 @@ function ClassicCard() {
             {t.classicBody}
           </AppText>
         </View>
-        <StickerButton label={t.play} size="sm" onPress={() => router.push('/quiz')} />
+        <StickerButton label={t.play} size="sm" onPress={playClassic} />
       </View>
     </Card>
+  );
+}
+
+/** Wheel + season pass, side by side. */
+function DailyExtras() {
+  const { data: wheel } = useWheel();
+  const { data: pass } = usePass();
+  const next = useCountdownTo(wheel?.next_free_at);
+  const e = strings.engage;
+  return (
+    <View style={styles.tiles}>
+      <Pressable
+        style={({ pressed }) => [styles.extra, styles.extraWheel, pressed && styles.pressed]}
+        onPress={() => router.push('/wheel')}
+        accessibilityRole="button"
+        accessibilityLabel={e.wheelTitle}
+      >
+        <Ionicons name="color-filter" size={30} color={colors.led} />
+        <AppText variant="label">{e.wheelTitle}</AppText>
+        <AppText variant="caption" color={wheel?.free_available ? colors.correct : colors.textDim} align="center">
+          {wheel?.free_available ? e.wheelEntry : next ? fmt(e.nextFree, { t: next }) : e.wheelBody}
+        </AppText>
+        {wheel?.free_available ? <View style={styles.dot} /> : null}
+      </Pressable>
+      <Pressable
+        style={({ pressed }) => [styles.extra, styles.extraPass, pressed && styles.pressed]}
+        onPress={() => router.push('/pass')}
+        accessibilityRole="button"
+        accessibilityLabel={e.passTitle}
+      >
+        <Ionicons name="ribbon" size={30} color={colors.gem} />
+        <AppText variant="label">{e.passTitle}</AppText>
+        <AppText variant="caption" color={colors.textDim} align="center">
+          {pass?.active
+            ? fmt(e.passEntry, { n: pass.tier, left: pass.xp_per_tier - (pass.xp - pass.tier * pass.xp_per_tier) })
+            : e.noSeason}
+        </AppText>
+      </Pressable>
+    </View>
   );
 }
 
@@ -136,7 +180,6 @@ export default function HomeScreen() {
   const { data: coll } = useCollection();
   const owned = coll ? coll.items.filter((i) => i.count > 0).length : 0;
   const packsWaiting = coll ? Object.values(coll.tokens).reduce((a, b) => a + b, 0) : 0;
-  const toast = useToast();
 
   return (
     <Screen header={<TopBar />} onRefresh={() => void refetch()} refreshing={isRefetching}>
@@ -146,6 +189,7 @@ export default function HomeScreen() {
       {data && !data.welcome_bonus_claimed ? <WelcomeBonus /> : null}
 
       <MatchOfTheDay />
+      <DailyExtras />
       {daily?.state === 'done' ? null : <ClassicCard />}
       {packsWaiting > 0 ? (
         <Card kind="sticker" frame={colors.correct} padding={space.md}>
@@ -168,17 +212,6 @@ export default function HomeScreen() {
         <StatTile value={String(owned)} label={t.statCollection} />
       </View>
 
-      <Card kind="soft" padding={space.md}>
-        <View style={styles.seasonRow}>
-          <View style={styles.flex}>
-            <AppText variant="label">{t.seasonTitle}</AppText>
-            <AppText variant="caption" color={colors.textDim}>
-              {t.seasonBody}
-            </AppText>
-          </View>
-          <StickerButton label={strings.common.soon} tone="outline" size="sm" onPress={() => toast(t.seasonBody, 'info')} />
-        </View>
-      </Card>
     </Screen>
   );
 }
@@ -203,4 +236,9 @@ const styles = StyleSheet.create({
   sideTight: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
   tiles: { flexDirection: 'row', gap: space.sm },
   seasonRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  extra: { flex: 1, alignItems: 'center', gap: space.xxs, padding: space.md, borderRadius: 18, borderWidth: 2 },
+  extraWheel: { backgroundColor: '#2A1F05', borderColor: colors.led },
+  extraPass: { backgroundColor: '#1B1640', borderColor: colors.gem },
+  dot: { position: 'absolute', top: 8, end: 8, width: 12, height: 12, borderRadius: 6, backgroundColor: colors.danger },
+  pressed: { transform: [{ scale: 0.97 }] },
 });

@@ -32,3 +32,15 @@ export function DustIcon({ size = 22 }: { size?: number }) {
     </Svg>
   );
 }
+
+/** Match ticket — the energy that classic runs spend. */
+export function TicketIcon({ size = 22 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" accessibilityElementsHidden>
+      <Path d="M3 8a2 2 0 0 0 0 4v5h18v-5a2 2 0 0 1 0-4V5H3z" transform="translate(0 2)" fill={palette.flareDeep} />
+      <Path d="M3 8a2 2 0 0 0 0 4v5h18v-5a2 2 0 0 1 0-4V5H3z" fill={palette.flare} />
+      <Path d="M15 5.5v11" stroke={palette.chalk} strokeWidth={1.4} strokeDasharray="1.6 1.6" />
+      <Path d="M8.5 8.2l.9 1.9 2 .2-1.5 1.4.4 2-1.8-1-1.8 1 .4-2-1.5-1.4 2-.2z" fill={palette.chalk} />
+    </Svg>
+  );
+}

@@ -1,5 +1,7 @@
 -- Picker: 80/20 Israeli share and an easy start.
 begin;
+-- Energy is covered by 13_engagement; give these runs plenty of tickets.
+update public.app_config set value = value || '{"max":99}' where key = 'energy';
 
 do $$
 declare i int; qid text;

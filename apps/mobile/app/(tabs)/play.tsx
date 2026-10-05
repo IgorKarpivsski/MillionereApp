@@ -6,6 +6,7 @@ import { AppText, Card, Led, Screen, StickerButton, TrophyLogo } from '@/design-
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { formatNumber } from '@/lib/format';
 import { strings } from '@/lib/i18n';
+import { usePlayClassic } from '@/features/engage/EnergySheet';
 
 const t = strings.play;
 
@@ -39,6 +40,7 @@ function LadderPreview() {
 }
 
 export default function PlayScreen() {
+  const playClassic = usePlayClassic();
   return (
     <Screen header={<TopBar />}>
       <AppText variant="title">{t.title}</AppText>
@@ -57,7 +59,7 @@ export default function PlayScreen() {
           size="lg"
           fullWidth
           style={styles.cta}
-          onPress={() => router.push('/quiz')}
+          onPress={playClassic}
         />
       </Card>
       <Card kind="soft" padding={space.md}>

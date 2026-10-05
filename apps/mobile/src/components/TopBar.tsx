@@ -1,7 +1,9 @@
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { AppText, AvatarBadge, CoinIcon, GemIcon, Led, Skeleton } from '@/design-system/components';
+import { AppText, AvatarBadge, CoinIcon, GemIcon, Led, Skeleton, TicketIcon } from '@/design-system/components';
 import { colors, radius, space } from '@/design-system/tokens';
+import { useEnergySheet } from '@/features/engage/EnergySheet';
+import { useCountdownTo, useEnergy } from '@/features/engage/hooks';
 import { useMyState } from '@/features/profile/hooks';
 import { formatCompact, formatNumber } from '@/lib/format';
 import { fmt, strings } from '@/lib/i18n';
@@ -23,6 +25,32 @@ function Meter({ kind, amount }: { kind: 'coins' | 'gems'; amount: number }) {
         {strings.common[kind]}
       </AppText>
     </View>
+  );
+}
+
+/** Tickets for classic runs, with the time to the next one. Opens the refill sheet. */
+function Tickets() {
+  const { data } = useEnergy();
+  const show = useEnergySheet((s) => s.show);
+  const next = useCountdownTo(data && !data.unlimited && data.tickets < data.max ? data.next_at : null);
+  if (!data) return null;
+  const label = data.unlimited ? '∞' : String(data.tickets);
+  return (
+    <Pressable
+      onPress={show}
+      style={styles.meter}
+      accessibilityRole="button"
+      accessibilityLabel={data.unlimited ? strings.engage.unlimited : fmt(strings.engage.ticketsA11y, { n: data.tickets })}
+      hitSlop={8}
+    >
+      <View style={styles.meterRow}>
+        <TicketIcon size={16} />
+        <Led color={data.tickets < 1 && !data.unlimited ? colors.danger : colors.text}>{label}</Led>
+      </View>
+      <AppText variant="caption" color={colors.textDim}>
+        {next ?? strings.engage.tickets}
+      </AppText>
+    </Pressable>
   );
 }
 
@@ -51,6 +79,7 @@ export function TopBar() {
       ) : (
         <Skeleton width={140} height={40} />
       )}
+      <Tickets />
       <Pressable
         style={styles.wallet}
         onPress={() => router.push('/shop')}
@@ -87,7 +116,7 @@ const styles = StyleSheet.create({
   },
   who: { flexDirection: 'row', alignItems: 'center', gap: space.sm, flexShrink: 1 },
   whoText: { flexShrink: 1 },
-  wallet: { flexDirection: 'row', gap: space.lg },
+  wallet: { flexDirection: 'row', gap: space.md },
   meter: { alignItems: 'center' },
   meterRow: { flexDirection: 'row', alignItems: 'center', gap: space.xs },
 });

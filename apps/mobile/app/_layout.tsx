@@ -24,6 +24,8 @@ import { bindOnlineManager } from '@/lib/network';
 import { queryClient } from '@/lib/queryClient';
 import { ensureRTL } from '@/lib/rtl';
 import { initAds } from '@/features/store/ads';
+import { EnergySheet } from '@/features/engage/EnergySheet';
+import { DealPopup } from '@/features/engage/DealPopup';
 
 ensureRTL();
 initMonitoring();
@@ -72,7 +74,11 @@ function Gate() {
         <Stack.Screen name="pack-open" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="match" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="shop" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="wheel" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="pass" />
       </Stack>
+      <EnergySheet />
+      <DealPopup />
       <OfflineBanner />
     </>
   );

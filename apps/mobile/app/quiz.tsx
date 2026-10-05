@@ -1,3 +1,5 @@
+import { useEnergySheet } from '@/features/engage/EnergySheet';
+import { useEnergy } from '@/features/engage/hooks';
 import { Ionicons } from '@expo/vector-icons';
 import { LADDER } from '@fm/economy-config';
 import type { LifelineKind, ReportReason } from '@fm/shared';
@@ -234,6 +236,8 @@ export default function QuizScreen() {
   const daily = params.mode === 'daily';
   const total = daily ? 10 : 12;
   const { state: s, start, pick, next, lifeline, cashOut, whistle } = useQuizRun(daily ? 'daily' : 'classic');
+  const { data: energy } = useEnergy();
+  const showEnergy = useEnergySheet((x) => x.show);
   const toast = useToast();
   const reduced = useReducedMotion();
   const [reportOpen, setReportOpen] = useState(false);
@@ -294,6 +298,23 @@ export default function QuizScreen() {
 
   /* ---------- states without a question ---------- */
 
+  if (s.phase === 'error' && s.notice === 'no_energy') {
+    return (
+      <SafeAreaView style={styles.root}>
+        <View style={styles.center}>
+          <EmptyState
+            icon="ticket-outline"
+            title={strings.engage.outTitle}
+            body={strings.engage.freeModes}
+            actionLabel={strings.engage.refillNow}
+            onAction={showEnergy}
+          />
+          <StickerButton label={t.home} tone="ghost" onPress={() => router.back()} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   if (s.phase === 'error') {
     return (
       <SafeAreaView style={styles.root}>
@@ -314,7 +335,11 @@ export default function QuizScreen() {
   if (s.phase === 'finished' && s.summary) {
     return (
       <SafeAreaView style={styles.root}>
-        <ResultView s={s} daily={daily} onAgain={() => void start()} />
+        <ResultView
+          s={s}
+          daily={daily}
+          onAgain={() => (energy && !energy.unlimited && energy.tickets < 1 ? showEnergy() : void start())}
+        />
       </SafeAreaView>
     );
   }
