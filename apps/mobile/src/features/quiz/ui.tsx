@@ -62,7 +62,7 @@ export function AnswerTile({
         onPress={onPress}
         disabled={disabled || hidden || state === 'overturned'}
         accessibilityRole="button"
-        accessibilityLabel={hidden ? 'תשובה שהוסרה' : text}
+        accessibilityLabel={hidden ? 'תשובה שהוסרה' : `תשובה ${index + 1}: ${text}`}
         accessibilityState={{ disabled: disabled || hidden, selected: state === 'picked' }}
         style={({ pressed }) => [
           styles.tile,
@@ -72,6 +72,11 @@ export function AnswerTile({
       >
         {hidden ? null : (
           <>
+            <View style={[styles.numBadge, { borderColor: l.border }]}>
+              <AppText variant="caption" color={l.text} style={styles.numText}>
+                {index + 1}
+              </AppText>
+            </View>
             <AppText
               variant="bodyStrong"
               color={l.text}
@@ -82,11 +87,9 @@ export function AnswerTile({
             >
               {text}
             </AppText>
-            {state === 'correctPicked' ? (
+            {state === 'correctPicked' || state === 'correctMissed' ? (
               <Animated.View entering={reduced ? undefined : ZoomIn.springify()}>
-                <Led size="ledS" color={colors.correct}>
-                  GOAL +1
-                </Led>
+                <Ionicons name="checkmark-circle" size={18} color={colors.correct} />
               </Animated.View>
             ) : null}
             {state === 'wrongPicked' ? <Ionicons name="close-circle" size={18} color={colors.danger} /> : null}
@@ -170,6 +173,18 @@ const styles = StyleSheet.create({
   },
   tileText: { fontFamily: 'IBMPlexSansHebrew_700Bold', fontSize: 17, lineHeight: 23 },
   pressed: { transform: [{ scale: 0.97 }] },
+  numBadge: {
+    position: 'absolute',
+    top: 6,
+    end: 6,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  numText: { fontFamily: 'IBMPlexSansHebrew_700Bold', lineHeight: 16 },
   struck: { textDecorationLine: 'line-through' },
   expertBadge: {
     position: 'absolute',

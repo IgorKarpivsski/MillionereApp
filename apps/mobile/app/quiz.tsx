@@ -4,7 +4,7 @@ import type { LifelineKind, ReportReason } from '@fm/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import Animated, { FadeIn, FadeInDown, FadeOut, ZoomIn } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   AppText,
@@ -237,7 +237,6 @@ export default function QuizScreen() {
   const toast = useToast();
   const reduced = useReducedMotion();
   const [reportOpen, setReportOpen] = useState(false);
-  const [goal, setGoal] = useState(false);
 
   useEffect(() => {
     preloadSounds(['whistle', 'tick', 'answer_lock', 'answer_correct', 'answer_wrong', 'var', 'coins']);
@@ -247,13 +246,6 @@ export default function QuizScreen() {
   useEffect(() => {
     if (s.notice === 'var') toast(t.varOverturned, 'info');
   }, [s.notice, toast]);
-
-  useEffect(() => {
-    if (s.reveal?.result !== 'correct') return;
-    setGoal(true);
-    const id = setTimeout(() => setGoal(false), 1300);
-    return () => clearTimeout(id);
-  }, [s.reveal]);
 
   const secs = useSecondsLeft(s.deadlineAt, s.phase === 'question', whistle);
 
@@ -506,16 +498,7 @@ export default function QuizScreen() {
         )}
       </View>
 
-      {goal ? (
-        <Animated.View
-          pointerEvents="none"
-          entering={reduced ? undefined : ZoomIn.springify().damping(10)}
-          exiting={reduced ? undefined : FadeOut.duration(300)}
-          style={styles.goal}
-        >
-          <Led size="ledXL">GOAL!</Led>
-        </Animated.View>
-      ) : null}
+
 
       <BottomSheet visible={reportOpen} onClose={() => setReportOpen(false)} title={t.reportTitle}>
         {REPORT_REASONS.map((r) => (
