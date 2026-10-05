@@ -220,10 +220,11 @@ export const CollectibleSchema = z.object({
   number: z.number().int(),
   rarity: RaritySchema,
   name: z.string(),
-  position: z.enum(['GK', 'DEF', 'MID', 'FWD']),
+  position: z.enum(['GK', 'DEF', 'MID', 'FWD', 'OBJ']),
   era: z.enum(['70s', '80s', '90s', '00s', 'modern']),
   bio: z.string(),
   art_seed: z.number().int(),
+  kind: z.enum(['player', 'object']).default('player'),
   count: z.number().int(),
 });
 export type Collectible = z.infer<typeof CollectibleSchema>;
@@ -239,7 +240,7 @@ export const PackCatalogEntrySchema = z.object({
 export type PackCatalogEntry = z.infer<typeof PackCatalogEntrySchema>;
 
 export const CollectionStateSchema = z.object({
-  albums: z.array(z.object({ slug: z.string(), title: z.string(), blurb: z.string(), total: z.number().int(), owned: z.number().int(), claimed: z.boolean() })),
+  albums: z.array(z.object({ slug: z.string(), title: z.string(), blurb: z.string(), kind: z.enum(['players', 'objects']).default('players'), total: z.number().int(), owned: z.number().int(), claimed: z.boolean() })),
   items: z.array(CollectibleSchema),
   tokens: z.record(z.number().int()),
   dust: z.number(),

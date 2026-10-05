@@ -1,38 +1,88 @@
+import { Ionicons } from '@expo/vector-icons';
 import { legendParams, legendSvg, type Collectible } from '@fm/shared';
-import { memo, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { memo, useEffect, useMemo, type ComponentProps } from 'react';
+import { Image, StyleSheet, View } from 'react-native';
+import Animated, {
+  Easing,
+  cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import { SvgXml } from 'react-native-svg';
 import { AppText, Led } from '@/design-system/components';
+import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { colors, radius, rarityColors } from '@/design-system/tokens';
+import { CARD_ART } from './cardArt';
 
-const POS_HE: Record<Collectible['position'], string> = { GK: 'שוער', DEF: 'הגנה', MID: 'קישור', FWD: 'התקפה' };
-const ERA_HE: Record<Collectible['era'], string> = { '70s': "שנות ה-70", '80s': "שנות ה-80", '90s': "שנות ה-90", '00s': "שנות ה-2000", modern: 'הדור החדש' };
+const POS_HE: Record<Collectible['position'], string> = { GK: 'שוער', DEF: 'הגנה', MID: 'קישור', FWD: 'התקפה', OBJ: 'פריט אספנים' };
+const ERA_HE: Record<Collectible['era'], string> = { '70s': 'שנות ה-70', '80s': 'שנות ה-80', '90s': 'שנות ה-90', '00s': 'שנות ה-2000', modern: 'הדור החדש' };
+const OBJ_ICON: Record<string, ComponentProps<typeof Ionicons>['name']> = {
+  stadiums: 'business',
+  shirts: 'shirt',
+  balls: 'football',
+  clubs: 'shield-half',
+  merch: 'gift',
+};
+const RANK = { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4, iconic: 5 } as const;
 
-/** Retro sticker: caricature art, number badge, name banner, rarity frame. */
+type CardItem = Pick<Collectible, 'id' | 'album' | 'number' | 'rarity' | 'name' | 'art_seed' | 'era' | 'position'> & {
+  kind?: Collectible['kind'];
+};
+
+/**
+ * Collectible sticker: illustrated art (or the drawn fallback), number badge,
+ * name banner and rarity frame. Rare and above get a moving foil shine;
+ * legendary and "מיתי" also sparkle. Motion is off when reduced motion is on.
+ */
 export const LegendCard = memo(function LegendCard({
   item,
   width = 104,
   locked = false,
 }: {
-  item: Pick<Collectible, 'number' | 'rarity' | 'name' | 'art_seed' | 'era' | 'position'>;
+  item: CardItem;
   width?: number;
   locked?: boolean;
 }) {
   const r = rarityColors[item.rarity];
   const artW = width - 8;
+  const artH = artW * 1.25;
+  const art = CARD_ART[item.id];
+  const isObject = item.kind === 'object' || item.position === 'OBJ';
   const xml = useMemo(
-    () => (locked ? null : legendSvg(legendParams(item.art_seed, item.era), r.fill, artW)),
-    [locked, item.art_seed, item.era, r.fill, artW],
+    () => (locked || art || isObject ? null : legendSvg(legendParams(item.art_seed, item.era), r.fill, artW)),
+    [locked, art, isObject, item.art_seed, item.era, r.fill, artW],
   );
   const big = width >= 180;
+  const rank = RANK[item.rarity];
   return (
     <View
       accessible
       accessibilityLabel={locked ? `משבצת ${item.number}, עוד לא באוסף` : `${item.name}, ${r.label}`}
-      style={[styles.card, { width, borderColor: locked ? colors.border : r.fill, borderStyle: locked ? 'dashed' : 'solid' }]}
+      style={[
+        styles.card,
+        { width, borderColor: locked ? colors.border : r.fill, borderStyle: locked ? 'dashed' : 'solid' },
+        !locked && rank >= 4 ? { shadowColor: r.fill, shadowOpacity: 0.8, shadowRadius: 10, elevation: 8 } : null,
+      ]}
     >
-      <View style={[styles.art, { height: artW * 1.25, backgroundColor: locked ? colors.bgDeep : r.lip }]}>
-        {xml ? <SvgXml xml={xml} width={artW} height={artW * 1.25} /> : <Led size={big ? 'ledXL' : 'ledL'} color={colors.border}>{item.number}</Led>}
+      <View style={[styles.art, { height: artH, backgroundColor: locked ? colors.bgDeep : r.lip }]}>
+        {locked ? (
+          <Led size={big ? 'ledXL' : 'ledL'} color={colors.border}>
+            {item.number}
+          </Led>
+        ) : art ? (
+          <Image source={art} style={{ width: artW, height: artH }} resizeMode="cover" accessibilityIgnoresInvertColors />
+        ) : xml ? (
+          <SvgXml xml={xml} width={artW} height={artH} />
+        ) : (
+          <Ionicons name={OBJ_ICON[item.album] ?? 'star'} size={artW * 0.45} color={r.fill} />
+        )}
+        {!locked && rank >= 2 ? <Foil width={artW} height={artH} strong={rank >= 3} /> : null}
+        {!locked && rank >= 4 ? <Sparkles width={artW} height={artH} color={rank === 5 ? '#FFFFFF' : r.fill} /> : null}
       </View>
       {!locked ? (
         <View style={[styles.num, { backgroundColor: r.fill }]}>
@@ -41,19 +91,20 @@ export const LegendCard = memo(function LegendCard({
           </AppText>
         </View>
       ) : null}
+      {!locked && rank === 5 ? (
+        <View style={styles.mythic}>
+          <AppText variant="caption" color={colors.textOnBright} style={styles.numText}>
+            {r.label}
+          </AppText>
+        </View>
+      ) : null}
       <View style={[styles.banner, { backgroundColor: locked ? colors.board : colors.card }]}>
-        <AppText
-          variant={big ? 'heading' : 'caption'}
-          color={locked ? colors.textDim : colors.cardText}
-          numberOfLines={1}
-          align="center"
-          style={styles.name}
-        >
+        <AppText variant={big ? 'heading' : 'caption'} color={locked ? colors.textDim : colors.cardText} numberOfLines={1} align="center" style={styles.name}>
           {locked ? '?' : item.name}
         </AppText>
         {big && !locked ? (
           <AppText variant="caption" color={colors.cardMuted} align="center">
-            {`${POS_HE[item.position]} · ${ERA_HE[item.era]} · ${r.label}`}
+            {isObject ? `${POS_HE.OBJ} · ${r.label}` : `${POS_HE[item.position]} · ${ERA_HE[item.era]} · ${r.label}`}
           </AppText>
         ) : null}
       </View>
@@ -61,10 +112,75 @@ export const LegendCard = memo(function LegendCard({
   );
 });
 
+/** A diagonal band of light that sweeps across the art every few seconds. */
+function Foil({ width, height, strong }: { width: number; height: number; strong: boolean }) {
+  const reduced = useReducedMotion();
+  const x = useSharedValue(-1);
+  useEffect(() => {
+    if (reduced) return;
+    x.value = withRepeat(
+      withSequence(withTiming(1, { duration: strong ? 1400 : 1800, easing: Easing.inOut(Easing.quad) }), withDelay(strong ? 1200 : 2600, withTiming(-1, { duration: 0 }))),
+      -1,
+    );
+    return () => cancelAnimation(x);
+  }, [reduced, strong, x]);
+  const style = useAnimatedStyle(() => ({ transform: [{ translateX: x.value * width * 1.3 }, { rotate: '20deg' }] }));
+  if (reduced) return null;
+  const a = strong ? 0.55 : 0.35;
+  return (
+    <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.clip]}>
+      <Animated.View style={[{ position: 'absolute', top: -height * 0.25, left: width * 0.25, width: width * 0.5, height: height * 1.5 }, style]}>
+        <LinearGradient
+          colors={['rgba(255,255,255,0)', `rgba(255,255,255,${a})`, 'rgba(255,255,255,0)']}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
+    </View>
+  );
+}
+
+const SPARKS = [
+  [0.15, 0.12, 0],
+  [0.8, 0.2, 500],
+  [0.25, 0.7, 900],
+  [0.7, 0.62, 300],
+  [0.5, 0.35, 1300],
+] as const;
+
+function Sparkles({ width, height, color }: { width: number; height: number; color: string }) {
+  const reduced = useReducedMotion();
+  if (reduced) return null;
+  return (
+    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      {SPARKS.map(([fx, fy, delay]) => (
+        <Spark key={`${fx}-${fy}`} x={fx * width} y={fy * height} delay={delay} size={Math.max(8, width * 0.09)} color={color} />
+      ))}
+    </View>
+  );
+}
+
+function Spark({ x, y, delay, size, color }: { x: number; y: number; delay: number; size: number; color: string }) {
+  const t = useSharedValue(0);
+  useEffect(() => {
+    t.value = withDelay(delay, withRepeat(withSequence(withTiming(1, { duration: 450 }), withTiming(0, { duration: 650 }), withTiming(0, { duration: 900 })), -1));
+    return () => cancelAnimation(t);
+  }, [delay, t]);
+  const style = useAnimatedStyle(() => ({ opacity: t.value, transform: [{ scale: 0.4 + t.value * 0.8 }, { rotate: `${t.value * 90}deg` }] }));
+  return (
+    <Animated.View style={[{ position: 'absolute', left: x - size / 2, top: y - size / 2 }, style]}>
+      <Ionicons name="sparkles" size={size} color={color} />
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
-  card: { borderWidth: 3, borderRadius: radius.sticker, overflow: 'hidden', backgroundColor: colors.board, padding: 2 },
+  card: { borderWidth: 3, borderRadius: radius.sticker, backgroundColor: colors.board, padding: 2 },
   art: { borderRadius: radius.sticker - 4, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
+  clip: { overflow: 'hidden' },
   num: { position: 'absolute', top: 6, start: 6, minWidth: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
+  mythic: { position: 'absolute', top: 6, end: 6, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6, backgroundColor: '#FFFFFF' },
   numText: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
   banner: { paddingVertical: 4, paddingHorizontal: 4, borderBottomLeftRadius: radius.sticker - 4, borderBottomRightRadius: radius.sticker - 4, marginTop: 2 },
   name: { fontFamily: 'IBMPlexSansHebrew_700Bold' },

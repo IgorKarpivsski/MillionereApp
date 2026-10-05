@@ -79,7 +79,7 @@ export const rarityColors = {
   rare: { fill: palette.sky, lip: palette.skyDeep, label: 'נדיר' },
   epic: { fill: palette.violet, lip: palette.violetDeep, label: 'אפי' },
   legendary: { fill: palette.gold, lip: palette.goldDeep, label: 'אגדי' },
-  iconic: { fill: palette.flare, lip: palette.flareDeep, label: 'אייקוני' },
+  iconic: { fill: palette.flare, lip: palette.flareDeep, label: 'מיתי' },
 } as const;
 
 export type ColorToken = keyof typeof colors;
