@@ -1,0 +1,34 @@
+name: Fetch art
+
+# Downloads generated art listed in tools/art/urls.txt ("<dest path> <url>" per line)
+# and commits it to the data-fetch branch. Used for AI-generated card art.
+on:
+  workflow_dispatch:
+  push:
+    branches: [data-fetch]
+    paths: ['tools/art/urls.txt', '.github/workflows/fetch-art.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download
+        run: |
+          while read -r dest url; do
+            [ -z "$dest" ] && continue
+            case "$dest" in \#*) continue;; esac
+            [ -f "$dest" ] && continue
+            mkdir -p "$(dirname "$dest")"
+            for i in 1 2 3; do curl -sSfL --max-time 120 -o "$dest" "$url" && break; sleep 5; done || echo "::warning::failed $dest"
+          done < tools/art/urls.txt
+      - name: Commit
+        run: |
+          git config user.name "football-data-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add art || true
+          git commit -m "art $(date -u +%Y-%m-%dT%H:%MZ)" || echo "no changes"
+          git pull --rebase && git push
