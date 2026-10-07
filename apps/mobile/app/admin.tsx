@@ -13,6 +13,8 @@ import { requestId } from '@/features/collection/api';
 import { PACK_NAMES } from '@/features/collection/PackArt';
 import { RewardIcon, rewardLabel } from '@/features/engage/rewards';
 import { SegmentTabs } from '@/features/league/LeagueView';
+import { useRefreshEconomy } from '@/features/engage/hooks';
+import { useMyState } from '@/features/profile/hooks';
 import { formatNumber } from '@/lib/format';
 import { fmt, strings } from '@/lib/i18n';
 
@@ -90,11 +92,24 @@ function GiveTab() {
   const [busy, setBusy] = useState(false);
   const toast = useToast();
   const qc = useQueryClient();
+  const refresh = useRefreshEconomy();
   useEffect(() => {
     const id = setTimeout(() => setDebounced(q.trim()), 350);
     return () => clearTimeout(id);
   }, [q]);
   const found = useQuery({ queryKey: ['admin-find', debounced], queryFn: () => adminApi.find(debounced), enabled: debounced.length >= 2 });
+  const { data: mine } = useMyState();
+  const meAsPlayer: AdminPlayer | null = mine
+    ? {
+        id: mine.profile.id,
+        username: mine.profile.username,
+        avatar_id: mine.profile.avatar_id,
+        level: mine.profile.level,
+        friend_code: null,
+        coins: mine.wallet.coins,
+        gems: mine.wallet.gems,
+      }
+    : null;
 
   const give = () => {
     if (!player) return;
@@ -107,6 +122,7 @@ function GiveTab() {
           setBusy(true);
           try {
             await adminApi.grant(player.id, reward, note, requestId());
+            if (player.id === mine?.profile.id) refresh();
             haptic('success');
             toast(fmt(t.given, { label, name: player.username }), 'success');
             setNote('');
@@ -124,6 +140,15 @@ function GiveTab() {
 
   return (
     <View style={styles.gap}>
+      {meAsPlayer ? (
+        <StickerButton
+          label={fmt(t.toMe, { name: meAsPlayer.username })}
+          icon="person-circle"
+          tone={player?.id === meAsPlayer.id ? 'prize' : 'outline'}
+          fullWidth
+          onPress={() => setPlayer(meAsPlayer)}
+        />
+      ) : null}
       <TextInput
         value={q}
         onChangeText={setQ}
@@ -144,7 +169,7 @@ function GiveTab() {
         >
           <AvatarBadge avatarId={p.avatar_id} level={p.level} size={40} />
           <View style={styles.flex}>
-            <AppText variant="label">{p.username}</AppText>
+            <AppText variant="label">{p.id === mine?.profile.id ? `${p.username} (${t.thisIsYou})` : p.username}</AppText>
             <AppText variant="caption" color={colors.textDim}>
               {`${p.friend_code ?? '------'}   ${formatNumber(p.coins)} ${strings.common.coins}   ${formatNumber(p.gems)} ${strings.common.gems}`}
             </AppText>

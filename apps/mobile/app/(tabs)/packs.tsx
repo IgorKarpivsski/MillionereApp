@@ -89,12 +89,23 @@ export default function PacksScreen() {
         return (
           <Card key={p.slug} kind={tokens > 0 ? 'sticker' : 'panel'} padding={space.md}>
             <View style={styles.packRow}>
-              <PackArt slug={p.slug} width={70} />
+              <PackArt slug={p.slug} width={84} />
               <View style={styles.flex}>
                 <AppText variant="heading">{PACK_NAMES[p.slug]}</AppText>
-                <AppText variant="caption" color={colors.textDim}>
-                  {fmt(t.items, { n: p.items })}
-                </AppText>
+                <View style={styles.chips}>
+                  <View style={styles.countChip}>
+                    <AppText variant="label" color={colors.textOnBright}>
+                      {fmt(t.items, { n: p.items })}
+                    </AppText>
+                  </View>
+                  {p.guaranteed ? (
+                    <View style={[styles.countChip, { backgroundColor: rarityColors[p.guaranteed].fill }]}>
+                      <AppText variant="caption" color={colors.textOnBright} style={styles.bold}>
+                        {fmt(t.guaranteedShort, { rarity: rarityColors[p.guaranteed].label })}
+                      </AppText>
+                    </View>
+                  ) : null}
+                </View>
                 {tokens > 0 ? (
                   <AppText variant="label" color={colors.correct}>
                     {fmt(t.owned, { n: tokens })}
@@ -139,4 +150,7 @@ const styles = StyleSheet.create({
   odds: { gap: space.sm },
   oddsRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   swatch: { width: 18, height: 18, borderRadius: 6 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.xs, marginTop: space.xxs },
+  countChip: { paddingHorizontal: space.sm, paddingVertical: 2, borderRadius: 999, backgroundColor: colors.led },
+  bold: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
 });

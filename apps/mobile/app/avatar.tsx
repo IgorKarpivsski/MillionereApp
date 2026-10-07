@@ -13,12 +13,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { memo, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
-import Animated, { ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgXml } from 'react-native-svg';
 import { AppText, StickerButton, useToast } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
-import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound } from '@/design-system/feedback/sound';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { useMyState, useUpdateProfile } from '@/features/profile/hooks';
@@ -146,7 +144,6 @@ export default function AvatarScreen() {
   const [buying, setBuying] = useState(false);
   const save = useUpdateProfile();
   const toast = useToast();
-  const reduced = useReducedMotion();
   const { width } = useWindowDimensions();
   const [spec, setSpec] = useState<AvatarSpec | null>(null);
   const [tab, setTab] = useState<AvatarSlot>('species');
@@ -202,7 +199,6 @@ export default function AvatarScreen() {
       toast(t.passOnly, 'info');
       return;
     }
-    if (shopPrice(tab, v)) toast(t.tryOn, 'info');
     haptic('select');
     playSound('tap');
     setSpec({ ...spec, [tab]: v });
@@ -251,11 +247,11 @@ export default function AvatarScreen() {
 
       <View style={styles.stage}>
         <View style={styles.spot} />
-        <Animated.View key={code} entering={reduced ? undefined : ZoomIn.springify().damping(14)}>
+        <View>
           <View accessible accessibilityRole="image" accessibilityLabel={`${t.preview}: ${optionLabel('species', spec.species)}`}>
             <SvgXml xml={bigXml} width={170} height={170} />
           </View>
-        </Animated.View>
+        </View>
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabs} style={styles.tabsBar}>
