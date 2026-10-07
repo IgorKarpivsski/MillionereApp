@@ -5,7 +5,10 @@ import { LADDER } from '@fm/economy-config';
 import type { LifelineKind, ReportReason } from '@fm/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
+import * as StoreReview from 'expo-store-review';
+import { askForRemindersOnce } from '@/features/reminders/useReminders';
+import { useSettingsStore } from '@/features/settings/store';
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -130,6 +133,28 @@ function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => voi
   const sum = s.summary!;
   const won = daily ? sum.correct >= 6 : sum.status === 'won';
   const rival = daily ? 10 - sum.correct : sum.status === 'lost' || sum.status === 'timed_out' ? 1 : 0;
+  useEffect(() => {
+    // After a finished game (never on first launch): ask once for reminders,
+    // and after a good result, once ever, for a store rating.
+    void askForRemindersOnce();
+    const good = daily ? sum.correct >= 7 : sum.correct >= 6;
+    if (!good || useSettingsStore.getState().reviewAsked) return;
+    const id = setTimeout(async () => {
+      try {
+        if (await StoreReview.isAvailableAsync()) {
+          useSettingsStore.getState().set({ reviewAsked: true });
+          await StoreReview.requestReview();
+        }
+      } catch {
+        // ignore
+      }
+    }, 1800);
+    return () => clearTimeout(id);
+  }, [daily, sum.correct]);
+  const shareResult = () =>
+    void Share.share({
+      message: daily ? fmt(strings.share.daily, { n: sum.correct }) : fmt(strings.share.classic, { n: sum.correct, p: formatNumber(sum.prize_points) }),
+    });
   return (
     <ScrollView contentContainerStyle={styles.result}>
       <Animated.View entering={reduced ? undefined : ZoomIn.springify().damping(12)}>
@@ -193,6 +218,7 @@ function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => voi
         ) : null}
       </Card>
 
+      <StickerButton label={strings.share.cta} icon="share-social" tone="outline" fullWidth onPress={shareResult} />
       {daily ? (
         <StickerButton label={t.toClassic} icon="football" size="lg" fullWidth onPress={() => router.replace('/quiz')} />
       ) : (

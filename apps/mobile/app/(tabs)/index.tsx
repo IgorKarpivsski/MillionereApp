@@ -26,6 +26,7 @@ import { useDailyStatus, useLeaderboard } from '@/features/quiz/hooks';
 import { useUnreadTotal } from '@/features/social/hooks';
 import { useLeague } from '@/features/league/api';
 import { LeagueBadge } from '@/features/league/LeagueBadge';
+import { LoginCalendar } from '@/features/engage/LoginCalendar';
 import { useCollection } from '@/features/collection/hooks';
 import { PackArt } from '@/features/collection/PackArt';
 import { useClaimWelcomeBonus, useMyState } from '@/features/profile/hooks';
@@ -260,6 +261,7 @@ export default function HomeScreen() {
       {isLoading ? <Skeleton height={140} rounded={18} /> : null}
       {data && !data.welcome_bonus_claimed ? <WelcomeBonus /> : null}
 
+      <LoginCalendar />
       <PlayNowHero />
       <MatchOfTheDay />
       <DailyExtras />

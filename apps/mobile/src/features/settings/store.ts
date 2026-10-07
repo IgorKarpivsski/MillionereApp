@@ -22,6 +22,7 @@ interface SettingsState {
   remindersAsked: boolean;
   /** Last league week whose result popup was shown. */
   leagueSeenWeek: string | null;
+  reviewAsked: boolean;
   set: (patch: Partial<Omit<SettingsState, 'set' | 'hydrateFromServer'>>) => void;
   hydrateFromServer: (s: Settings) => void;
 }
@@ -38,6 +39,7 @@ export const useSettingsStore = create<SettingsState>()(
       reminders: true,
       remindersAsked: false,
       leagueSeenWeek: null,
+      reviewAsked: false,
       set: (patch) => set(patch),
       hydrateFromServer: (s) =>
         set({ sound: s.sound, music: s.music, haptics: s.haptics, reducedMotion: s.reduced_motion, extendedTime: s.extended_time }),
@@ -45,7 +47,7 @@ export const useSettingsStore = create<SettingsState>()(
     {
       name: 'fm.settings.v1',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: ({ sound, music, haptics, reducedMotion, largeText, extendedTime, reminders, remindersAsked, leagueSeenWeek }) => ({
+      partialize: ({ sound, music, haptics, reducedMotion, largeText, extendedTime, reminders, remindersAsked, leagueSeenWeek, reviewAsked }) => ({
         sound,
         music,
         haptics,
@@ -55,6 +57,7 @@ export const useSettingsStore = create<SettingsState>()(
         reminders,
         remindersAsked,
         leagueSeenWeek,
+        reviewAsked,
       }),
     },
   ),
