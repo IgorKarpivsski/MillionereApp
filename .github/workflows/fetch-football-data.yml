@@ -23,7 +23,8 @@ jobs:
       - run: |
           [ -f data/wikidata/players_famous.json ] || node tools/question-gen/fetch-wikidata.mjs
           [ -f data/wikidata/wiki_titles.json ] || node tools/question-gen/fetch-wikidata-2.mjs
-          node tools/question-gen/fetch-wikidata-3.mjs
+          [ -f data/wikidata/refs_people.json ] || node tools/question-gen/fetch-wikidata-3.mjs
+          node tools/question-gen/fetch-wikidata-4.mjs
       - name: Commit data
         run: |
           git config user.name "football-data-bot"
