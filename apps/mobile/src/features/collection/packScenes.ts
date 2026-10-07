@@ -110,7 +110,7 @@ function scene(tier: PackTier, th: Theme, uid: string): string {
   }
 }
 
-export function packSvg(tier: PackTier, width = 100, uid = tier): string {
+export function packSvg(tier: PackTier, width = 100, uid: string = tier): string {
   const th = THEMES[tier];
   const [d, m, l] = th.foil;
   const h = width * 1.45;
