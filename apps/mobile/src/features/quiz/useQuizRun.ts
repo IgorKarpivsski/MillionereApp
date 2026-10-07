@@ -98,6 +98,7 @@ export function useQuizRun(mode: QuizMode = 'classic') {
       void qc.invalidateQueries({ queryKey: queryKeys.myState });
       void qc.invalidateQueries({ queryKey: queryKeys.daily });
       void qc.invalidateQueries({ queryKey: queryKeys.leaderboard });
+      void qc.invalidateQueries({ queryKey: queryKeys.league });
       void qc.invalidateQueries({ queryKey: queryKeys.collection });
       void qc.invalidateQueries({ queryKey: queryKeys.energy });
       void qc.invalidateQueries({ queryKey: queryKeys.pass });

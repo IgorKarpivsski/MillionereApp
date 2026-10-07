@@ -24,6 +24,8 @@ import { usePlayClassic } from '@/features/engage/EnergySheet';
 import { useCountdownTo, usePass, useWheel } from '@/features/engage/hooks';
 import { useDailyStatus, useLeaderboard } from '@/features/quiz/hooks';
 import { useUnreadTotal } from '@/features/social/hooks';
+import { useLeague } from '@/features/league/api';
+import { LeagueBadge } from '@/features/league/LeagueBadge';
 import { useCollection } from '@/features/collection/hooks';
 import { PackArt } from '@/features/collection/PackArt';
 import { useClaimWelcomeBonus, useMyState } from '@/features/profile/hooks';
@@ -185,6 +187,28 @@ function DailyExtras() {
   );
 }
 
+function LeagueEntry() {
+  const { data } = useLeague();
+  if (!data) return null;
+  const me = data.rows.find((r) => r.me);
+  const label = me && data.rows.length > 1 ? fmt(strings.league.homeTile, { name: data.tier_name, r: me.rank }) : fmt(strings.league.homeTileNoRank, { name: data.tier_name });
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.friends, pressed && styles.pressed]}
+      onPress={() => router.push('/(tabs)/leaderboard')}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+    >
+      <LinearGradient colors={['#2A1D52', '#123F31']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
+      <LeagueBadge tier={data.tier} size={44} />
+      <AppText variant="label" style={styles.flex}>
+        {label}
+      </AppText>
+      <Ionicons name="chevron-back" size={22} color={colors.text} />
+    </Pressable>
+  );
+}
+
 function FriendsEntry() {
   const unread = useUnreadTotal();
   return (
@@ -231,6 +255,7 @@ export default function HomeScreen() {
 
       <MatchOfTheDay />
       <DailyExtras />
+      <LeagueEntry />
       <FriendsEntry />
       {daily?.state === 'done' ? null : <ClassicCard />}
       {packsWaiting > 0 ? (

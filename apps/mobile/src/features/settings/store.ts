@@ -20,6 +20,8 @@ interface SettingsState {
   /** Local reminder notifications (wheel, streak, tickets). Device-only. */
   reminders: boolean;
   remindersAsked: boolean;
+  /** Last league week whose result popup was shown. */
+  leagueSeenWeek: string | null;
   set: (patch: Partial<Omit<SettingsState, 'set' | 'hydrateFromServer'>>) => void;
   hydrateFromServer: (s: Settings) => void;
 }
@@ -35,6 +37,7 @@ export const useSettingsStore = create<SettingsState>()(
       extendedTime: false,
       reminders: true,
       remindersAsked: false,
+      leagueSeenWeek: null,
       set: (patch) => set(patch),
       hydrateFromServer: (s) =>
         set({ sound: s.sound, music: s.music, haptics: s.haptics, reducedMotion: s.reduced_motion, extendedTime: s.extended_time }),
@@ -42,7 +45,7 @@ export const useSettingsStore = create<SettingsState>()(
     {
       name: 'fm.settings.v1',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: ({ sound, music, haptics, reducedMotion, largeText, extendedTime, reminders, remindersAsked }) => ({
+      partialize: ({ sound, music, haptics, reducedMotion, largeText, extendedTime, reminders, remindersAsked, leagueSeenWeek }) => ({
         sound,
         music,
         haptics,
@@ -51,6 +54,7 @@ export const useSettingsStore = create<SettingsState>()(
         extendedTime,
         reminders,
         remindersAsked,
+        leagueSeenWeek,
       }),
     },
   ),

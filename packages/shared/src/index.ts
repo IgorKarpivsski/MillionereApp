@@ -423,3 +423,42 @@ export const ChatReportReasonSchema = z.enum(['rude', 'bullying', 'personal_info
 export type ChatReportReason = z.infer<typeof ChatReportReasonSchema>;
 export const FriendDupesSchema = z.array(FriendDupeSchema);
 export * from './avatar';
+
+/* -------------------------------------------------------------------------- */
+/* Weekly leagues — mirrors supabase/migrations/*_leagues.sql                 */
+/* -------------------------------------------------------------------------- */
+export const LeagueResultSchema = z.object({
+  week: z.string(),
+  from_tier: z.number().int(),
+  to_tier: z.number().int(),
+  rank: z.number().int(),
+  members: z.number().int(),
+  points: z.number(),
+  coins: z.number().int(),
+  gems: z.number().int(),
+});
+export type LeagueResult = z.infer<typeof LeagueResultSchema>;
+
+export const LeagueStateSchema = z.object({
+  week_start: z.string(),
+  seconds_left: z.number().int(),
+  tier: z.number().int().min(0).max(4),
+  tier_name: z.string(),
+  tiers: z.array(z.string()),
+  promote: z.number().int(),
+  demote: z.number().int(),
+  rewards: z.array(z.object({ upto: z.number().int(), coins: z.number().int(), gems: z.number().int() })),
+  tier_bonus: z.number(),
+  rows: z.array(
+    z.object({
+      rank: z.number().int(),
+      username: z.string(),
+      avatar_id: z.string(),
+      level: z.number().int(),
+      points: z.number(),
+      me: z.boolean(),
+    }),
+  ),
+  last_result: LeagueResultSchema.nullable(),
+});
+export type LeagueState = z.infer<typeof LeagueStateSchema>;

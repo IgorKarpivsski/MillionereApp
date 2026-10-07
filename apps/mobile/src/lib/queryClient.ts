@@ -20,6 +20,7 @@ export const queryKeys = {
   myState: ['my-state'] as const,
   daily: ['daily-status'] as const,
   leaderboard: ['leaderboard-week'] as const,
+  league: ['league'] as const,
   collection: ['collection'] as const,
   store: ['store'] as const,
   energy: ['energy'] as const,
