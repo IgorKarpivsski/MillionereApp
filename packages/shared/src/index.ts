@@ -104,9 +104,19 @@ export const QuizHintsSchema = z
   .passthrough();
 export type QuizHints = z.infer<typeof QuizHintsSchema>;
 
+/** Picture questions: where to drop the pin on a bundled base map (see ./maps). */
+export const QuestionImageSchema = z.object({
+  kind: z.literal('map'),
+  map: z.enum(['israel', 'europe']),
+  lon: z.number(),
+  lat: z.number(),
+});
+export type QuestionImage = z.infer<typeof QuestionImageSchema>;
+
 export const QuizQuestionSchema = z.object({
   id: z.string(),
   text: z.string(),
+  image: QuestionImageSchema.nullable().optional(),
   category: z.string(),
   category_name: z.string().nullable(),
   difficulty: z.enum(['easy', 'medium', 'hard', 'expert', 'legendary']),
@@ -207,6 +217,7 @@ export const LeaderboardSchema = z.object({
 export type Leaderboard = z.infer<typeof LeaderboardSchema>;
 
 export * from './legendArt';
+export * from './maps';
 
 /* -------------------------------------------------------------------------- */
 /* Album ("אגדות") — mirrors supabase/migrations/*_collection.sql             */
@@ -283,6 +294,7 @@ export const MatchStateSchema = z.object({
     .object({
       id: z.string(),
       text: z.string(),
+      image: QuestionImageSchema.nullable().optional(),
       category_name: z.string().nullable(),
       answers: z.array(z.object({ slot: z.number().int(), text: z.string() })),
     })

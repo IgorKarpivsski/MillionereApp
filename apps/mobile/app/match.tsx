@@ -15,6 +15,7 @@ import { RpcError } from '@/features/profile/api';
 import { AnswerTile, type AnswerState } from '@/features/quiz/ui';
 import { queryKeys } from '@/lib/queryClient';
 import { fmt, strings } from '@/lib/i18n';
+import { QuestionMap } from '@/features/quiz/QuestionMap';
 
 const t = strings.match;
 
@@ -308,6 +309,7 @@ export default function MatchScreen() {
             <AppText variant="question" color={colors.cardText}>
               {q.text}
             </AppText>
+            {q.image ? <QuestionMap image={q.image} height={160} /> : null}
           </Animated.View>
         ) : null}
         <View style={styles.grid}>

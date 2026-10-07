@@ -29,6 +29,7 @@ import { AnswerTile, LifelineButton, type AnswerState } from '@/features/quiz/ui
 import { useQuizRun, type QuizRunState } from '@/features/quiz/useQuizRun';
 import { formatNumber } from '@/lib/format';
 import { fmt, strings } from '@/lib/i18n';
+import { QuestionMap } from '@/features/quiz/QuestionMap';
 
 const t = strings.quiz;
 
@@ -427,6 +428,7 @@ export default function QuizScreen() {
           <AppText variant="question" color={colors.cardText}>
             {q.text}
           </AppText>
+          {q.image ? <QuestionMap image={q.image} /> : null}
         </Animated.View>
 
         <View style={styles.grid}>
