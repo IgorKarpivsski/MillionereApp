@@ -20,8 +20,8 @@ export const AVATAR_SLOTS = [
   { key: 'hairColor', count: 12 },
   { key: 'outfit', count: 6 },
   { key: 'outfitColor', count: 12 },
-  { key: 'bg', count: 10 },
-  { key: 'accessory', count: 10 },
+  { key: 'bg', count: 14 },
+  { key: 'accessory', count: 18 },
 ] as const;
 
 export type AvatarSlot = (typeof AVATAR_SLOTS)[number]['key'];
@@ -32,6 +32,17 @@ export type Species = (typeof SPECIES)[number];
 
 /** Accessories that must be earned (season pass). Value = cosmetic item id. */
 export const PREMIUM_ACCESSORIES: Readonly<Record<number, string>> = { 8: 'avatar_shades', 9: 'avatar_crown' };
+
+/**
+ * Items sold in the avatar shop (prices live on the server: app_config 'avatar.shop').
+ * Cosmetic id = avatar_<slot>_<base36 value>, e.g. avatar_acc_a.
+ */
+export const SHOP_ACCESSORIES = [10, 11, 12, 13, 14, 15, 16, 17] as const;
+export const SHOP_BACKGROUNDS = [10, 11, 12, 13] as const;
+export function cosmeticFor(slot: 'accessory' | 'bg', value: number): string | null {
+  if (slot === 'accessory') return PREMIUM_ACCESSORIES[value] ?? (value >= 10 ? `avatar_acc_${value.toString(36)}` : null);
+  return value >= 10 ? `avatar_bg_${value.toString(36)}` : null;
+}
 
 export const AVATAR_CODE_REGEX = /^av1_[0-9a-z]{12}$/;
 const B36 = '0123456789abcdefghijklmnopqrstuvwxyz';
@@ -75,7 +86,8 @@ export function specFromAvatarId(avatarId: string): AvatarSpec {
 export function randomAvatar(rand: () => number = Math.random): AvatarSpec {
   const out = {} as AvatarSpec;
   for (const { key, count } of AVATAR_SLOTS) out[key] = Math.floor(rand() * count);
-  if (PREMIUM_ACCESSORIES[out.accessory]) out.accessory = 0;
+  if (cosmeticFor('accessory', out.accessory)) out.accessory = 0;
+  if (cosmeticFor('bg', out.bg)) out.bg = out.bg % 10;
   return out;
 }
 
@@ -92,7 +104,34 @@ export const AVATAR_OUTFIT = ['#FFB000', '#3DDC84', '#FF5A4E', '#7FD1FF', '#B49C
 export const AVATAR_BG: ReadonlyArray<[string, string]> = [
   ['#FFE08A', '#FFB000'], ['#9FF0C1', '#3DDC84'], ['#FFB3AC', '#FF5A4E'], ['#BDE8FF', '#7FD1FF'], ['#DCD0FF', '#B49CFF'],
   ['#FFD0A8', '#FF8A3D'], ['#FFC6E3', '#FF6FB5'], ['#2A5A49', '#0B2B22'], ['#F7F3E8', '#D9CFB8'], ['#B8C3FF', '#5C7CFF'],
+  // shop backgrounds: gold rays, galaxy, stadium lights, fire
+  ['#FFF1A8', '#FFB000'], ['#5B3FA8', '#120B2E'], ['#1F5C45', '#06130F'], ['#FFD45A', '#E8371F'],
 ];
+
+/** Extra art layered on the shop backgrounds. */
+function bgDecor(bg: number): string {
+  switch (bg) {
+    case 10:
+      return Array.from({ length: 12 }, (_, i) => {
+        const a = (i * Math.PI) / 6, b = a + Math.PI / 14;
+        return `<path d="M50 45 L${(50 + 90 * Math.cos(a)).toFixed(1)} ${(45 + 90 * Math.sin(a)).toFixed(1)} L${(50 + 90 * Math.cos(b)).toFixed(1)} ${(45 + 90 * Math.sin(b)).toFixed(1)} Z" fill="#FFF8D0" opacity="0.45"/>`;
+      }).join('');
+    case 11:
+      return [[10, 12, 1.2], [24, 30, 0.8], [80, 10, 1.5], [90, 40, 0.9], [70, 24, 0.7], [14, 52, 1], [35, 8, 0.9], [62, 6, 1.1], [88, 78, 1.3], [8, 86, 0.9]]
+        .map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#FFF" opacity="0.9"/>`).join('') +
+        `<path d="M84 22 l1.2 2.6 2.8 .3 -2.1 1.9 .6 2.8 -2.5 -1.4 -2.5 1.4 .6 -2.8 -2.1 -1.9 2.8 -.3 Z" fill="#FFE08A"/>` +
+        `<ellipse cx="22" cy="20" rx="12" ry="5" fill="#B49CFF" opacity="0.35" transform="rotate(-20 22 20)"/>`;
+    case 12:
+      return `<path d="M4 0 L18 0 L52 100 L30 100 Z" fill="#FFFBE0" opacity="0.18"/><path d="M82 0 L96 0 L70 100 L48 100 Z" fill="#FFFBE0" opacity="0.18"/>` +
+        `<rect x="2" y="2" width="16" height="7" rx="2" fill="#FFF8D0"/><rect x="82" y="2" width="16" height="7" rx="2" fill="#FFF8D0"/>` +
+        `<path d="M0 88 Q50 80 100 88 L100 100 L0 100 Z" fill="#3DDC84" opacity="0.5"/>`;
+    case 13:
+      return `<path d="M0 100 L0 74 Q8 60 12 72 Q16 52 24 66 Q30 50 36 68 Q44 56 48 72 Q56 54 62 70 Q68 52 74 68 Q82 56 86 72 Q94 58 100 70 L100 100 Z" fill="#FF5A4E" opacity="0.75"/>` +
+        `<path d="M0 100 L0 86 Q10 76 16 86 Q24 72 32 86 Q42 74 50 86 Q60 72 68 86 Q78 74 86 86 Q94 76 100 84 L100 100 Z" fill="#FFB000" opacity="0.8"/>`;
+    default:
+      return '';
+  }
+}
 
 // ---------------------------------------------------------------- drawing
 
@@ -336,6 +375,48 @@ function accessorySvg(kind: number, eyeY: number, sp: Species, outfit: string): 
       return `<path d="M33 22 L35 6 L42.5 14 L50 3 L57.5 14 L65 6 L67 22 Z" fill="#FFC93C" stroke="#A86F00" stroke-width="1.5" stroke-linejoin="round"/>` +
         `<rect x="33" y="19" width="34" height="5" rx="2" fill="#FFB000" stroke="#A86F00" stroke-width="1.3"/>` +
         `<circle cx="50" cy="12" r="2.2" fill="#FF5A4E"/><circle cx="41" cy="21.5" r="1.6" fill="#7FD1FF"/><circle cx="59" cy="21.5" r="1.6" fill="#3DDC84"/>`;
+    case 10: // headphones
+      return `<path d="M22 46 Q20 10 50 10 Q80 10 78 46" fill="none" stroke="${INK}" stroke-width="4.5" stroke-linecap="round"/>` +
+        `<path d="M22 46 Q20 10 50 10 Q80 10 78 46" fill="none" stroke="${outfit}" stroke-width="2.4" stroke-linecap="round"/>` +
+        `<rect x="15" y="40" width="11" height="18" rx="5" fill="${outfit}" stroke="${INK}" stroke-width="1.6"/>` +
+        `<rect x="74" y="40" width="11" height="18" rx="5" fill="${outfit}" stroke="${INK}" stroke-width="1.6"/>` +
+        `<rect x="17.5" y="44" width="3" height="10" rx="1.5" fill="#fff" opacity="0.6"/>`;
+    case 11: { // striped scarf
+      const st = shade(outfit, 0.6);
+      return `<path d="M33 72 Q50 82 67 72 L69 79 Q50 90 31 79 Z" fill="${outfit}" stroke="${INK}" stroke-width="1.5" stroke-linejoin="round"/>` +
+        `<path d="M58 80 L64 99 L72 97 L66 78 Z" fill="${outfit}" stroke="${INK}" stroke-width="1.5" stroke-linejoin="round"/>` +
+        `<path d="M40 77 L42 84 M50 79 L50 86 M60 77 L58 84 M61 86 L68 84 M63 92 L70 90" stroke="${st}" stroke-width="2.2"/>`;
+    }
+    case 12: { // star glasses
+      const star = (cx: number) => Array.from({ length: 10 }, (_, i) => {
+        const a = (Math.PI / 5) * i - Math.PI / 2, r = i % 2 ? 4.4 : 9.5;
+        return `${(cx + r * Math.cos(a)).toFixed(1)},${(eyeY + 0.5 + r * Math.sin(a)).toFixed(1)}`;
+      }).join(' ');
+      return `<polygon points="${star(40)}" fill="#FFC93C" stroke="${INK}" stroke-width="1.4" stroke-linejoin="round"/>` +
+        `<polygon points="${star(60)}" fill="#FFC93C" stroke="${INK}" stroke-width="1.4" stroke-linejoin="round"/>` +
+        `<circle cx="40" cy="${eyeY + 0.5}" r="3.4" fill="#2B2420" opacity="0.85"/><circle cx="60" cy="${eyeY + 0.5}" r="3.4" fill="#2B2420" opacity="0.85"/>` +
+        `<path d="M48.5 ${eyeY - 1} L51.5 ${eyeY - 1}" stroke="${INK}" stroke-width="2"/>`;
+    }
+    case 13: // bucket hat
+      return `<path d="M28 30 Q28 10 50 10 Q72 10 72 30 Z" fill="${outfit}" stroke="${INK}" stroke-width="1.6"/>` +
+        `<path d="M16 34 Q50 22 84 34 Q84 38 78 38 Q50 30 22 38 Q16 38 16 34 Z" fill="${shade(outfit, -0.15)}" stroke="${INK}" stroke-width="1.6" stroke-linejoin="round"/>` +
+        `<path d="M29 26 Q50 22 71 26" stroke="${shade(outfit, 0.5)}" stroke-width="2" fill="none"/>`;
+    case 14: // hero mask
+      return `<path d="M26 ${eyeY - 7} Q50 ${eyeY - 11} 74 ${eyeY - 7} L72 ${eyeY + 6} Q60 ${eyeY + 9} 50 ${eyeY + 3} Q40 ${eyeY + 9} 28 ${eyeY + 6} Z ` +
+        `M35 ${eyeY} a5 4.5 0 1 0 10 0 a5 4.5 0 1 0 -10 0 Z M55 ${eyeY} a5 4.5 0 1 0 10 0 a5 4.5 0 1 0 -10 0 Z" fill="${outfit}" fill-rule="evenodd" stroke="${INK}" stroke-width="1.4"/>` +
+        `<path d="M74 ${eyeY - 5} L84 ${eyeY - 9} M74 ${eyeY} L85 ${eyeY + 1}" stroke="${outfit}" stroke-width="2.6" stroke-linecap="round"/>`;
+    case 15: // halo
+      return `<ellipse cx="50" cy="8" rx="16" ry="4.5" fill="none" stroke="#FFE08A" stroke-width="3.4"/>` +
+        `<ellipse cx="50" cy="8" rx="16" ry="4.5" fill="none" stroke="#FFF8D0" stroke-width="1.2"/>`;
+    case 16: { // bandana
+      const dots = [[34, 28], [44, 24.5], [56, 24.5], [66, 28]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.3" fill="#fff"/>`).join('');
+      return `<path d="M24 34 Q24 16 50 16 Q76 16 76 34 Q50 24 24 34 Z" fill="${outfit}" stroke="${INK}" stroke-width="1.5"/>` + dots +
+        `<path d="M75 31 L86 26 L83 36 Z M75 31 L87 34 L80 40 Z" fill="${outfit}" stroke="${INK}" stroke-width="1.3" stroke-linejoin="round"/>`;
+    }
+    case 17: // party hat
+      return `<g transform="rotate(8 52 12)"><path d="M38 22 L53 0 L66 20 Z" fill="${outfit}" stroke="${INK}" stroke-width="1.5" stroke-linejoin="round"/>` +
+        `<path d="M45 13 L59 10 M49 6 L56 4.5" stroke="#fff" stroke-width="2"/>` +
+        `<circle cx="53" cy="0.5" r="3.6" fill="#FFC93C" stroke="${INK}" stroke-width="1.2"/></g>`;
     default: return '';
   }
 }
@@ -463,6 +544,7 @@ export function avatarSvg(spec: AvatarSpec, opts: { size?: number; uid?: string;
   );
   parts.push(`<g${opts.round ? ` clip-path="url(#rc${uid})"` : ''}>`);
   parts.push(`<rect width="100" height="100" fill="url(#bg${uid})"/>`);
+  parts.push(bgDecor(spec.bg));
   // confetti dots — a little stadium-night sparkle
   parts.push(
     [[12, 14, 2], [86, 20, 1.6], [16, 70, 1.4], [88, 64, 2.2], [76, 8, 1.2]]

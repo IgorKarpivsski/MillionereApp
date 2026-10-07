@@ -16,6 +16,7 @@ import { useCountdownTo, useRefreshEconomy, useWheel } from '@/features/engage/h
 import { RewardIcon, rewardLabel } from '@/features/engage/rewards';
 import { RpcError } from '@/features/profile/api';
 import { fmt, strings } from '@/lib/i18n';
+import { physicalLeft } from '@/lib/rtl';
 
 const t = strings.engage;
 const SLICE = [palette.gold, palette.night700, palette.sky, palette.night800, palette.flare, palette.night700, palette.pitch, palette.night800, palette.violet, palette.night700];
@@ -127,7 +128,7 @@ export default function WheelScreen() {
                   pointerEvents="none"
                   style={{
                     position: 'absolute',
-                    left: c + rr * Math.sin(a) - icon / 2,
+                    ...physicalLeft(c + rr * Math.sin(a) - icon / 2, icon, size),
                     top: c - rr * Math.cos(a) - icon / 2,
                     width: icon,
                     alignItems: 'center',

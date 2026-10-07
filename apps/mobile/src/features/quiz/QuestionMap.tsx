@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import Svg, { Circle, G, Path, Rect } from 'react-native-svg';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
+import { physicalLeft } from '@/lib/rtl';
 
 const SEA = '#2D7FB8';
 const LAND = '#F2E6C9';
@@ -45,7 +46,7 @@ export const QuestionMap = memo(function QuestionMap({ image, height = 190 }: { 
       </Svg>
       <Animated.View
         pointerEvents="none"
-        style={[{ position: 'absolute', left: x * scale - pinSize / 2, top: y * scale - pinSize }, pinStyle]}
+        style={[{ position: 'absolute', ...physicalLeft(x * scale - pinSize / 2, pinSize, width), top: y * scale - pinSize }, pinStyle]}
       >
         <Svg width={pinSize} height={pinSize} viewBox="0 0 24 24">
           <Path d="M12 23 C12 23 4 14.5 4 9 A8 8 0 0 1 20 9 C20 14.5 12 23 12 23 Z" fill="#FF5A4E" stroke="#FFF8EA" strokeWidth={2} />

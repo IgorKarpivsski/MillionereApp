@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import {
   AVATAR_SLOTS,
-  PREMIUM_ACCESSORIES,
+  cosmeticFor,
   avatarSvg,
   encodeAvatar,
   randomAvatar,
@@ -9,7 +9,7 @@ import {
   type AvatarSlot,
   type AvatarSpec,
 } from '@fm/shared';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { memo, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
@@ -23,6 +23,7 @@ import { playSound } from '@/design-system/feedback/sound';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { useMyState, useUpdateProfile } from '@/features/profile/hooks';
 import { fmt, strings } from '@/lib/i18n';
+import { queryKeys } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 
 const t = strings.avatar;
@@ -53,9 +54,32 @@ function useOwnedCosmetics() {
   });
 }
 
+interface ShopItem {
+  item: string;
+  currency: 'coins' | 'gems';
+  price: number;
+}
+
+function useShopCatalog() {
+  return useQuery({
+    queryKey: ['avatar-shop'],
+    staleTime: 10 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('app_config').select('value').eq('key', 'avatar.shop').single();
+      if (error) throw error;
+      return new Map(((data?.value ?? []) as ShopItem[]).map((r) => [r.item, r]));
+    },
+  });
+}
+
+function priceLabel(p: ShopItem) {
+  return `${p.price.toLocaleString('he-IL')} ${p.currency === 'coins' ? strings.common.coins : strings.common.gems}`;
+}
+
 function optionLabel(slot: AvatarSlot, v: number): string {
   if (slot === 'species') return t.species[v] ?? fmt(t.option, { n: v + 1 });
   if (slot === 'accessory') return t.accessories[v] ?? fmt(t.option, { n: v + 1 });
+  if (slot === 'bg') return t.backgrounds[v] ?? fmt(t.option, { n: v + 1 });
   return fmt(t.option, { n: v + 1 });
 }
 
@@ -64,6 +88,7 @@ const Thumb = memo(function Thumb({
   size,
   selected,
   locked,
+  price,
   label,
   onPress,
 }: {
@@ -71,6 +96,7 @@ const Thumb = memo(function Thumb({
   size: number;
   selected: boolean;
   locked: boolean;
+  price?: ShopItem;
   label: string;
   onPress: () => void;
 }) {
@@ -79,8 +105,8 @@ const Thumb = memo(function Thumb({
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={locked ? `${label}, ${t.locked}` : label}
-      accessibilityState={{ selected, disabled: locked }}
+      accessibilityLabel={price ? `${label}, ${priceLabel(price)}` : locked ? `${label}, ${t.locked}` : label}
+      accessibilityState={{ selected, disabled: locked && !price }}
       style={({ pressed }) => [
         styles.thumb,
         { width: size + 8, height: size + 8 },
@@ -88,10 +114,17 @@ const Thumb = memo(function Thumb({
         pressed ? { transform: [{ scale: 0.95 }] } : null,
       ]}
     >
-      <View style={[styles.thumbArt, locked ? styles.dim : null]}>
+      <View style={[styles.thumbArt, locked && !price ? styles.dim : null]}>
         <SvgXml xml={xml} width={size} height={size} />
       </View>
-      {locked ? (
+      {price ? (
+        <View style={[styles.priceTag, price.currency === 'gems' ? styles.priceGem : null]}>
+          <Ionicons name={price.currency === 'gems' ? 'diamond' : 'logo-bitcoin'} size={11} color={colors.textOnBright} />
+          <AppText variant="caption" color={colors.textOnBright} style={styles.priceText}>
+            {price.price.toLocaleString('he-IL')}
+          </AppText>
+        </View>
+      ) : locked ? (
         <View style={styles.lock}>
           <Ionicons name="lock-closed" size={16} color={colors.textOnBright} />
         </View>
@@ -108,6 +141,9 @@ const Thumb = memo(function Thumb({
 export default function AvatarScreen() {
   const { data } = useMyState();
   const owned = useOwnedCosmetics();
+  const shop = useShopCatalog();
+  const qc = useQueryClient();
+  const [buying, setBuying] = useState(false);
   const save = useUpdateProfile();
   const toast = useToast();
   const reduced = useReducedMotion();
@@ -126,19 +162,47 @@ export default function AvatarScreen() {
   const count = AVATAR_SLOTS.find((s) => s.key === tab)!.count;
   const cols = width >= 400 ? 4 : 3;
   const thumb = Math.floor((width - space.lg * 2 - space.sm * (cols - 1)) / cols) - 8;
+  const itemFor = (slot: AvatarSlot, v: number) => (slot === 'accessory' || slot === 'bg' ? cosmeticFor(slot, v) : null);
   const isLocked = (slot: AvatarSlot, v: number) => {
-    if (slot !== 'accessory') return false;
-    const item = PREMIUM_ACCESSORIES[v];
+    const item = itemFor(slot, v);
     return !!item && !owned.data?.has(item);
   };
+  const shopPrice = (slot: AvatarSlot, v: number) => {
+    const item = itemFor(slot, v);
+    return item && !owned.data?.has(item) ? shop.data?.get(item) : undefined;
+  };
+  // Shop items can be tried on; anything still unowned must be bought before saving.
+  const unpaid = (['accessory', 'bg'] as const)
+    .map((slot) => ({ slot, item: itemFor(slot, spec[slot]) }))
+    .filter((x): x is { slot: 'accessory' | 'bg'; item: string } => !!x.item && !owned.data?.has(x.item));
+  const toBuy = unpaid.map((u) => shop.data?.get(u.item)).find((p) => !!p);
   const changed = code !== data.profile.avatar_id;
 
+  const buy = async (p: ShopItem) => {
+    setBuying(true);
+    try {
+      const { error } = await supabase.rpc('avatar_shop_buy', { p_item: p.item });
+      if (error) throw error;
+      haptic('success');
+      playSound('coins');
+      toast(t.bought, 'success');
+      await qc.invalidateQueries({ queryKey: ['my-cosmetics'] });
+      void qc.invalidateQueries({ queryKey: queryKeys.myState });
+    } catch (e) {
+      const msg = (e as { message?: string })?.message ?? '';
+      toast(msg.includes('insufficient_funds') ? fmt(t.notEnough, { cur: p.currency === 'coins' ? strings.common.coins : strings.common.gems }) : strings.errors.generic, 'error');
+    } finally {
+      setBuying(false);
+    }
+  };
+
   const pick = (v: number) => {
-    if (isLocked(tab, v)) {
+    if (isLocked(tab, v) && !shopPrice(tab, v)) {
       haptic('error');
-      toast(t.locked, 'info');
+      toast(t.passOnly, 'info');
       return;
     }
+    if (shopPrice(tab, v)) toast(t.tryOn, 'info');
     haptic('select');
     playSound('tap');
     setSpec({ ...spec, [tab]: v });
@@ -223,6 +287,7 @@ export default function AvatarScreen() {
             size={thumb}
             selected={spec[tab] === v}
             locked={isLocked(tab, v)}
+            price={shopPrice(tab, v)}
             label={optionLabel(tab, v)}
             onPress={() => pick(v)}
           />
@@ -230,15 +295,27 @@ export default function AvatarScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <StickerButton
-          label={t.save}
-          icon="checkmark-circle"
-          size="lg"
-          fullWidth
-          disabled={!changed}
-          loading={save.isPending}
-          onPress={onSave}
-        />
+        {toBuy ? (
+          <StickerButton
+            label={fmt(t.buy, { price: priceLabel(toBuy) })}
+            icon={toBuy.currency === 'gems' ? 'diamond' : 'cart'}
+            tone={toBuy.currency === 'gems' ? 'gem' : 'prize'}
+            size="lg"
+            fullWidth
+            loading={buying}
+            onPress={() => void buy(toBuy)}
+          />
+        ) : (
+          <StickerButton
+            label={t.save}
+            icon="checkmark-circle"
+            size="lg"
+            fullWidth
+            disabled={!changed || unpaid.length > 0}
+            loading={save.isPending}
+            onPress={onSave}
+          />
+        )}
       </View>
     </SafeAreaView>
   );
@@ -301,6 +378,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  priceTag: {
+    position: 'absolute',
+    bottom: -6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    paddingHorizontal: 6,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: colors.led,
+    borderWidth: 2,
+    borderColor: palette.night950,
+  },
+  priceGem: { backgroundColor: colors.gem },
+  priceText: { fontWeight: '700' },
   check: {
     position: 'absolute',
     top: -6,

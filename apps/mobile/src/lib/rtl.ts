@@ -11,3 +11,13 @@ export function ensureRTL(): void {
   I18nManager.forceRTL(true);
   if (__DEV__) DevSettings.reload();
 }
+
+/**
+ * Absolute horizontal position measured from the PHYSICAL left edge.
+ * In RTL, Android swaps `left`/`right` (swapLeftAndRightInRTL) while iOS does not,
+ * so pixel-exact overlays (wheel labels, map pins) use `start` computed from the
+ * right edge instead, which behaves the same on both platforms.
+ */
+export function physicalLeft(x: number, width: number, containerWidth: number): { left: number } | { start: number } {
+  return I18nManager.isRTL ? { start: containerWidth - x - width } : { left: x };
+}

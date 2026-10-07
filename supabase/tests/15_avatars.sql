@@ -31,3 +31,28 @@ begin
   perform test.assert(s -> 'profile' ->> 'avatar_id' = 'av1_1324531a2b39', 'crown allowed once owned');
 end $$;
 rollback;
+
+-- Avatar shop: buy with coins, ownership unlocks the slot, can't buy twice or for free.
+begin;
+create temp table ids as select test.new_user() as a;
+grant select on ids to authenticated;
+reset role;
+select public.ledger_apply((select a from ids), 'coins', 2000, 'test', 'test', 't', 'shop-test-coins');
+set local role authenticated;
+do $$
+declare a uuid := (select ids.a from ids); r jsonb; c0 bigint;
+begin
+  perform test.login(a);
+  perform test.assert_raises($q$select public.update_my_profile(p_avatar_id => 'av1_1324531a2b3a')$q$, 'invalid_input', 'headphones locked before buying');
+  perform test.assert_raises($q$select public.update_my_profile(p_avatar_id => 'av1_1324531a2bb0')$q$, 'invalid_input', 'galaxy background locked');
+  c0 := (select w.coins from public.wallets w);
+  r := public.avatar_shop_buy('avatar_acc_a');
+  perform test.assert((select w.coins from public.wallets w) = c0 - 1200, 'charged 1200 coins');
+  perform test.assert(r -> 'owned' ? 'avatar_acc_a', 'owned list returned');
+  perform public.update_my_profile(p_avatar_id => 'av1_1324531a2b3a');
+  perform test.assert_raises($q$select public.avatar_shop_buy('avatar_acc_a')$q$, 'already_owned', 'buy once');
+  perform test.assert_raises($q$select public.avatar_shop_buy('avatar_crown')$q$, 'invalid_input', 'pass items are not for sale');
+  perform test.assert_raises($q$select public.avatar_shop_buy('avatar_bg_b')$q$, 'insufficient_funds', 'gems needed for galaxy');
+  perform test.assert_raises($q$select public.update_my_profile(p_avatar_id => 'av1_1324531a2b3i')$q$, 'invalid_input', 'accessory out of range');
+end $$;
+rollback;
