@@ -5,12 +5,13 @@ import { queryKeys } from '@/lib/queryClient';
 import { updateSettings } from '@/features/profile/api';
 import { useSettingsStore } from './store';
 
-type ToggleKey = 'sound' | 'music' | 'haptics' | 'reducedMotion';
+type ToggleKey = 'sound' | 'music' | 'haptics' | 'reducedMotion' | 'extendedTime';
 const serverKey: Record<ToggleKey, string> = {
   sound: 'sound',
   music: 'music',
   haptics: 'haptics',
   reducedMotion: 'reduced_motion',
+  extendedTime: 'extended_time',
 };
 
 /** Optimistic toggle: flips locally at once, syncs to the server, rolls back on failure. */

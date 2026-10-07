@@ -15,6 +15,11 @@ interface SettingsState {
   reducedMotion: boolean;
   /** Accessibility: ~20% bigger text everywhere (on top of the system font size). Device-only. */
   largeText: boolean;
+  /** Accessibility: 1.5x answer time (stored on the server, which enforces it). */
+  extendedTime: boolean;
+  /** Local reminder notifications (wheel, streak, tickets). Device-only. */
+  reminders: boolean;
+  remindersAsked: boolean;
   set: (patch: Partial<Omit<SettingsState, 'set' | 'hydrateFromServer'>>) => void;
   hydrateFromServer: (s: Settings) => void;
 }
@@ -27,14 +32,26 @@ export const useSettingsStore = create<SettingsState>()(
       haptics: true,
       reducedMotion: false,
       largeText: false,
+      extendedTime: false,
+      reminders: true,
+      remindersAsked: false,
       set: (patch) => set(patch),
       hydrateFromServer: (s) =>
-        set({ sound: s.sound, music: s.music, haptics: s.haptics, reducedMotion: s.reduced_motion }),
+        set({ sound: s.sound, music: s.music, haptics: s.haptics, reducedMotion: s.reduced_motion, extendedTime: s.extended_time }),
     }),
     {
       name: 'fm.settings.v1',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: ({ sound, music, haptics, reducedMotion, largeText }) => ({ sound, music, haptics, reducedMotion, largeText }),
+      partialize: ({ sound, music, haptics, reducedMotion, largeText, extendedTime, reminders, remindersAsked }) => ({
+        sound,
+        music,
+        haptics,
+        reducedMotion,
+        largeText,
+        extendedTime,
+        reminders,
+        remindersAsked,
+      }),
     },
   ),
 );

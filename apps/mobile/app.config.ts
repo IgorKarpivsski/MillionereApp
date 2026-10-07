@@ -60,6 +60,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     '@sentry/react-native',
     ['react-native-google-mobile-ads', { androidAppId: ADMOB_ANDROID_APP_ID, iosAppId: ADMOB_IOS_APP_ID }],
     'expo-iap',
+    ['expo-notifications', { icon: './assets/images/notification-icon.png', color: '#FFB000' }],
     ['expo-build-properties', { android: { kotlinVersion: '2.2.0' } }],
   ],
   experiments: { typedRoutes: true },

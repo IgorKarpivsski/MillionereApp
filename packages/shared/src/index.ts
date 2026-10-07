@@ -41,6 +41,7 @@ export const SettingsSchema = z.object({
   haptics: z.boolean(),
   reduced_motion: z.boolean(),
   notif_prefs: z.record(z.string(), z.boolean()),
+  extended_time: z.boolean().default(false),
 });
 export type Settings = z.infer<typeof SettingsSchema>;
 

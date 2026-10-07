@@ -8,12 +8,13 @@ import { colors, palette, space } from '@/design-system/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useToggleSetting } from '@/features/settings/hooks';
 import { useSettingsStore } from '@/features/settings/store';
+import { askForRemindersOnce } from '@/features/reminders/useReminders';
 import { brand } from '@/lib/brand';
 import { fmt, strings } from '@/lib/i18n';
 import { useIsOnline } from '@/lib/network';
 
 const t = strings.settings;
-type ToggleKey = 'sound' | 'music' | 'haptics' | 'reducedMotion';
+type ToggleKey = 'sound' | 'music' | 'haptics' | 'reducedMotion' | 'extendedTime';
 
 function ToggleRow({ k, label, hint }: { k: ToggleKey; label: string; hint?: string }) {
   const value = useSettingsStore((s) => s[k]);
@@ -40,21 +41,28 @@ function ToggleRow({ k, label, hint }: { k: ToggleKey; label: string; hint?: str
   );
 }
 
-function LargeTextRow() {
-  const value = useSettingsStore((s) => s.largeText);
+/** Device-only switches (not synced to the server). */
+function LocalToggleRow({ k, label, hint }: { k: 'largeText' | 'reminders'; label: string; hint: string }) {
+  const value = useSettingsStore((s) => s[k]);
   const set = useSettingsStore((s) => s.set);
   return (
     <View style={styles.row}>
       <View style={styles.flex}>
-        <AppText variant="bodyStrong">{t.largeText}</AppText>
+        <AppText variant="bodyStrong">{label}</AppText>
         <AppText variant="caption" color={colors.textMuted}>
-          {t.largeTextHint}
+          {hint}
         </AppText>
       </View>
       <Switch
         value={value}
-        onValueChange={(v) => set({ largeText: v })}
-        accessibilityLabel={t.largeText}
+        onValueChange={(v) => {
+          set({ [k]: v });
+          if (k === 'reminders' && v) {
+            set({ remindersAsked: false });
+            void askForRemindersOnce();
+          }
+        }}
+        accessibilityLabel={label}
         trackColor={{ false: palette.night950, true: colors.primary }}
         thumbColor={colors.sticker}
         ios_backgroundColor={palette.night950}
@@ -114,6 +122,7 @@ export default function SettingsScreen() {
         <ToggleRow k="sound" label={t.sound} />
         <ToggleRow k="music" label={t.music} />
         <ToggleRow k="haptics" label={t.haptics} />
+        <LocalToggleRow k="reminders" label={t.reminders} hint={t.remindersHint} />
       </Card>
 
       <Card>
@@ -121,7 +130,8 @@ export default function SettingsScreen() {
           {t.accessibility}
         </AppText>
         <ToggleRow k="reducedMotion" label={t.reducedMotion} hint={t.reducedMotionHint} />
-        <LargeTextRow />
+        <LocalToggleRow k="largeText" label={t.largeText} hint={t.largeTextHint} />
+        <ToggleRow k="extendedTime" label={t.extendedTime} hint={t.extendedTimeHint} />
         <LinkRow label={t.a11yStatement} onPress={() => router.push('/legal/accessibility')} />
       </Card>
 
