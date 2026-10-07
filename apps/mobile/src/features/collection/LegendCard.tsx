@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { legendParams, legendSvg, type Collectible } from '@fm/shared';
+import { legendParams, legendSvg, objectSvg, type Collectible } from '@fm/shared';
 import { LinearGradient } from 'expo-linear-gradient';
 import { memo, useEffect, useMemo, type ComponentProps, type ReactNode } from 'react';
 import { Image, Platform, StyleSheet, View } from 'react-native';
@@ -74,8 +74,13 @@ function CardBody({
   const art = CARD_ART[item.id];
   const isObject = item.kind === 'object' || item.position === 'OBJ';
   const xml = useMemo(
-    () => (art || isObject ? null : legendSvg(legendParams(item.art_seed, item.era), locked ? '#3A4A43' : r.fill, artW)),
-    [art, isObject, item.art_seed, item.era, r.fill, artW, locked],
+    () =>
+      art
+        ? null
+        : isObject
+          ? objectSvg(item.id, item.rarity, artW, `${item.id}${Math.round(artW)}`)
+          : legendSvg(legendParams(item.art_seed, item.era), locked ? '#3A4A43' : r.fill, artW),
+    [art, isObject, item.id, item.rarity, item.art_seed, item.era, r.fill, artW, locked],
   );
   const big = width >= 180;
   const rank = RANK[item.rarity];

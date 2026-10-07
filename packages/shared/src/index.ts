@@ -476,3 +476,4 @@ export const LeagueStateSchema = z.object({
   last_result: LeagueResultSchema.nullable(),
 });
 export type LeagueState = z.infer<typeof LeagueStateSchema>;
+export * from './objectArt';
