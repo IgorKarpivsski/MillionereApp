@@ -462,7 +462,7 @@ export default function QuizScreen() {
         ) : null}
 
         {reveal ? (
-          <Animated.View entering={reduced ? undefined : FadeInDown.springify().damping(16)}>
+          <Animated.View entering={reduced ? undefined : FadeInDown.springify().damping(16)} accessibilityLiveRegion="assertive">
             <Card kind="soft" padding={space.md} style={styles.explain}>
               <AppText
                 variant="heading"

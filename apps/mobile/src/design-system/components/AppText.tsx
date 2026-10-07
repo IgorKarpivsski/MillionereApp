@@ -1,4 +1,5 @@
 import { Text, type TextProps, type TextStyle } from 'react-native';
+import { useSettingsStore } from '@/features/settings/store';
 import { colors, textStyles, type TextVariant } from '../tokens';
 
 export interface AppTextProps extends TextProps {
@@ -13,10 +14,14 @@ export interface AppTextProps extends TextProps {
  */
 export function AppText({ variant = 'body', color = colors.text, align, style, ...rest }: AppTextProps) {
   const { maxScale, ...type } = textStyles[variant];
+  const large = useSettingsStore((s) => s.largeText);
+  const boost = large
+    ? { fontSize: Math.round((type.fontSize ?? 16) * 1.2), lineHeight: type.lineHeight ? Math.round(type.lineHeight * 1.2) : undefined }
+    : null;
   return (
     <Text
       maxFontSizeMultiplier={maxScale}
-      style={[type, { color, writingDirection: 'rtl' }, align ? { textAlign: align } : null, style]}
+      style={[type, boost, { color, writingDirection: 'rtl' }, align ? { textAlign: align } : null, style]}
       {...rest}
     />
   );

@@ -13,6 +13,8 @@ interface SettingsState {
   music: boolean;
   haptics: boolean;
   reducedMotion: boolean;
+  /** Accessibility: ~20% bigger text everywhere (on top of the system font size). Device-only. */
+  largeText: boolean;
   set: (patch: Partial<Omit<SettingsState, 'set' | 'hydrateFromServer'>>) => void;
   hydrateFromServer: (s: Settings) => void;
 }
@@ -24,6 +26,7 @@ export const useSettingsStore = create<SettingsState>()(
       music: true,
       haptics: true,
       reducedMotion: false,
+      largeText: false,
       set: (patch) => set(patch),
       hydrateFromServer: (s) =>
         set({ sound: s.sound, music: s.music, haptics: s.haptics, reducedMotion: s.reduced_motion }),
@@ -31,7 +34,7 @@ export const useSettingsStore = create<SettingsState>()(
     {
       name: 'fm.settings.v1',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: ({ sound, music, haptics, reducedMotion }) => ({ sound, music, haptics, reducedMotion }),
+      partialize: ({ sound, music, haptics, reducedMotion, largeText }) => ({ sound, music, haptics, reducedMotion, largeText }),
     },
   ),
 );

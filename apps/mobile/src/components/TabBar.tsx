@@ -1,22 +1,20 @@
-import { Ionicons } from '@expo/vector-icons';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppText } from '@/design-system/components';
+import { AppText, Icon, type IconName } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 
-type IconName = ComponentProps<typeof Ionicons>['name'];
-const ICONS: Record<string, { on: IconName; off: IconName }> = {
-  index: { on: 'home', off: 'home-outline' },
-  play: { on: 'football', off: 'football-outline' },
-  packs: { on: 'gift', off: 'gift-outline' },
-  collection: { on: 'albums', off: 'albums-outline' },
-  profile: { on: 'person-circle', off: 'person-circle-outline' },
-  leaderboard: { on: 'podium', off: 'podium-outline' },
+/** Original illustrated sticker icons (src/design-system/icons/art.ts). */
+const ICONS: Record<string, IconName> = {
+  index: 'home',
+  play: 'play',
+  packs: 'packs',
+  collection: 'album',
+  profile: 'friends',
+  leaderboard: 'podium',
 };
 /** Routes reachable from elsewhere (e.g. the profile from the top bar) but not shown as tabs. */
 const HIDDEN = new Set(['profile']);
@@ -32,10 +30,16 @@ function Tab({
   focused: boolean;
   onPress: () => void;
 }) {
-  const icon = ICONS[name] ?? ICONS.index!;
+  const icon = ICONS[name] ?? 'home';
   const reduced = useReducedMotion();
   const glow = useAnimatedStyle(() => ({
     opacity: reduced ? (focused ? 1 : 0) : withTiming(focused ? 1 : 0, { duration: 180 }),
+  }));
+  const pop = useAnimatedStyle(() => ({
+    transform: [
+      { scale: reduced ? 1 : withSpring(focused ? 1.12 : 1, { damping: 9, stiffness: 220 }) },
+      { translateY: reduced ? 0 : withSpring(focused ? -3 : 0, { damping: 9, stiffness: 220 }) },
+    ],
   }));
   const tint = focused ? colors.led : colors.textDim;
   return (
@@ -50,7 +54,9 @@ function Tab({
       style={styles.tab}
     >
       <Animated.View style={[styles.lamp, glow]} />
-      <Ionicons name={focused ? icon.on : icon.off} size={23} color={tint} />
+      <Animated.View style={pop}>
+        <Icon name={icon} size={30} mono={!focused} />
+      </Animated.View>
       <AppText variant="caption" color={tint} numberOfLines={1} style={focused ? styles.on : null}>
         {label}
       </AppText>

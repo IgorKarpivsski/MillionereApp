@@ -11,6 +11,7 @@ import Svg, { Circle } from 'react-native-svg';
 import { useReducedMotion } from '../feedback/reducedMotion';
 import { colors, radius, space, type TextVariant } from '../tokens';
 import { AppText } from './AppText';
+import { Icon, type IconName } from '../icons/Icon';
 
 /* ------------------------------------------------------------------ */
 /* Logo                                                                */
@@ -101,9 +102,20 @@ export function ScoreLine({
 /* Stat tile                                                           */
 /* ------------------------------------------------------------------ */
 
-export function StatTile({ value, label, color = colors.text }: { value: string; label: string; color?: string }) {
+export function StatTile({
+  value,
+  label,
+  color = colors.text,
+  icon,
+}: {
+  value: string;
+  label: string;
+  color?: string;
+  icon?: IconName;
+}) {
   return (
     <View style={styles.tile} accessible accessibilityLabel={`${label}: ${value}`}>
+      {icon ? <Icon name={icon} size={30} /> : null}
       <Led size="ledM" color={color}>{value}</Led>
       <AppText variant="caption" color={colors.textDim} align="center" numberOfLines={1}>
         {label}

@@ -1,10 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { TopBar } from '@/components/TopBar';
 import {
   AppText,
+  AvatarBadge,
   Card,
+  ChampionBadge,
+  Icon,
   CoinIcon,
   Led,
   LiveTicker,
@@ -12,11 +16,10 @@ import {
   Skeleton,
   StatTile,
   StickerButton,
-  TrophyLogo,
   useCountdownToMidnight,
   useToast,
 } from '@/design-system/components';
-import { colors, space } from '@/design-system/tokens';
+import { colors, palette, space } from '@/design-system/tokens';
 import { usePlayClassic } from '@/features/engage/EnergySheet';
 import { useCountdownTo, usePass, useWheel } from '@/features/engage/hooks';
 import { useDailyStatus, useLeaderboard } from '@/features/quiz/hooks';
@@ -72,12 +75,18 @@ function WelcomeBonus() {
 
 function MatchOfTheDay() {
   const playClassic = usePlayClassic();
+  const { data: me } = useMyState();
   const countdown = useCountdownToMidnight();
   const { data: daily } = useDailyStatus();
   const done = daily?.state === 'done';
   const missed = done ? 10 - (daily?.correct ?? 0) : 0;
   return (
-    <Card kind="sticker" padding={space.lg} style={styles.match}>
+    <View style={styles.matchShell}>
+      <LinearGradient colors={['#123F31', '#0B2B22', '#2A1D52']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+      <View style={styles.pitchLines} pointerEvents="none">
+        <View style={styles.centerCircle} />
+        <View style={styles.halfway} />
+      </View>
       <View style={styles.matchHead}>
         <AppText variant="label" color={colors.led}>
           {t.matchTitle}
@@ -85,15 +94,17 @@ function MatchOfTheDay() {
         <Led color={colors.led} size="number">{countdown}</Led>
       </View>
       <View style={styles.matchRow}>
-        <View style={styles.side}>
-          <AppText variant="label">אתה</AppText>
+        <View style={styles.sideCol}>
+          {me ? <AvatarBadge avatarId={me.profile.avatar_id} size={58} ring={colors.correct} /> : <View style={styles.side} />}
+          <AppText variant="caption" style={styles.sideTight}>אתה</AppText>
         </View>
         <View style={styles.matchDigits}>
           <Led size="ledXL" color={colors.text}>{done ? daily?.correct ?? 0 : 0}</Led>
           <Led size="ledXL" color={colors.text}>:</Led>
           <Led size="ledXL" color={done && missed > (daily?.correct ?? 0) ? colors.danger : colors.text}>{missed}</Led>
         </View>
-        <View style={styles.side}>
+        <View style={styles.sideCol}>
+          <ChampionBadge size={58} />
           <AppText variant="caption" style={styles.sideTight}>האלוף</AppText>
         </View>
       </View>
@@ -111,7 +122,7 @@ function MatchOfTheDay() {
           onPress={() => router.push({ pathname: '/quiz', params: { mode: 'daily' } })}
         />
       )}
-    </Card>
+    </View>
   );
 }
 
@@ -120,7 +131,7 @@ function ClassicCard() {
   return (
     <Card kind="soft" padding={space.md}>
       <View style={styles.seasonRow}>
-        <TrophyLogo size={36} />
+        <Icon name="trophy" size={44} />
         <View style={styles.flex}>
           <AppText variant="label">{t.classicTitle}</AppText>
           <AppText variant="caption" color={colors.textDim}>
@@ -142,27 +153,29 @@ function DailyExtras() {
   return (
     <View style={styles.tiles}>
       <Pressable
-        style={({ pressed }) => [styles.extra, styles.extraWheel, pressed && styles.pressed]}
+        style={({ pressed }) => [styles.extra, pressed && styles.pressed]}
         onPress={() => router.push('/wheel')}
         accessibilityRole="button"
         accessibilityLabel={e.wheelTitle}
       >
-        <Ionicons name="color-filter" size={30} color={colors.led} />
-        <AppText variant="label">{e.wheelTitle}</AppText>
-        <AppText variant="caption" color={wheel?.free_available ? colors.correct : colors.textDim} align="center">
+        <LinearGradient colors={['#FFC93C', '#FF8A3D']} style={StyleSheet.absoluteFill} />
+        <Icon name="wheel" size={52} />
+        <AppText variant="label" color={colors.textOnBright}>{e.wheelTitle}</AppText>
+        <AppText variant="caption" color={colors.textOnBright} align="center" style={styles.sideTight}>
           {wheel?.free_available ? e.wheelEntry : next ? fmt(e.nextFree, { t: next }) : e.wheelBody}
         </AppText>
         {wheel?.free_available ? <View style={styles.dot} /> : null}
       </Pressable>
       <Pressable
-        style={({ pressed }) => [styles.extra, styles.extraPass, pressed && styles.pressed]}
+        style={({ pressed }) => [styles.extra, pressed && styles.pressed]}
         onPress={() => router.push('/pass')}
         accessibilityRole="button"
         accessibilityLabel={e.passTitle}
       >
-        <Ionicons name="ribbon" size={30} color={colors.gem} />
-        <AppText variant="label">{e.passTitle}</AppText>
-        <AppText variant="caption" color={colors.textDim} align="center">
+        <LinearGradient colors={['#B49CFF', '#5C7CFF']} style={StyleSheet.absoluteFill} />
+        <Icon name="pass" size={52} />
+        <AppText variant="label" color={colors.textOnBright}>{e.passTitle}</AppText>
+        <AppText variant="caption" color={colors.textOnBright} align="center" style={styles.sideTight}>
           {pass?.active
             ? fmt(e.passEntry, { n: pass.tier, left: pass.xp_per_tier - (pass.xp - pass.tier * pass.xp_per_tier) })
             : e.noSeason}
@@ -181,7 +194,9 @@ function FriendsEntry() {
       accessibilityRole="button"
       accessibilityLabel={unread > 0 ? `${strings.social.entry}, ${unread}` : strings.social.entry}
     >
-      <Ionicons name="people" size={26} color={colors.correct} />
+      <LinearGradient colors={['#1E9E5A', '#0E5E3A']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
+      <Icon name="friends" size={40} />
+      <Icon name="chat" size={30} />
       <AppText variant="label" style={styles.flex}>
         {strings.social.entry}
       </AppText>
@@ -192,7 +207,7 @@ function FriendsEntry() {
           </AppText>
         </View>
       ) : null}
-      <Ionicons name="chevron-back" size={20} color={colors.textDim} />
+      <Ionicons name="chevron-back" size={22} color={colors.text} />
     </Pressable>
   );
 }
@@ -234,9 +249,9 @@ export default function HomeScreen() {
       ) : null}
 
       <View style={styles.tiles}>
-        <StatTile value={String(streak)} label={t.statStreak} color={colors.correct} />
-        <StatTile value={rank ? `#${rank}` : '--'} label={t.statRank} color={colors.led} />
-        <StatTile value={String(owned)} label={t.statCollection} />
+        <StatTile icon="fire" value={String(streak)} label={t.statStreak} color={colors.correct} />
+        <StatTile icon="podium" value={rank ? `#${rank}` : '--'} label={t.statRank} color={colors.led} />
+        <StatTile icon="album" value={String(owned)} label={t.statCollection} />
       </View>
 
     </Screen>
@@ -248,7 +263,18 @@ const styles = StyleSheet.create({
   welcomeRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   welcomeBtn: { marginTop: space.md },
   noBorder: { borderWidth: 0 },
-  match: { gap: space.md },
+  matchShell: {
+    gap: space.md,
+    padding: space.lg,
+    borderRadius: 22,
+    borderWidth: 3,
+    borderColor: colors.led,
+    overflow: 'hidden',
+  },
+  pitchLines: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', opacity: 0.12 },
+  centerCircle: { width: 150, height: 150, borderRadius: 75, borderWidth: 3, borderColor: palette.chalk },
+  halfway: { position: 'absolute', width: 3, top: 0, bottom: 0, backgroundColor: palette.chalk },
+  sideCol: { alignItems: 'center', gap: space.xs },
   matchHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   matchRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   matchDigits: { flexDirection: 'row', alignItems: 'center', gap: space.md },
@@ -263,9 +289,16 @@ const styles = StyleSheet.create({
   sideTight: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
   tiles: { flexDirection: 'row', gap: space.sm },
   seasonRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  extra: { flex: 1, alignItems: 'center', gap: space.xxs, padding: space.md, borderRadius: 18, borderWidth: 2 },
-  extraWheel: { backgroundColor: '#2A1F05', borderColor: colors.led },
-  extraPass: { backgroundColor: '#1B1640', borderColor: colors.gem },
+  extra: {
+    flex: 1,
+    alignItems: 'center',
+    gap: space.xxs,
+    padding: space.md,
+    borderRadius: 20,
+    borderWidth: 3,
+    borderColor: palette.night950,
+    overflow: 'hidden',
+  },
   dot: { position: 'absolute', top: 8, end: 8, width: 12, height: 12, borderRadius: 6, backgroundColor: colors.danger },
   pressed: { transform: [{ scale: 0.97 }] },
   friends: {
@@ -273,10 +306,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: space.md,
     padding: space.md,
-    borderRadius: 18,
-    borderWidth: 2,
-    borderColor: colors.correct,
-    backgroundColor: '#0E3A2A',
+    borderRadius: 20,
+    borderWidth: 3,
+    borderColor: palette.night950,
+    overflow: 'hidden',
   },
   count: { minWidth: 24, height: 24, borderRadius: 12, backgroundColor: colors.danger, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
 });

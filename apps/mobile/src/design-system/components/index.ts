@@ -13,3 +13,5 @@ export * from './EmptyState';
 export * from './Screen';
 export * from './BottomSheet';
 export * from './Scoreboard';
+export * from '../icons/Icon';
+export * from './ChampionBadge';

@@ -40,6 +40,29 @@ function ToggleRow({ k, label, hint }: { k: ToggleKey; label: string; hint?: str
   );
 }
 
+function LargeTextRow() {
+  const value = useSettingsStore((s) => s.largeText);
+  const set = useSettingsStore((s) => s.set);
+  return (
+    <View style={styles.row}>
+      <View style={styles.flex}>
+        <AppText variant="bodyStrong">{t.largeText}</AppText>
+        <AppText variant="caption" color={colors.textMuted}>
+          {t.largeTextHint}
+        </AppText>
+      </View>
+      <Switch
+        value={value}
+        onValueChange={(v) => set({ largeText: v })}
+        accessibilityLabel={t.largeText}
+        trackColor={{ false: palette.night950, true: colors.primary }}
+        thumbColor={colors.sticker}
+        ios_backgroundColor={palette.night950}
+      />
+    </View>
+  );
+}
+
 function LinkRow({ label, onPress }: { label: string; onPress: () => void }) {
   return (
     <Pressable onPress={onPress} accessibilityRole="link" style={styles.row}>
@@ -91,11 +114,19 @@ export default function SettingsScreen() {
         <ToggleRow k="sound" label={t.sound} />
         <ToggleRow k="music" label={t.music} />
         <ToggleRow k="haptics" label={t.haptics} />
-        <ToggleRow k="reducedMotion" label={t.reducedMotion} hint={t.reducedMotionHint} />
       </Card>
 
       <Card>
-        <AppText variant="label" color={colors.textMuted}>
+        <AppText variant="label" color={colors.textMuted} accessibilityRole="header">
+          {t.accessibility}
+        </AppText>
+        <ToggleRow k="reducedMotion" label={t.reducedMotion} hint={t.reducedMotionHint} />
+        <LargeTextRow />
+        <LinkRow label={t.a11yStatement} onPress={() => router.push('/legal/accessibility')} />
+      </Card>
+
+      <Card>
+        <AppText variant="label" color={colors.textMuted} accessibilityRole="header">
           {t.legal}
         </AppText>
         <LinkRow label={t.terms} onPress={() => router.push('/legal/terms')} />

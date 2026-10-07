@@ -62,7 +62,13 @@ export function AnswerTile({
         onPress={onPress}
         disabled={disabled || hidden || state === 'overturned'}
         accessibilityRole="button"
-        accessibilityLabel={hidden ? 'תשובה שהוסרה' : `תשובה ${index + 1}: ${text}`}
+        accessibilityLabel={
+          hidden
+            ? 'תשובה שהוסרה'
+            : `תשובה ${index + 1}: ${text}${
+                state === 'correctPicked' ? ', נכון!' : state === 'correctMissed' ? ', זו התשובה הנכונה' : state === 'wrongPicked' ? ', לא נכון' : state === 'overturned' ? ', נפסלה' : ''
+              }`
+        }
         accessibilityState={{ disabled: disabled || hidden, selected: state === 'picked' }}
         style={({ pressed }) => [
           styles.tile,

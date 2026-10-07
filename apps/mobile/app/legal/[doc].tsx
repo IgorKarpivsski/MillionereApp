@@ -10,6 +10,16 @@ import { strings } from '@/lib/i18n';
  * before submission (App Store requires a privacy policy URL as well).
  */
 const DOCS: Record<string, { title: string; body: string[] }> = {
+  accessibility: {
+    title: strings.settings.a11yStatement,
+    body: [
+      'אנחנו רוצים שכל אחד יוכל לשחק ב"האלוף", כולל אנשים עם מוגבלות.',
+      'מה כבר עשינו: תמיכה בקורא מסך (TalkBack ו-VoiceOver) עם תיאור בעברית לכפתורים, לתמונות ולמצב המשחק; התשובות ממוספרות ומסומנות גם בסמל (וי או איקס) ולא רק בצבע; ניגודיות צבעים לפי WCAG AA; כפתורים בגודל 44 נקודות לפחות; תמיכה בהגדלת גופן של המכשיר ובאפשרות "טקסט גדול"; אפשרות "הפחתת תנועה" שמבטלת אנימציות; כיבוי צלילים, מוזיקה ורטט בכל רגע.',
+      'מה עוד לא מושלם: יש שאלות עם מגבלת זמן; אנחנו עובדים על מצב עם זמן מורחב.',
+      `נתקלת בבעיית נגישות? נשמח לשמוע ולתקן: ${brand.supportEmail}`,
+      'עודכן לאחרונה: אוקטובר 2026.',
+    ],
+  },
   terms: {
     title: strings.settings.terms,
     body: [
@@ -44,7 +54,7 @@ export default function LegalScreen() {
       <Card>
         <View style={styles.body}>
           {d.body.map((p, i) => (
-            <AppText key={i} color={i === 0 ? colors.prize : colors.text}>
+            <AppText key={i} color={i === 0 && doc !== 'accessibility' ? colors.prize : colors.text}>
               {p}
             </AppText>
           ))}
