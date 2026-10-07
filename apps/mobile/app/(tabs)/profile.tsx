@@ -3,7 +3,7 @@ import { USERNAME_REGEX } from '@fm/shared';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import {
   AppText,
   AvatarBadge,
@@ -154,7 +154,18 @@ export default function ProfileScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <AvatarBadge avatarId={data.profile.avatar_id} level={data.profile.level} size={96} />
+        <Pressable
+          onPress={() => router.push('/avatar')}
+          accessibilityRole="button"
+          accessibilityLabel={t.editAvatar}
+          style={({ pressed }) => (pressed ? { transform: [{ scale: 0.96 }] } : null)}
+        >
+          <AvatarBadge avatarId={data.profile.avatar_id} level={data.profile.level} size={120} ring={colors.led} />
+          <View style={styles.editDot}>
+            <Ionicons name="brush" size={16} color={colors.textOnBright} />
+          </View>
+        </Pressable>
+        <StickerButton label={t.editAvatar} size="sm" tone="outline" icon="color-palette" onPress={() => router.push('/avatar')} />
         <View style={styles.nameRow}>
           <AppText variant="title" numberOfLines={1}>
             {data.profile.username}
@@ -198,6 +209,19 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  editDot: {
+    position: 'absolute',
+    top: 0,
+    start: 0,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.led,
+    borderWidth: 2,
+    borderColor: colors.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   flex: { flex: 1, gap: space.xxs },
   header: { alignItems: 'center', gap: space.md, paddingTop: space.md },
   nameRow: { alignItems: 'center', gap: space.sm },

@@ -54,7 +54,7 @@ export type MyState = z.infer<typeof MyStateSchema>;
 
 export const UpdateProfileInputSchema = z.object({
   username: z.string().regex(USERNAME_REGEX).optional(),
-  avatar_id: z.string().regex(/^avatar_\d{2}$/).optional(),
+  avatar_id: z.string().regex(/^(avatar_\d{2}|av1_[0-9a-z]{12})$/).optional(),
   fav_leagues: z.array(z.string().max(40)).max(10).optional(),
   fav_teams: z.array(z.string().max(60)).max(10).optional(),
 });
@@ -421,3 +421,4 @@ export type FriendDupe = z.infer<typeof FriendDupeSchema>;
 export const ChatReportReasonSchema = z.enum(['rude', 'bullying', 'personal_info', 'spam', 'other']);
 export type ChatReportReason = z.infer<typeof ChatReportReasonSchema>;
 export const FriendDupesSchema = z.array(FriendDupeSchema);
+export * from './avatar';

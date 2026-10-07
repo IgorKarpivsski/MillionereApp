@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import collections
+import re
 import json
 import random
 from pathlib import Path
@@ -26,6 +27,8 @@ CAPS_ISRAEL = {
     "player:club": 1100, "club:which_player": 900, "player:position": 500,
     "player:birth_year": 20, "club:founded": 10, "club:city": 120, "club:stadium": 100,
 }
+YEAR_TEMPLATES = re.compile(r"^(player:birth_year|club:founded|wc:first_title|won_when|award:ballon_dor)")
+YEAR_TOTAL_CAP = 40
 MULTI_OK = {"player:club", "club:which_player", "hw:player_club", "hw:club_which_player", "hw:coached_club", "hw:nt_coach", "hw:nt_nt_goals", "hw:nt_nt_caps", "wc:semifinalist", "award:ballon_dor_when"}
 LEVEL_SHARE = [("easy", 0.25), ("medium", 0.25), ("hard", 0.25), ("expert", 0.17), ("legendary", 0.08)]
 
@@ -103,9 +106,9 @@ def main() -> None:
         cap = (CAPS_ISRAEL if isr else CAPS).get(tpl)
         final.extend(qs[:cap] if cap else qs)
 
-    # Players find "which year/season" questions dull: keep only the best-known 120.
-    years = sorted((q for q in final if q.template.startswith("won_when")), key=lambda q: q.obscurity)
-    drop = {id(q) for q in years[120:]}
+    # Players find "which year/season" questions dull: keep only the best-known 40 of all year-type templates.
+    years = sorted((q for q in final if YEAR_TEMPLATES.match(q.template)), key=lambda q: q.obscurity)
+    drop = {id(q) for q in years[YEAR_TOTAL_CAP:]}
     final = [q for q in final if id(q) not in drop]
 
     # Difficulty from obscurity quantiles

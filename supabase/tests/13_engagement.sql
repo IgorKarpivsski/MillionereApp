@@ -73,6 +73,8 @@ reset role;
 
 -- XP from any source fills the pass.
 update public.profiles set xp = xp + 520 where id = (select ids.a from ids);
+-- Top up gems: the live deal (which rotates with time) may have spent some.
+select public.ledger_apply((select ids.a from ids), 'gems', 1000, 'test', 'test', 't2', 'test-gems-2');
 
 set local role authenticated;
 do $$

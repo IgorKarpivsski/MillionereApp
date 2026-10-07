@@ -1,50 +1,50 @@
+import { avatarSvg, specFromAvatarId } from '@fm/shared';
+import { memo, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import { SvgXml } from 'react-native-svg';
 import { colors, palette } from '../tokens';
 import { AppText } from './AppText';
 
 /**
- * Player avatar: a plain, generic shirt silhouette in one of 12 color pairs.
- * Deliberately NOT based on any club or national-team kit.
+ * Player avatar: the player's own drawn character (custom 'av1_' code) or,
+ * for old accounts, a character derived from the legacy 'avatar_NN' id.
+ * All art is original (packages/shared/src/avatar.ts).
  */
-const AVATAR_COLORS: ReadonlyArray<[string, string]> = [
-  [palette.pitch, palette.pitchDeep],
-  [palette.gold, palette.goldDeep],
-  [palette.flare, palette.flareDeep],
-  [palette.sky, palette.skyDeep],
-  [palette.violet, palette.violetDeep],
-  ['#FF8A3D', '#B9531A'],
-  ['#F2F2F2', '#9C93D9'],
-  ['#FF6FB5', '#B83A7C'],
-  ['#7BE0C3', '#2E9C80'],
-  ['#C6E05A', '#7E9324'],
-  ['#5C7CFF', '#2F45B0'],
-  ['#FFB4A2', '#C66B55'],
-];
-
-export function avatarColors(avatarId: string): [string, string] {
-  const n = Number(avatarId.replace('avatar_', '')) || 1;
-  return AVATAR_COLORS[(n - 1) % AVATAR_COLORS.length] ?? AVATAR_COLORS[0]!;
-}
-
-export function AvatarBadge({ avatarId, level, size = 52 }: { avatarId: string; level: number; size?: number }) {
-  const [body, trim] = avatarColors(avatarId);
+export const AvatarBadge = memo(function AvatarBadge({
+  avatarId,
+  level,
+  size = 52,
+  ring = colors.border,
+}: {
+  avatarId: string;
+  level?: number;
+  size?: number;
+  ring?: string;
+}) {
+  const xml = useMemo(
+    () => avatarSvg(specFromAvatarId(avatarId), { size, round: true, uid: avatarId.replace(/[^a-z0-9]/gi, '') + size }),
+    [avatarId, size],
+  );
   return (
-    <View style={{ width: size, height: size }} accessible accessibilityLabel={`שלב ${level}`}>
-      <View style={[styles.circle, { width: size, height: size, borderRadius: size / 2 }]}>
-        <Svg width={size * 0.72} height={size * 0.72} viewBox="0 0 48 48">
-          <Path d="M17 6l-11 6 4 9 5-2v23h18V19l5 2 4-9-11-6c-1 3-4 5-7 5s-6-2-7-5z" fill={body} />
-          <Path d="M17 6c1 3 4 5 7 5s6-2 7-5" stroke={trim} strokeWidth={3} fill="none" />
-        </Svg>
+    <View
+      style={{ width: size, height: size }}
+      accessible
+      accessibilityRole="image"
+      accessibilityLabel={level != null ? `דמות השחקן, שלב ${level}` : 'דמות השחקן'}
+    >
+      <View style={[styles.circle, { width: size, height: size, borderRadius: size / 2, borderColor: ring }]}>
+        <SvgXml xml={xml} width={size - 4} height={size - 4} />
       </View>
-      <View style={[styles.level, { minWidth: size * 0.46 }]}>
-        <AppText variant="ledS" color={colors.textOnBright} style={styles.levelText}>
-          {level}
-        </AppText>
-      </View>
+      {level != null ? (
+        <View style={[styles.level, { minWidth: Math.max(22, size * 0.42) }]}>
+          <AppText variant="ledS" color={colors.textOnBright} style={styles.levelText}>
+            {level}
+          </AppText>
+        </View>
+      ) : null}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   circle: {
@@ -53,6 +53,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   level: {
     position: 'absolute',
