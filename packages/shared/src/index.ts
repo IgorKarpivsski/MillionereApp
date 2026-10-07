@@ -238,6 +238,8 @@ export const CollectibleSchema = z.object({
   art_seed: z.number().int(),
   kind: z.enum(['player', 'object']).default('player'),
   count: z.number().int(),
+  /** Glowing (animated) copies among `count`. */
+  glow: z.number().int().default(0),
 });
 export type Collectible = z.infer<typeof CollectibleSchema>;
 

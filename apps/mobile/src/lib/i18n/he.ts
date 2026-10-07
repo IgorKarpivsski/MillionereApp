@@ -310,6 +310,9 @@ export const he = {
     revealAll: 'חשוף הכל',
     stamp: { rare: 'נדיר!', epic: 'אפי!', legendary: 'אגדי!', iconic: 'מיתי!!!' },
     walkoutHint: 'משהו מיוחד מחכה בפנים…',
+    swipeToTear: 'החלק את האצבע על הקו כדי לקרוע (או הקש)',
+    glowNew: 'זוהרת!',
+    glowStamp: 'מדבקה זוהרת!',
   },
   collection: {
     title: 'אלבום האגדות',

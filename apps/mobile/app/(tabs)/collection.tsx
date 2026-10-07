@@ -126,7 +126,7 @@ export default function CollectionScreen() {
                 }}
                 accessibilityRole="button"
               >
-                <LegendCard item={it} width={104} locked={it.count === 0} />
+                <LegendCard item={it} width={104} locked={it.count === 0} glow={it.glow > 0} />
                 {it.count > 1 ? (
                   <View style={styles.dupe}>
                     <AppText variant="caption" color={colors.textOnBright} style={styles.bold}>
@@ -158,7 +158,7 @@ export default function CollectionScreen() {
       >
         {open ? (
           <View style={styles.sheet}>
-            <LegendCard item={open} width={200} locked={open.count === 0} />
+            <LegendCard item={open} width={200} locked={open.count === 0} glow={open.glow > 0} />
             {open.count > 0 ? (
               <AppText color={colors.textMuted} align="center">
                 {open.bio}

@@ -69,3 +69,29 @@ begin
   perform test.assert((select count from public.user_pack_tokens where user_id = u and pack = 'bronze') = 1, 'daily gives bronze');
 end $$;
 rollback;
+
+-- Glowing copies: rolled when counts go up, never more than the copies you own.
+begin;
+update public.app_config set value = '1'::jsonb where key = 'packs.glow_chance';
+create temp table g as select test.new_user() as a;
+insert into public.user_collectibles (user_id, item_id, count) select a, (select id from public.collectibles order by id limit 1), 2 from g;
+do $$
+begin
+  perform test.assert((select glow from public.user_collectibles where user_id = (select a from g)) = 2, 'chance 1: both copies glow');
+  update public.user_collectibles set count = 1 where user_id = (select a from g);
+  perform test.assert((select glow from public.user_collectibles where user_id = (select a from g)) = 1, 'glow capped by count');
+end $$;
+update public.app_config set value = '0'::jsonb where key = 'packs.glow_chance';
+do $$
+begin
+  update public.user_collectibles set count = 5 where user_id = (select a from g);
+  perform test.assert((select glow from public.user_collectibles where user_id = (select a from g)) = 1, 'chance 0: no new glow');
+end $$;
+grant select on g to authenticated;
+set local role authenticated;
+do $$
+begin
+  perform test.login((select a from g));
+  perform test.assert(exists (select 1 from jsonb_array_elements(public.collection_state() -> 'items') i where (i ->> 'glow')::int = 1), 'glow in collection_state');
+end $$;
+rollback;

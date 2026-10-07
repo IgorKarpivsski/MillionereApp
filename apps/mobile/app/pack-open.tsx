@@ -3,11 +3,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
   FadeIn,
-  FadeInDown,
   FadeOut,
+  Keyframe,
+  runOnJS,
   ZoomIn,
   cancelAnimation,
   interpolate,
@@ -39,6 +41,8 @@ const t = strings.packs;
 const RANK = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'iconic'] as const;
 type Rarity = (typeof RANK)[number];
 const TAPS = 3;
+const PACK_W = 220;
+const TEAR_Y = (22 / 145) * PACK_W * 1.45; // the dashed line on the pack art
 
 /* ------------------------------------------------------------------ */
 /* Light rays behind the pack / a big reveal                           */
@@ -130,18 +134,34 @@ function CardBack({ width, glow }: { width: number; glow?: string }) {
   );
 }
 
+/** Cards shoot up out of the opened pack, spinning into place. */
+function riseFromPack(index: number, total: number) {
+  const side = index - (total - 1) / 2;
+  return new Keyframe({
+    0: { opacity: 0, transform: [{ translateY: 320 }, { translateX: -side * 30 }, { scale: 0.25 }, { rotate: `${side * 25}deg` }] },
+    60: { opacity: 1, transform: [{ translateY: -24 }, { translateX: side * 6 }, { scale: 1.08 }, { rotate: `${-side * 6}deg` }] },
+    100: { opacity: 1, transform: [{ translateY: 0 }, { translateX: 0 }, { scale: 1 }, { rotate: '0deg' }] },
+  })
+    .duration(650)
+    .delay(250 + index * 160);
+}
+
 function FlipCard({
   item,
   revealed,
   onPress,
   width,
   index,
+  total,
+  glow,
 }: {
   item: { id: string; rarity: string; new: boolean; dust: number };
   revealed: boolean;
   onPress: () => void;
   width: number;
   index: number;
+  total: number;
+  glow: boolean;
 }) {
   const reduced = useReducedMotion();
   const flip = useSharedValue(revealed ? 1 : 0);
@@ -173,7 +193,7 @@ function FlipCard({
   });
 
   return (
-    <Animated.View entering={reduced ? undefined : FadeInDown.delay(index * 110).springify().damping(13)} style={styles.cardSlot}>
+    <Animated.View entering={reduced ? undefined : riseFromPack(index, total)} style={styles.cardSlot}>
       {face && rank >= 3 ? <Rays size={width * 2} color={r.fill} opacity={0.35} speed={6000} /> : null}
       <Pressable
         onPress={onPress}
@@ -182,7 +202,11 @@ function FlipCard({
         accessibilityLabel={revealed ? `${full?.name ?? ''}, ${r.label}` : t.tapToFlip}
       >
         <Animated.View style={style}>
-          {face && full ? <LegendCard item={full} width={width} /> : <CardBack width={width} glow={revealed && rank >= 2 ? r.fill : undefined} />}
+          {face && full ? (
+            <LegendCard item={full} width={width} glow={glow} />
+          ) : (
+            <CardBack width={width} glow={revealed && (rank >= 2 || glow) ? (glow ? '#FFF8D0' : r.fill) : undefined} />
+          )}
         </Animated.View>
       </Pressable>
       {face ? (
@@ -191,11 +215,13 @@ function FlipCard({
           style={[styles.tag, { backgroundColor: item.new ? colors.correct : colors.board }]}
         >
           <AppText variant="caption" color={item.new ? colors.textOnBright : colors.textMuted} style={styles.bold}>
-            {item.new ? t.newCard : fmt(t.dupe, { n: item.dust })}
+            {glow ? t.glowNew : item.new ? t.newCard : fmt(t.dupe, { n: item.dust })}
           </AppText>
         </Animated.View>
       ) : null}
-      {face && rank >= 3 && !reduced ? <Burst colorsList={[r.fill, palette.chalk, colors.led]} count={14} radius={width} /> : null}
+      {face && (rank >= 3 || glow) && !reduced ? (
+        <Burst colorsList={glow ? ['#FF6FB5', '#FFC93C', '#3DDC84', '#7FD1FF', '#B49CFF'] : [r.fill, palette.chalk, colors.led]} count={glow ? 24 : 14} radius={width} />
+      ) : null}
     </Animated.View>
   );
 }
@@ -212,11 +238,17 @@ export default function PackOpenScreen() {
   const { width: screenW } = useWindowDimensions();
   const { data: coll } = useCollection();
   const req = useRef(requestId());
+  // Glow counts before opening: a higher count afterwards means a glowing copy came out of this pack.
+  const prevGlow = useRef<Record<string, number> | null>(null);
+  if (!prevGlow.current && coll) prevGlow.current = Object.fromEntries(coll.items.map((i) => [i.id, i.glow ?? 0]));
+  const tear = useSharedValue(0);
+  const fly = useSharedValue(0);
+  const tearTicks = useRef(0);
   const [result, setResult] = useState<OpenPackResult | null>(null);
   const [taps, setTaps] = useState(0);
   const [torn, setTorn] = useState(false);
   const [shown, setShown] = useState<boolean[]>([]);
-  const [stamp, setStamp] = useState<{ rarity: Rarity; key: number } | null>(null);
+  const [stamp, setStamp] = useState<{ rarity: Rarity | 'glow'; key: number } | null>(null);
   const shake = useSharedValue(0);
   const charge = useSharedValue(0);
   const flash = useSharedValue(0);
@@ -258,6 +290,49 @@ export default function PackOpenScreen() {
   }));
   const flashStyle = useAnimatedStyle(() => ({ opacity: flash.value }));
 
+  const tornRef = useRef(false);
+  const finishTear = () => {
+    if (tornRef.current) return;
+    tornRef.current = true;
+    playSound('pack_open');
+    haptic('heavy');
+    if (!reduced) {
+      fly.value = withTiming(1, { duration: 520, easing: Easing.out(Easing.cubic) });
+      flash.value = withSequence(withTiming(1, { duration: 90 }), withTiming(0, { duration: 650 }));
+      setTimeout(() => setTorn(true), 420);
+    } else {
+      setTorn(true);
+    }
+  };
+
+  const tick = (p: number) => {
+    const n = Math.floor(p * 6);
+    if (n > tearTicks.current) {
+      tearTicks.current = n;
+      haptic(n >= 5 ? 'heavy' : 'tap');
+      playSound('tick');
+    }
+  };
+
+  // Swipe along the dashed line to tear the pack open (taps still work, for accessibility).
+  const pan = Gesture.Pan()
+    .enabled(!!result && !torn)
+    .onUpdate((e) => {
+      const p = Math.min(1, Math.abs(e.translationX) / 170);
+      if (p > tear.value) tear.value = p;
+      runOnJS(tick)(tear.value);
+      if (tear.value >= 0.9) runOnJS(finishTear)();
+    })
+    .onEnd(() => {
+      if (tear.value < 0.9) tear.value = withSpring(0);
+    });
+
+  const tearLight = useAnimatedStyle(() => ({ opacity: tear.value, transform: [{ scaleX: Math.max(0.01, tear.value) }] }));
+  const topPiece = useAnimatedStyle(() => ({
+    opacity: 1 - fly.value,
+    transform: [{ translateY: -fly.value * 220 }, { translateX: fly.value * 80 }, { rotate: `${fly.value * 35}deg` }],
+  }));
+
   const tapPack = () => {
     if (!result) return;
     const n = taps + 1;
@@ -268,16 +343,26 @@ export default function PackOpenScreen() {
       haptic(n === TAPS - 1 ? 'heavy' : 'tap');
       return;
     }
-    playSound('pack_open');
-    haptic('heavy');
-    if (!reduced) flash.value = withSequence(withTiming(1, { duration: 90 }), withTiming(0, { duration: 650 }));
-    setTorn(true);
+    finishTear();
+  };
+
+  const isGlow = (id: string) => {
+    const now = coll?.items.find((x) => x.id === id)?.glow ?? 0;
+    return now > (prevGlow.current?.[id] ?? 0);
   };
 
   const reveal = (i: number) => {
     if (!result || i < 0) return;
     const it = result.items[i]!;
     const rank = RANK.indexOf(it.rarity as Rarity);
+    if (isGlow(it.id)) {
+      setTimeout(() => {
+        setStamp({ rarity: 'glow', key: Date.now() });
+        playSound('level_up');
+        if (!reduced) flash.value = withSequence(withTiming(0.7, { duration: 80 }), withTiming(0, { duration: 900 }));
+      }, 500);
+      setTimeout(() => setStamp(null), 2600);
+    }
     playSound(rank >= 2 ? 'rare_reveal' : 'answer_lock');
     haptic(rank >= 3 ? 'heavy' : 'tap');
     if (rank >= 3) {
@@ -309,11 +394,24 @@ export default function PackOpenScreen() {
       {!torn ? (
         <Pressable style={styles.center} disabled={!result} onPress={tapPack} accessibilityRole="button" accessibilityLabel={t.tapToOpen}>
           {result ? <Rays size={Math.min(screenW * 1.1, 460)} color={hint} opacity={0.25 + taps * 0.18} speed={9000 - taps * 2500} /> : null}
-          <Animated.View style={packStyle}>
-            <PackArt slug={pack} width={200} />
-          </Animated.View>
+          <GestureDetector gesture={pan}>
+            <Animated.View style={packStyle}>
+              <View style={{ width: PACK_W, height: PACK_W * 1.45 }}>
+                {/* bottom part stays; the strip above the dashed line flies away when torn */}
+                <View style={[styles.packClip, { top: TEAR_Y, height: PACK_W * 1.45 - TEAR_Y }]}>
+                  <View style={{ marginTop: -TEAR_Y }}>
+                    <PackArt slug={pack} width={PACK_W} />
+                  </View>
+                </View>
+                <Animated.View style={[styles.packClip, { top: 0, height: TEAR_Y }, topPiece]}>
+                  <PackArt slug={pack} width={PACK_W} />
+                </Animated.View>
+                <Animated.View pointerEvents="none" style={[styles.tearLight, { top: TEAR_Y - 4, backgroundColor: hint, shadowColor: hint }, tearLight]} />
+              </View>
+            </Animated.View>
+          </GestureDetector>
           <AppText variant="heading" color={taps > 0 ? hint : colors.textMuted} align="center">
-            {!result ? '…' : taps === 0 ? t.tapToOpen : taps === TAPS - 1 ? t.tapLast : t.tapMore}
+            {!result ? '…' : taps === 0 ? t.swipeToTear : taps === TAPS - 1 ? t.tapLast : t.tapMore}
           </AppText>
           {result && bestRank >= 3 && taps > 0 ? (
             <Animated.View entering={reduced ? undefined : FadeIn}>
@@ -328,7 +426,16 @@ export default function PackOpenScreen() {
           {!reduced ? <Burst colorsList={[hint, colors.led, palette.chalk, palette.sky]} count={30} /> : null}
           <View style={styles.cards}>
             {result.items.map((it, i) => (
-              <FlipCard key={`${it.id}-${i}`} item={it} index={i} width={cardW} revealed={!!shown[i]} onPress={() => reveal(i)} />
+              <FlipCard
+                key={`${it.id}-${i}`}
+                item={it}
+                index={i}
+                total={result.items.length}
+                width={cardW}
+                revealed={!!shown[i]}
+                glow={isGlow(it.id)}
+                onPress={() => reveal(i)}
+              />
             ))}
           </View>
           {!allShown ? (
@@ -372,9 +479,9 @@ export default function PackOpenScreen() {
           style={styles.stampWrap}
           accessibilityLiveRegion="assertive"
         >
-          <View style={[styles.stamp, { borderColor: rarityColors[stamp.rarity].fill }]}>
-            <AppText variant="title" color={rarityColors[stamp.rarity].fill} style={styles.stampText}>
-              {t.stamp[stamp.rarity as 'rare' | 'epic' | 'legendary' | 'iconic']}
+          <View style={[styles.stamp, { borderColor: stamp.rarity === 'glow' ? '#FFF8D0' : rarityColors[stamp.rarity].fill }]}>
+            <AppText variant="title" color={stamp.rarity === 'glow' ? '#FFE08A' : rarityColors[stamp.rarity].fill} style={styles.stampText}>
+              {stamp.rarity === 'glow' ? t.glowStamp : t.stamp[stamp.rarity as 'rare' | 'epic' | 'legendary' | 'iconic']}
             </AppText>
           </View>
         </Animated.View>
@@ -418,4 +525,6 @@ const styles = StyleSheet.create({
   },
   stampText: { fontSize: 44, lineHeight: 56, fontFamily: 'IBMPlexSansHebrew_700Bold' },
   flash: { backgroundColor: '#FFFFFF' },
+  packClip: { position: 'absolute', left: 0, right: 0, overflow: 'hidden' },
+  tearLight: { position: 'absolute', left: 6, right: 6, height: 8, borderRadius: 4, shadowOpacity: 1, shadowRadius: 12, elevation: 12 },
 });
