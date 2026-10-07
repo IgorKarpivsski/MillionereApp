@@ -128,21 +128,28 @@ function MatchOfTheDay() {
   );
 }
 
-function ClassicCard() {
+/** The first thing on the screen: one big way to start playing right now. */
+function PlayNowHero() {
   const playClassic = usePlayClassic();
   return (
-    <Card kind="soft" padding={space.md}>
-      <View style={styles.seasonRow}>
-        <Icon name="trophy" size={44} />
+    <View style={styles.hero}>
+      <LinearGradient colors={['#FFC93C', '#FF8A3D', '#FF5A4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+      <View style={styles.heroBall} pointerEvents="none">
+        <Icon name="play" size={150} />
+      </View>
+      <View style={styles.heroRow}>
+        <ChampionBadge size={76} ring={palette.night950} />
         <View style={styles.flex}>
-          <AppText variant="label">{t.classicTitle}</AppText>
-          <AppText variant="caption" color={colors.textDim}>
-            {t.classicBody}
+          <AppText variant="title" color={colors.textOnBright}>
+            {t.heroTitle}
+          </AppText>
+          <AppText variant="bodyStrong" color={colors.textOnBright}>
+            {t.heroBody}
           </AppText>
         </View>
-        <StickerButton label={t.play} size="sm" onPress={playClassic} />
       </View>
-    </Card>
+      <StickerButton label={t.playCta} icon="football" tone="ghost" size="lg" fullWidth onPress={playClassic} />
+    </View>
   );
 }
 
@@ -253,11 +260,11 @@ export default function HomeScreen() {
       {isLoading ? <Skeleton height={140} rounded={18} /> : null}
       {data && !data.welcome_bonus_claimed ? <WelcomeBonus /> : null}
 
+      <PlayNowHero />
       <MatchOfTheDay />
       <DailyExtras />
       <LeagueEntry />
       <FriendsEntry />
-      {daily?.state === 'done' ? null : <ClassicCard />}
       {packsWaiting > 0 ? (
         <Card kind="sticker" frame={colors.correct} padding={space.md}>
           <View style={styles.seasonRow}>
@@ -288,6 +295,16 @@ const styles = StyleSheet.create({
   welcomeRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   welcomeBtn: { marginTop: space.md },
   noBorder: { borderWidth: 0 },
+  hero: {
+    gap: space.md,
+    padding: space.lg,
+    borderRadius: 24,
+    borderWidth: 3,
+    borderColor: palette.night950,
+    overflow: 'hidden',
+  },
+  heroRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  heroBall: { position: 'absolute', top: -30, end: -40, opacity: 0.18, transform: [{ rotate: '-18deg' }] },
   matchShell: {
     gap: space.md,
     padding: space.lg,

@@ -82,6 +82,7 @@ function Gate() {
         <Stack.Screen name="pass" />
         <Stack.Screen name="friends" />
         <Stack.Screen name="avatar" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="admin" options={{ presentation: 'modal' }} />
         <Stack.Screen name="chat/[id]" />
         <Stack.Screen name="trade/[id]" options={{ presentation: 'modal' }} />
       </Stack>

@@ -9,6 +9,8 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { useToggleSetting } from '@/features/settings/hooks';
 import { useSettingsStore } from '@/features/settings/store';
 import { askForRemindersOnce } from '@/features/reminders/useReminders';
+import { useAdminStatus } from '@/features/admin/api';
+import { AdminUnlockSheet, RedeemSheet } from '@/features/admin/CodeSheets';
 import { brand } from '@/lib/brand';
 import { fmt, strings } from '@/lib/i18n';
 import { useIsOnline } from '@/lib/network';
@@ -87,6 +89,9 @@ export default function SettingsScreen() {
   const toast = useToast();
   const online = useIsOnline();
   const [deleting, setDeleting] = useState(false);
+  const [redeemOpen, setRedeemOpen] = useState(false);
+  const [unlockOpen, setUnlockOpen] = useState(false);
+  const admin = useAdminStatus();
 
   const confirmDelete = () =>
     Alert.alert(t.deleteTitle, t.deleteBody, [
@@ -136,6 +141,11 @@ export default function SettingsScreen() {
       </Card>
 
       <Card>
+        <LinkRow label={strings.redeem.entry} onPress={() => setRedeemOpen(true)} />
+        {admin.data?.admin ? <LinkRow label={strings.admin.entry} onPress={() => router.push('/admin')} /> : null}
+      </Card>
+
+      <Card>
         <AppText variant="label" color={colors.textMuted} accessibilityRole="header">
           {t.legal}
         </AppText>
@@ -153,9 +163,14 @@ export default function SettingsScreen() {
         loading={deleting}
         onPress={confirmDelete}
       />
-      <AppText variant="caption" color={colors.textMuted} align="center">
-        {fmt(t.version, { v: Application.nativeApplicationVersion ?? '0.1.0' })}
-      </AppText>
+      {/* Long-press the version for the owner's admin unlock (the server still checks the secret code). */}
+      <Pressable onLongPress={() => setUnlockOpen(true)} delayLongPress={2500} accessible={false}>
+        <AppText variant="caption" color={colors.textMuted} align="center">
+          {fmt(t.version, { v: Application.nativeApplicationVersion ?? '0.1.0' })}
+        </AppText>
+      </Pressable>
+      <RedeemSheet visible={redeemOpen} onClose={() => setRedeemOpen(false)} />
+      <AdminUnlockSheet visible={unlockOpen} onClose={() => setUnlockOpen(false)} />
     </Screen>
   );
 }
