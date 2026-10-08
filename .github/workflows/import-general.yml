@@ -1,0 +1,25 @@
+name: Import general questions
+
+# Loads content/general/questions.jsonl into Supabase. The import token is
+# single-use: it is disabled on the server right after the import.
+on:
+  push:
+    branches: [data-fetch]
+    paths: ['content/general/questions.jsonl', '.github/workflows/import-general.yml']
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Import
+        run: |
+          set -a; . apps/mobile/public-config.env; set +a
+          tools/scripts/ci-run.sh import node tools/question-gen/import.mjs
+        env:
+          QUESTIONS_FILE: content/general/questions.jsonl
+          IMPORT_TOKEN: 09fec31c07e8c6d849eca087273bd7869103957651b48821
