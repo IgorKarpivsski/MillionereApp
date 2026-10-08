@@ -22,7 +22,7 @@ function get(): AudioPlayer | null {
   }
 }
 
-const QUIET = ['/quiz', '/match'];
+const QUIET = ['/quiz', '/match', '/session'];
 
 export function useBackgroundMusic(): void {
   const on = useSettingsStore((s) => s.music);

@@ -37,17 +37,17 @@ alter table public.question_categories alter column world set not null;
 insert into public.app_config (key, value, is_public) values
   ('worlds', '[
      {"slug": "geography", "name": "גאוגרפיה", "icon": "globe",   "color": "#22B07D", "levels": 40, "active": true},
-     {"slug": "history",   "name": "היסטוריה", "icon": "scroll",  "color": "#C9853A", "levels": 30, "active": true},
-     {"slug": "science",   "name": "מדע",      "icon": "atom",    "color": "#3E8EF7", "levels": 30, "active": true},
-     {"slug": "nature",    "name": "טבע וחיות", "icon": "leaf",    "color": "#6CBF3B", "levels": 40, "active": true},
-     {"slug": "space",     "name": "חלל",      "icon": "planet",  "color": "#7B5CF0", "levels": 20, "active": true},
+     {"slug": "history",   "name": "היסטוריה", "icon": "scroll",  "color": "#C9853A", "levels": 25, "active": true},
+     {"slug": "science",   "name": "מדע",      "icon": "atom",    "color": "#3E8EF7", "levels": 25, "active": true},
+     {"slug": "nature",    "name": "טבע וחיות", "icon": "leaf",    "color": "#6CBF3B", "levels": 30, "active": true},
+     {"slug": "space",     "name": "חלל",      "icon": "planet",  "color": "#7B5CF0", "levels": 15, "active": true},
      {"slug": "culture",   "name": "אמנות וספרות", "icon": "palette", "color": "#E2557B", "levels": 30, "active": true},
-     {"slug": "screen",    "name": "קולנוע",    "icon": "film",    "color": "#F2694B", "levels": 30, "active": true},
-     {"slug": "music",     "name": "מוזיקה",    "icon": "note",    "color": "#D84FD0", "levels": 20, "active": true},
+     {"slug": "screen",    "name": "קולנוע",    "icon": "film",    "color": "#F2694B", "levels": 25, "active": true},
+     {"slug": "music",     "name": "מוזיקה",    "icon": "note",    "color": "#D84FD0", "levels": 15, "active": true},
      {"slug": "people",    "name": "אישים",     "icon": "person",  "color": "#F0A020", "levels": 30, "active": true},
      {"slug": "israel",    "name": "ישראל",     "icon": "star",    "color": "#2F7DE1", "levels": 30, "active": true},
-     {"slug": "sport",     "name": "ספורט",     "icon": "medal",   "color": "#14A3B8", "levels": 20, "active": true},
-     {"slug": "food",      "name": "אוכל",      "icon": "food",    "color": "#EE8A2E", "levels": 20, "active": true},
+     {"slug": "sport",     "name": "ספורט",     "icon": "medal",   "color": "#14A3B8", "levels": 25, "active": true},
+     {"slug": "food",      "name": "אוכל",      "icon": "food",    "color": "#EE8A2E", "levels": 15, "active": true},
      {"slug": "football",  "name": "כדורגל",    "icon": "ball",    "color": "#1E9E4A", "levels": 60, "active": true}
    ]'::jsonb, true),
   ('session', '{

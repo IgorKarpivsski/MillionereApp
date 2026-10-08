@@ -29,17 +29,17 @@ export const sessionApi = {
 /** Fallback so the map renders even before the config arrives. */
 export const DEFAULT_WORLDS: WorldConfig[] = [
   { slug: 'geography', name: 'גאוגרפיה', icon: 'globe', color: '#22B07D', levels: 40 },
-  { slug: 'history', name: 'היסטוריה', icon: 'scroll', color: '#C9853A', levels: 30 },
-  { slug: 'science', name: 'מדע', icon: 'atom', color: '#3E8EF7', levels: 30 },
-  { slug: 'nature', name: 'טבע וחיות', icon: 'leaf', color: '#6CBF3B', levels: 40 },
-  { slug: 'space', name: 'חלל', icon: 'planet', color: '#7B5CF0', levels: 20 },
+  { slug: 'history', name: 'היסטוריה', icon: 'scroll', color: '#C9853A', levels: 25 },
+  { slug: 'science', name: 'מדע', icon: 'atom', color: '#3E8EF7', levels: 25 },
+  { slug: 'nature', name: 'טבע וחיות', icon: 'leaf', color: '#6CBF3B', levels: 30 },
+  { slug: 'space', name: 'חלל', icon: 'planet', color: '#7B5CF0', levels: 15 },
   { slug: 'culture', name: 'אמנות וספרות', icon: 'palette', color: '#E2557B', levels: 30 },
-  { slug: 'screen', name: 'קולנוע', icon: 'film', color: '#F2694B', levels: 30 },
-  { slug: 'music', name: 'מוזיקה', icon: 'note', color: '#D84FD0', levels: 20 },
+  { slug: 'screen', name: 'קולנוע', icon: 'film', color: '#F2694B', levels: 25 },
+  { slug: 'music', name: 'מוזיקה', icon: 'note', color: '#D84FD0', levels: 15 },
   { slug: 'people', name: 'אישים', icon: 'person', color: '#F0A020', levels: 30 },
   { slug: 'israel', name: 'ישראל', icon: 'star', color: '#2F7DE1', levels: 30 },
-  { slug: 'sport', name: 'ספורט', icon: 'medal', color: '#14A3B8', levels: 20 },
-  { slug: 'food', name: 'אוכל', icon: 'food', color: '#EE8A2E', levels: 20 },
+  { slug: 'sport', name: 'ספורט', icon: 'medal', color: '#14A3B8', levels: 25 },
+  { slug: 'food', name: 'אוכל', icon: 'food', color: '#EE8A2E', levels: 15 },
   { slug: 'football', name: 'כדורגל', icon: 'ball', color: '#1E9E4A', levels: 60 },
 ];
 

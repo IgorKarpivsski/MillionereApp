@@ -117,6 +117,9 @@ class Names:
 
 
 N: Names
+GENDER: dict[str, str] = {}
+HUMAN: set[str] = set()
+BIRTH: dict[str, int] = {}
 
 
 # ---------------------------------------------------------------------------
@@ -140,12 +143,14 @@ def photo(file: str | None, fit: str = "cover") -> dict | None:
     if c.get("mime") not in ("image/jpeg", "image/png", "image/svg+xml", "image/webp", "image/gif", "image/tiff"):
         return None
     artist = re.sub(r"\s+", " ", c.get("artist") or "").strip()
+    if re.search(r"(See File history|uploader|Unknown|unknown|Own work|transferred)", artist):
+        artist = ""
     if not artist or len(artist) > 60:
         artist = artist[:57] + "…" if artist else ""
     credit = f"{artist} · {lic} · ויקישיתוף" if artist else f"{lic} · ויקישיתוף"
     return {
         "kind": "photo",
-        "url": c["thumb"],
+        "url": c["thumb"].split("?")[0],
         "credit": credit[:200],
         "license": lic[:60],
         "page": c.get("page"),
@@ -231,6 +236,21 @@ def fem(gender: str | None) -> bool:
     return gender in ("Q6581072", "Q1052281")
 
 
+ARTICLE_NAMES = ("הפיליפינים", "הרפובליקה", "הממלכה", "האיים", "האמירויות", "המדינות", "הקונגו")
+
+
+def be(name: str) -> str:
+    """Hebrew "in X": ב absorbs the definite article (בפיליפינים) but not a root ה (בהודו)."""
+    return "ב" + (name[1:] if name.startswith(ARTICLE_NAMES) else name)
+
+
+def be_century(c: str) -> str:
+    return "ב" + c[1:] if c.startswith("ה") else "ב" + c
+
+
+ORG_WORDS = re.compile(r"(חברת|חברה|משרד|אדריכלים|ממשלת|הסתדרות|קבוצת|ארגון|מכון|אוניברסיט|תאגיד|בע\"מ|רשות|עיריית|האקדמיה|מועצת|מפלגת|ועדת|צבא|חיל|בנק)")
+
+
 def century_he(y: int) -> str:
     if y <= 0:
         c = (abs(y) - 1) // 100 + 1
@@ -257,9 +277,17 @@ CONTINENT_HE = {
     "Q46": "אירופה", "Q48": "אסיה", "Q15": "אפריקה", "Q49": "צפון אמריקה", "Q18": "דרום אמריקה",
     "Q538": "אוקיאניה", "Q55643": "אוקיאניה", "Q3960": "אוקיאניה", "Q51": "אנטארקטיקה",
 }
+COUNTRY_NAME = {"Q148": "סין", "Q29999": "הולנד", "Q55": "הולנד", "Q145": "בריטניה", "Q884": "דרום קוריאה", "Q423": "צפון קוריאה"}
+ISLAND_STATES_EN = {"Japan", "Philippines", "Sri Lanka", "Madagascar", "Cuba", "Jamaica", "The Bahamas", "Fiji", "New Zealand", "Australia",
+    "Comoros", "Mauritius", "Seychelles", "Maldives", "Malta", "Cyprus", "Bahrain", "Singapore", "Taiwan", "Cape Verde", "São Tomé and Príncipe",
+    "Trinidad and Tobago", "Barbados", "Iceland", "Solomon Islands", "Vanuatu", "Samoa", "Tonga", "Kiribati", "Tuvalu", "Nauru", "Palau",
+    "Marshall Islands", "Federated States of Micronesia", "Saint Lucia", "Grenada", "Dominica", "Antigua and Barbuda", "Saint Kitts and Nevis",
+    "Saint Vincent and the Grenadines", "Indonesia", "United Kingdom", "Ireland", "Papua New Guinea", "East Timor", "Timor-Leste", "Haiti",
+    "Dominican Republic", "Brunei", "Malaysia"}
 EXCLUDED_COUNTRIES = {"Q219060", "Q40362", "Q23681", "Q23334", "Q23427", "Q907112", "Q34754", "Q1246"}
 
 countries: dict[str, dict] = {}  # qid -> {he, sl, continent, pop, area, flag}
+CITY_COUNTRY: dict[str, str] = {}
 
 
 def multi(rows: list[dict], key="x", val="v") -> dict[str, set[str]]:
@@ -268,6 +296,13 @@ def multi(rows: list[dict], key="x", val="v") -> dict[str, set[str]]:
         if r.get(key) and r.get(val):
             d[r[key]].add(r[val])
     return d
+
+
+def build_city_country():
+    cc = multi(load("cities"), "x", "c")
+    for x, cs in cc.items():
+        if len(cs) == 1:
+            CITY_COUNTRY[x] = next(iter(cs))
 
 
 def build_countries():
@@ -279,7 +314,7 @@ def build_countries():
         e = N.get(q)
         if not e:
             continue
-        c = countries.setdefault(q, {"he": e.he, "sl": int(r.get("sl") or e.sl or 0), "flag": None, "pop": None, "area": None, "ent": e})
+        c = countries.setdefault(q, {"he": COUNTRY_NAME.get(q, e.he), "island": (e.en or "") in ISLAND_STATES_EN, "sl": int(r.get("sl") or e.sl or 0), "flag": None, "pop": None, "area": None, "ent": e})
         conts = {CONTINENT_HE[x] for x in cont.get(q, set()) if x in CONTINENT_HE}
         c["continents"] = conts
         c["continent"] = next(iter(conts)) if len(conts) == 1 else None
@@ -302,8 +337,11 @@ def country_pool(near_continent: str | None = None, exclude: set[str] = frozense
 QS: list[Q] = []
 
 
+SENSITIVE = re.compile(r"(ג'יהאד|קאעידה|חמאס|חיזבאללה|דאעש|טליבאן|המדינה האסלאמית|מחנה הריכוז|מחנה השמדה|השמדה|השואה|רצח העם|ג'נוסייד|טרור|פיגוע|נאצי|אס אס|גסטפו|זרקאווי)")
+
+
 def add(q: Q | None):
-    if q and answers_ok(q):
+    if q and answers_ok(q) and not SENSITIVE.search(q.text + " " + " ".join([q.correct, *q.wrong]) + " " + q.explanation):
         QS.append(q)
 
 
@@ -340,7 +378,7 @@ def gen_geography():
         if c["continent"] and c["continent"] != "אנטארקטיקה":
             others = [x for x in ["אירופה", "אסיה", "אפריקה", "צפון אמריקה", "דרום אמריקה", "אוקיאניה"] if x != c["continent"]]
             rng.shuffle(others)
-            add(Q(f"באיזו יבשת נמצאת {name}?", c["continent"], others[:3], f"{name} נמצאת ב{c['continent']}.", "geography", "continent", max(0, ob - 0.15), src, key=q))
+            add(Q(f"באיזו יבשת נמצאת {name}?", c["continent"], others[:3], f"{name} נמצאת {be(c['continent'])}.", "geography", "continent", max(0, ob - 0.15), src, key=q))
         # flag (photo)
         img = photo(c["flag"], fit="contain")
         if img:
@@ -365,10 +403,10 @@ def gen_geography():
                 if w:
                     add(Q(f"מהי השפה הרשמית של {name}?", le.he, w, f"השפה הרשמית של {name} היא {le.he}.", "geography", "language", min(1, ob + 0.05), src, key=q))
         # neighbour
-        nb = [o for o in border.get(q, ()) if o in countries]
+        nb = [o for o in border.get(q, ()) if o in countries and not countries[o]["island"]] if not c["island"] else []
         if nb:
             o = max(nb, key=lambda x: countries[x]["sl"])
-            notnb = [countries[x]["he"] for x in countries if x != q and x not in border.get(q, ()) and c["continent"] and c["continent"] in countries[x].get("continents", set())]
+            notnb = [countries[x]["he"] for x in countries if x != q and not countries[x]["island"] and x not in border.get(q, ()) and c["continent"] and c["continent"] in countries[x].get("continents", set())]
             w = pick(notnb, {countries[o]["he"], name})
             if w:
                 add(Q(f"איזו מהמדינות הבאות גובלת עם {name}?", countries[o]["he"], w, f"{countries[o]['he']} גובלת עם {name}.", "geography", "border", min(1, ob + 0.15), src, key=q))
@@ -421,7 +459,7 @@ def gen_geography():
         pool, nearc = country_pool(c["continent"], {cq})
         w = pick(pool, {c["he"]}, near=nearc)
         if w:
-            add(Q(f"באיזו מדינה נמצאת העיר {e.he}?", c["he"], w, f"{e.he} נמצאת ב{c['he']}." if not c["he"].startswith("ה") else f"העיר {e.he} נמצאת במדינה {c['he']}.",
+            add(Q(f"באיזו מדינה נמצאת העיר {e.he}?", c["he"], w, f"{e.he} נמצאת {be(c['he'])}.",
                   "geography", "city_country", fame(city_sl[x], 250, 40), e.sources, key=x))
 
     # rivers, mountains, lakes, islands, deserts, volcanoes, waterfalls
@@ -437,9 +475,12 @@ def gen_geography():
             if r.get("img") and r["x"] not in img:
                 img[r["x"]] = r["img"]
         out = {}
+        dup = collections.Counter(N.he(x) for x in sl if N.get(x))
         for x in sl:
             e = N.get(x)
-            if not e:
+            if not e or dup[e.he] > 1 or e.he.startswith(("ריו ", "רio")):
+                continue
+            if e.he.startswith(("מפלי", "המפלים")):
                 continue
             label = e.he if e.he.startswith(prefixes) else f"{typ} {e.he}"
             out[x] = (e, label, {c for c in cs.get(x, set()) if c in countries}, sl[x], img.get(x))
@@ -450,7 +491,7 @@ def gen_geography():
                 pool, nearc = country_pool(c["continent"], {cq})
                 w = pick(pool, {c["he"]}, near=nearc)
                 if w and c["he"] not in e.he:
-                    add(Q(f"באיזו מדינה נמצא {label}?", c["he"], w, f"{label} נמצא ב{c['he']}." if not c["he"].startswith("ה") else f"{label} נמצא במדינה {c['he']}.",
+                    add(Q(f"באיזו מדינה נמצא {label}?", c["he"], w, f"{label} נמצא {be(c['he'])}.",
                           "geography", tpl, fame(s, hi, lo), e.sources, key=x))
             elif len(ccs) > 1 and typ in ("הנהר",):
                 cq = max(ccs, key=lambda k: countries[k]["sl"])
@@ -458,11 +499,11 @@ def gen_geography():
                 notin = [countries[k]["he"] for k in countries if k not in ccs and c["continent"] and c["continent"] in countries[k].get("continents", set())]
                 w = pick(notin, {c["he"]})
                 if w:
-                    add(Q(f"דרך איזו מהמדינות הבאות זורם {label}?", c["he"], w, f"{label} זורם בין היתר ב{c['he']}." if not c["he"].startswith("ה") else f"{label} זורם בין היתר במדינה {c['he']}.",
+                    add(Q(f"דרך איזו מהמדינות הבאות זורם {label}?", c["he"], w, f"{label} זורם בין היתר {be(c['he'])}.",
                           "geography", tpl + "_multi", fame(s, hi, lo) + 0.1, e.sources, key=x))
         return out
 
-    rivers = places("rivers", "הנהר", ("נהר", "הנהר"), 150, 25, "river_country")
+    rivers = places("rivers", "הנהר", ("נהר", "הנהר", "נחל"), 150, 25, "river_country")
     places("mountains", "ההר", ("הר ", "ההר", "הרי"), 120, 20, "mountain_country")
     places("lakes", "האגם", ("אגם", "האגם", "ים "), 120, 25, "lake_country")
     places("islands", "האי", ("אי ", "האי", "איי"), 150, 30, "island_country")
@@ -478,12 +519,14 @@ def gen_geography():
             mouth.setdefault(r["x"], set()).add(r["mouth"])
         if num(r.get("len")):
             length[r["x"]] = max(length.get(r["x"], 0), num(r["len"]))
-    mouth_names = [N.he(next(iter(v))) for v in mouth.values() if len(v) == 1]
+    mouth_names = [N.he(next(iter(v))) for v in mouth.values() if len(v) == 1 and len(N.he(next(iter(v))) or "") >= 3]
     for x, ms in mouth.items():
         e = N.get(x)
         if not e or len(ms) != 1 or x not in rivers:
             continue
         me = N.get(next(iter(ms)))
+        if len(me.he) < 3:
+            continue
         w = pick([m for m in mouth_names if m], {me.he})
         if w:
             add(Q(f"לאן נשפך {rivers[x][1]}?", me.he, w, f"{rivers[x][1]} נשפך אל {me.he}.", "geography", "river_mouth", fame(rivers[x][3], 150, 25) + 0.15, e.sources, key=x))
@@ -533,7 +576,7 @@ def gen_landmarks():
             d["arch"].add(r["arch"])
     named = {x: (N.get(x), d) for x, d in info.items() if N.get(x)}
     names_by_type: dict[str, list[tuple[str, int]]] = collections.defaultdict(list)
-    all_names = [(e.he, d["sl"]) for e, d in named.values()]
+    all_names = [(e.he, d["sl"]) for e, d in named.values() if d["types"]]
     for x, (e, d) in named.items():
         for t in d["types"]:
             names_by_type[t].append((e.he, d["sl"]))
@@ -541,11 +584,11 @@ def gen_landmarks():
         ccs = {c for c in d["cs"] if c in countries}
         # photo: which landmark is this?
         img = photo(d["img"])
-        if img and d["sl"] >= 40:
+        if img and d["sl"] >= 40 and (d["types"] or d["sl"] >= 70):
             same = [n for t in d["types"] for n, _ in names_by_type[t] if n != e.he]
             w = pick([n for n, _ in all_names], {e.he}, near=same or by_closeness(all_names, d["sl"]))
             if w:
-                add(Q("איזה מקום מפורסם מופיע בתמונה?", e.he, w, f"זה {e.he}." + (f" הוא נמצא ב{countries[next(iter(ccs))]['he']}." if len(ccs) == 1 and not countries[next(iter(ccs))]['he'].startswith('ה') else ""),
+                add(Q("איזה מקום מפורסם מופיע בתמונה?", e.he, w, f"בתמונה: {e.he}" + (f", {be(countries[next(iter(ccs))]['he'])}." if len(ccs) == 1 else "."),
                       "geography", "landmark_photo", fame(d["sl"], 160, 35), e.sources, image=img, key=x))
         if len(ccs) == 1:
             cq = next(iter(ccs))
@@ -555,7 +598,7 @@ def gen_landmarks():
             pool, nearc = country_pool(c["continent"], {cq})
             w = pick(pool, {c["he"]}, near=nearc)
             if w:
-                add(Q(f"באיזו מדינה נמצא האתר \"{e.he}\"?", c["he"], w, f"{e.he} נמצא ב{c['he']}." if not c["he"].startswith("ה") else f"{e.he} נמצא במדינה {c['he']}.",
+                add(Q(f"באיזו מדינה נמצא האתר \"{e.he}\"?", c["he"], w, f"האתר \"{e.he}\" נמצא {be(c['he'])}.",
                       "geography", "landmark_country", fame(d["sl"], 160, 30) + 0.05, e.sources, key=x))
 
 
@@ -582,7 +625,7 @@ def gen_nature():
         if len(g) == 1:
             group[x] = next(iter(g))
     names = {x: N.get(x) for x in sp_sl}
-    names = {x: e for x, e in names.items() if e and " " not in e.he[:1]}
+    names = {x: e for x, e in names.items() if e and x in group and not e.he.startswith(("הומו", "האדם", "אדם "))}
     by_group: dict[str, list[tuple[str, int]]] = collections.defaultdict(list)
     for x, e in names.items():
         if x in group:
@@ -597,11 +640,11 @@ def gen_nature():
             near = by_closeness(by_group.get(g, []), s, 16) if g else by_closeness(all_animals, s)
             w = pick([n for n, _ in all_animals], {e.he}, near=[n for n in near if n != e.he])
             if w:
-                add(Q("איזה בעל חיים מופיע בתמונה?", e.he, w, f"זה {e.he}." + (f" הוא שייך ל{g}." if g else ""), "nature", "animal_photo", fame(s, 220, 50), e.sources, image=img, key=x))
+                add(Q("איזה בעל חיים מופיע בתמונה?", e.he, w, f"בתמונה: {e.he}" + (f" (מקבוצת ה{g})." if g else "."), "nature", "animal_photo", fame(s, 220, 50), e.sources, image=img, key=x))
         if g and s >= 45:
             w = [o for o in groups if o != g]
             rng.shuffle(w)
-            add(Q(f"לאיזו קבוצה של בעלי חיים שייך ה{e.he}?" if not e.he.startswith("ה") else f"לאיזו קבוצה של בעלי חיים שייך {e.he}?", g, w[:3],
+            add(Q(f"לאיזו קבוצה של בעלי חיים שייך {e.he}?", g, w[:3],
                   f"{e.he} שייך ל{g}.", "nature", "animal_class", fame(s, 220, 45) + 0.05, e.sources, key=x))
     # dog breeds
     breeds = {}
@@ -624,7 +667,7 @@ def gen_nature():
             pool, nearc = country_pool(c["continent"], o)
             w = pick(pool, {c["he"]}, near=nearc)
             if w and c["he"] not in d["e"].he:
-                add(Q(f"מאיזו מדינה מגיע גזע הכלבים {d['e'].he}?", c["he"], w, f"{d['e'].he} הוא גזע כלבים שמקורו ב{c['he']}.", "nature", "dog_origin", fame(d["sl"], 90, 20) + 0.15, d["e"].sources, key=x))
+                add(Q(f"מאיזו מדינה מגיע גזע הכלבים {d['e'].he}?", c["he"], w, f"{d['e'].he} הוא גזע כלבים שמקורו {be(c['he'])}.", "nature", "dog_origin", fame(d["sl"], 90, 20) + 0.15, d["e"].sources, key=x))
 
 
 # ---------------------------------------------------------------------------
@@ -675,19 +718,19 @@ def gen_science():
     for r in load("nobel"):
         fields[r["x"]].add(NOBEL.get(r["award"], ""))
         sl[r["x"]] = int(r.get("sl") or 0)
-    gender = {r["x"]: r.get("gender") for r in load("people_facts")}
+    gender = GENDER
     for x, fs in fields.items():
         e = N.get(x)
-        if not e or len(fs) != 1 or not sl.get(x) or sl[x] < 25:
+        if not e or len(fs) != 1 or not sl.get(x) or sl[x] < 25 or (e.en or "") in BLOCKED_PEOPLE_EN:
             continue
         f = next(iter(fs))
-        others = [o for o in NOBEL.values() if o != f]
+        others = [o for o in dict.fromkeys(NOBEL.values()) if o != f]
         rng.shuffle(others)
         verb = "זכתה" if fem(gender.get(x)) else "זכה"
         cat = "science" if f in ("פיזיקה", "כימיה", "רפואה") else "people"
         add(Q(f"באיזה תחום {verb} {e.he} בפרס נובל?", f, others[:3], f"{e.he} {verb} בפרס נובל ל{f}.", cat, "nobel_field", fame(sl[x], 150, 25) + 0.1, e.sources, key=x))
 
-    # inventors & discoverers (not elements)
+    return  # "who discovered/invented X" from P61 mixes islands, constellations and gadgets: not reliable enough
     rows = load("rel_discoverer")
     disc = multi(rows, "x", "v")
     xsl = {r["x"]: int(r.get("sl") or 0) for r in rows}
@@ -739,7 +782,7 @@ def gen_space():
     cons = {r["x"]: N.get(r["x"]) for r in load("constellations")}
     cons = {k: v for k, v in cons.items() if v}
     cnames = [v.he for v in cons.values()]
-    for r in load("stars"):
+    for r in load("stars") + load("stars2"):
         e = N.get(r["x"])
         c = cons.get(r.get("con"))
         if not e or not c:
@@ -762,17 +805,22 @@ def gen_space():
         w = pick(pool, {c["he"]}, near=big)
         f = fem(gender.get(x))
         if w:
-            add(Q(f"מאיזו מדינה {'האסטרונאוטית' if f else 'האסטרונאוט'} {e.he}?", c["he"], w, f"{e.he} {'היא אסטרונאוטית' if f else 'הוא אסטרונאוט'} מ{c['he']}.", "space", "astronaut_country", fame(asl[x], 120, 20), e.sources, key=x))
+            add(Q(f"איזו מדינה שלחה לחלל את {e.he}?", c["he"], w, f"{c['he']} שלחה לחלל את {e.he}.", "space", "astronaut_country", fame(asl[x], 120, 20), e.sources, key=x))
 
 
 # ---------------------------------------------------------------------------
 # People
 # ---------------------------------------------------------------------------
+BLOCKED_PEOPLE_EN = {"Adolf Hitler", "Joseph Goebbels", "Heinrich Himmler", "Hermann Göring", "Adolf Eichmann", "Josef Mengele",
+    "Reinhard Heydrich", "Martin Bormann", "Rudolf Hess", "Ernst Röhm", "Klaus Barbie", "Joachim von Ribbentrop", "Albert Speer",
+    "Osama bin Laden", "Pol Pot", "Yasser Arafat", "Saddam Hussein", "Muammar Gaddafi", "Ayatollah Khomeini", "Ruhollah Khomeini",
+    "Ali Khamenei", "Hassan Nasrallah", "Ahmed Yassin", "Yahya Sinwar", "Benito Mussolini", "Idi Amin", "Charles Manson", "Ted Bundy"}
+
 FIELD = {
     "פוליטיקה": {"Q82955", "Q372436", "Q193391", "Q30461", "Q2285706", "Q116", "Q48352", "Q12097", "Q10737834"},
     "משחק": {"Q33999", "Q10800557", "Q10798782", "Q2405480", "Q2259451", "Q948329"},
     "מוזיקה ושירה": {"Q177220", "Q639669", "Q488205", "Q753110", "Q855091", "Q2252262", "Q386854", "Q183945", "Q2643890"},
-    "ספרות": {"Q36180", "Q6625963", "Q49757", "Q4853732", "Q214917", "Q482980", "Q18844224", "Q1930187"},
+    "ספרות": {"Q36180", "Q6625963", "Q49757", "Q4853732", "Q214917", "Q482980", "Q18844224"},
     "ציור ואמנות": {"Q1028181", "Q1281618", "Q483501", "Q11569986", "Q15296811", "Q33231"},
     "מדע": {"Q901", "Q169470", "Q593644", "Q170790", "Q864503", "Q11063", "Q1622272", "Q39631", "Q350979", "Q2919046", "Q520549"},
     "ספורט": {"Q937857", "Q3665646", "Q10833314", "Q10843402", "Q11513337", "Q2066131", "Q13382576", "Q11338576", "Q12299841", "Q13141064", "Q4009406", "Q19204627", "Q15117302", "Q10871364", "Q11774891", "Q13381376"},
@@ -808,7 +856,7 @@ def gen_people():
         sl[r["x"]] = max(sl.get(r["x"], 0), int(r.get("sl") or 0))
         israeli.add(r["x"])
     names = {x: N.get(x) for x in sl}
-    names = {x: e for x, e in names.items() if e and len(e.he.split()) <= 4}
+    names = {x: e for x, e in names.items() if e and len(e.he.split()) <= 4 and (e.en or "") not in BLOCKED_PEOPLE_EN}
     field_of = {}
     for x in names:
         fs = {OCC_TO_FIELD[o] for o in occ.get(x, ()) if o in OCC_TO_FIELD}
@@ -832,13 +880,16 @@ def gen_people():
             f = field_of[x]
             others = [o for o in all_fields if o != f]
             rng.shuffle(others)
-            add(Q(f"במה {'התפרסמה' if f_ else 'התפרסם'} {e.he}?", f, others[:3], f"{e.he} {'מוכרת' if f_ else 'מוכר'} בזכות {f}.", cat, "person_field", ob, e.sources, key=x))
+            add(Q(f"במה {'התפרסמה' if f_ else 'התפרסם'} {e.he}?", f, others[:3], f"התחום שבו {e.he} {'התפרסמה' if f_ else 'התפרסם'}: {f}.", cat, "person_field", ob, e.sources, key=x))
         # photo (only people who have died)
         img = photo(d.get("img"))
         if img and d.get("death") and s >= (25 if isr else 90) and x in field_of:
+            era = d.get("birth")
             same = [n for n, _ in by_field_gender[(field_of[x], f_)] if n != e.he]
-            near = by_closeness([(n, ss) for n, ss in by_field_gender[(field_of[x], f_)] if n != e.he], s, 12)
-            w = pick(same, {e.he}, near=near)
+            near = [names[o].he for o in field_of if o != x and field_of[o] == field_of[x] and fem(facts.get(o, {}).get("gender")) == f_
+                    and era and facts.get(o, {}).get("birth") and abs(facts[o]["birth"] - era) <= 40]
+            near = by_closeness([(n, sl[o]) for o in field_of for n in [names[o].he] if n in set(near)], s, 12) if near else []
+            w = pick(near, {e.he}) if len(near) >= 3 else None
             if w:
                 add(Q(f"מי {'מופיעה' if f_ else 'מופיע'} בתמונה?", e.he, w, f"{'זוהי' if f_ else 'זהו'} {e.he}.", cat, "person_photo", ob + 0.1, e.sources, image=img, key=x))
         # citizenship (one modern country)
@@ -854,21 +905,27 @@ def gen_people():
         # birth city
         bp = born.get(x, set())
         if len(bp) == 1:
-            be = N.get(next(iter(bp)))
-            if be and be.sl >= 40:
-                cities_he[x] = be.he
+            bpe = N.get(next(iter(bp)))
+            if bpe and bpe.sl >= 40:
+                cities_he[x] = (bpe.he, CITY_COUNTRY.get(bpe.qid))
         # birth century (historical figures only)
         b = d.get("birth")
         if b and b < 1850 and s >= (20 if isr else 80):
             co = century_options(b)
             if co:
-                add(Q(f"באיזו מאה {'נולדה' if f_ else 'נולד'} {e.he}?", co[0], co[1], f"{e.he} {'נולדה' if f_ else 'נולד'} בשנת {b}, כלומר ב{co[0]}.", cat if b > 0 else "history",
+                add(Q(f"באיזו מאה {'נולדה' if f_ else 'נולד'} {e.he}?", co[0], co[1], f"{e.he} {'נולדה' if f_ else 'נולד'} בשנת {b}, כלומר {be_century(co[0])}.", "history",
                       "person_century", ob + 0.1, e.sources, key=x))
-    city_pool = list(set(cities_he.values()))
-    for x, city in cities_he.items():
+    city_pool = list({c for c, _ in cities_he.values()})
+    by_cc = collections.defaultdict(set)
+    for c, cc in cities_he.values():
+        if cc:
+            by_cc[cc].add(c)
+    for x, (city, cc) in cities_he.items():
         e = names[x]
         f_ = fem(facts.get(x, {}).get("gender"))
-        w = pick(city_pool, {city})
+        if not cc or len(by_cc[cc]) < 4:
+            continue
+        w = pick(city_pool, {city}, near=list(by_cc[cc] - {city}))
         if w and city not in e.he:
             add(Q(f"באיזו עיר {'נולדה' if f_ else 'נולד'} {e.he}?", city, w, f"{e.he} {'נולדה' if f_ else 'נולד'} ב{city}.", "israel" if x in israeli else "people", "person_birthplace",
                   fame(sl[x], 60, 8) + 0.2 if x in israeli else fame(sl[x], 250, 70) + 0.2, e.sources, key=x))
@@ -880,7 +937,7 @@ def gen_people():
 LIT = {"Q7725634", "Q8261", "Q5185279", "Q25379", "Q571", "Q49084", "Q149537", "Q1279564", "Q699", "Q1667921", "Q12106333", "Q47461344"}
 FILM = {"Q11424", "Q202866", "Q24862", "Q506240", "Q1261214", "Q229390", "Q20650540", "Q17517379"}
 SERIES = {"Q5398426", "Q581714", "Q1259759", "Q526877"}
-ART = {"Q3305213", "Q860861", "Q93184", "Q11060274", "Q125191", "Q1278452"}
+ART = {"Q3305213", "Q860861"}
 MUSIC = {"Q7366", "Q134556", "Q482994", "Q105543609", "Q2188189", "Q1344", "Q9734", "Q207628", "Q2743", "Q169930", "Q208569"}
 COMPANY = {"Q4830453", "Q891723", "Q6881511", "Q783794", "Q43229", "Q163740", "Q1058914", "Q18388277", "Q1589009"}
 
@@ -903,12 +960,16 @@ def relation(name: str, kinds: set[str] | None, cat: str, text, expl, tpl: str, 
         if len(vs) != 1:
             continue
         e, ve = N.get(x), N.get(next(iter(vs)))
-        if not e or not ve or e.he == ve.he or ve.he in e.he:
+        if not e or not ve or e.he == ve.he or ve.he in e.he or e.he in ve.he:
+            continue
+        if ORG_WORDS.search(ve.he) or (HUMAN and ve.qid not in HUMAN) or (ve.en or "") in BLOCKED_PEOPLE_EN:
+            continue
+        if set(e.he.split()) & set(ve.he.split()) - {"של", "ה", "את"}:
             continue
         eligible[x] = (e, ve)
         k = next(iter(sorted(typ.get(x, set()) & kinds))) if kinds else "_"
         pool_by_kind[k].append((ve.he, ve.sl))
-    makers = [v for vs in pool_by_kind.values() for v in vs]
+    makers = [v for vs in pool_by_kind.values() for v in vs if not ORG_WORDS.search(v[0])]
     makers_dedup = list({n: s for n, s in makers}.items())
     for x, (e, ve) in eligible.items():
         k = next(iter(sorted(typ.get(x, set()) & kinds))) if kinds else "_"
@@ -918,7 +979,7 @@ def relation(name: str, kinds: set[str] | None, cat: str, text, expl, tpl: str, 
             continue
         c = israel_cat if israel_cat and next(iter(who[x])) in israelis else cat
         ob = fame(sl[x], hi, lo) + bias
-        add(Q(text(e.he), ve.he, w, expl(e.he, ve.he), c, tpl, ob, e.sources + ve.sources[:1], key=x))
+        add(Q(text(e.he, typ.get(x, set())), ve.he, w, expl(e.he, ve.he), c, tpl, ob, e.sources + ve.sources[:1], key=x))
         if img_text:
             im = photo(img.get(x), fit="contain")
             if im and sl[x] >= 30:
@@ -927,15 +988,15 @@ def relation(name: str, kinds: set[str] | None, cat: str, text, expl, tpl: str, 
 
 
 def gen_relations():
-    relation("rel_author", LIT, "culture", lambda w: f"מי כתב את \"{w}\"?", lambda w, a: f"\"{w}\" נכתב על ידי {a}.", "author", 120, 12, israel_cat="israel")
-    relation("rel_director", FILM | SERIES, "screen", lambda w: f"מי ביים את הסרט \"{w}\"?", lambda w, a: f"\"{w}\" בוים על ידי {a}.", "director", 120, 15)
-    relation("rel_creator", ART, "culture", lambda w: f"מי יצר את \"{w}\"?", lambda w, a: f"\"{w}\" נוצר על ידי {a}.", "artist", 100, 10,
+    relation("rel_author", LIT, "culture", lambda w, t: f"מי כתב את \"{w}\"?", lambda w, a: f"\"{w}\" נכתב על ידי {a}.", "author", 120, 12, israel_cat="israel")
+    relation("rel_director", FILM | SERIES, "screen", lambda w, t: f"מי ביים את {'הסרט' if t & FILM else 'הסדרה'} \"{w}\"?", lambda w, a: f"\"{w}\" בוים על ידי {a}.", "director", 120, 15)
+    relation("rel_creator", ART, "culture", lambda w, t: f"מי צייר את \"{w}\"?" if "Q3305213" in t else f"מי פיסל את \"{w}\"?", lambda w, a: f"\"{w}\" נוצר על ידי {a}.", "artist", 100, 10,
              img_text="מי האמן שיצר את היצירה שבתמונה?")
-    relation("rel_composer", MUSIC, "music", lambda w: f"מי הלחין את \"{w}\"?", lambda w, a: f"\"{w}\" הולחן על ידי {a}.", "composer", 80, 8, israel_cat="israel")
-    relation("rel_lyricist", MUSIC, "music", lambda w: f"מי כתב את המילים לשיר \"{w}\"?", lambda w, a: f"המילים ל\"{w}\" נכתבו על ידי {a}.", "lyricist", 40, 5, israel_cat="israel")
-    relation("rel_performer", MUSIC, "music", lambda w: f"מי ביצע את \"{w}\"?", lambda w, a: f"\"{w}\" בוצע על ידי {a}.", "performer", 80, 12)
-    relation("rel_architect", None, "culture", lambda w: f"מי תכנן את \"{w}\"?", lambda w, a: f"\"{w}\" תוכנן על ידי {a}.", "architect", 120, 12, bias=0.15)
-    relation("rel_founder", COMPANY, "people", lambda w: f"מי ייסד את \"{w}\"?", lambda w, a: f"\"{w}\" נוסד על ידי {a}.", "founder", 150, 20)
+    relation("rel_composer", MUSIC, "music", lambda w, t: f"מי הלחין את \"{w}\"?", lambda w, a: f"\"{w}\" הולחן על ידי {a}.", "composer", 80, 8, israel_cat="israel")
+    relation("rel_lyricist", MUSIC, "music", lambda w, t: f"מי כתב את המילים לשיר \"{w}\"?", lambda w, a: f"המילים ל\"{w}\" נכתבו על ידי {a}.", "lyricist", 40, 5, israel_cat="israel")
+    relation("rel_performer", MUSIC, "music", lambda w, t: f"מי ביצע את \"{w}\"?", lambda w, a: f"\"{w}\" בוצע על ידי {a}.", "performer", 80, 12)
+    relation("rel_architect", None, "culture", lambda w, t: f"מי תכנן את \"{w}\"?", lambda w, a: f"\"{w}\" תוכנן על ידי {a}.", "architect", 120, 12, bias=0.15)
+    relation("rel_founder", COMPANY, "people", lambda w, t: f"מי ייסד את \"{w}\"?", lambda w, a: f"\"{w}\" נוסד על ידי {a}.", "founder", 150, 20)
 
     # paintings by photo: "which famous artwork is this?"
     rows = load("rel_creator")
@@ -956,7 +1017,7 @@ def gen_relations():
                 add(Q("איזו יצירת אמנות מפורסמת מופיעה בתמונה?", e.he, w, f"זו \"{e.he}\".", "culture", "artwork_photo", fame(s, 100, 25), e.sources, image=img, key=x))
 
     # where did a film / dish / cheese come from
-    rows = load("rel_origin")
+    rows = load("rel_origin") + load("origin2")
     typ = multi(rows, "x", "t")
     org = multi(rows, "x", "v")
     sl = {r["x"]: int(r.get("sl") or 0) for r in rows}
@@ -984,7 +1045,7 @@ def gen_relations():
         pool, nearc = country_pool(c["continent"], cc)
         w = pick(pool, {c["he"]}, near=nearc)
         if w:
-            add(Q(text, c["he"], w, f"{e.he} {'מגיע' if tpl != 'cheese_origin' else 'מגיעה'} מ{c['he']}." if not c["he"].startswith("ה") else f"מקורו של {e.he} במדינה {c['he']}.",
+            add(Q(text, c["he"], w, f"המקור של {e.he}: {c['he']}.",
                   cat, tpl, fame(sl.get(x, 0), 120, 12), e.sources, key=x))
 
 
@@ -1002,21 +1063,30 @@ OFFICE_HE = {
 def gen_history():
     for name, typ, tpl in (("wars", "המלחמה", "war_century"), ("events", "האירוע", "event_century")):
         rows = load(name)
-        start, sl = {}, {}
+        start, sl, end = {}, {}, {}
         for r in rows:
             y = year_of(r.get("start")) or year_of(r.get("date"))
             if y:
                 start[r["x"]] = min(start.get(r["x"], 9999), y)
+            ye = year_of(r.get("end"))
+            if ye:
+                end[r["x"]] = max(end.get(r["x"], -9999), ye)
             sl[r["x"]] = max(sl.get(r["x"], 0), int(r.get("sl") or 0))
+        bad = {r["x"] for r in rows if r.get("t") in ("Q2223653", "Q3199915", "Q750215", "Q2001676")}
         for x, y in start.items():
             e = N.get(x)
-            if not e or y < 1 or y > 2010:
+            if not e or y < 1 or y > 2010 or x in bad:
+                continue
+            if x in end and (end[x] - 1) // 100 != (y - 1) // 100:
                 continue
             co = century_options(y)
             if not co:
                 continue
-            verb = "התחילה" if name == "wars" else "התרחש"
-            add(Q(f"באיזו מאה {verb} {e.he}?", co[0], co[1], f"{e.he} {verb} בשנת {y}, ב{co[0]}.", "history", tpl, fame(sl[x], 150, 30), e.sources, key=x))
+            if e.he.startswith(("מלחמת", "המלחמה")):
+                text, ex = f"באיזו מאה פרצה {e.he}?", f"{e.he} פרצה בשנת {y}, {be_century(co[0])}."
+            else:
+                text, ex = f"לאיזו מאה שייך האירוע \"{e.he}\"?", f"האירוע \"{e.he}\" התרחש בשנת {y}, {be_century(co[0])}."
+            add(Q(text, co[0], co[1], ex, "history", tpl, fame(sl[x], 150, 30), e.sources, key=x))
 
     resolved = json.loads((DATA / "_offices_resolved.json").read_text()) if (DATA / "_offices_resolved.json").exists() else {}
     by_office = collections.defaultdict(list)
@@ -1024,7 +1094,7 @@ def gen_history():
         y = r.get("start")
         if r.get("office") and r.get("x") and y:
             by_office[r["office"]].append((y, r["x"], r.get("end")))
-    gender = {r["x"]: r.get("gender") for r in load("people_facts")}
+    gender = GENDER
     for key, qid in resolved.items():
         if not qid or key not in OFFICE_HE or qid not in by_office:
             continue
@@ -1042,7 +1112,7 @@ def gen_history():
         first = seq[0]
         w = pick(names, {N.he(first)}, near=names[1:6])
         if w:
-            add(Q(f"מי {'הייתה' if fem(gender.get(first)) else 'היה'} {title} הראשון?", N.he(first), w, f"{N.he(first)} היה {title} הראשון.", cat, "office_first", 0.15, N.get(first).sources, key=key))
+            add(Q(f"מי {'הייתה' if fem(gender.get(first)) else 'היה'} {title} הראשון?", N.he(first), w, f"{N.he(first)} {'הייתה' if fem(gender.get(first)) else 'היה'} {title} הראשון.", cat, "office_first", 0.15, N.get(first).sources, key=key))
         for i in range(1, len(seq)):
             prev, cur = seq[i - 1], seq[i]
             if runs[prev] != 1 or runs[cur] != 1:
@@ -1059,6 +1129,10 @@ def gen_history():
 # Israel, sport, food, music extras
 # ---------------------------------------------------------------------------
 DISTRICT_HE = {}
+OFFICIAL_DISTRICTS = {"מחוז הצפון", "מחוז חיפה", "מחוז המרכז", "מחוז תל אביב", "מחוז ירושלים", "מחוז הדרום"}
+ISRAEL_PLACE_TYPES = {"Q839954", "Q755017", "Q46169", "Q16970", "Q8502", "Q4022", "Q33506", "Q187971", "Q32815", "Q12404340", "Q179049",
+    "Q35509", "Q54050", "Q34627", "Q174782", "Q39816", "Q1814183", "Q22698", "Q57821", "Q12518", "Q23413", "Q44539", "Q23397", "Q34038",
+    "Q124714", "Q47521", "Q40080", "Q109607", "Q570116", "Q12280", "Q4989906", "Q41176", "Q16560", "Q2977", "Q1081138", "Q15243209"}
 
 
 def gen_israel():
@@ -1071,10 +1145,10 @@ def gen_israel():
         p = num(r.get("pop"))
         if p and (d["pop"] is None or p > d["pop"]):
             d["pop"] = p
-    dist = multi(load("israel_district"), "x", "d")
+    dist = multi(load("israel_district") + load("israel_admin"), "x", "d")
     dnames = {}
     for x, ds in dist.items():
-        hs = {N.he(d) for d in ds if N.he(d) and N.he(d).startswith("מחוז")}
+        hs = {N.he(d) for d in ds if N.he(d) in OFFICIAL_DISTRICTS}
         if len(hs) == 1:
             dnames[x] = next(iter(hs))
     all_d = sorted(set(dnames.values()))
@@ -1104,10 +1178,12 @@ def gen_israel():
     sites = {}
     for r in load("israel_sites"):
         e = N.get(r["x"])
+        if r.get("t") not in ISRAEL_PLACE_TYPES:
+            continue
         if e and r.get("img") and r["x"] not in sites:
             sites[r["x"]] = (e, int(r.get("sl") or 0), r["img"])
     for x, d in places.items():
-        if d["img"] and d["sl"] >= 15 and x not in sites:
+        if d["img"] and d["sl"] >= 25 and x not in sites:
             sites[x] = (d["e"], d["sl"], d["img"])
     pool = [(e.he, s) for e, s, _ in sites.values()]
     for x, (e, s, im) in sites.items():
@@ -1118,6 +1194,29 @@ def gen_israel():
                 add(Q("איזה מקום בישראל מופיע בתמונה?", e.he, w, f"זה {e.he}.", "israel", "israel_photo", fame(s, 60, 10), e.sources, image=img, key=x))
 
 
+def gen_athletes():
+    rows = load("athletes")
+    sports = multi(rows, "x", "sport")
+    sl = {r["x"]: int(r.get("sl") or 0) for r in rows}
+    count = collections.Counter(sp for x, ss in sports.items() if len(ss) == 1 for sp in ss)
+    names = {sp: N.he(sp) for sp in count if count[sp] >= 12 and N.he(sp) and sp != "Q2736"}
+    pool = list(dict.fromkeys(names.values()))
+    for x, ss in sports.items():
+        if len(ss) != 1 or x not in HUMAN:
+            continue
+        sp = next(iter(ss))
+        e = N.get(x)
+        if not e or sp not in names or sp == "Q2736":
+            continue
+        f_ = fem(GENDER.get(x))
+        w = pick(pool, {names[sp]})
+        if w:
+            add(Q(f"באיזה ענף ספורט {'התפרסמה' if f_ else 'התפרסם'} {e.he}?", names[sp], w, f"{e.he} {'התפרסמה' if f_ else 'התפרסם'} ב{names[sp]}.", "sport", "athlete_sport", fame(sl[x], 150, 35), e.sources, key=x))
+
+
+BAD_INSTR = re.compile(r"(מערבל|סאב|ווקאלואיד|מכונת|סקוונסר|^כלי |אירופוניים|פנדר|גיבסון|יאמהה|דגם|מגבר|רמקול|מיקרופון)")
+
+
 def gen_sport_food_music():
     for r in load("olympics"):
         e = N.get(r["x"])
@@ -1125,9 +1224,9 @@ def gen_sport_food_music():
         if not e or not city or city.he in e.he:
             continue
     oly = {}
-    for r in load("olympics"):
+    for r in load("olympics") + load("olympics2"):
         e = N.get(r["x"])
-        if e and r.get("city") and N.get(r["city"]):
+        if e and r.get("city") and N.get(r["city"]) and r["city"] in CITY_COUNTRY:
             oly.setdefault(r["x"], (e, set()))[1].add(N.he(r["city"]))
     cities = sorted({c for _, cs in oly.values() for c in cs})
     for x, (e, cs) in oly.items():
@@ -1139,7 +1238,7 @@ def gen_sport_food_music():
         w = pick(cities, {c})
         if w:
             add(Q(f"באיזו עיר נערכה {e.he}?", c, w, f"{e.he} נערכה ב{c}.", "sport", "olympics_city", 0.35, e.sources, key=x))
-    for r in load("sports"):
+    for r in []:
         e = N.get(r["x"])
         n_ = num(r.get("players"))
         if e and n_ and 1 <= n_ <= 15:
@@ -1155,12 +1254,28 @@ def gen_sport_food_music():
     pool = [(e.he, s) for e, s, _ in sp.values()]
     for x, (e, s, im) in sp.items():
         img = photo(im)
-        if img and s >= 40:
-            w = pick([n for n, _ in pool], {e.he}, near=by_closeness(pool, s))
+        if img and s >= 70 and not re.search(r"(שחמט|שבץ|סודוקו|ברידג|רברסי|דמקה|סרייה|מרתון|ליגת|גביע|פוקר|שש בש)", e.he):
+            w = pick([n for n, _ in pool if not re.search(r"(שחמט|שבץ|סודוקו|ברידג|רברסי|דמקה|סרייה|מרתון|ליגת|גביע|פוקר|שש בש)", n) and _ >= 50], {e.he}, near=None)
             if w:
                 add(Q("איזה ענף ספורט מופיע בתמונה?", e.he, w, f"זה {e.he}.", "sport", "sport_photo", fame(s, 160, 40), e.sources, image=img, key=x))
     # dishes & foods
-    for name, text, tpl, minsl in (("dishes", "איזה מאכל מופיע בתמונה?", "dish_photo", 20), ("foods", "מה מופיע בתמונה?", "food_photo", 30)):
+    FOOD_CLS = {"Q1364": ("איזה פרי מופיע בתמונה?", "fruit_photo"), "Q11004": ("איזה ירק מופיע בתמונה?", "vegetable_photo"), "Q10943": ("איזו גבינה מופיעה בתמונה?", "cheese_photo")}
+    for cls, (text, tpl) in FOOD_CLS.items():
+        items = {}
+        for r in load("foods2"):
+            e = N.get(r["x"])
+            if r.get("cls") == cls and e and r.get("img") and r["x"] not in items:
+                items[r["x"]] = (e, int(r.get("sl") or 0), r["img"])
+        pool = [(e.he, s_) for e, s_, _ in items.values()]
+        if len(pool) < 8:
+            continue
+        for x, (e, s_, im) in items.items():
+            img = photo(im)
+            if img and s_ >= 30:
+                w = pick([n for n, _ in pool], {e.he}, near=by_closeness(pool, s_))
+                if w:
+                    add(Q(text, e.he, w, f"בתמונה: {e.he}.", "food", tpl, fame(s_, 150, 25), e.sources, image=img, key=x))
+    for name, text, tpl, minsl in (("dishes", "איזה מאכל מופיע בתמונה?", "dish_photo", 20),):
         items = {}
         for r in load(name):
             e = N.get(r["x"])
@@ -1172,7 +1287,7 @@ def gen_sport_food_music():
             if img and s >= minsl:
                 w = pick([n for n, _ in pool], {e.he}, near=by_closeness(pool, s))
                 if w:
-                    add(Q(text, e.he, w, f"זה {e.he}.", "food", tpl, fame(s, 120, 15), e.sources, image=img, key=x))
+                    add(Q(text, e.he, w, f"בתמונה: {e.he}.", "food", tpl, fame(s, 120, 15), e.sources, image=img, key=x))
     dish_origin = multi(load("dishes"), "x", "origin")
     dsl = {r["x"]: int(r.get("sl") or 0) for r in load("dishes")}
     for x, os_ in dish_origin.items():
@@ -1186,7 +1301,7 @@ def gen_sport_food_music():
         pool, nearc = country_pool(c["continent"], cc)
         w = pick(pool, {c["he"]}, near=nearc)
         if w:
-            add(Q(f"מאיזו מדינה מגיע המאכל {e.he}?", c["he"], w, f"{e.he} {'מגיע' } מ{c['he']}." if not c["he"].startswith("ה") else f"מקורו של {e.he} במדינה {c['he']}.",
+            add(Q(f"מאיזו מדינה מגיע המאכל {e.he}?", c["he"], w, f"המאכל {e.he} מגיע במקור מ{c['he']}.",
                   "food", "dish_origin", fame(dsl.get(x, 0), 120, 12), e.sources, key=x))
     # instruments
     items = {}
@@ -1197,15 +1312,15 @@ def gen_sport_food_music():
     pool = [(e.he, s) for e, s, _ in items.values()]
     for x, (e, s, im) in items.items():
         img = photo(im, fit="contain")
-        if img and s >= 25:
-            w = pick([n for n, _ in pool], {e.he}, near=by_closeness(pool, s))
+        if img and s >= 40 and not BAD_INSTR.search(e.he):
+            w = pick([n for n, ss in pool if ss >= 30 and not BAD_INSTR.search(n)], {e.he}, near=by_closeness([(n, ss) for n, ss in pool if not BAD_INSTR.search(n)], s))
             if w:
                 add(Q("איזה כלי נגינה מופיע בתמונה?", e.he, w, f"זה {e.he}.", "music", "instrument_photo", fame(s, 120, 25), e.sources, image=img, key=x))
     # eurovision host city
     ev = {}
-    for r in load("eurovision"):
+    for r in load("eurovision") + load("eurovision2"):
         e = N.get(r["x"])
-        if e and r.get("city") and N.get(r["city"]):
+        if e and r.get("city") and N.get(r["city"]) and r["city"] in CITY_COUNTRY:
             ev.setdefault(r["x"], (e, set()))[1].add(N.he(r["city"]))
     cities = sorted({c for _, cs in ev.values() for c in cs})
     for x, (e, cs) in ev.items():
@@ -1220,6 +1335,7 @@ def gen_sport_food_music():
 # Output
 # ---------------------------------------------------------------------------
 CAPS = {
+    "athlete_sport": 900, "district": 300, "series_origin": 250, "dish_origin": 160, "border": 120,
     "person_field": 1400, "person_country": 900, "person_birthplace": 500, "person_photo": 600, "person_century": 250,
     "city_country": 900, "author": 900, "director": 700, "performer": 600, "animal_photo": 700, "animal_class": 500,
     "landmark_country": 600, "landmark_photo": 600, "inventor": 250, "founder": 250, "food_photo": 300, "dish_photo": 300,
@@ -1237,8 +1353,18 @@ def main():
     N = Names()
     for c in load("commons"):
         COMMONS[c["file"]] = c
+    for r in load("people_facts") + load("genders"):
+        if r.get("gender"):
+            GENDER.setdefault(r["x"], r["gender"])
+        if r.get("human") in ("true", True) or r.get("x") in {p["x"] for p in []}:
+            HUMAN.add(r["x"])
+        if year_of(r.get("birth")):
+            BIRTH.setdefault(r["x"], year_of(r["birth"]))
+    for r in load("people") + load("people_israel"):
+        HUMAN.add(r["x"])
     build_countries()
-    steps = [gen_geography, gen_nature, gen_science, gen_space, gen_people, gen_relations, gen_history, gen_israel, gen_sport_food_music]
+    build_city_country()
+    steps = [gen_geography, gen_nature, gen_science, gen_space, gen_people, gen_relations, gen_history, gen_israel, gen_sport_food_music, gen_athletes]
     for s in steps:
         before = len(QS)
         try:

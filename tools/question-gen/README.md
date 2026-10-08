@@ -32,3 +32,16 @@ python3 tools/question-gen/generate.py --openfootball $OF --out content/question
 
 Output: `content/questions/questions.jsonl` (one question per line, answer 0 is correct)
 and `content/questions/report.json` (counts, rejections, cross-check results).
+
+## General knowledge (13 worlds)
+
+`fetch-general.mjs` (GitHub Actions, `Fetch general knowledge data` on the data-fetch branch) pulls
+countries, cities, rivers, landmarks, animals, elements, people, books, films, paintings, music and more
+from Wikidata, Hebrew Wikipedia titles for every name, and author + license for every Wikimedia Commons image.
+
+```bash
+python3 tools/question-gen/gen_general.py --data data/general --out content/general
+```
+
+Every photo question carries `image: {kind: "photo", url, credit, license, page}`; the app shows the
+credit line under the picture. Sensitive subjects (terror, the Holocaust, notorious figures) are filtered out.
