@@ -1,0 +1,365 @@
+[
+ {
+  "name": "countries",
+  "rows": 203,
+  "ms": 2931
+ },
+ {
+  "name": "country_capital",
+  "rows": 210,
+  "ms": 2319
+ },
+ {
+  "name": "country_continent",
+  "rows": 234,
+  "ms": 1317
+ },
+ {
+  "name": "country_currency",
+  "rows": 227,
+  "ms": 1275
+ },
+ {
+  "name": "country_language",
+  "rows": 447,
+  "ms": 2713
+ },
+ {
+  "name": "country_border",
+  "rows": 941,
+  "ms": 1365
+ },
+ {
+  "name": "country_highest",
+  "rows": 201,
+  "ms": 859
+ },
+ {
+  "name": "country_driving",
+  "rows": 197,
+  "ms": 1276
+ },
+ {
+  "name": "country_anthem",
+  "rows": 206,
+  "ms": 5076
+ },
+ {
+  "name": "cities",
+  "rows": 4813,
+  "ms": 3457
+ },
+ {
+  "name": "rivers",
+  "rows": 795,
+  "ms": 31484
+ },
+ {
+  "name": "mountains",
+  "rows": 430,
+  "ms": 10073
+ },
+ {
+  "name": "lakes",
+  "rows": 189,
+  "ms": 3672
+ },
+ {
+  "name": "islands",
+  "rows": 526,
+  "ms": 10603
+ },
+ {
+  "name": "volcanoes",
+  "rows": 63,
+  "ms": 3586
+ },
+ {
+  "name": "deserts",
+  "rows": 76,
+  "ms": 4559
+ },
+ {
+  "name": "waterfalls",
+  "rows": 34,
+  "ms": 1205
+ },
+ {
+  "name": "seas",
+  "rows": 166,
+  "ms": 903
+ },
+ {
+  "name": "landmarks",
+  "rows": 2857,
+  "ms": 59161
+ },
+ {
+  "name": "unesco",
+  "rows": 1139,
+  "ms": 7998
+ },
+ {
+  "name": "species",
+  "rows": 2989,
+  "ms": 56835
+ },
+ {
+  "name": "species_class",
+  "rows": 5042,
+  "ok": true
+ },
+ {
+  "name": "species_status",
+  "rows": 1377,
+  "ok": true
+ },
+ {
+  "name": "dog_breeds",
+  "rows": 157,
+  "ms": 1530
+ },
+ {
+  "name": "elements",
+  "rows": 173,
+  "ms": 3706
+ },
+ {
+  "name": "moons",
+  "rows": 197,
+  "ms": 3378
+ },
+ {
+  "name": "planets",
+  "rows": 24,
+  "ms": 1152
+ },
+ {
+  "name": "constellations",
+  "rows": 86,
+  "ms": 2528
+ },
+ {
+  "name": "stars",
+  "error": "Bad control character in string literal in JSON at position 73751 (line 2872 column 67)",
+  "attempt": 1,
+  "at": "2026-10-08T02:50:37.851Z"
+ },
+ {
+  "name": "stars",
+  "error": "HTTP 504",
+  "attempt": 2,
+  "at": "2026-10-08T02:51:46.929Z"
+ },
+ {
+  "name": "stars",
+  "error": "HTTP 504",
+  "attempt": 3,
+  "at": "2026-10-08T02:52:59.985Z"
+ },
+ {
+  "name": "astronauts",
+  "rows": 516,
+  "ms": 4108
+ },
+ {
+  "name": "nobel",
+  "rows": 1036,
+  "ms": 8447
+ },
+ {
+  "name": "rel_author",
+  "rows": 4614,
+  "ms": 49775
+ },
+ {
+  "name": "rel_director",
+  "rows": 15018,
+  "ms": 52499
+ },
+ {
+  "name": "rel_creator",
+  "rows": 8136,
+  "ms": 19959
+ },
+ {
+  "name": "rel_composer",
+  "error": "Bad control character in string literal in JSON at position 8986647 (line 322048 column 79)",
+  "attempt": 1,
+  "at": "2026-10-08T02:56:26.893Z"
+ },
+ {
+  "name": "rel_composer",
+  "error": "Bad control character in string literal in JSON at position 8732695 (line 312939 column 49)",
+  "attempt": 2,
+  "at": "2026-10-08T02:57:31.194Z"
+ },
+ {
+  "name": "rel_composer",
+  "rows": 15367,
+  "ms": 24935
+ },
+ {
+  "name": "rel_architect",
+  "rows": 1941,
+  "ms": 4311
+ },
+ {
+  "name": "rel_discoverer",
+  "rows": 2903,
+  "ms": 23085
+ },
+ {
+  "name": "rel_founder",
+  "rows": 7165,
+  "ms": 24098
+ },
+ {
+  "name": "rel_performer",
+  "rows": 14571,
+  "ms": 57956
+ },
+ {
+  "name": "rel_origin",
+  "error": "Expected ',' or '}' after property value in JSON at position 14573568 (line 524775 column 27)",
+  "attempt": 1,
+  "at": "2026-10-08T03:00:53.726Z"
+ },
+ {
+  "name": "rel_origin",
+  "error": "Bad control character in string literal in JSON at position 12214295 (line 439788 column 51)",
+  "attempt": 2,
+  "at": "2026-10-08T03:01:57.992Z"
+ },
+ {
+  "name": "rel_origin",
+  "error": "Expected double-quoted property name in JSON at position 9355264 (line 337523 column 5)",
+  "attempt": 3,
+  "at": "2026-10-08T03:03:06.129Z"
+ },
+ {
+  "name": "rel_hq",
+  "rows": 12249,
+  "ms": 32014
+ },
+ {
+  "name": "rel_location",
+  "rows": 16725,
+  "ms": 32356
+ },
+ {
+  "name": "rel_lyricist",
+  "rows": 5410,
+  "ms": 23568
+ },
+ {
+  "name": "people",
+  "rows": 4420,
+  "ms": 29424
+ },
+ {
+  "name": "people_israel",
+  "rows": 1395,
+  "ms": 14216
+ },
+ {
+  "name": "people_facts",
+  "rows": 6448,
+  "ok": true
+ },
+ {
+  "name": "people_occupation",
+  "rows": 29818,
+  "ok": true
+ },
+ {
+  "name": "people_country",
+  "rows": 7642,
+  "ok": true
+ },
+ {
+  "name": "people_birthplace",
+  "rows": 5913,
+  "ok": true
+ },
+ {
+  "name": "wars",
+  "rows": 332,
+  "ms": 9957
+ },
+ {
+  "name": "events",
+  "rows": 383,
+  "ms": 2583
+ },
+ {
+  "name": "olympics",
+  "rows": 0,
+  "ms": 858
+ },
+ {
+  "name": "sports",
+  "rows": 140,
+  "ms": 2618
+ },
+ {
+  "name": "dishes",
+  "rows": 417,
+  "ms": 8584
+ },
+ {
+  "name": "foods",
+  "error": "HTTP 504",
+  "attempt": 1,
+  "at": "2026-10-08T03:11:48.477Z"
+ },
+ {
+  "name": "foods",
+  "error": "Bad control character in string literal in JSON at position 262167 (line 9207 column 52)",
+  "attempt": 2,
+  "at": "2026-10-08T03:12:52.539Z"
+ },
+ {
+  "name": "foods",
+  "error": "Expected ',' or '}' after property value in JSON at position 40960 (line 1446 column 4)",
+  "attempt": 3,
+  "at": "2026-10-08T03:14:00.656Z"
+ },
+ {
+  "name": "instruments",
+  "rows": 293,
+  "ms": 1691
+ },
+ {
+  "name": "eurovision",
+  "rows": 0,
+  "ms": 844
+ },
+ {
+  "name": "israel_places",
+  "error": "Bad control character in string literal in JSON at position 999447 (line 34174 column 46)",
+  "attempt": 1,
+  "at": "2026-10-08T03:15:15.246Z"
+ },
+ {
+  "name": "israel_places",
+  "error": "Bad control character in string literal in JSON at position 401431 (line 13600 column 45)",
+  "attempt": 2,
+  "at": "2026-10-08T03:16:19.333Z"
+ },
+ {
+  "name": "israel_places",
+  "rows": 2488,
+  "ms": 49849
+ },
+ {
+  "name": "israel_district",
+  "rows": 0,
+  "ms": 6198
+ },
+ {
+  "name": "israel_sites",
+  "rows": 1778,
+  "ms": 24170
+ }
+]
