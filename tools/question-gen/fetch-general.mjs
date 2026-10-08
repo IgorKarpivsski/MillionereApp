@@ -417,6 +417,74 @@ SELECT ?x ?t ?sl ?img WHERE {
 }`);
 
 // ---------------------------------------------------------------------------
+// Round 2: fixed and extra datasets
+// ---------------------------------------------------------------------------
+await q('olympics2', `
+SELECT ?x ?sl ?city ?c ?date ?t WHERE {
+  ?x wdt:P31 ?t . ?t wdt:P279* wd:Q5389 .
+  ?x wikibase:sitelinks ?sl .
+  ${HEWIKI('?x')}
+  OPTIONAL { ?x wdt:P276 ?city }
+  OPTIONAL { ?x wdt:P17 ?c }
+  OPTIONAL { ?x wdt:P585 ?date }
+}`);
+await q('eurovision2', `
+SELECT ?x ?sl ?date ?city ?c ?winner WHERE {
+  { ?x wdt:P179 wd:Q276 } UNION { ?x wdt:P361 wd:Q276 } UNION { ?x wdt:P31 wd:Q276 }
+  ?x wikibase:sitelinks ?sl .
+  ${HEWIKI('?x')}
+  OPTIONAL { ?x wdt:P585 ?date }
+  OPTIONAL { ?x wdt:P276 ?city }
+  OPTIONAL { ?x wdt:P17 ?c }
+  OPTIONAL { ?x wdt:P1346 ?winner }
+}`);
+await q('israel_admin', `
+SELECT ?x ?d WHERE {
+  ?x wdt:P17 wd:Q801 ; wdt:P131+ ?d .
+  ${HEWIKI('?x')}
+}`);
+if (!has('foods2')) {
+  const all = [];
+  for (const cls of ['Q1364', 'Q11004', 'Q10943', 'Q2095', 'Q40050', 'Q8495']) {
+    const r = await sparqlRaw(`foods_${cls}`, `
+SELECT ?x ?sl ?img ?cls WHERE {
+  BIND(wd:${cls} AS ?cls)
+  ?x wdt:P279 ?cls ; wikibase:sitelinks ?sl . FILTER(?sl >= 25)
+  ${HEWIKI('?x')}
+  ?x wdt:P18 ?img .
+}`);
+    if (r) all.push(...r.rows);
+  }
+  if (all.length) save('foods2', all);
+}
+await q('stars2', `
+SELECT ?x ?sl ?con WHERE {
+  ?x wdt:P31 wd:Q523 ; wdt:P59 ?con ; wikibase:sitelinks ?sl . FILTER(?sl >= 30)
+  ${HEWIKI('?x')}
+}`);
+await q('origin2', `
+SELECT ?x ?t ?v ?sl WHERE {
+  VALUES ?t { wd:Q10943 wd:Q2471 wd:Q154 wd:Q282 wd:Q44 wd:Q5398426 wd:Q581714 wd:Q746549 wd:Q1778821 }
+  ?x wdt:P31 ?t ; wdt:P495 ?v ; wikibase:sitelinks ?sl . FILTER(?sl >= 10)
+  ${HEWIKI('?x')}
+}`);
+await q('athletes', `
+SELECT ?x ?sport ?sl ?c WHERE {
+  ?x wdt:P641 ?sport ; wikibase:sitelinks ?sl . FILTER(?sl >= 35)
+  ?x wdt:P31 wd:Q5 .
+  ${HEWIKI('?x')}
+  OPTIONAL { ?x wdt:P1532 ?c }
+}`);
+{
+  const humans = new Set();
+  for (const f of ['nobel', 'astronauts', 'offices', 'athletes']) for (const r of load(f)) if (r.x) humans.add(r.x);
+  for (const f of ['rel_author', 'rel_director', 'rel_creator', 'rel_composer', 'rel_architect', 'rel_founder', 'rel_performer', 'rel_lyricist'])
+    for (const r of load(f)) if (r.v) humans.add(r.v);
+  await qBatched('genders', [...humans], 300, (ids) => `
+SELECT ?x ?gender ?human ?birth WHERE { ${vals('?x', ids)} OPTIONAL { ?x wdt:P21 ?gender } BIND(EXISTS { ?x wdt:P31 wd:Q5 } AS ?human) OPTIONAL { ?x wdt:P569 ?birth } }`);
+}
+
+// ---------------------------------------------------------------------------
 // Names: Hebrew Wikipedia title + English title + sitelinks for every id used.
 // ---------------------------------------------------------------------------
 const ids = new Set();
