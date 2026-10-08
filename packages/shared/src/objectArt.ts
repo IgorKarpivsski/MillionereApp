@@ -6,6 +6,8 @@
  * objectSvg('stadiums_03', 'common', 120) → '<svg …>'
  */
 
+import { KNOWLEDGE_ALBUM_BG, knowledgeArt } from './knowledgeArt';
+
 type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'iconic';
 
 const INK = '#14110F';
@@ -47,7 +49,7 @@ function star(cx: number, cy: number, r: number, fill: string, stroke = true): s
 
 /** Background by rarity: the rarer, the louder. */
 function background(album: string, rarity: Rarity, uid: string): string {
-  const [a, b] = ALBUM_BG[album] ?? ['#DDD', '#AAA'];
+  const [a, b] = ALBUM_BG[album] ?? KNOWLEDGE_ALBUM_BG[album] ?? ['#DDD', '#AAA'];
   const grad = (c1: string, c2: string) =>
     `<defs><radialGradient id="bg${uid}" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></radialGradient></defs><rect width="100" height="125" fill="url(#bg${uid})"/>`;
   switch (rarity) {
@@ -516,7 +518,7 @@ export function objectSvg(id: string, rarity: Rarity, width = 100, uid = id): st
         : album === 'stadiums' ? stadiumArt(n)
           : album === 'clubs' ? clubArt(n, rarity)
             : album === 'merch' ? merchArt(n)
-              : '';
+              : knowledgeArt(album ?? '', n);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${h.toFixed(1)}" viewBox="0 0 100 125">` +
     `<defs><clipPath id="c${uid}"><rect width="100" height="125"/></clipPath></defs><g clip-path="url(#c${uid})">` +
     background(album ?? '', rarity, uid) + art + `</g></svg>`;

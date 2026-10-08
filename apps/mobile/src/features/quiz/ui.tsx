@@ -72,6 +72,7 @@ export function AnswerTile({
         accessibilityState={{ disabled: disabled || hidden, selected: state === 'picked' }}
         style={({ pressed }) => [
           styles.tile,
+          fill && styles.tileRow,
           { backgroundColor: l.bg, borderColor: l.border, borderWidth: l.bw, opacity: l.opacity },
           pressed && !disabled ? styles.pressed : null,
         ]}
@@ -178,6 +179,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   tileText: { fontFamily: 'IBMPlexSansHebrew_700Bold', fontSize: 17, lineHeight: 23 },
+  tileRow: { minHeight: 58, paddingHorizontal: space.xl + space.md, borderBottomWidth: 5 },
   pressed: { transform: [{ scale: 0.97 }] },
   numBadge: {
     position: 'absolute',

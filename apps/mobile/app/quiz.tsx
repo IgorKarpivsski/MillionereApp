@@ -32,7 +32,7 @@ import { AnswerTile, LifelineButton, type AnswerState } from '@/features/quiz/ui
 import { useQuizRun, type QuizRunState } from '@/features/quiz/useQuizRun';
 import { formatNumber } from '@/lib/format';
 import { fmt, strings } from '@/lib/i18n';
-import { QuestionMap } from '@/features/quiz/QuestionMap';
+import { QuestionImageView } from '@/features/quiz/QuestionImage';
 
 const t = strings.quiz;
 
@@ -220,7 +220,7 @@ function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => voi
 
       <StickerButton label={strings.share.cta} icon="share-social" tone="outline" fullWidth onPress={shareResult} />
       {daily ? (
-        <StickerButton label={t.toClassic} icon="football" size="lg" fullWidth onPress={() => router.replace('/quiz')} />
+        <StickerButton label={t.toClassic} icon="flash" size="lg" fullWidth onPress={() => router.replace({ pathname: '/session', params: { world: 'mix' } })} />
       ) : (
         <StickerButton label={t.again} icon="refresh" size="lg" fullWidth onPress={onAgain} />
       )}
@@ -454,7 +454,7 @@ export default function QuizScreen() {
           <AppText variant="question" color={colors.cardText}>
             {q.text}
           </AppText>
-          {q.image ? <QuestionMap image={q.image} /> : null}
+          {q.image ? <QuestionImageView image={q.image} /> : null}
         </Animated.View>
 
         <View style={styles.grid}>

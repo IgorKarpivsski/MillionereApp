@@ -5,9 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { TopBar } from '@/components/TopBar';
 import {
   AppText,
-  AvatarBadge,
   Card,
-  ChampionBadge,
   Icon,
   CoinIcon,
   Led,
@@ -20,7 +18,7 @@ import {
   useToast,
 } from '@/design-system/components';
 import { colors, palette, space } from '@/design-system/tokens';
-import { usePlayClassic } from '@/features/engage/EnergySheet';
+import { QuickPlayCard, WorldsStrip } from '@/features/worlds/WorldCards';
 import { useCountdownTo, usePass, useWheel } from '@/features/engage/hooks';
 import { useDailyStatus, useLeaderboard } from '@/features/quiz/hooks';
 import { useUnreadTotal } from '@/features/social/hooks';
@@ -76,50 +74,40 @@ function WelcomeBonus() {
   );
 }
 
-function MatchOfTheDay() {
-  const playClassic = usePlayClassic();
-  const { data: me } = useMyState();
+/** The daily challenge: the same 10 mixed questions for everyone, once a day. */
+function DailyCard() {
   const countdown = useCountdownToMidnight();
   const { data: daily } = useDailyStatus();
   const done = daily?.state === 'done';
-  const missed = done ? 10 - (daily?.correct ?? 0) : 0;
   return (
     <View style={styles.matchShell}>
-      <LinearGradient colors={['#123F31', '#0B2B22', '#2A1D52']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-      <View style={styles.pitchLines} pointerEvents="none">
-        <View style={styles.centerCircle} />
-        <View style={styles.halfway} />
-      </View>
+      <LinearGradient colors={['#3E8EF7', '#5C4CE0', '#7B2FD0']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
       <View style={styles.matchHead}>
-        <AppText variant="label" color={colors.led}>
-          {t.matchTitle}
-        </AppText>
+        <View style={styles.dailyTitle}>
+          <Icon name="daily" size={40} />
+          <AppText variant="heading">{t.dailyTitle}</AppText>
+        </View>
         <Led color={colors.led} size="number">{countdown}</Led>
       </View>
-      <View style={styles.matchRow}>
-        <View style={styles.sideCol}>
-          {me ? <AvatarBadge avatarId={me.profile.avatar_id} size={58} ring={colors.correct} /> : <View style={styles.side} />}
-          <AppText variant="caption" style={styles.sideTight}>אתה</AppText>
+      {done ? (
+        <View style={styles.dailyDots} accessible accessibilityLabel={fmt(strings.session.correctOf, { n: daily?.correct ?? 0, total: 10 })}>
+          {Array.from({ length: 10 }, (_, i) => (
+            <View key={i} style={[styles.dailyDot, { backgroundColor: i < (daily?.correct ?? 0) ? colors.correct : 'rgba(255,255,255,0.25)' }]} />
+          ))}
         </View>
-        <View style={styles.matchDigits}>
-          <Led size="ledXL" color={colors.text}>{done ? daily?.correct ?? 0 : 0}</Led>
-          <Led size="ledXL" color={colors.text}>:</Led>
-          <Led size="ledXL" color={done && missed > (daily?.correct ?? 0) ? colors.danger : colors.text}>{missed}</Led>
-        </View>
-        <View style={styles.sideCol}>
-          <ChampionBadge size={58} />
-          <AppText variant="caption" style={styles.sideTight}>האלוף</AppText>
-        </View>
-      </View>
-      <AppText color={colors.textMuted} align="center">
+      ) : null}
+      <AppText color={colors.text} align="center">
         {done ? fmt(t.dailyDone, { n: daily?.coins ?? 0 }) : t.dailyBody}
       </AppText>
-      {done ? (
-        <StickerButton label={t.playClassic} icon="football" tone="outline" size="lg" fullWidth onPress={playClassic} />
-      ) : (
+      {daily?.streak ? (
+        <AppText variant="label" color={colors.led} align="center">
+          {`🔥 ${fmt(t.streakDays, { n: daily.streak })}`}
+        </AppText>
+      ) : null}
+      {done ? null : (
         <StickerButton
-          label={daily?.state === 'in_progress' ? t.dailyContinue : t.kickoff}
-          icon="football"
+          label={daily?.state === 'in_progress' ? t.dailyContinue : t.dailyCta}
+          icon="calendar"
           size="lg"
           fullWidth
           onPress={() => router.push({ pathname: '/quiz', params: { mode: 'daily' } })}
@@ -129,28 +117,21 @@ function MatchOfTheDay() {
   );
 }
 
-/** The first thing on the screen: one big way to start playing right now. */
+/** The first thing on the screen: quick play, then the worlds. */
 function PlayNowHero() {
-  const playClassic = usePlayClassic();
   return (
-    <View style={styles.hero}>
-      <LinearGradient colors={['#FFC93C', '#FF8A3D', '#FF5A4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-      <View style={styles.heroBall} pointerEvents="none">
-        <Icon name="play" size={150} />
-      </View>
-      <View style={styles.heroRow}>
-        <ChampionBadge size={76} ring={palette.night950} />
-        <View style={styles.flex}>
-          <AppText variant="title" color={colors.textOnBright}>
-            {t.heroTitle}
+    <>
+      <QuickPlayCard />
+      <View style={styles.matchHead}>
+        <AppText variant="heading">{strings.worlds.title}</AppText>
+        <Pressable onPress={() => router.push('/(tabs)/play')} hitSlop={8} accessibilityRole="button">
+          <AppText variant="label" color={colors.led}>
+            {strings.worlds.all}
           </AppText>
-          <AppText variant="bodyStrong" color={colors.textOnBright}>
-            {t.heroBody}
-          </AppText>
-        </View>
+        </Pressable>
       </View>
-      <StickerButton label={t.playCta} icon="football" tone="ghost" size="lg" fullWidth onPress={playClassic} />
-    </View>
+      <WorldsStrip />
+    </>
   );
 }
 
@@ -207,7 +188,7 @@ function LeagueEntry() {
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <LinearGradient colors={['#2A1D52', '#123F31']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={['#2E2263', '#4B2A8A']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
       <LeagueBadge tier={data.tier} size={44} />
       <AppText variant="label" style={styles.flex}>
         {label}
@@ -226,7 +207,7 @@ function FriendsEntry() {
       accessibilityRole="button"
       accessibilityLabel={unread > 0 ? `${strings.social.entry}, ${unread}` : strings.social.entry}
     >
-      <LinearGradient colors={['#1E9E5A', '#0E5E3A']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={['#14A3B8', '#2F5FD0']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
       <Icon name="friends" size={40} />
       <Icon name="chat" size={30} />
       <AppText variant="label" style={styles.flex}>
@@ -263,7 +244,7 @@ export default function HomeScreen() {
 
       <LoginCalendar />
       <PlayNowHero />
-      <MatchOfTheDay />
+      <DailyCard />
       <DailyExtras />
       <LeagueEntry />
       <FriendsEntry />
@@ -312,7 +293,7 @@ const styles = StyleSheet.create({
     padding: space.lg,
     borderRadius: 22,
     borderWidth: 3,
-    borderColor: colors.led,
+    borderColor: palette.night950,
     overflow: 'hidden',
   },
   pitchLines: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', opacity: 0.12 },
@@ -343,6 +324,9 @@ const styles = StyleSheet.create({
     borderColor: palette.night950,
     overflow: 'hidden',
   },
+  dailyTitle: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  dailyDots: { flexDirection: 'row', justifyContent: 'center', gap: 5 },
+  dailyDot: { width: 18, height: 10, borderRadius: 5 },
   dot: { position: 'absolute', top: 8, end: 8, width: 12, height: 12, borderRadius: 6, backgroundColor: colors.danger },
   pressed: { transform: [{ scale: 0.97 }] },
   friends: {

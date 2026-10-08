@@ -21,12 +21,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   orientation: 'portrait',
   icon: './assets/images/icon.png',
   userInterfaceStyle: 'dark',
-  backgroundColor: '#0B2B22',
+  backgroundColor: '#1E1250',
   newArchEnabled: true,
   splash: {
     image: './assets/images/splash-icon.png',
     resizeMode: 'contain',
-    backgroundColor: '#0B2B22',
+    backgroundColor: '#1E1250',
   },
   ios: {
     bundleIdentifier: IS_PROD ? 'com.footballmillionaire.app' : 'com.footballmillionaire.app.dev',
@@ -48,7 +48,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     package: IS_PROD ? 'com.footballmillionaire.app' : 'com.footballmillionaire.app.dev',
-    adaptiveIcon: { foregroundImage: './assets/images/adaptive-icon.png', backgroundColor: '#0B2B22' },
+    adaptiveIcon: { foregroundImage: './assets/images/adaptive-icon.png', backgroundColor: '#1E1250' },
   },
   plugins: [
     'expo-router',
@@ -56,7 +56,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-audio',
     'expo-web-browser',
     ['expo-localization', { supportedLocales: { ios: ['he'], android: ['he'] } }],
-    ['expo-splash-screen', { image: './assets/images/splash-icon.png', imageWidth: 180, backgroundColor: '#0B2B22' }],
+    ['expo-splash-screen', { image: './assets/images/splash-icon.png', imageWidth: 180, backgroundColor: '#1E1250' }],
     '@sentry/react-native',
     ['react-native-google-mobile-ads', { androidAppId: ADMOB_ANDROID_APP_ID, iosAppId: ADMOB_IOS_APP_ID }],
     'expo-iap',

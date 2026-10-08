@@ -75,6 +75,8 @@ function Gate() {
         <Stack.Screen name="legal/[doc]" options={{ presentation: 'modal' }} />
         <Stack.Screen name="design-system" />
         <Stack.Screen name="quiz" options={{ gestureEnabled: false, animation: 'fade' }} />
+        <Stack.Screen name="session" options={{ gestureEnabled: false, animation: 'fade' }} />
+        <Stack.Screen name="world/[slug]" />
         <Stack.Screen name="pack-open" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="match" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="shop" options={{ presentation: 'modal' }} />

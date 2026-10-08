@@ -25,7 +25,7 @@ interface Ink {
 }
 
 const COLOR: Ink = {
-  ink: '#10241D', a: '#FFB000', a2: '#D98C00', b: '#3DDC84', b2: '#1E9E5A', c: '#FF5A4E', w: '#FFF8EA', hi: 'rgba(255,255,255,0.55)',
+  ink: '#1A1036', a: '#FFB000', a2: '#D98C00', b: '#3DDC84', b2: '#1E9E5A', c: '#FF5A4E', w: '#FFF8EA', hi: 'rgba(255,255,255,0.55)',
 };
 const MONO: Ink = {
   ink: '#5E7A6E', a: '#3A5A4D', a2: '#2E4A3F', b: '#34544A', b2: '#2A463C', c: '#47685B', w: '#4A6A5D', hi: 'rgba(255,255,255,0.12)',
@@ -44,12 +44,13 @@ function draw(name: IconName, k: Ink): string {
         `<path d="M18 40 L18 32 Q24 29 30 32 L30 40 Z" fill="${k.w}" ${s}/>` +
         `<path d="M9 22 L9 8 M39 22 L39 8" ${s}/><rect x="5" y="4" width="8" height="6" rx="2" fill="${k.a}" ${s}/><rect x="35" y="4" width="8" height="6" rx="2" fill="${k.a}" ${s}/>` +
         `<path d="M11 27 Q18 23 24 23" stroke="${k.hi}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
-    case 'play': // ball with speed lines
-      return `<path d="M3 18 L12 18 M2 25 L10 25 M4 32 L12 32" ${s}/>` +
-        `<circle cx="28" cy="25" r="16" fill="${k.w}" ${s}/>` +
-        `<path d="M28 17 L35 22 L32.5 30 L23.5 30 L21 22 Z" fill="${k.ink}"/>` +
-        `<path d="M28 9.5 L28 17 M35 22 L42.5 19.5 M32.5 30 L37 37 M23.5 30 L19 37 M21 22 L13.5 19.5" stroke="${k.ink}" stroke-width="2"/>` +
-        `<path d="M19 15 Q23 12 27 12" stroke="${k.a}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
+    case 'play': // a lit idea bulb with sparks
+      return `<path d="M24 6 Q38 6 38 20 Q38 27 32 31 L32 35 L16 35 L16 31 Q10 27 10 20 Q10 6 24 6 Z" fill="${k.a}" ${s}/>` +
+        `<rect x="16" y="35" width="16" height="7" rx="2" fill="${k.w}" ${s}/>` +
+        `<path d="M19 45 L29 45" ${s}/>` +
+        `<path d="M19 22 Q21 17 24 21 Q27 17 29 22 L29 31 M19 22 L19 31" fill="none" stroke="${k.a2}" stroke-width="2.4" stroke-linecap="round"/>` +
+        `<path d="M4 12 L8 14 M44 12 L40 14 M3 24 L7 24 M45 24 L41 24" ${s}/>` +
+        `<path d="M15 14 Q17 10 21 9" stroke="${k.hi}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
     case 'packs': // foil pack with tear strip and star
       return `<path d="M10 9 L38 9 L36 41 L12 41 Z" fill="${k.c}" ${s}/>` +
         `<path d="M10 9 L13 5 L16 9 L19 5 L22 9 L25 5 L28 9 L31 5 L34 9 L37 5 L38 9" fill="${k.w}" ${s}/>` +

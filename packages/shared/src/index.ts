@@ -105,12 +105,24 @@ export const QuizHintsSchema = z
 export type QuizHints = z.infer<typeof QuizHintsSchema>;
 
 /** Picture questions: where to drop the pin on a bundled base map (see ./maps). */
-export const QuestionImageSchema = z.object({
+export const QuestionMapImageSchema = z.object({
   kind: z.literal('map'),
   map: z.enum(['israel', 'europe']),
   lon: z.number(),
   lat: z.number(),
 });
+/** A Wikimedia Commons photo, always shown with its credit line. */
+export const QuestionPhotoSchema = z.object({
+  kind: z.literal('photo'),
+  url: z.string().url(),
+  credit: z.string(),
+  license: z.string().optional(),
+  page: z.string().optional(),
+  fit: z.enum(['cover', 'contain']).optional(),
+  w: z.number().optional(),
+  h: z.number().optional(),
+});
+export const QuestionImageSchema = z.discriminatedUnion('kind', [QuestionMapImageSchema, QuestionPhotoSchema]);
 export type QuestionImage = z.infer<typeof QuestionImageSchema>;
 
 export const QuizQuestionSchema = z.object({
@@ -215,6 +227,82 @@ export const LeaderboardSchema = z.object({
   me: z.object({ rank: z.number().int().nullable(), points: z.number(), games: z.number().int() }),
 });
 export type Leaderboard = z.infer<typeof LeaderboardSchema>;
+
+/* -------------------------------------------------------------------------- */
+/* Knowledge worlds + sessions — mirrors *_knowledge_worlds.sql               */
+/* -------------------------------------------------------------------------- */
+export const WorldConfigSchema = z.object({
+  slug: z.string(),
+  name: z.string(),
+  icon: z.string(),
+  color: z.string(),
+  levels: z.number().int(),
+  active: z.boolean().optional(),
+});
+export type WorldConfig = z.infer<typeof WorldConfigSchema>;
+export const WorldsConfigSchema = z.array(WorldConfigSchema);
+
+export const WorldsStateSchema = z.object({
+  worlds: z.array(
+    z.object({
+      slug: z.string(),
+      unlocked: z.number().int(),
+      stars: z.record(z.number().int()),
+      total_stars: z.number().int(),
+    }),
+  ),
+  total_stars: z.number().int(),
+  active_run: z.object({ run_id: z.string().uuid(), world: z.string(), level: z.number().int() }).nullable(),
+});
+export type WorldsState = z.infer<typeof WorldsStateSchema>;
+
+export const SessionPayloadSchema = z.object({
+  run_id: z.string().uuid(),
+  status: QuizRunStatusSchema,
+  rung: z.number().int().min(1).max(12),
+  correct: z.number().int().min(0).max(12),
+  lifelines_used: z.array(z.string()),
+  question: QuizQuestionSchema.nullable(),
+  mode: z.literal('session'),
+  world: z.string(),
+  level: z.number().int(),
+  score: z.number().int(),
+  total: z.number().int(),
+  question_world: z.string().nullable(),
+});
+export type SessionPayload = z.infer<typeof SessionPayloadSchema>;
+
+export const SessionSummarySchema = z.object({
+  mode: z.literal('session'),
+  status: z.enum(['won', 'lost']),
+  world: z.string(),
+  level: z.number().int(),
+  stars: z.number().int(),
+  prev_stars: z.number().int(),
+  correct: z.number().int(),
+  total: z.number().int(),
+  coins: z.number().int(),
+  prize_points: z.number().int(),
+  xp: z.number().int(),
+  player_level: z.number().int(),
+  leveled_up: z.boolean(),
+  balance: z.number(),
+  chest: z.enum(['bronze', 'silver', 'gold', 'epic', 'legendary']).nullable(),
+  first_clear: z.boolean(),
+  unlocked: z.number().int().nullable(),
+});
+export type SessionSummary = z.infer<typeof SessionSummarySchema>;
+
+export const SessionAnswerSchema = z.object({
+  result: z.enum(['correct', 'wrong', 'timeout']),
+  correct_slot: SlotSchema,
+  explanation: z.string(),
+  points: z.number().int(),
+  score: z.number().int(),
+  correct_count: z.number().int(),
+  summary: SessionSummarySchema.nullable(),
+});
+export type SessionAnswer = z.infer<typeof SessionAnswerSchema>;
 
 export * from './legendArt';
 export * from './maps';

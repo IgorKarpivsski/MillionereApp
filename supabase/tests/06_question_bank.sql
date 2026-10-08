@@ -28,7 +28,7 @@ do $$
 begin
   perform test.assert_raises('select count(*) from public.questions', 'permission denied', 'anon cannot read questions');
   perform test.assert_raises('select count(*) from public.question_answers', 'permission denied', 'anon cannot read answers');
-  perform test.assert((select count(*) from public.question_categories) = 15, 'categories readable');
+  perform test.assert((select count(*) from public.question_categories) = 26, 'categories readable');
 end $$;
 reset role;
 set local role authenticated;

@@ -21,7 +21,7 @@ export interface AnalyticsEvents {
   offline_shown: Record<string, never>;
 
   // Phase 2+ (declared now so the catalog is the contract)
-  quiz_started: { mode: 'classic' | 'daily' | 'event' | 'onboarding'; category?: string };
+  quiz_started: { mode: 'classic' | 'daily' | 'event' | 'onboarding' | 'session'; category?: string };
   question_answered: { rung: number; correct: boolean; ms: number; difficulty: string };
   question_failed: { rung: number; difficulty: string };
   quiz_completed: { rung: number; ended_by: 'walk_away' | 'wrong' | 'completed' | 'timeout' };

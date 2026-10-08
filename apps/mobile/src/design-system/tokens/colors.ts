@@ -1,5 +1,5 @@
 /**
- * Color tokens — "האלוף": a stadium at night, read off the scoreboard.
+ * Color tokens — "האלוף": a bright trivia game on a deep violet "knowledge night".
  *
  * Every hue has one job. Don't use a color for decoration:
  *   led    = the scoreboard amber: primary action, coins, prizes, the ladder
@@ -12,14 +12,14 @@
  * Palette keys keep their old names so every screen picks up the new theme.
  */
 export const palette = {
-  night950: '#06130F', // scoreboard panel
-  night900: '#0B2B22', // grass at night (screen background)
-  night800: '#0F3428',
-  night700: '#133D30', // secondary card
-  night600: '#1F4A3C', // panel borders
-  night300: '#8FA79B', // dim captions
-  chalk: '#F2F5EF', // floodlight white
-  chalkDim: '#B8C9C0',
+  night950: '#140C33', // deep panel
+  night900: '#1E1250', // knowledge-night violet (screen background)
+  night800: '#281A63',
+  night700: '#322275', // secondary card
+  night600: '#45338F', // panel borders
+  night300: '#A99CDB', // dim captions
+  chalk: '#F7F5FF', // paper white
+  chalkDim: '#CFC6F2',
   white: '#FFFFFF',
 
   pitch: '#3DDC84',
@@ -54,7 +54,7 @@ export const colors = {
   prize: palette.gold,
   prizeLip: palette.goldDeep,
   correct: palette.pitch,
-  correctFill: '#0F4A33',
+  correctFill: '#17533F',
   danger: palette.flare,
   dangerLip: palette.flareDeep,
   gem: palette.sky,
@@ -67,14 +67,14 @@ export const colors = {
   /** The bright question card ("floodlight"). */
   card: palette.chalk,
   cardText: palette.night950,
-  cardMuted: '#4E6A5E',
+  cardMuted: '#6A5F96',
 
   sticker: palette.chalk,
-  overlay: 'rgba(6, 19, 15, 0.78)',
+  overlay: 'rgba(14, 8, 38, 0.8)',
 } as const;
 
 export const rarityColors = {
-  common: { fill: '#9DB3A8', lip: '#5E7569', label: 'רגיל' },
+  common: { fill: '#B4ACD6', lip: '#7268A0', label: 'רגיל' },
   uncommon: { fill: palette.pitch, lip: palette.pitchDeep, label: 'לא שכיח' },
   rare: { fill: palette.sky, lip: palette.skyDeep, label: 'נדיר' },
   epic: { fill: palette.violet, lip: palette.violetDeep, label: 'אפי' },

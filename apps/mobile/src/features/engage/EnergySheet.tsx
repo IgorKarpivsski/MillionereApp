@@ -26,7 +26,17 @@ export function usePlayClassic() {
   const show = useEnergySheet((s) => s.show);
   return () => {
     if (data && !data.unlimited && data.tickets < 1) show();
-    else router.push('/quiz');
+    else router.push({ pathname: '/session', params: { world: 'mix' } });
+  };
+}
+
+/** Opens a session in a world at a level (or quick play with world 'mix'); out of tickets → the refill sheet. */
+export function usePlaySession() {
+  const { data } = useEnergy();
+  const show = useEnergySheet((s) => s.show);
+  return (world: string, level?: number) => {
+    if (data && !data.unlimited && data.tickets < 1) show();
+    else router.push({ pathname: '/session', params: level ? { world, level: String(level) } : { world } });
   };
 }
 

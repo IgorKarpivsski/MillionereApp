@@ -1,4 +1,6 @@
-import { BASE_MAPS, projectOnMap, type QuestionImage } from '@fm/shared';
+import { BASE_MAPS, projectOnMap, type QuestionImage as AnyQuestionImage } from '@fm/shared';
+
+type QuestionImage = Extract<AnyQuestionImage, { kind: 'map' }>;
 import { memo, useEffect } from 'react';
 import { View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
