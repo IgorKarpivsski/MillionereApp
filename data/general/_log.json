@@ -361,5 +361,87 @@
   "name": "israel_sites",
   "rows": 1778,
   "ms": 24170
+ },
+ {
+  "name": "stars",
+  "error": "Bad control character in string literal in JSON at position 90135 (line 3509 column 79)",
+  "attempt": 1,
+  "at": "2026-10-08T03:50:58.028Z"
+ },
+ {
+  "name": "stars",
+  "error": "Bad control character in string literal in JSON at position 98327 (line 3829 column 34)",
+  "attempt": 2,
+  "at": "2026-10-08T03:52:02.095Z"
+ },
+ {
+  "name": "stars",
+  "error": "Bad control character in string literal in JSON at position 73751 (line 2872 column 69)",
+  "attempt": 3,
+  "at": "2026-10-08T03:53:10.203Z"
+ },
+ {
+  "name": "rel_origin",
+  "error": "terminated",
+  "attempt": 1,
+  "at": "2026-10-08T03:54:28.365Z"
+ },
+ {
+  "name": "rel_origin",
+  "rows": 59010,
+  "ms": 50291
+ },
+ {
+  "name": "foods",
+  "error": "Expected ':' after property name in JSON at position 32768 (line 1156 column 17)",
+  "attempt": 1,
+  "at": "2026-10-08T03:56:22.786Z"
+ },
+ {
+  "name": "foods",
+  "error": "Expected property name or '}' in JSON at position 155648 (line 5470 column 7)",
+  "attempt": 2,
+  "at": "2026-10-08T03:57:26.854Z"
+ },
+ {
+  "name": "foods",
+  "error": "HTTP 504",
+  "attempt": 3,
+  "at": "2026-10-08T03:58:39.952Z"
+ },
+ {
+  "name": "olympics2",
+  "rows": 0,
+  "ms": 1220
+ },
+ {
+  "name": "eurovision2",
+  "rows": 143,
+  "ms": 1358
+ },
+ {
+  "name": "israel_admin",
+  "rows": 33548,
+  "ms": 7733
+ },
+ {
+  "name": "stars2",
+  "rows": 35,
+  "ms": 19515
+ },
+ {
+  "name": "origin2",
+  "rows": 2126,
+  "ms": 4932
+ },
+ {
+  "name": "athletes",
+  "rows": 5427,
+  "ms": 26749
+ },
+ {
+  "name": "genders",
+  "rows": 15911,
+  "ok": true
  }
 ]
