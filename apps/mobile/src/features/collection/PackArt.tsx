@@ -18,10 +18,10 @@ function usePackLook(): Look {
     queryFn: async () => {
       const { data: row } = await supabase.from('app_config').select('value').eq('key', 'packs.style').maybeSingle();
       const v = row?.value as string | undefined;
-      return LOOKS.includes(v as Look) ? (v as Look) : 'scenes';
+      return LOOKS.includes(v as Look) ? (v as Look) : 'retro';
     },
   });
-  return data ?? 'scenes';
+  return data ?? 'retro';
 }
 
 export const PACK_NAMES: Record<PackSlug, string> = {
