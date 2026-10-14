@@ -423,7 +423,7 @@ export default function SessionScreen() {
         </View>
         <TimerBar
           deadlineAt={s.deadlineAt}
-          total={q.seconds_left > 20 ? q.seconds_left : 20}
+          total={Math.max(q.seconds_left, 25)}
           running={answering}
           color={secs <= 5 ? colors.danger : qWorld.color}
         />
