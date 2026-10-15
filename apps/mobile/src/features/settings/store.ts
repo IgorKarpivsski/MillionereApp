@@ -23,6 +23,8 @@ interface SettingsState {
   /** Last league week whose result popup was shown. */
   leagueSeenWeek: string | null;
   reviewAsked: boolean;
+  /** Age band from the neutral age screen (null = not asked yet → treated as a child). Device-only. */
+  ageBand: 'under13' | '13to15' | '16plus' | null;
   set: (patch: Partial<Omit<SettingsState, 'set' | 'hydrateFromServer'>>) => void;
   hydrateFromServer: (s: Settings) => void;
 }
@@ -40,6 +42,7 @@ export const useSettingsStore = create<SettingsState>()(
       remindersAsked: false,
       leagueSeenWeek: null,
       reviewAsked: false,
+      ageBand: null,
       set: (patch) => set(patch),
       hydrateFromServer: (s) =>
         set({ sound: s.sound, music: s.music, haptics: s.haptics, reducedMotion: s.reduced_motion, extendedTime: s.extended_time }),
@@ -47,7 +50,7 @@ export const useSettingsStore = create<SettingsState>()(
     {
       name: 'fm.settings.v1',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: ({ sound, music, haptics, reducedMotion, largeText, extendedTime, reminders, remindersAsked, leagueSeenWeek, reviewAsked }) => ({
+      partialize: ({ sound, music, haptics, reducedMotion, largeText, extendedTime, reminders, remindersAsked, leagueSeenWeek, reviewAsked, ageBand }) => ({
         sound,
         music,
         haptics,
@@ -58,6 +61,7 @@ export const useSettingsStore = create<SettingsState>()(
         remindersAsked,
         leagueSeenWeek,
         reviewAsked,
+        ageBand,
       }),
     },
   ),

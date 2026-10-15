@@ -8,7 +8,7 @@
 // Secrets (Supabase → Edge Functions → Secrets):
 //   GOOGLE_PLAY_SERVICE_ACCOUNT  JSON key of a Play Console service account
 //                                with "View financial data" + "Manage orders".
-//   ANDROID_PACKAGE_NAME         e.g. com.footballmillionaire.app
+//   ANDROID_PACKAGE_NAME         e.g. com.haaluf.trivia
 // Deploy with verify_jwt = true.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return json(405, { error: 'method_not_allowed' });
 
   const saRaw = Deno.env.get('GOOGLE_PLAY_SERVICE_ACCOUNT');
-  const pkg = Deno.env.get('ANDROID_PACKAGE_NAME') ?? 'com.footballmillionaire.app';
+  const pkg = Deno.env.get('ANDROID_PACKAGE_NAME') ?? 'com.haaluf.trivia';
   if (!saRaw) return json(503, { error: 'store_not_configured' });
 
   const url = Deno.env.get('SUPABASE_URL')!;

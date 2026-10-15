@@ -29,7 +29,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     backgroundColor: '#1E1250',
   },
   ios: {
-    bundleIdentifier: IS_PROD ? 'com.footballmillionaire.app' : 'com.footballmillionaire.app.dev',
+    bundleIdentifier: IS_PROD ? 'com.haaluf.trivia' : 'com.haaluf.trivia.dev',
     supportsTablet: false,
     usesAppleSignIn: true,
     infoPlist: {
@@ -47,7 +47,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
   },
   android: {
-    package: IS_PROD ? 'com.footballmillionaire.app' : 'com.footballmillionaire.app.dev',
+    package: IS_PROD ? 'com.haaluf.trivia' : 'com.haaluf.trivia.dev',
     adaptiveIcon: { foregroundImage: './assets/images/adaptive-icon.png', backgroundColor: '#5624A2' },
   },
   plugins: [
