@@ -501,6 +501,7 @@ export const he = {
     privacy: 'מדיניות פרטיות',
     support: 'תמיכה',
     deleteAccount: 'מחק את החשבון',
+    fullDoc: 'למסמך המלא',
     deleteTitle: 'למחוק את החשבון?',
     deleteBody: 'כל ההתקדמות, המטבעות והמדבקות יימחקו לצמיתות. אי אפשר לבטל את זה.',
     deleteConfirm: 'מחק לצמיתות',
