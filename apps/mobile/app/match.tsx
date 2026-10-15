@@ -2,7 +2,7 @@ import type { MatchState } from '@fm/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText, AvatarBadge, Card, Led, StickerButton, TrophyLogo, useToast } from '@/design-system/components';
@@ -187,6 +187,20 @@ export default function MatchScreen() {
       void qc.invalidateQueries({ queryKey: queryKeys.myState });
     }
   }, [s, picked, qc]);
+
+  // Leaving a live match needs a confirmation (Android back button).
+  const live = !!s && (s.phase === 'countdown' || s.phase === 'question' || s.phase === 'reveal');
+  useEffect(() => {
+    if (!live) return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      Alert.alert(t.exitTitle, t.exitBody, [
+        { text: strings.common.cancel, style: 'cancel' },
+        { text: t.exit, style: 'destructive', onPress: () => router.back() },
+      ]);
+      return true;
+    });
+    return () => sub.remove();
+  }, [live]);
 
   if (!room) {
     return (

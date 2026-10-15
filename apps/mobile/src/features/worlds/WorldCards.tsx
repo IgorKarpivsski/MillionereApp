@@ -51,7 +51,7 @@ export function WorldsGrid() {
               onPress={() => router.push({ pathname: '/world/[slug]', params: { slug: w.slug } })}
               accessibilityRole="button"
               accessibilityLabel={`${w.name}, ${fmt(t.progress, { n: passed })}`}
-              style={({ pressed }) => [styles.world, { backgroundColor: w.color, borderBottomColor: shade(w.color, -0.35) }, pressed && styles.pressed]}
+              style={({ pressed }) => [styles.world, { backgroundColor: shade(w.color, -0.4), borderBottomColor: shade(w.color, -0.65) }, pressed && styles.pressed]}
             >
               {WORLD_IMAGES[w.icon] ? (
                 <Image source={WORLD_IMAGES[w.icon]!} style={styles.cover} resizeMode="cover" />

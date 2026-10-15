@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ParentalGate } from '@/components/ParentalGate';
 import { AppText, Card, CoinIcon, GemIcon, Led, StickerButton, TrophyLogo, useToast } from '@/design-system/components';
 import { playSound } from '@/design-system/feedback/sound';
 import { colors, radius, space } from '@/design-system/tokens';
@@ -29,6 +30,7 @@ export default function ShopScreen() {
   const qc = useQueryClient();
   const ad = useAdReward();
   const [buying, setBuying] = useState<string | null>(null);
+  const [gateFor, setGateFor] = useState<StoreProduct | null>(null);
 
   const { connected, products, subscriptions, fetchProducts, requestPurchase, finishTransaction } = useIAP({
     onPurchaseSuccess: async (purchase: Purchase) => {
@@ -123,7 +125,7 @@ export default function ShopScreen() {
             tone={owned ? 'ghost' : 'primary'}
             disabled={owned || !price || !!buying}
             loading={buying === p.sku}
-            onPress={() => void buy(p)}
+            onPress={() => setGateFor(p)}
           />
         </View>
       </Card>
@@ -201,6 +203,15 @@ export default function ShopScreen() {
           {vipActive ? 'VIP' : ''}
         </Led>
       </ScrollView>
+      <ParentalGate
+        visible={!!gateFor}
+        onClose={() => setGateFor(null)}
+        onPass={() => {
+          const p = gateFor;
+          setGateFor(null);
+          if (p) void buy(p);
+        }}
+      />
     </SafeAreaView>
   );
 }

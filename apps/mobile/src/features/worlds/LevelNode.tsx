@@ -51,7 +51,7 @@ export const LevelNode = memo(function LevelNode({
         ) : chest ? (
           <Image source={CHEST_IMAGE} style={{ width: size * 0.66, height: size * 0.66 }} resizeMode="contain" />
         ) : (
-          <Text style={[styles.num, { fontSize: size * 0.38 }]}>{level}</Text>
+          <Text maxFontSizeMultiplier={1.1} style={[styles.num, { fontSize: size * 0.38 }]}>{level}</Text>
         )}
       </View>
     </View>

@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { TopBar } from '@/components/TopBar';
@@ -62,7 +63,7 @@ function AllTable({ data, isLoading }: { data: ReturnType<typeof useLeaderboard>
 
       {isLoading ? <Skeleton height={300} rounded={18} /> : null}
       {data && data.rows.length === 0 ? (
-        <EmptyState icon="trophy-outline" title={t.emptyTitle} body={t.emptyBody} />
+        <EmptyState icon="trophy-outline" title={t.emptyTitle} body={t.emptyBody} actionLabel={strings.worlds.play} onAction={() => router.push('/(tabs)/play')} />
       ) : null}
 
       <View style={styles.list}>

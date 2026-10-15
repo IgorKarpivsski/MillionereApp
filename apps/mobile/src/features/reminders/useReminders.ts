@@ -1,8 +1,9 @@
 import type { DailyStatus, EnergyState, WheelState } from '@fm/shared';
 import * as Notifications from 'expo-notifications';
 import { useEffect } from 'react';
-import { AppState, Platform } from 'react-native';
+import { Alert, AppState, Platform } from 'react-native';
 import { useSettingsStore } from '@/features/settings/store';
+import { strings } from '@/lib/i18n';
 import { queryClient, queryKeys } from '@/lib/queryClient';
 import { planReminders } from './plan';
 
@@ -69,6 +70,14 @@ export async function askForRemindersOnce(): Promise<void> {
   try {
     const p = await Notifications.getPermissionsAsync();
     if (!p.granted && p.canAskAgain) {
+      // Explain why before the system dialog, so the first answer is an informed one.
+      const yes = await new Promise<boolean>((resolve) =>
+        Alert.alert(strings.reminders.askTitle, strings.reminders.askBody, [
+          { text: strings.reminders.askNo, style: 'cancel', onPress: () => resolve(false) },
+          { text: strings.reminders.askYes, onPress: () => resolve(true) },
+        ], { cancelable: true, onDismiss: () => resolve(false) }),
+      );
+      if (!yes) return;
       await ensureChannel();
       await Notifications.requestPermissionsAsync();
     }

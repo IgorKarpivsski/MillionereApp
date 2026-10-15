@@ -96,10 +96,10 @@ export function AnswerTile({
             </AppText>
             {state === 'correctPicked' || state === 'correctMissed' ? (
               <Animated.View entering={reduced ? undefined : ZoomIn.springify()}>
-                <Ionicons name="checkmark-circle" size={18} color={colors.correct} />
+                <Ionicons name="checkmark-circle" size={24} color={colors.correct} />
               </Animated.View>
             ) : null}
-            {state === 'wrongPicked' ? <Ionicons name="close-circle" size={18} color={colors.danger} /> : null}
+            {state === 'wrongPicked' ? <Ionicons name="close-circle" size={24} color={colors.danger} /> : null}
             {expertPick ? (
               <View style={styles.expertBadge}>
                 <Ionicons name="mic" size={12} color={colors.textOnBright} />
