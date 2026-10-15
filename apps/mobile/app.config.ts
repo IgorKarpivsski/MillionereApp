@@ -71,5 +71,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     supportsRTL: true,
     forcesRTL: true,
     eas: { projectId: process.env.EAS_PROJECT_ID },
+    // Store builds show real ads; test builds use Google's test ads.
+    appEnv: process.env.APP_ENV ?? 'development',
   },
 });

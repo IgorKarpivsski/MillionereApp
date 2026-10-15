@@ -3,7 +3,7 @@ import { USERNAME_REGEX } from '@fm/shared';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import {
   AppText,
   AvatarBadge,
@@ -105,15 +105,18 @@ function LinkAccountCard() {
         </View>
       </View>
       <View style={styles.linkButtons}>
-        <StickerButton
-          label={t.linkApple}
-          icon="logo-apple"
-          tone="ghost"
-          fullWidth
-          disabled={!online || busy !== null}
-          loading={busy === 'apple'}
-          onPress={() => void go('apple')}
-        />
+        {/* Sign in with Apple is offered on iPhone only. */}
+        {Platform.OS === 'ios' ? (
+          <StickerButton
+            label={t.linkApple}
+            icon="logo-apple"
+            tone="ghost"
+            fullWidth
+            disabled={!online || busy !== null}
+            loading={busy === 'apple'}
+            onPress={() => void go('apple')}
+          />
+        ) : null}
         <StickerButton
           label={t.linkGoogle}
           icon="logo-google"
