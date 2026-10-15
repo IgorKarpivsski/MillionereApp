@@ -43,7 +43,7 @@ begin
   perform test.assert((select dust from public.wallets) > 100, 'duplicates made dust');
 
   -- craft a missing common
-  select c.id into missing from public.collectibles c where c.rarity = 'common'
+  select c.id into missing from public.collectibles c where c.rarity = 'common' and c.active
     and not exists (select 1 from public.user_collectibles u where u.item_id = c.id and u.count > 0) limit 1;
   r := public.craft_item(missing);
   perform test.assert((select count from public.user_collectibles where item_id = missing) = 1, 'crafted');
@@ -74,7 +74,7 @@ rollback;
 begin;
 update public.app_config set value = '1'::jsonb where key = 'packs.glow_chance';
 create temp table g as select test.new_user() as a;
-insert into public.user_collectibles (user_id, item_id, count) select a, (select id from public.collectibles order by id limit 1), 2 from g;
+insert into public.user_collectibles (user_id, item_id, count) select a, (select id from public.collectibles where active order by id limit 1), 2 from g;
 do $$
 begin
   perform test.assert((select glow from public.user_collectibles where user_id = (select a from g)) = 2, 'chance 1: both copies glow');

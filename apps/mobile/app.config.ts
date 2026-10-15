@@ -1,12 +1,12 @@
 import type { ExpoConfig, ConfigContext } from 'expo/config';
 
 /**
- * Product name: "האלוף" (chosen 2026-10). It still needs a formal trademark
+ * Product name: "טריוויה - האלוף" (chosen 2026-10-15). It still needs a formal trademark
  * check before store submission (doc §11).
  * Change it here and in src/lib/brand.ts; nothing else hard-codes it.
  * The package id / slug stay as-is so installed builds update in place.
  */
-const APP_NAME = 'האלוף';
+const APP_NAME = 'טריוויה - האלוף';
 const IS_PROD = process.env.APP_ENV === 'production';
 // AdMob: Google's public TEST app id until the real one is set in the build env.
 const ADMOB_ANDROID_APP_ID = process.env.ADMOB_ANDROID_APP_ID || 'ca-app-pub-3940256099942544~3347511713';

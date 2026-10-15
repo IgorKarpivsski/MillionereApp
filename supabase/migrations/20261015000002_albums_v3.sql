@@ -1,22 +1,22 @@
--- v3 collection: wipe every old album and sticker, then add the 15 AI-illustrated
--- opening albums (12 stickers each). Art is bundled in the app as
--- assets/stickers/<album>_<NN>.webp (tools/scripts/albums_v3.py). Glow, dust,
--- crafting, trades and the album-completion reward keep working as before.
-delete from public.trade_offers where give_item is not null;
-delete from public.user_collectibles where item_id is not null;
-delete from public.album_claims where album is not null;
-delete from public.collectibles where id is not null;
-delete from public.albums where slug is not null;
+-- v3 collection: retire every old album and sticker (kept in the database but hidden
+-- everywhere) and add the 15 AI-illustrated opening albums, 12 stickers each. Art is
+-- bundled in the app as assets/stickers/<art>_<NN>.webp (tools/scripts/albums_v3.py).
+-- Glow, dust, crafting, trades and the album-completion reward keep working.
+alter table public.albums add column active boolean not null default true;
+alter table public.collectibles add column active boolean not null default true;
+update public.albums set active = false where active;
+update public.collectibles set active = false where active;
+update public.trade_offers set status = 'cancelled', decided_at = now() where status = 'pending';
 
 insert into public.albums (slug, title, blurb, sort, kind) values
   ('wild', 'חיות הבר', 'מלכי הסוואנה והג''ונגל.', 1, 'knowledge'),
   ('ocean', 'מתחת לים', 'מסע לעומק האוקיינוס.', 2, 'knowledge'),
-  ('dinos', 'דינוזאורים', 'ענקים מלפני מיליוני שנים.', 3, 'knowledge'),
-  ('space', 'חלל וכוכבים', 'מסע בין כוכבי הלכת.', 4, 'knowledge'),
-  ('wonders', 'פלאי עולם', 'מקומות שכל העולם בא לראות.', 5, 'knowledge'),
-  ('inventions', 'המצאות', 'רעיונות ששינו את העולם.', 6, 'knowledge'),
+  ('jurassic', 'דינוזאורים', 'ענקים מלפני מיליוני שנים.', 3, 'knowledge'),
+  ('cosmos', 'חלל וכוכבים', 'מסע בין כוכבי הלכת.', 4, 'knowledge'),
+  ('landmarks', 'פלאי עולם', 'מקומות שכל העולם בא לראות.', 5, 'knowledge'),
+  ('gadgets', 'המצאות', 'רעיונות ששינו את העולם.', 6, 'knowledge'),
   ('music', 'כלי נגינה', 'תזמורת שלמה באלבום.', 7, 'knowledge'),
-  ('food', 'מטעמי העולם', 'טעימות מכל העולם.', 8, 'knowledge'),
+  ('tasty', 'מטעמי העולם', 'טעימות מכל העולם.', 8, 'knowledge'),
   ('vehicles', 'כלי תחבורה', 'מסע ביבשה, בים ובאוויר.', 9, 'knowledge'),
   ('weather', 'מזג אוויר וטבע', 'כוחות הטבע המופלאים.', 10, 'knowledge'),
   ('sports', 'עולם הספורט', 'ציוד של אלופים.', 11, 'knowledge'),
@@ -50,54 +50,54 @@ insert into public.collectibles (id, album, number, rarity, name_he, position, e
   ('ocean_10', 'ocean', 10, 'epic', 'לווייתן גבנון', 'OBJ', 'modern', 'שר שירים ארוכים מתחת למים.', 30110, 'object'),
   ('ocean_11', 'ocean', 11, 'legendary', 'דג דבלול', 'OBJ', 'modern', 'חי בחושך העמוק ומאיר בעצמו.', 30111, 'object'),
   ('ocean_12', 'ocean', 12, 'iconic', 'לווייתן כחול', 'OBJ', 'modern', 'בעל החיים הגדול ביותר אי פעם.', 30112, 'object'),
-  ('dinos_01', 'dinos', 1, 'common', 'סטגוזאורוס', 'OBJ', 'modern', 'לוחות על הגב וקוצים בזנב.', 30201, 'object'),
-  ('dinos_02', 'dinos', 2, 'common', 'טריצרטופס', 'OBJ', 'modern', 'שלוש קרניים ומגן גדול.', 30202, 'object'),
-  ('dinos_03', 'dinos', 3, 'common', 'דיפלודוקוס', 'OBJ', 'modern', 'צוואר ארוך במיוחד.', 30203, 'object'),
-  ('dinos_04', 'dinos', 4, 'common', 'אנקילוזאורוס', 'OBJ', 'modern', 'אלה כבדה בקצה הזנב.', 30204, 'object'),
-  ('dinos_05', 'dinos', 5, 'uncommon', 'פטרנודון', 'OBJ', 'modern', 'זוחל מעופף ענק.', 30205, 'object'),
-  ('dinos_06', 'dinos', 6, 'uncommon', 'ולוצירפטור', 'OBJ', 'modern', 'קטן, מהיר ונוצתי.', 30206, 'object'),
-  ('dinos_07', 'dinos', 7, 'uncommon', 'פרזאורולופוס', 'OBJ', 'modern', 'ציצה ארוכה על הראש.', 30207, 'object'),
-  ('dinos_08', 'dinos', 8, 'rare', 'ממותה', 'OBJ', 'modern', 'פרווה עבה לעידן הקרח.', 30208, 'object'),
-  ('dinos_09', 'dinos', 9, 'rare', 'ברכיוזאורוס', 'OBJ', 'modern', 'גבוה כמו בניין.', 30209, 'object'),
-  ('dinos_10', 'dinos', 10, 'epic', 'ספינוזאורוס', 'OBJ', 'modern', 'מפרש ענק על הגב.', 30210, 'object'),
-  ('dinos_11', 'dinos', 11, 'legendary', 'טירנוזאורוס רקס', 'OBJ', 'modern', 'שיניים בגודל בננה.', 30211, 'object'),
-  ('dinos_12', 'dinos', 12, 'iconic', 'ביצת דינוזאור', 'OBJ', 'modern', 'מי יבקע ממנה?', 30212, 'object'),
-  ('space_01', 'space', 1, 'common', 'הירח', 'OBJ', 'modern', 'תמיד מראה לנו את אותו הצד.', 30301, 'object'),
-  ('space_02', 'space', 2, 'common', 'מאדים', 'OBJ', 'modern', 'הכוכב האדום.', 30302, 'object'),
-  ('space_03', 'space', 3, 'common', 'כוכב שביט', 'OBJ', 'modern', 'זנב ארוך של קרח ואבק.', 30303, 'object'),
-  ('space_04', 'space', 4, 'common', 'טלסקופ', 'OBJ', 'modern', 'מקרב אלינו כוכבים רחוקים.', 30304, 'object'),
-  ('space_05', 'space', 5, 'uncommon', 'לוויין', 'OBJ', 'modern', 'מקיף את כדור הארץ.', 30305, 'object'),
-  ('space_06', 'space', 6, 'uncommon', 'אסטרונאוט', 'OBJ', 'modern', 'מרחף בחלל בחליפה מיוחדת.', 30306, 'object'),
-  ('space_07', 'space', 7, 'uncommon', 'טיל', 'OBJ', 'modern', 'צריך מהירות עצומה כדי להגיע לחלל.', 30307, 'object'),
-  ('space_08', 'space', 8, 'rare', 'שבתאי', 'OBJ', 'modern', 'טבעות של קרח וסלעים.', 30308, 'object'),
-  ('space_09', 'space', 9, 'rare', 'כדור הארץ', 'OBJ', 'modern', 'הכוכב הכחול שלנו.', 30309, 'object'),
-  ('space_10', 'space', 10, 'epic', 'גלקסיה', 'OBJ', 'modern', 'מיליארדי כוכבים יחד.', 30310, 'object'),
-  ('space_11', 'space', 11, 'legendary', 'השמש', 'OBJ', 'modern', 'הכוכב הקרוב אלינו.', 30311, 'object'),
-  ('space_12', 'space', 12, 'iconic', 'חור שחור', 'OBJ', 'modern', 'גם אור לא בורח ממנו.', 30312, 'object'),
-  ('wonders_01', 'wonders', 1, 'common', 'מגדל פיזה', 'OBJ', 'modern', 'נוטה הצידה כבר מאות שנים.', 30401, 'object'),
-  ('wonders_02', 'wonders', 2, 'common', 'ביג בן', 'OBJ', 'modern', 'השעון המפורסם של לונדון.', 30402, 'object'),
-  ('wonders_03', 'wonders', 3, 'common', 'פסל החירות', 'OBJ', 'modern', 'מתנה מצרפת לארצות הברית.', 30403, 'object'),
-  ('wonders_04', 'wonders', 4, 'common', 'בית האופרה של סידני', 'OBJ', 'modern', 'גגות שנראים כמו מפרשים.', 30404, 'object'),
-  ('wonders_05', 'wonders', 5, 'uncommon', 'מגדל אייפל', 'OBJ', 'modern', 'הסמל של פריז.', 30405, 'object'),
-  ('wonders_06', 'wonders', 6, 'uncommon', 'הקולוסיאום', 'OBJ', 'modern', 'זירה רומית עתיקה.', 30406, 'object'),
-  ('wonders_07', 'wonders', 7, 'uncommon', 'טאג'' מהאל', 'OBJ', 'modern', 'ארמון שיש לבן בהודו.', 30407, 'object'),
-  ('wonders_08', 'wonders', 8, 'rare', 'מאצ''ו פיצ''ו', 'OBJ', 'modern', 'עיר אינקה בהרים.', 30408, 'object'),
-  ('wonders_09', 'wonders', 9, 'rare', 'פטרה', 'OBJ', 'modern', 'עיר חצובה בסלע ורוד.', 30409, 'object'),
-  ('wonders_10', 'wonders', 10, 'epic', 'החומה הסינית', 'OBJ', 'modern', 'נמתחת אלפי קילומטרים.', 30410, 'object'),
-  ('wonders_11', 'wonders', 11, 'legendary', 'הפירמידות', 'OBJ', 'modern', 'הפלא העתיק שעדיין עומד.', 30411, 'object'),
-  ('wonders_12', 'wonders', 12, 'iconic', 'אורות הצפון', 'OBJ', 'modern', 'ריקוד של אורות בשמיים.', 30412, 'object'),
-  ('inventions_01', 'inventions', 1, 'common', 'הגלגל', 'OBJ', 'modern', 'אחת ההמצאות העתיקות.', 30501, 'object'),
-  ('inventions_02', 'inventions', 2, 'common', 'נורה', 'OBJ', 'modern', 'אור בלחיצת כפתור.', 30502, 'object'),
-  ('inventions_03', 'inventions', 3, 'common', 'מצפן', 'OBJ', 'modern', 'תמיד מצביע צפונה.', 30503, 'object'),
-  ('inventions_04', 'inventions', 4, 'common', 'טלפון', 'OBJ', 'modern', 'קול שעובר למרחקים.', 30504, 'object'),
-  ('inventions_05', 'inventions', 5, 'uncommon', 'מיקרוסקופ', 'OBJ', 'modern', 'מגלה עולם זעיר.', 30505, 'object'),
-  ('inventions_06', 'inventions', 6, 'uncommon', 'מצלמה', 'OBJ', 'modern', 'שומרת רגעים לתמיד.', 30506, 'object'),
-  ('inventions_07', 'inventions', 7, 'uncommon', 'מטוס', 'OBJ', 'modern', 'האחים רייט טסו ראשונים.', 30507, 'object'),
-  ('inventions_08', 'inventions', 8, 'rare', 'קטר קיטור', 'OBJ', 'modern', 'הניע את המהפכה התעשייתית.', 30508, 'object'),
-  ('inventions_09', 'inventions', 9, 'rare', 'מחשב', 'OBJ', 'modern', 'היה פעם בגודל של חדר.', 30509, 'object'),
-  ('inventions_10', 'inventions', 10, 'epic', 'רובוט', 'OBJ', 'modern', 'עוזר לבני אדם.', 30510, 'object'),
-  ('inventions_11', 'inventions', 11, 'legendary', 'מכונת דפוס', 'OBJ', 'modern', 'הפכה ספרים לנפוצים.', 30511, 'object'),
-  ('inventions_12', 'inventions', 12, 'iconic', 'מכונת זמן', 'OBJ', 'modern', 'המצאה שעוד מחכה לממציא שלה...', 30512, 'object'),
+  ('jurassic_01', 'jurassic', 1, 'common', 'סטגוזאורוס', 'OBJ', 'modern', 'לוחות על הגב וקוצים בזנב.', 30201, 'object'),
+  ('jurassic_02', 'jurassic', 2, 'common', 'טריצרטופס', 'OBJ', 'modern', 'שלוש קרניים ומגן גדול.', 30202, 'object'),
+  ('jurassic_03', 'jurassic', 3, 'common', 'דיפלודוקוס', 'OBJ', 'modern', 'צוואר ארוך במיוחד.', 30203, 'object'),
+  ('jurassic_04', 'jurassic', 4, 'common', 'אנקילוזאורוס', 'OBJ', 'modern', 'אלה כבדה בקצה הזנב.', 30204, 'object'),
+  ('jurassic_05', 'jurassic', 5, 'uncommon', 'פטרנודון', 'OBJ', 'modern', 'זוחל מעופף ענק.', 30205, 'object'),
+  ('jurassic_06', 'jurassic', 6, 'uncommon', 'ולוצירפטור', 'OBJ', 'modern', 'קטן, מהיר ונוצתי.', 30206, 'object'),
+  ('jurassic_07', 'jurassic', 7, 'uncommon', 'פרזאורולופוס', 'OBJ', 'modern', 'ציצה ארוכה על הראש.', 30207, 'object'),
+  ('jurassic_08', 'jurassic', 8, 'rare', 'ממותה', 'OBJ', 'modern', 'פרווה עבה לעידן הקרח.', 30208, 'object'),
+  ('jurassic_09', 'jurassic', 9, 'rare', 'ברכיוזאורוס', 'OBJ', 'modern', 'גבוה כמו בניין.', 30209, 'object'),
+  ('jurassic_10', 'jurassic', 10, 'epic', 'ספינוזאורוס', 'OBJ', 'modern', 'מפרש ענק על הגב.', 30210, 'object'),
+  ('jurassic_11', 'jurassic', 11, 'legendary', 'טירנוזאורוס רקס', 'OBJ', 'modern', 'שיניים בגודל בננה.', 30211, 'object'),
+  ('jurassic_12', 'jurassic', 12, 'iconic', 'ביצת דינוזאור', 'OBJ', 'modern', 'מי יבקע ממנה?', 30212, 'object'),
+  ('cosmos_01', 'cosmos', 1, 'common', 'הירח', 'OBJ', 'modern', 'תמיד מראה לנו את אותו הצד.', 30301, 'object'),
+  ('cosmos_02', 'cosmos', 2, 'common', 'מאדים', 'OBJ', 'modern', 'הכוכב האדום.', 30302, 'object'),
+  ('cosmos_03', 'cosmos', 3, 'common', 'כוכב שביט', 'OBJ', 'modern', 'זנב ארוך של קרח ואבק.', 30303, 'object'),
+  ('cosmos_04', 'cosmos', 4, 'common', 'טלסקופ', 'OBJ', 'modern', 'מקרב אלינו כוכבים רחוקים.', 30304, 'object'),
+  ('cosmos_05', 'cosmos', 5, 'uncommon', 'לוויין', 'OBJ', 'modern', 'מקיף את כדור הארץ.', 30305, 'object'),
+  ('cosmos_06', 'cosmos', 6, 'uncommon', 'אסטרונאוט', 'OBJ', 'modern', 'מרחף בחלל בחליפה מיוחדת.', 30306, 'object'),
+  ('cosmos_07', 'cosmos', 7, 'uncommon', 'טיל', 'OBJ', 'modern', 'צריך מהירות עצומה כדי להגיע לחלל.', 30307, 'object'),
+  ('cosmos_08', 'cosmos', 8, 'rare', 'שבתאי', 'OBJ', 'modern', 'טבעות של קרח וסלעים.', 30308, 'object'),
+  ('cosmos_09', 'cosmos', 9, 'rare', 'כדור הארץ', 'OBJ', 'modern', 'הכוכב הכחול שלנו.', 30309, 'object'),
+  ('cosmos_10', 'cosmos', 10, 'epic', 'גלקסיה', 'OBJ', 'modern', 'מיליארדי כוכבים יחד.', 30310, 'object'),
+  ('cosmos_11', 'cosmos', 11, 'legendary', 'השמש', 'OBJ', 'modern', 'הכוכב הקרוב אלינו.', 30311, 'object'),
+  ('cosmos_12', 'cosmos', 12, 'iconic', 'חור שחור', 'OBJ', 'modern', 'גם אור לא בורח ממנו.', 30312, 'object'),
+  ('landmarks_01', 'landmarks', 1, 'common', 'מגדל פיזה', 'OBJ', 'modern', 'נוטה הצידה כבר מאות שנים.', 30401, 'object'),
+  ('landmarks_02', 'landmarks', 2, 'common', 'ביג בן', 'OBJ', 'modern', 'השעון המפורסם של לונדון.', 30402, 'object'),
+  ('landmarks_03', 'landmarks', 3, 'common', 'פסל החירות', 'OBJ', 'modern', 'מתנה מצרפת לארצות הברית.', 30403, 'object'),
+  ('landmarks_04', 'landmarks', 4, 'common', 'בית האופרה של סידני', 'OBJ', 'modern', 'גגות שנראים כמו מפרשים.', 30404, 'object'),
+  ('landmarks_05', 'landmarks', 5, 'uncommon', 'מגדל אייפל', 'OBJ', 'modern', 'הסמל של פריז.', 30405, 'object'),
+  ('landmarks_06', 'landmarks', 6, 'uncommon', 'הקולוסיאום', 'OBJ', 'modern', 'זירה רומית עתיקה.', 30406, 'object'),
+  ('landmarks_07', 'landmarks', 7, 'uncommon', 'טאג'' מהאל', 'OBJ', 'modern', 'ארמון שיש לבן בהודו.', 30407, 'object'),
+  ('landmarks_08', 'landmarks', 8, 'rare', 'מאצ''ו פיצ''ו', 'OBJ', 'modern', 'עיר אינקה בהרים.', 30408, 'object'),
+  ('landmarks_09', 'landmarks', 9, 'rare', 'פטרה', 'OBJ', 'modern', 'עיר חצובה בסלע ורוד.', 30409, 'object'),
+  ('landmarks_10', 'landmarks', 10, 'epic', 'החומה הסינית', 'OBJ', 'modern', 'נמתחת אלפי קילומטרים.', 30410, 'object'),
+  ('landmarks_11', 'landmarks', 11, 'legendary', 'הפירמידות', 'OBJ', 'modern', 'הפלא העתיק שעדיין עומד.', 30411, 'object'),
+  ('landmarks_12', 'landmarks', 12, 'iconic', 'אורות הצפון', 'OBJ', 'modern', 'ריקוד של אורות בשמיים.', 30412, 'object'),
+  ('gadgets_01', 'gadgets', 1, 'common', 'הגלגל', 'OBJ', 'modern', 'אחת ההמצאות העתיקות.', 30501, 'object'),
+  ('gadgets_02', 'gadgets', 2, 'common', 'נורה', 'OBJ', 'modern', 'אור בלחיצת כפתור.', 30502, 'object'),
+  ('gadgets_03', 'gadgets', 3, 'common', 'מצפן', 'OBJ', 'modern', 'תמיד מצביע צפונה.', 30503, 'object'),
+  ('gadgets_04', 'gadgets', 4, 'common', 'טלפון', 'OBJ', 'modern', 'קול שעובר למרחקים.', 30504, 'object'),
+  ('gadgets_05', 'gadgets', 5, 'uncommon', 'מיקרוסקופ', 'OBJ', 'modern', 'מגלה עולם זעיר.', 30505, 'object'),
+  ('gadgets_06', 'gadgets', 6, 'uncommon', 'מצלמה', 'OBJ', 'modern', 'שומרת רגעים לתמיד.', 30506, 'object'),
+  ('gadgets_07', 'gadgets', 7, 'uncommon', 'מטוס', 'OBJ', 'modern', 'האחים רייט טסו ראשונים.', 30507, 'object'),
+  ('gadgets_08', 'gadgets', 8, 'rare', 'קטר קיטור', 'OBJ', 'modern', 'הניע את המהפכה התעשייתית.', 30508, 'object'),
+  ('gadgets_09', 'gadgets', 9, 'rare', 'מחשב', 'OBJ', 'modern', 'היה פעם בגודל של חדר.', 30509, 'object'),
+  ('gadgets_10', 'gadgets', 10, 'epic', 'רובוט', 'OBJ', 'modern', 'עוזר לבני אדם.', 30510, 'object'),
+  ('gadgets_11', 'gadgets', 11, 'legendary', 'מכונת דפוס', 'OBJ', 'modern', 'הפכה ספרים לנפוצים.', 30511, 'object'),
+  ('gadgets_12', 'gadgets', 12, 'iconic', 'מכונת זמן', 'OBJ', 'modern', 'המצאה שעוד מחכה לממציא שלה...', 30512, 'object'),
   ('music_01', 'music', 1, 'common', 'תוף', 'OBJ', 'modern', 'הכלי העתיק ביותר.', 30601, 'object'),
   ('music_02', 'music', 2, 'common', 'חליל', 'OBJ', 'modern', 'נושפים ומנגנים.', 30602, 'object'),
   ('music_03', 'music', 3, 'common', 'משולש', 'OBJ', 'modern', 'קטן אבל נשמע רחוק.', 30603, 'object'),
@@ -110,18 +110,18 @@ insert into public.collectibles (id, album, number, rarity, name_he, position, e
   ('music_10', 'music', 10, 'epic', 'פסנתר כנף', 'OBJ', 'modern', '88 קלידים.', 30610, 'object'),
   ('music_11', 'music', 11, 'legendary', 'תופים חשמליים', 'OBJ', 'modern', 'הלב של להקת רוק.', 30611, 'object'),
   ('music_12', 'music', 12, 'iconic', 'גיטרת רוק בוערת', 'OBJ', 'modern', 'הכי רוק שיש!', 30612, 'object'),
-  ('food_01', 'food', 1, 'common', 'פלאפל', 'OBJ', 'modern', 'כדורים מטוגנים מחומוס.', 30701, 'object'),
-  ('food_02', 'food', 2, 'common', 'חומוס', 'OBJ', 'modern', 'עם טחינה ושמן זית.', 30702, 'object'),
-  ('food_03', 'food', 3, 'common', 'פיצה', 'OBJ', 'modern', 'מגיעה מאיטליה.', 30703, 'object'),
-  ('food_04', 'food', 4, 'common', 'גלידה', 'OBJ', 'modern', 'פינוק של קיץ.', 30704, 'object'),
-  ('food_05', 'food', 5, 'uncommon', 'סושי', 'OBJ', 'modern', 'מנה יפנית.', 30705, 'object'),
-  ('food_06', 'food', 6, 'uncommon', 'המבורגר', 'OBJ', 'modern', 'קציצה בלחמנייה.', 30706, 'object'),
-  ('food_07', 'food', 7, 'uncommon', 'שקשוקה', 'OBJ', 'modern', 'ביצים ברוטב עגבניות.', 30707, 'object'),
-  ('food_08', 'food', 8, 'rare', 'טאקו', 'OBJ', 'modern', 'מקסיקני ופריך.', 30708, 'object'),
-  ('food_09', 'food', 9, 'rare', 'קרואסון', 'OBJ', 'modern', 'מאפה חמאה צרפתי.', 30709, 'object'),
-  ('food_10', 'food', 10, 'epic', 'ראמן', 'OBJ', 'modern', 'מרק אטריות יפני.', 30710, 'object'),
-  ('food_11', 'food', 11, 'legendary', 'עוגת יום הולדת', 'OBJ', 'modern', 'עם נרות ומשאלה.', 30711, 'object'),
-  ('food_12', 'food', 12, 'iconic', 'סופגנייה מוזהבת', 'OBJ', 'modern', 'המלכה של חנוכה.', 30712, 'object'),
+  ('tasty_01', 'tasty', 1, 'common', 'פלאפל', 'OBJ', 'modern', 'כדורים מטוגנים מחומוס.', 30701, 'object'),
+  ('tasty_02', 'tasty', 2, 'common', 'חומוס', 'OBJ', 'modern', 'עם טחינה ושמן זית.', 30702, 'object'),
+  ('tasty_03', 'tasty', 3, 'common', 'פיצה', 'OBJ', 'modern', 'מגיעה מאיטליה.', 30703, 'object'),
+  ('tasty_04', 'tasty', 4, 'common', 'גלידה', 'OBJ', 'modern', 'פינוק של קיץ.', 30704, 'object'),
+  ('tasty_05', 'tasty', 5, 'uncommon', 'סושי', 'OBJ', 'modern', 'מנה יפנית.', 30705, 'object'),
+  ('tasty_06', 'tasty', 6, 'uncommon', 'המבורגר', 'OBJ', 'modern', 'קציצה בלחמנייה.', 30706, 'object'),
+  ('tasty_07', 'tasty', 7, 'uncommon', 'שקשוקה', 'OBJ', 'modern', 'ביצים ברוטב עגבניות.', 30707, 'object'),
+  ('tasty_08', 'tasty', 8, 'rare', 'טאקו', 'OBJ', 'modern', 'מקסיקני ופריך.', 30708, 'object'),
+  ('tasty_09', 'tasty', 9, 'rare', 'קרואסון', 'OBJ', 'modern', 'מאפה חמאה צרפתי.', 30709, 'object'),
+  ('tasty_10', 'tasty', 10, 'epic', 'ראמן', 'OBJ', 'modern', 'מרק אטריות יפני.', 30710, 'object'),
+  ('tasty_11', 'tasty', 11, 'legendary', 'עוגת יום הולדת', 'OBJ', 'modern', 'עם נרות ומשאלה.', 30711, 'object'),
+  ('tasty_12', 'tasty', 12, 'iconic', 'סופגנייה מוזהבת', 'OBJ', 'modern', 'המלכה של חנוכה.', 30712, 'object'),
   ('vehicles_01', 'vehicles', 1, 'common', 'אופניים', 'OBJ', 'modern', 'שני גלגלים וכוח רגליים.', 30801, 'object'),
   ('vehicles_02', 'vehicles', 2, 'common', 'אוטובוס', 'OBJ', 'modern', 'לוקח הרבה נוסעים.', 30802, 'object'),
   ('vehicles_03', 'vehicles', 3, 'common', 'סירת מפרש', 'OBJ', 'modern', 'שטה בעזרת הרוח.', 30803, 'object'),
@@ -206,6 +206,29 @@ insert into public.collectibles (id, album, number, rarity, name_he, position, e
   ('pets_10', 'pets', 10, 'epic', 'כלב פודל', 'OBJ', 'modern', 'מתולתל ומסודר.', 31410, 'object'),
   ('pets_11', 'pets', 11, 'legendary', 'חתול פרסי', 'OBJ', 'modern', 'פרווה ארוכה ומפוארת.', 31411, 'object'),
   ('pets_12', 'pets', 12, 'iconic', 'גור דלמטי', 'OBJ', 'modern', 'נקודות שחורות על לבן.', 31412, 'object');
+
+-- Only active albums and stickers are shown, dropped, crafted, claimed or traded.
+do $$
+declare
+  d text;
+  procedure_patch text[][] := array[
+    ['public.collection_state()', 'from public.albums a)', 'from public.albums a where a.active)'],
+    ['public.collection_state()', 'left join public.user_collectibles u on u.item_id = c.id and u.user_id = v_uid)', 'left join public.user_collectibles u on u.item_id = c.id and u.user_id = v_uid where c.active)'],
+    ['public.open_pack(text,text,uuid)', 'from public.collectibles where rarity = v_r order by', 'from public.collectibles where rarity = v_r and active order by'],
+    ['public.craft_item(text)', 'from public.collectibles where id = p_item;', 'from public.collectibles where id = p_item and active;'],
+    ['public.claim_album(text)', 'where c.album = p_album;', 'where c.album = p_album and c.active;'],
+    ['public.friend_dupes(uuid)', 'and c.rarity <> ''iconic'')', 'and c.rarity <> ''iconic'' and c.active)'],
+    ['public.trade_offer(uuid,text,text)', 'and rarity = ''iconic'') then', 'and (rarity = ''iconic'' or not active)) then']];
+  i int;
+begin
+  for i in 1 .. array_length(procedure_patch, 1) loop
+    d := pg_get_functiondef(procedure_patch[i][1]::regprocedure);
+    if position(procedure_patch[i][2] in d) = 0 then
+      raise exception 'patch % failed: %', i, procedure_patch[i][1];
+    end if;
+    execute replace(d, procedure_patch[i][2], procedure_patch[i][3]);
+  end loop;
+end $$;
 
 -- Finishing an album: 20 gems and a gold pack.
 update public.app_config set value = '{"gems":20,"pack":"gold"}'::jsonb where key = 'packs.album_reward';

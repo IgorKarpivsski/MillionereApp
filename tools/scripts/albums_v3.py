@@ -223,31 +223,64 @@ def sql_str(s: str) -> str:
     return "'" + s.replace("'", "''") + "'"
 
 
+# DB slugs: five old albums already use these names, so the v3 versions get new ones.
+DB_SLUG = {'space': 'cosmos', 'wonders': 'landmarks', 'inventions': 'gadgets', 'dinos': 'jurassic', 'food': 'tasty'}
+
+
+def db_slug(slug: str) -> str:
+    return DB_SLUG.get(slug, slug)
+
+
 def migration() -> str:
     out = [
-        "-- v3 collection: wipe every old album and sticker, then add the 15 AI-illustrated",
-        "-- opening albums (12 stickers each). Art is bundled in the app as",
-        "-- assets/stickers/<album>_<NN>.webp (tools/scripts/albums_v3.py). Glow, dust,",
-        "-- crafting, trades and the album-completion reward keep working as before.",
-        "delete from public.trade_offers where give_item is not null;",
-        "delete from public.user_collectibles where item_id is not null;",
-        "delete from public.album_claims where album is not null;",
-        "delete from public.collectibles where id is not null;",
-        "delete from public.albums where slug is not null;",
+        "-- v3 collection: retire every old album and sticker (kept in the database but hidden",
+        "-- everywhere) and add the 15 AI-illustrated opening albums, 12 stickers each. Art is",
+        "-- bundled in the app as assets/stickers/<art>_<NN>.webp (tools/scripts/albums_v3.py).",
+        "-- Glow, dust, crafting, trades and the album-completion reward keep working.",
+        "alter table public.albums add column active boolean not null default true;",
+        "alter table public.collectibles add column active boolean not null default true;",
+        "update public.albums set active = false where active;",
+        "update public.collectibles set active = false where active;",
+        "update public.trade_offers set status = 'cancelled', decided_at = now() where status = 'pending';",
         "",
         "insert into public.albums (slug, title, blurb, sort, kind) values",
     ]
-    out.append(",\n".join(f"  ({sql_str(s)}, {sql_str(t)}, {sql_str(b)}, {i + 1}, 'knowledge')" for i, (s, t, b, _) in enumerate(ALBUMS)) + ";")
+    out.append(",\n".join(f"  ({sql_str(db_slug(s))}, {sql_str(t)}, {sql_str(b)}, {i + 1}, 'knowledge')" for i, (s, t, b, _) in enumerate(ALBUMS)) + ";")
     out += ["", "insert into public.collectibles (id, album, number, rarity, name_he, position, era, bio_he, art_seed, kind) values"]
     rows = []
     for ai, (slug, _, _, items) in enumerate(ALBUMS):
         assert len(items) == 12, slug
+        d = db_slug(slug)
         for n, (name, fact, _subj) in enumerate(items, 1):
-            rows.append(f"  ({sql_str(f'{slug}_{n:02d}')}, {sql_str(slug)}, {n}, {sql_str(RARITY[n - 1])}, {sql_str(name)}, 'OBJ', 'modern', {sql_str(fact)}, {30000 + ai * 100 + n}, 'object')")
+            rows.append(f"  ({sql_str(f'{d}_{n:02d}')}, {sql_str(d)}, {n}, {sql_str(RARITY[n - 1])}, {sql_str(name)}, 'OBJ', 'modern', {sql_str(fact)}, {30000 + ai * 100 + n}, 'object')")
     out.append(",\n".join(rows) + ";")
-    out += ["", "-- Finishing an album: 20 gems and a gold pack.",
+    out += ["", "-- Only active albums and stickers are shown, dropped, crafted, claimed or traded.", PATCHES,
+            "", "-- Finishing an album: 20 gems and a gold pack.",
             "update public.app_config set value = '{\"gems\":20,\"pack\":\"gold\"}'::jsonb where key = 'packs.album_reward';", ""]
     return "\n".join(out)
+
+
+PATCHES = r"""do $$
+declare
+  d text;
+  procedure_patch text[][] := array[
+    ['public.collection_state()', 'from public.albums a)', 'from public.albums a where a.active)'],
+    ['public.collection_state()', 'left join public.user_collectibles u on u.item_id = c.id and u.user_id = v_uid)', 'left join public.user_collectibles u on u.item_id = c.id and u.user_id = v_uid where c.active)'],
+    ['public.open_pack(text,text,uuid)', 'from public.collectibles where rarity = v_r order by', 'from public.collectibles where rarity = v_r and active order by'],
+    ['public.craft_item(text)', 'from public.collectibles where id = p_item;', 'from public.collectibles where id = p_item and active;'],
+    ['public.claim_album(text)', 'where c.album = p_album;', 'where c.album = p_album and c.active;'],
+    ['public.friend_dupes(uuid)', 'and c.rarity <> ''iconic'')', 'and c.rarity <> ''iconic'' and c.active)'],
+    ['public.trade_offer(uuid,text,text)', 'and rarity = ''iconic'') then', 'and (rarity = ''iconic'' or not active)) then']];
+  i int;
+begin
+  for i in 1 .. array_length(procedure_patch, 1) loop
+    d := pg_get_functiondef(procedure_patch[i][1]::regprocedure);
+    if position(procedure_patch[i][2] in d) = 0 then
+      raise exception 'patch % failed: %', i, procedure_patch[i][1];
+    end if;
+    execute replace(d, procedure_patch[i][2], procedure_patch[i][3]);
+  end loop;
+end $$;"""
 
 
 def ts_index() -> str:
@@ -257,8 +290,7 @@ def ts_index() -> str:
              "export const CARD_ART: Record<string, number> = {"]
     for slug, _, _, items in ALBUMS:
         for n in range(1, len(items) + 1):
-            k = f"{slug}_{n:02d}"
-            lines.append(f"  {k}: require('../../../assets/stickers/{k}.webp'),")
+            lines.append(f"  {db_slug(slug)}_{n:02d}: require('../../../assets/stickers/{slug}_{n:02d}.webp'),")
     lines.append("};")
     return "\n".join(lines) + "\n"
 
