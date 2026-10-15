@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
@@ -13,6 +13,7 @@ import { usePlaySession } from '@/features/engage/EnergySheet';
 import { useWorldsConfig, useWorldsState, worldBySlug } from '@/features/worlds/api';
 import { shade } from '@/features/worlds/worldArt';
 import { WorldBadge } from '@/features/worlds/WorldBadge';
+import { WORLD_IMAGES } from '@/features/worlds/worldImages';
 import { fmt, strings } from '@/lib/i18n';
 import { physicalLeft } from '@/lib/rtl';
 
@@ -86,7 +87,8 @@ export default function WorldScreen() {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <LinearGradient colors={[shade(w.color, -0.35), colors.bg]} style={styles.glow} />
+      {WORLD_IMAGES[w.icon] ? <Image source={WORLD_IMAGES[w.icon]!} style={styles.glow} resizeMode="cover" blurRadius={2} /> : null}
+      <LinearGradient colors={[shade(w.color, -0.35) + 'CC', colors.bg]} locations={[0, 1]} style={styles.glow} />
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button" accessibilityLabel={strings.common.back}>
           <Ionicons name="arrow-forward" size={26} color={colors.text} />
@@ -183,7 +185,7 @@ export default function WorldScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
-  glow: { position: 'absolute', top: 0, left: 0, right: 0, height: 300 },
+  glow: { position: 'absolute', top: 0, left: 0, right: 0, height: 320, width: '100%' },
   flex: { flex: 1 },
   bold: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
   header: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingHorizontal: space.md, paddingTop: space.sm },

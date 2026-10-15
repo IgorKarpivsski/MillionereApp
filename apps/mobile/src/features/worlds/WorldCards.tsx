@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { AppText } from '@/design-system/components';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
@@ -11,6 +11,7 @@ import { fmt, strings } from '@/lib/i18n';
 import { MIX_WORLD, useWorldsConfig, useWorldsState } from './api';
 import { shade } from './worldArt';
 import { WorldBadge } from './WorldBadge';
+import { WORLD_IMAGES } from './worldImages';
 
 const t = strings.worlds;
 
@@ -20,7 +21,7 @@ export function QuickPlayCard() {
   return (
     <Pressable onPress={() => play('mix')} accessibilityRole="button" accessibilityLabel={t.quickPlay} style={({ pressed }) => [styles.quick, pressed && styles.pressed]}>
       <LinearGradient colors={['#FFC53D', '#FF8A3D']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-      <WorldBadge icon={MIX_WORLD.icon} color="#FF6B2C" size={72} />
+      <Image source={WORLD_IMAGES.bolt} style={styles.quickArt} />
       <View style={styles.flex}>
         <AppText variant="title" color={colors.textOnBright}>
           {t.quickPlay}
@@ -50,24 +51,32 @@ export function WorldsGrid() {
               onPress={() => router.push({ pathname: '/world/[slug]', params: { slug: w.slug } })}
               accessibilityRole="button"
               accessibilityLabel={`${w.name}, ${fmt(t.progress, { n: passed })}`}
-              style={({ pressed }) => [styles.world, { backgroundColor: shade(w.color, -0.55), borderColor: shade(w.color, -0.2) }, pressed && styles.pressed]}
+              style={({ pressed }) => [styles.world, { backgroundColor: w.color, borderBottomColor: shade(w.color, -0.35) }, pressed && styles.pressed]}
             >
-              <WorldBadge icon={w.icon} color={w.color} size={62} />
-              <AppText variant="heading" align="center" numberOfLines={1}>
-                {w.name}
-              </AppText>
-              <View style={styles.track}>
-                <View style={[styles.fill, { width: `${(passed / Math.max(1, w.levels)) * 100}%`, backgroundColor: w.color }]} />
-              </View>
-              <View style={styles.meta}>
-                <AppText variant="caption" color={colors.textMuted}>
-                  {fmt(t.level, { n: st?.unlocked ?? 1 })}
+              {WORLD_IMAGES[w.icon] ? (
+                <Image source={WORLD_IMAGES[w.icon]!} style={styles.cover} resizeMode="cover" />
+              ) : (
+                <View style={[styles.cover, styles.coverFallback]}>
+                  <WorldBadge icon={w.icon} color={w.color} size={62} />
+                </View>
+              )}
+              <View style={styles.body}>
+                <AppText variant="heading" align="center" numberOfLines={1} color="#FFFFFF" style={styles.worldName}>
+                  {w.name}
                 </AppText>
-                <View style={styles.starCount}>
-                  <Ionicons name="star" size={12} color={colors.led} />
-                  <AppText variant="caption" color={colors.led}>
-                    {st?.total_stars ?? 0}
+                <View style={styles.track}>
+                  <View style={[styles.fill, { width: `${(passed / Math.max(1, w.levels)) * 100}%` }]} />
+                </View>
+                <View style={styles.meta}>
+                  <AppText variant="caption" color="#FFFFFF" style={styles.worldName}>
+                    {fmt(t.level, { n: st?.unlocked ?? 1 })}
                   </AppText>
+                  <View style={styles.starPill}>
+                    <Ionicons name="star" size={12} color="#FFD23F" />
+                    <AppText variant="caption" color="#FFFFFF">
+                      {st?.total_stars ?? 0}
+                    </AppText>
+                  </View>
                 </View>
               </View>
             </Pressable>
@@ -130,15 +139,18 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: space.md },
   cell: { width: '48%' },
   world: {
-    alignItems: 'center',
-    gap: 6,
-    padding: space.md,
     borderRadius: 22,
-    borderWidth: 2,
     borderBottomWidth: 6,
+    overflow: 'hidden',
   },
-  track: { alignSelf: 'stretch', height: 6, borderRadius: 3, backgroundColor: palette.night950, overflow: 'hidden' },
-  fill: { height: 6, borderRadius: 3 },
+  cover: { width: '100%', aspectRatio: 1.15 },
+  coverFallback: { alignItems: 'center', justifyContent: 'center' },
+  body: { paddingHorizontal: space.sm, paddingTop: 6, paddingBottom: space.sm, gap: 5 },
+  worldName: { textShadowColor: 'rgba(0,0,0,0.35)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 },
+  track: { alignSelf: 'stretch', height: 7, borderRadius: 4, backgroundColor: 'rgba(0,0,0,0.28)', overflow: 'hidden' },
+  fill: { height: 7, borderRadius: 4, backgroundColor: '#FFFFFF' },
+  starPill: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 7, paddingVertical: 1, borderRadius: 10, backgroundColor: 'rgba(0,0,0,0.3)' },
+  quickArt: { width: 76, height: 76, borderRadius: 38, borderWidth: 3, borderColor: '#FFFFFF' },
   meta: { alignSelf: 'stretch', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   starCount: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   row: { flexDirection: 'row', gap: space.md },

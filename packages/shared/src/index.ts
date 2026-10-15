@@ -305,6 +305,13 @@ export const SessionAnswerSchema = z.object({
 export type SessionAnswer = z.infer<typeof SessionAnswerSchema>;
 
 export * from './legendArt';
+export * from './matchsticks';
+export * from './matchPuzzles';
+
+export const PuzzlesStateSchema = z.object({ solved: z.array(z.number().int()), hinted: z.array(z.number().int()), total: z.number().int() });
+export type PuzzlesState = z.infer<typeof PuzzlesStateSchema>;
+export const PuzzleSolveSchema = z.object({ first: z.boolean(), coins: z.number().int(), pack: z.string().nullable(), solved: z.number().int() });
+export type PuzzleSolve = z.infer<typeof PuzzleSolveSchema>;
 export * from './maps';
 
 /* -------------------------------------------------------------------------- */

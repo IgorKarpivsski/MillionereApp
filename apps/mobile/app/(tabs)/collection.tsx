@@ -1,7 +1,7 @@
 import type { Collectible } from '@fm/shared';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { TopBar } from '@/components/TopBar';
 import {
   AppText,
@@ -18,6 +18,7 @@ import {
 import { haptic } from '@/design-system/feedback/haptics';
 import { playSound } from '@/design-system/feedback/sound';
 import { colors, radius, rarityColors, space } from '@/design-system/tokens';
+import { CARD_ART } from '@/features/collection/cardArt';
 import { LegendCard } from '@/features/collection/LegendCard';
 import { useClaimAlbum, useCollection, useCraft } from '@/features/collection/hooks';
 import { RpcError } from '@/features/profile/api';
@@ -70,6 +71,7 @@ export default function CollectionScreen() {
                   accessibilityRole="tab"
                   accessibilityState={{ selected: on }}
                 >
+                  {CARD_ART[`${a.slug}_12`] ? <Image source={CARD_ART[`${a.slug}_12`]!} style={styles.chipArt} /> : null}
                   <AppText variant="label" color={on ? colors.textOnBright : colors.text} numberOfLines={1}>
                     {a.title}
                   </AppText>
@@ -91,6 +93,11 @@ export default function CollectionScreen() {
                 value={album.owned / Math.max(1, album.total)}
                 accessibilityLabel={fmt(t.albumProgress, { n: album.owned, total: album.total })}
               />
+              {!album.claimed ? (
+                <AppText variant="caption" color={colors.led}>
+                  🎁 {t.rewardHint}
+                </AppText>
+              ) : null}
               {album.owned === album.total && !album.claimed ? (
                 <StickerButton
                   label={album.slug === 'hall' ? t.claimHall : t.claim}
@@ -222,6 +229,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     alignItems: 'center',
   },
+  chipArt: { width: 40, height: 40, borderRadius: 20 },
   chipOn: { backgroundColor: colors.led, borderColor: colors.led },
   albumCard: { gap: space.sm },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, justifyContent: 'center' },

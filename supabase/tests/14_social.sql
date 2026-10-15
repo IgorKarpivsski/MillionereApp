@@ -4,9 +4,9 @@ create temp table ids as select test.new_user() as a, test.new_user() as b, test
 grant select on ids to authenticated;
 -- a owns two duplicates; b owns one duplicate; one iconic duplicate for a.
 insert into public.user_collectibles (user_id, item_id, count)
-select a, 'seventies_01', 3 from ids union all
-select a, 'seventies_12', 2 from ids union all
-select b, 'eighties_02', 2 from ids;
+select a, 'wild_01', 3 from ids union all
+select a, 'wild_12', 2 from ids union all
+select b, 'ocean_02', 2 from ids;
 
 set local role authenticated;
 do $$
@@ -58,9 +58,9 @@ begin
 
   -- trading
   perform test.login(a);
-  perform test.assert_raises(format('select public.trade_offer(%L, %L, %L)', b, 'seventies_12', 'eighties_02'), 'iconic', 'iconic not tradeable');
-  perform test.assert_raises(format('select public.trade_offer(%L, %L, null)', b, 'seventies_02'), 'not a duplicate', 'only duplicates');
-  offer := (public.trade_offer(b, 'seventies_01', 'eighties_02') ->> 'id')::uuid;
+  perform test.assert_raises(format('select public.trade_offer(%L, %L, %L)', b, 'wild_12', 'ocean_02'), 'iconic', 'iconic not tradeable');
+  perform test.assert_raises(format('select public.trade_offer(%L, %L, null)', b, 'wild_02'), 'not a duplicate', 'only duplicates');
+  offer := (public.trade_offer(b, 'wild_01', 'ocean_02') ->> 'id')::uuid;
   perform test.assert(jsonb_array_length(public.friend_dupes(b)) = 1, 'b has one tradeable duplicate');
 
   perform test.login(b);
@@ -74,10 +74,10 @@ reset role;
 do $$
 declare a uuid := (select ids.a from ids); b uuid := (select ids.b from ids);
 begin
-  perform test.assert((select count from public.user_collectibles where user_id = a and item_id = 'seventies_01') = 2, 'a gave one');
-  perform test.assert((select count from public.user_collectibles where user_id = b and item_id = 'seventies_01') = 1, 'b received');
-  perform test.assert((select count from public.user_collectibles where user_id = b and item_id = 'eighties_02') = 1, 'b gave one');
-  perform test.assert((select count from public.user_collectibles where user_id = a and item_id = 'eighties_02') = 1, 'a received');
+  perform test.assert((select count from public.user_collectibles where user_id = a and item_id = 'wild_01') = 2, 'a gave one');
+  perform test.assert((select count from public.user_collectibles where user_id = b and item_id = 'wild_01') = 1, 'b received');
+  perform test.assert((select count from public.user_collectibles where user_id = b and item_id = 'ocean_02') = 1, 'b gave one');
+  perform test.assert((select count from public.user_collectibles where user_id = a and item_id = 'ocean_02') = 1, 'a received');
 end $$;
 
 create temp table codes as select friend_code as b_code from public.profiles where id = (select ids.b from ids);
@@ -88,7 +88,7 @@ declare a uuid := (select ids.a from ids); b uuid := (select ids.b from ids); of
 begin
   -- stale offer: a no longer has a duplicate after trading it away elsewhere
   perform test.login(a);
-  offer := (public.trade_offer(b, 'seventies_01', null) ->> 'id')::uuid;
+  offer := (public.trade_offer(b, 'wild_01', null) ->> 'id')::uuid;
   perform test.login(b);
   -- block ends everything
   perform public.block_user(a);

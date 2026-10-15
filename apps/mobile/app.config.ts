@@ -48,7 +48,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     package: IS_PROD ? 'com.footballmillionaire.app' : 'com.footballmillionaire.app.dev',
-    adaptiveIcon: { foregroundImage: './assets/images/adaptive-icon.png', backgroundColor: '#1E1250' },
+    adaptiveIcon: { foregroundImage: './assets/images/adaptive-icon.png', backgroundColor: '#5624A2' },
   },
   plugins: [
     'expo-router',

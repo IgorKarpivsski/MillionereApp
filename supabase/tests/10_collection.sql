@@ -19,7 +19,7 @@ declare
 begin
   perform test.login(a);
   st := public.collection_state();
-  perform test.assert(jsonb_array_length(st -> 'albums') = 19 and jsonb_array_length(st -> 'items') = 228, 'catalogue');
+  perform test.assert(jsonb_array_length(st -> 'albums') = 15 and jsonb_array_length(st -> 'items') = 180, 'catalogue');
   perform test.assert((st -> 'tokens' ->> 'silver')::int = 1, 'starter silver pack');
 
   r := public.open_pack('silver', 'token', req);
@@ -49,12 +49,12 @@ begin
   perform test.assert((select count from public.user_collectibles where item_id = missing) = 1, 'crafted');
   perform test.assert_raises(format('select public.craft_item(%L)', missing), 'already owned', 'cannot craft owned');
 
-  perform test.assert_raises($q$select public.claim_album('seventies')$q$, 'incomplete', 'album must be complete');
-  perform test.give_all(a, 'seventies');
-  r := public.claim_album('seventies');
-  perform test.assert((select gems from public.wallets) = 15, 'album reward gems');
+  perform test.assert_raises($q$select public.claim_album('wild')$q$, 'incomplete', 'album must be complete');
+  perform test.give_all(a, 'wild');
+  r := public.claim_album('wild');
+  perform test.assert((select gems from public.wallets) = 20, 'album reward gems');
   perform test.assert((public.collection_state() -> 'tokens' ->> 'gold')::int = 1, 'album reward pack');
-  perform test.assert_raises($q$select public.claim_album('seventies')$q$, 'already claimed', 'once');
+  perform test.assert_raises($q$select public.claim_album('wild')$q$, 'already claimed', 'once');
 
   perform test.assert_raises($q$update public.user_pack_tokens set count = 99$q$, 'permission denied', 'cannot edit tokens');
 end $$;

@@ -19,6 +19,7 @@ import {
 } from '@/design-system/components';
 import { colors, palette, space } from '@/design-system/tokens';
 import { QuickPlayCard, WorldsStrip } from '@/features/worlds/WorldCards';
+import { PuzzlesCard } from '@/features/puzzles/PuzzlesCard';
 import { useCountdownTo, usePass, useWheel } from '@/features/engage/hooks';
 import { useDailyStatus, useLeaderboard } from '@/features/quiz/hooks';
 import { useUnreadTotal } from '@/features/social/hooks';
@@ -244,6 +245,7 @@ export default function HomeScreen() {
 
       <LoginCalendar />
       <PlayNowHero />
+      <PuzzlesCard />
       <DailyCard />
       <DailyExtras />
       <LeagueEntry />

@@ -93,40 +93,38 @@ C5, E5, G5, C6, E6, G6 = 523.25, 659.25, 783.99, 1046.5, 1318.5, 1568.0
 
 save("tap", tone(1400, 0.03, "sine", 0.4, 0.001, 0.025), 0.25)
 save("tick", tone(880, 0.05, "sine", 0.4, 0.002, 0.04), 0.25)
-save("answer_lock", seq(tone(660, 0.07, "sine", 0.3), tone(990, 0.09, "sine", 0.3), gap=0.015), 0.35)
-# Kickoff: a soft two-note stadium chime over a low crowd murmur (no shrill whistle).
-G4 = 392.0
-save("whistle", mix(
-    seq(tone(G4, 0.32, "sine", 0.5, 0.03, 0.22), tone(523.25, 0.6, "sine", 0.5, 0.03, 0.45), gap=0.04),
-    seq(tone(G4 * 2, 0.32, "sine", 0.12, 0.03, 0.22), tone(1046.5, 0.6, "sine", 0.12, 0.03, 0.45), gap=0.04),
-    crowd(1.2, 0.5, 0.12, 200, 900),
-), 0.32)
-save(
-    "answer_correct",
-    mix(
-        seq(*(tone(f, 0.09, "square", 0.32) for f in (C5, E5, G5)), tone(C6, 0.35, "square", 0.32, release=0.25)),
-        np.concatenate([np.zeros(int(SR * 0.12)), crowd(1.5, 0.35, 0.38)]),
-    ),
-    0.55,
-)
-save(
-    "answer_wrong",
-    mix(
-        seq(tone(311, 0.16, "tri", 0.45), tone(233, 0.42, "tri", 0.45, release=0.3), gap=0.02),
-        crowd(1.1, 0.15, 0.22, 120, 700),
-    ),
-    0.45,
-)
-save("coins", seq(*(tone(f, 0.07, "sine", 0.35, release=0.06) for f in (G5, C6, E6, G6, C6 * 2)), gap=0.01), 0.4)
-save(
-    "level_up",
-    mix(
-        seq(*(tone(f, 0.11, "square", 0.3) for f in (C5, G5, C6, E6)), tone(G6, 0.5, "square", 0.3, release=0.35)),
-        np.concatenate([np.zeros(int(SR * 0.3)), crowd(1.4, 0.4, 0.3)]),
-    ),
-    0.55,
-)
+def mallet(freq, sec=0.35, vol=0.5):
+    """A soft marimba/xylophone hit: fundamental + quickly fading overtones."""
+    x = t(sec)
+    w = np.sin(2 * np.pi * freq * x) + 0.35 * np.sin(2 * np.pi * 4 * freq * x) * np.exp(-x * 30) + 0.15 * np.sin(2 * np.pi * 10 * freq * x) * np.exp(-x * 60)
+    return vol * w * np.exp(-x * 7) * env(len(x), 0.002, 0.05)
+
+
+def bell(freq, sec=0.6, vol=0.4):
+    x = t(sec)
+    w = np.sin(2 * np.pi * freq * x) + 0.5 * np.sin(2 * np.pi * 2.76 * freq * x) * np.exp(-x * 6) + 0.25 * np.sin(2 * np.pi * 5.4 * freq * x) * np.exp(-x * 12)
+    return vol * w * np.exp(-x * 4.5) * env(len(x), 0.002, 0.1)
+
+
+def at(sec, x):
+    return np.concatenate([np.zeros(int(SR * sec)), x])
+
+
+save("answer_lock", seq(mallet(660, 0.12, 0.4), mallet(990, 0.16, 0.4)), 0.35)
+# Start of a game: a cheerful 3-note marimba "ready, set, go".
+save("whistle", mix(at(0, mallet(C5, 0.3)), at(0.14, mallet(E5, 0.3)), at(0.28, mallet(G5, 0.5)), at(0.28, bell(C6, 0.7, 0.25))), 0.4)
+# Correct: a bright rising "ding-ding" with a sparkle on top.
+save("answer_correct", mix(at(0, mallet(G5, 0.25)), at(0.09, mallet(C6, 0.4)), at(0.09, bell(E6 * 2, 0.6, 0.18)), at(0.2, bell(G6 * 2, 0.5, 0.12))), 0.5)
+# Wrong: two soft low "boops" falling (friendly, not harsh).
+save("answer_wrong", seq(tone(330, 0.14, "tri", 0.45, 0.005, 0.08), tone(247, 0.32, "tri", 0.45, 0.005, 0.25), gap=0.03), 0.4)
+save("coins", seq(*(bell(f, 0.09, 0.35) for f in (G5, C6, E6, G6, C6 * 2)), gap=0.0), 0.4)
+# Level up / stars: a little xylophone fanfare + bells.
+save("level_up", mix(*(at(i * 0.1, mallet(f, 0.35)) for i, f in enumerate((C5, E5, G5, C6, E6))), at(0.5, bell(G6, 0.9, 0.3)), at(0.5, bell(C6 * 2, 0.9, 0.2))), 0.5)
 save("var", seq(*(tone(f, 0.05, "sine", 0.3) for f in np.linspace(500, 1200, 10)), tone(1200, 0.2, "sine", 0.3)), 0.35)
-save("pack_open", seq(noise(0.25, 800, 6000, 0.35) * env(int(SR * 0.25), 0.01, 0.2), tone(G6, 0.3, "sine", 0.3)))
-save("rare_reveal", seq(*(tone(f, 0.08, "tri", 0.35) for f in (C6, E6, G6, C6 * 2)), tone(E6 * 2, 0.4, "tri", 0.3)))
+save("pack_open", seq(noise(0.25, 800, 6000, 0.35) * env(int(SR * 0.25), 0.01, 0.2), bell(G6, 0.4, 0.3)))
+save("rare_reveal", seq(*(bell(f, 0.09, 0.35) for f in (C6, E6, G6, C6 * 2)), bell(E6 * 2, 0.6, 0.3)))
+# Puzzle cues: pick up a matchstick, drop it in place, puzzle solved.
+save("pick", seq(tone(900, 0.04, "sine", 0.4, 0.002, 0.03), tone(1300, 0.05, "sine", 0.4, 0.002, 0.04)), 0.3)
+save("place", mix(noise(0.05, 1500, 5000, 0.3) * env(int(SR * 0.05), 0.001, 0.04), tone(600, 0.06, "sine", 0.4, 0.001, 0.05)), 0.35)
+save("solved", mix(*(at(i * 0.08, mallet(f, 0.3)) for i, f in enumerate((C5, E5, G5, C6, E6, G6))), at(0.5, bell(C6 * 2, 1.0, 0.3))), 0.5)
 print("sounds written to", OUT)

@@ -29,6 +29,7 @@ export const queryKeys = {
   pass: ['pass'] as const,
   friends: ['friends'] as const,
   worlds: ['worlds-state'] as const,
+  puzzles: ['puzzles-state'] as const,
   worldsConfig: ['worlds-config'] as const,
   chat: (id: string) => ['chat', id] as const,
   dupes: (id: string) => ['dupes', id] as const,
