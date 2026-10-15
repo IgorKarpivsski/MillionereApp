@@ -11,7 +11,7 @@ import { useSettingsStore } from '@/features/settings/store';
  * who hasn't answered the age screen yet — are tagged child-directed (G rating);
  * under 16 are tagged under the age of consent.
  */
-const UNIT = process.env.EXPO_PUBLIC_ADMOB_REWARDED_ANDROID || TestIds.REWARDED;
+const UNIT = __DEV__ ? TestIds.REWARDED : process.env.EXPO_PUBLIC_ADMOB_REWARDED_ANDROID || 'ca-app-pub-4196315436564582/6070981024';
 let started = false;
 
 async function applyAudience(): Promise<void> {

@@ -9,7 +9,7 @@ import type { ExpoConfig, ConfigContext } from 'expo/config';
 const APP_NAME = 'טריוויה - האלוף';
 const IS_PROD = process.env.APP_ENV === 'production';
 // AdMob: Google's public TEST app id until the real one is set in the build env.
-const ADMOB_ANDROID_APP_ID = process.env.ADMOB_ANDROID_APP_ID || 'ca-app-pub-3940256099942544~3347511713';
+const ADMOB_ANDROID_APP_ID = process.env.ADMOB_ANDROID_APP_ID || 'ca-app-pub-4196315436564582~1233587313';
 const ADMOB_IOS_APP_ID = process.env.ADMOB_IOS_APP_ID || 'ca-app-pub-3940256099942544~1458002511';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
