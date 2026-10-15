@@ -1,0 +1,108 @@
+name: Android store build
+
+# Builds the signed store bundle (.aab) for Google Play. Run it by hand:
+# Actions -> "Android store build" -> Run workflow.
+#
+# The upload key sits in the repo only encrypted (apps/mobile/signing/upload.jks.enc).
+# Its password is the repository secret UPLOAD_KEY_PASSWORD. Google re-signs the
+# app with its own key (Play App Signing), so this key only proves uploads are ours.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check the key password is set
+        env:
+          PW: ${{ secrets.UPLOAD_KEY_PASSWORD }}
+        run: |
+          if [ -z "$PW" ]; then
+            echo "::error::Missing secret UPLOAD_KEY_PASSWORD (Settings -> Secrets and variables -> Actions)."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Align Expo native packages with the SDK
+        working-directory: apps/mobile
+        run: ../../tools/scripts/ci-run.sh "expo install" npx expo install --fix
+
+      - name: Write app config
+        working-directory: apps/mobile
+        env:
+          VAR_URL: ${{ vars.SUPABASE_URL }}
+          VAR_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+        run: |
+          set -a; [ -f public-config.env ] && . ./public-config.env; set +a
+          URL="${VAR_URL:-${SUPABASE_URL:-}}"
+          KEY="${VAR_KEY:-${SUPABASE_ANON_KEY:-}}"
+          if [ -z "$URL" ] || [ -z "$KEY" ]; then
+            echo "::error::Store build needs the Supabase URL and anon key."; exit 1
+          fi
+          printf 'EXPO_PUBLIC_SUPABASE_URL=%s\nEXPO_PUBLIC_SUPABASE_ANON_KEY=%s\n' "$URL" "$KEY" > .env.local
+
+      - name: Generate native Android project
+        working-directory: apps/mobile
+        env:
+          APP_ENV: production
+          VERSION_CODE: ${{ github.run_number }}
+        run: ../../tools/scripts/ci-run.sh prebuild npx expo prebuild --platform android --no-install --clean
+
+      - name: Unlock the upload key
+        env:
+          PW: ${{ secrets.UPLOAD_KEY_PASSWORD }}
+        run: |
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
+            -in apps/mobile/signing/upload.jks.enc -out "$RUNNER_TEMP/upload.jks" -pass env:PW
+          python3 tools/scripts/android-sign.py apps/mobile/android/app/build.gradle
+
+      - name: Build bundle
+        working-directory: apps/mobile/android
+        env:
+          APP_ENV: production
+          VERSION_CODE: ${{ github.run_number }}
+          UPLOAD_KEY_PASSWORD: ${{ secrets.UPLOAD_KEY_PASSWORD }}
+          SENTRY_DISABLE_AUTO_UPLOAD: 'true'
+          NODE_ENV: production
+        run: |
+          export UPLOAD_KEYSTORE="$RUNNER_TEMP/upload.jks"
+          ../../../tools/scripts/ci-run.sh gradle ./gradlew bundleRelease --no-daemon
+          mkdir -p ../../../out
+          cp app/build/outputs/bundle/release/app-release.aab ../../../out/trivia-haaluf-store-${{ github.run_number }}.aab
+
+      - name: Remove the unlocked key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload.jks"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aab
+          path: out/*.aab
+
+      # Draft release: only the repo owner sees it, so the bundle can be
+      # downloaded on the phone and uploaded to Play Console.
+      - name: Draft release with the bundle
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: store-build-${{ github.run_number }}
+          name: גרסה לחנות ${{ github.run_number }}
+          body: קובץ AAB להעלאה ל-Google Play Console.
+          files: out/*.aab
+          draft: true

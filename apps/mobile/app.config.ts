@@ -48,6 +48,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     package: IS_PROD ? 'com.haaluf.trivia' : 'com.haaluf.trivia.dev',
+    // Every store upload needs a higher number; CI passes its run number.
+    versionCode: Number(process.env.VERSION_CODE) || 1,
     adaptiveIcon: { foregroundImage: './assets/images/adaptive-icon.png', backgroundColor: '#5624A2' },
   },
   plugins: [
@@ -61,7 +63,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ['react-native-google-mobile-ads', { androidAppId: ADMOB_ANDROID_APP_ID, iosAppId: ADMOB_IOS_APP_ID }],
     'expo-iap',
     ['expo-notifications', { icon: './assets/images/notification-icon.png', color: '#FFB000' }],
-    ['expo-build-properties', { android: { kotlinVersion: '2.2.0' } }],
+    ['expo-build-properties', { android: { kotlinVersion: '2.2.0', compileSdkVersion: 36, targetSdkVersion: 36 } }],
   ],
   experiments: { typedRoutes: true },
   extra: {
