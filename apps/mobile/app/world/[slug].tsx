@@ -13,13 +13,14 @@ import { usePlaySession } from '@/features/engage/EnergySheet';
 import { useWorldsConfig, useWorldsState, worldBySlug } from '@/features/worlds/api';
 import { shade } from '@/features/worlds/worldArt';
 import { WorldBadge } from '@/features/worlds/WorldBadge';
-import { WORLD_IMAGES } from '@/features/worlds/worldImages';
+import { LevelNode } from '@/features/worlds/LevelNode';
+import { PATH_IMAGES, WORLD_IMAGES } from '@/features/worlds/worldImages';
 import { fmt, strings } from '@/lib/i18n';
 import { physicalLeft } from '@/lib/rtl';
 
 const t = strings.worlds;
 const STEP = 104; // vertical distance between level nodes
-const NODE = 70;
+const NODE = 78;
 
 function Stars({ n, size = 14 }: { n: number; size?: number }) {
   return (
@@ -83,6 +84,7 @@ export default function WorldScreen() {
   }, [data, unlocked]);
 
   const total = 40 + levels * STEP + 40;
+  const tileH = Math.round((width * 16) / 9);
   const sheetStars = sheet ? (stars[String(sheet)] ?? 0) : 0;
 
   return (
@@ -106,8 +108,22 @@ export default function WorldScreen() {
       </View>
 
       <ScrollView ref={scroll} contentContainerStyle={{ height: total }} showsVerticalScrollIndicator={false}>
+        {PATH_IMAGES[w.slug]
+          ? Array.from({ length: Math.ceil(total / tileH) }, (_, k) => (
+              <Image
+                key={`bg${k}`}
+                source={PATH_IMAGES[w.slug]!}
+                resizeMode="cover"
+                style={[styles.tile, { top: k * tileH, width, height: tileH }, k % 2 === 1 ? styles.flip : null]}
+              />
+            ))
+          : null}
+        <View style={[styles.tileShade, { height: total }]} />
         <Svg width={width} height={total} style={StyleSheet.absoluteFill}>
-          <Path d={road} stroke={shade(w.color, -0.15)} strokeWidth={10} strokeLinecap="round" strokeDasharray="2 18" fill="none" />
+          <Path d={road} stroke="rgba(0,0,0,0.25)" strokeWidth={40} strokeLinecap="round" fill="none" transform="translate(0 5)" />
+          <Path d={road} stroke={shade(w.color, -0.4)} strokeWidth={38} strokeLinecap="round" fill="none" />
+          <Path d={road} stroke="#FFF3D6" strokeWidth={28} strokeLinecap="round" fill="none" />
+          <Path d={road} stroke={shade(w.color, 0.25)} strokeWidth={5} strokeLinecap="round" strokeDasharray="12 16" fill="none" />
         </Svg>
         {pos.map((p, i) => {
           const lvl = i + 1;
@@ -115,7 +131,6 @@ export default function WorldScreen() {
           const open = lvl <= unlocked;
           const current = lvl === unlocked && s === 0;
           const chest = lvl % 5 === 0;
-          const face = open ? (s > 0 ? w.color : shade(w.color, 0.25)) : '#4B3F86';
           return (
             <View key={lvl} style={[styles.nodeWrap, { top: p.y }, physicalLeft(p.x, NODE, width)]}>
               {current ? <Pulse color={w.color} /> : null}
@@ -123,21 +138,9 @@ export default function WorldScreen() {
                 onPress={() => setSheet(lvl)}
                 accessibilityRole="button"
                 accessibilityLabel={`${fmt(t.level, { n: lvl })}${open ? `, ${s} כוכבים` : ', נעול'}`}
-                style={({ pressed }) => [
-                  styles.node,
-                  { backgroundColor: face, borderBottomColor: open ? shade(w.color, -0.4) : '#2E2563' },
-                  pressed && styles.pressed,
-                ]}
+                style={({ pressed }) => [pressed && styles.pressed]}
               >
-                {!open ? (
-                  <Ionicons name="lock-closed" size={26} color="#9C92CC" />
-                ) : chest ? (
-                  <Ionicons name="gift" size={30} color={colors.textOnBright} />
-                ) : (
-                  <AppText variant="heading" color={colors.textOnBright} style={styles.nodeNum}>
-                    {lvl}
-                  </AppText>
-                )}
+                <LevelNode size={NODE} level={lvl} color={w.color} chest={chest} state={!open ? 'locked' : current ? 'current' : s > 0 ? 'done' : 'open'} />
               </Pressable>
               {open && !current ? <Stars n={s} /> : null}
               {current ? (
@@ -192,18 +195,12 @@ const styles = StyleSheet.create({
   barTrack: { height: 8, borderRadius: 4, backgroundColor: palette.night950, marginHorizontal: space.md, marginTop: space.sm, overflow: 'hidden' },
   barFill: { height: 8, borderRadius: 4 },
   nodeWrap: { position: 'absolute', width: NODE, alignItems: 'center' },
-  node: {
-    width: NODE,
-    height: NODE,
-    borderRadius: NODE / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderBottomWidth: 7,
-  },
-  nodeNum: { fontSize: 24, lineHeight: 30 },
+  tile: { position: 'absolute', left: 0 },
+  flip: { transform: [{ scaleY: -1 }] },
+  tileShade: { position: 'absolute', left: 0, right: 0, top: 0, backgroundColor: 'rgba(20,10,60,0.18)' },
   pressed: { transform: [{ translateY: 3 }] },
-  pulse: { position: 'absolute', top: -8, width: NODE + 16, height: NODE + 16, borderRadius: (NODE + 16) / 2, borderWidth: 4 },
-  stars: { flexDirection: 'row', gap: 1, marginTop: 2 },
+  pulse: { position: 'absolute', top: -8, width: NODE + 16, height: NODE + 16, borderRadius: (NODE + 16) / 2, borderWidth: 5 },
+  stars: { flexDirection: 'row', gap: 1, marginTop: -2, paddingHorizontal: 6, paddingVertical: 1, borderRadius: 10, backgroundColor: 'rgba(0,0,0,0.45)' },
   here: { marginTop: 4, paddingHorizontal: space.md, paddingVertical: 2, borderRadius: radius.chip },
   sheet: { alignItems: 'center', gap: space.md },
 });

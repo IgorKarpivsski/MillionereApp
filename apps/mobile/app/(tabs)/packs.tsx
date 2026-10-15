@@ -2,6 +2,7 @@ import type { PackCatalogEntry, PackSlug } from '@fm/shared';
 import { getLocales } from 'expo-localization';
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Alert, StyleSheet, View } from 'react-native';
 import { TopBar } from '@/components/TopBar';
 import {
@@ -17,7 +18,7 @@ import {
   useToast,
 } from '@/design-system/components';
 import { colors, rarityColors, space, type RarityKey } from '@/design-system/tokens';
-import { PackArt, PACK_NAMES } from '@/features/collection/PackArt';
+import { PackArt, PACK_GLOW, PACK_NAMES } from '@/features/collection/PackArt';
 import { useCollection } from '@/features/collection/hooks';
 import { useMyState } from '@/features/profile/hooks';
 import { formatNumber } from '@/lib/format';
@@ -48,7 +49,7 @@ function OddsTable({ pack }: { pack: PackCatalogEntry }) {
 }
 
 export default function PacksScreen() {
-  const { data, isLoading, refetch, isRefetching } = useCollection();
+  const { data, isLoading, isError, error, refetch, isRefetching } = useCollection();
   const { data: me } = useMyState();
   const [oddsFor, setOddsFor] = useState<PackCatalogEntry | null>(null);
   const toast = useToast();
@@ -82,16 +83,33 @@ export default function PacksScreen() {
         </AppText>
       ) : null}
       {isLoading ? <Skeleton height={400} rounded={18} /> : null}
+      {isError && !data ? (
+        <Card padding={space.lg} style={styles.errorCard}>
+          <AppText variant="heading" align="center">{t.loadError}</AppText>
+          <AppText variant="caption" color={colors.textMuted} align="center" numberOfLines={3}>
+            {String((error as Error | null)?.message ?? '')}
+          </AppText>
+          <StickerButton label={t.retry} icon="refresh" onPress={() => void refetch()} />
+        </Card>
+      ) : null}
 
       {data?.catalog.map((p) => {
         const tokens = data.tokens[p.slug] ?? 0;
         const price = p.coins ?? p.gems;
         return (
-          <Card key={p.slug} kind={tokens > 0 ? 'sticker' : 'panel'} padding={space.md}>
+          <View key={p.slug} style={[styles.packCard, { borderColor: tokens > 0 ? PACK_GLOW[p.slug] : 'rgba(255,255,255,0.12)' }]}>
+            <LinearGradient
+              colors={[PACK_GLOW[p.slug] + '55', 'rgba(30,18,80,0.95)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
             <View style={styles.packRow}>
-              <PackArt slug={p.slug} width={84} />
+              <View style={[styles.packGlow, { shadowColor: PACK_GLOW[p.slug] }]}>
+                <PackArt slug={p.slug} width={104} />
+              </View>
               <View style={styles.flex}>
-                <AppText variant="heading">{PACK_NAMES[p.slug]}</AppText>
+                <AppText variant="title">{PACK_NAMES[p.slug]}</AppText>
                 <View style={styles.chips}>
                   <View style={styles.countChip}>
                     <AppText variant="label" color={colors.textOnBright}>
@@ -107,13 +125,15 @@ export default function PacksScreen() {
                   ) : null}
                 </View>
                 {tokens > 0 ? (
-                  <AppText variant="label" color={colors.correct}>
-                    {fmt(t.owned, { n: tokens })}
-                  </AppText>
+                  <View style={[styles.ownedPill, { backgroundColor: PACK_GLOW[p.slug] }]}>
+                    <AppText variant="label" color={colors.textOnBright}>
+                      {fmt(t.owned, { n: tokens })}
+                    </AppText>
+                  </View>
                 ) : (
                   <View style={styles.price}>
-                    {p.coins ? <CoinIcon size={16} /> : p.gems ? <GemIcon size={16} /> : null}
-                    <AppText variant="caption" color={colors.textMuted}>
+                    {p.coins ? <CoinIcon size={18} /> : p.gems ? <GemIcon size={18} /> : null}
+                    <AppText variant="bodyStrong" color={colors.text}>
                       {price ? formatNumber(price) : t.rewardsOnly}
                     </AppText>
                   </View>
@@ -130,7 +150,7 @@ export default function PacksScreen() {
               )}
               <StickerButton label={t.odds} size="sm" tone="ghost" onPress={() => setOddsFor(p)} />
             </View>
-          </Card>
+          </View>
         );
       })}
 
@@ -145,6 +165,10 @@ export default function PacksScreen() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   packRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  packCard: { borderRadius: 24, borderWidth: 2, padding: space.md, overflow: 'hidden' },
+  packGlow: { shadowOpacity: 0.9, shadowRadius: 16, shadowOffset: { width: 0, height: 0 }, elevation: 10, borderRadius: 10 },
+  ownedPill: { alignSelf: 'flex-start', paddingHorizontal: space.sm, paddingVertical: 3, borderRadius: 999, marginTop: space.xs },
+  errorCard: { gap: space.sm, alignItems: 'center' },
   price: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: space.xxs },
   actions: { flexDirection: 'row', gap: space.sm, marginTop: space.md },
   odds: { gap: space.sm },

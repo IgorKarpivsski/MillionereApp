@@ -28,7 +28,7 @@ import { fmt, strings } from '@/lib/i18n';
 const t = strings.collection;
 
 export default function CollectionScreen() {
-  const { data, isLoading, refetch, isRefetching } = useCollection();
+  const { data, isLoading, isError, refetch, isRefetching } = useCollection();
   const [albumSlug, setAlbumSlug] = useState<string | null>(null);
   const [open, setOpen] = useState<Collectible | null>(null);
   const craft = useCraft();
@@ -54,6 +54,12 @@ export default function CollectionScreen() {
       <AppText color={colors.textMuted}>{fmt(t.progress, { n: totalOwned, total: data?.items.length ?? 96 })}</AppText>
 
       {isLoading ? <Skeleton height={420} rounded={18} /> : null}
+      {isError && !data ? (
+        <Card padding={space.lg} style={styles.albumCard}>
+          <AppText variant="heading" align="center">{strings.packs.loadError}</AppText>
+          <StickerButton label={strings.packs.retry} icon="refresh" onPress={() => void refetch()} />
+        </Card>
+      ) : null}
 
       {data ? (
         <>

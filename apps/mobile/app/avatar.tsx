@@ -12,7 +12,8 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { memo, useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { AVATAR_3D_IDS, AVATARS_3D } from '@/lib/avatars3d';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgXml } from 'react-native-svg';
 import { AppText, StickerButton, useToast } from '@/design-system/components';
@@ -147,12 +148,16 @@ export default function AvatarScreen() {
   const { width } = useWindowDimensions();
   const [spec, setSpec] = useState<AvatarSpec | null>(null);
   const [tab, setTab] = useState<AvatarSlot>('species');
+  const [pick3d, setPick3d] = useState<string | null>(null);
 
   useEffect(() => {
-    if (data && !spec) setSpec(specFromAvatarId(data.profile.avatar_id));
+    if (data && !spec) {
+      setSpec(specFromAvatarId(data.profile.avatar_id));
+      if (AVATARS_3D[data.profile.avatar_id]) setPick3d(data.profile.avatar_id);
+    }
   }, [data, spec]);
 
-  const code = spec ? encodeAvatar(spec) : '';
+  const code = pick3d ?? (spec ? encodeAvatar(spec) : '');
   const bigXml = useMemo(() => (spec ? avatarSvg(spec, { size: 200, round: true, uid: 'big' }) : ''), [spec]);
   if (!spec || !data) return <SafeAreaView style={styles.root} />;
 
@@ -201,12 +206,14 @@ export default function AvatarScreen() {
     }
     haptic('select');
     playSound('tap');
+    setPick3d(null);
     setSpec({ ...spec, [tab]: v });
   };
 
   const shuffle = () => {
     haptic('tap');
     playSound('tap');
+    setPick3d(null);
     setSpec(randomAvatar());
   };
 
@@ -249,10 +256,36 @@ export default function AvatarScreen() {
         <View style={styles.spot} />
         <View>
           <View accessible accessibilityRole="image" accessibilityLabel={`${t.preview}: ${optionLabel('species', spec.species)}`}>
-            <SvgXml xml={bigXml} width={170} height={170} />
+            {pick3d ? (
+              <Image source={AVATARS_3D[pick3d]!} style={styles.big3d} />
+            ) : (
+              <SvgXml xml={bigXml} width={170} height={170} />
+            )}
           </View>
         </View>
       </View>
+
+      <AppText variant="label" color={colors.led} style={styles.label3d}>
+        ✨ {t.ready3d}
+      </AppText>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.strip3d}>
+        {AVATAR_3D_IDS.map((id) => (
+          <Pressable
+            key={id}
+            onPress={() => {
+              haptic('select');
+              playSound('tap');
+              setPick3d(id);
+            }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: pick3d === id }}
+            accessibilityLabel={t.ready3d}
+            style={[styles.thumb3d, pick3d === id ? styles.thumb3dOn : null]}
+          >
+            <Image source={AVATARS_3D[id]!} style={styles.thumb3dImg} />
+          </Pressable>
+        ))}
+      </ScrollView>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabs} style={styles.tabsBar}>
         {AVATAR_SLOTS.map(({ key }) => {
@@ -328,6 +361,12 @@ const styles = StyleSheet.create({
   },
   iconBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   stage: { alignItems: 'center', justifyContent: 'center', height: 190 },
+  big3d: { width: 170, height: 170, borderRadius: 85, borderWidth: 4, borderColor: '#FFFFFF' },
+  label3d: { paddingHorizontal: space.md, marginBottom: space.xs },
+  strip3d: { gap: space.sm, paddingHorizontal: space.md, paddingBottom: space.sm },
+  thumb3d: { width: 64, height: 64, borderRadius: 32, borderWidth: 3, borderColor: 'transparent', overflow: 'hidden' },
+  thumb3dOn: { borderColor: colors.led },
+  thumb3dImg: { width: '100%', height: '100%' },
   spot: {
     position: 'absolute',
     width: 220,

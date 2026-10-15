@@ -305,13 +305,7 @@ export const SessionAnswerSchema = z.object({
 export type SessionAnswer = z.infer<typeof SessionAnswerSchema>;
 
 export * from './legendArt';
-export * from './matchsticks';
-export * from './matchPuzzles';
 
-export const PuzzlesStateSchema = z.object({ solved: z.array(z.number().int()), hinted: z.array(z.number().int()), total: z.number().int() });
-export type PuzzlesState = z.infer<typeof PuzzlesStateSchema>;
-export const PuzzleSolveSchema = z.object({ first: z.boolean(), coins: z.number().int(), pack: z.string().nullable(), solved: z.number().int() });
-export type PuzzleSolve = z.infer<typeof PuzzleSolveSchema>;
 export * from './maps';
 
 /* -------------------------------------------------------------------------- */
@@ -349,7 +343,7 @@ export const PackCatalogEntrySchema = z.object({
 export type PackCatalogEntry = z.infer<typeof PackCatalogEntrySchema>;
 
 export const CollectionStateSchema = z.object({
-  albums: z.array(z.object({ slug: z.string(), title: z.string(), blurb: z.string(), kind: z.enum(['players', 'objects']).default('players'), total: z.number().int(), owned: z.number().int(), claimed: z.boolean() })),
+  albums: z.array(z.object({ slug: z.string(), title: z.string(), blurb: z.string(), kind: z.string().default('players'), total: z.number().int(), owned: z.number().int(), claimed: z.boolean() })),
   items: z.array(CollectibleSchema),
   tokens: z.record(z.number().int()),
   dust: z.number(),

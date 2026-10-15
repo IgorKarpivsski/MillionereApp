@@ -5,7 +5,6 @@ import { TopBar } from '@/components/TopBar';
 import { AppText, Icon, Screen } from '@/design-system/components';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { QuickPlayCard, WorldsGrid } from '@/features/worlds/WorldCards';
-import { PuzzlesCard } from '@/features/puzzles/PuzzlesCard';
 import { strings } from '@/lib/i18n';
 
 const t = strings.worlds;
@@ -18,7 +17,6 @@ export default function PlayScreen() {
         <AppText color={colors.textMuted}>{t.subtitle}</AppText>
       </View>
       <QuickPlayCard />
-      <PuzzlesCard />
       <WorldsGrid />
       <View style={styles.row}>
         <Pressable

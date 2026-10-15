@@ -1,6 +1,7 @@
 import { avatarSvg, specFromAvatarId } from '@fm/shared';
 import { memo, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
+import { AVATARS_3D } from '@/lib/avatars3d';
 import { SvgXml } from 'react-native-svg';
 import { colors, palette } from '../tokens';
 import { AppText } from './AppText';
@@ -21,9 +22,10 @@ export const AvatarBadge = memo(function AvatarBadge({
   size?: number;
   ring?: string;
 }) {
+  const img = AVATARS_3D[avatarId];
   const xml = useMemo(
-    () => avatarSvg(specFromAvatarId(avatarId), { size, round: true, uid: avatarId.replace(/[^a-z0-9]/gi, '') + size }),
-    [avatarId, size],
+    () => img ? '' : avatarSvg(specFromAvatarId(avatarId), { size, round: true, uid: avatarId.replace(/[^a-z0-9]/gi, '') + size }),
+    [img, avatarId, size],
   );
   return (
     <View
@@ -33,7 +35,7 @@ export const AvatarBadge = memo(function AvatarBadge({
       accessibilityLabel={level != null ? `דמות השחקן, שלב ${level}` : 'דמות השחקן'}
     >
       <View style={[styles.circle, { width: size, height: size, borderRadius: size / 2, borderColor: ring }]}>
-        <SvgXml xml={xml} width={size - 4} height={size - 4} />
+        {img ? <Image source={img} style={{ width: size, height: size }} resizeMode="cover" /> : <SvgXml xml={xml} width={size - 4} height={size - 4} />}
       </View>
       {level != null ? (
         <View style={[styles.level, { minWidth: Math.max(22, size * 0.42) }]}>

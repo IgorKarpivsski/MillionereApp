@@ -16,5 +16,23 @@ export const WORLD_IMAGES: Record<string, ImageSourcePropType> = {
   food: require('../../../assets/worlds/food.webp'),
   ball: require('../../../assets/worlds/football.webp'),
   bolt: require('../../../assets/worlds/mix.webp'),
-  puzzle: require('../../../assets/worlds/puzzles.webp'),
 };
+
+/** Tall level-map background behind each world's path, keyed by world slug. */
+export const PATH_IMAGES: Record<string, ImageSourcePropType> = {
+  geography: require('../../../assets/paths/geography.webp'),
+  history: require('../../../assets/paths/history.webp'),
+  science: require('../../../assets/paths/science.webp'),
+  nature: require('../../../assets/paths/nature.webp'),
+  space: require('../../../assets/paths/space.webp'),
+  culture: require('../../../assets/paths/culture.webp'),
+  screen: require('../../../assets/paths/screen.webp'),
+  music: require('../../../assets/paths/music.webp'),
+  people: require('../../../assets/paths/people.webp'),
+  israel: require('../../../assets/paths/israel.webp'),
+  sport: require('../../../assets/paths/sport.webp'),
+  food: require('../../../assets/paths/food.webp'),
+  football: require('../../../assets/paths/football.webp'),
+};
+
+export const CHEST_IMAGE: ImageSourcePropType = require('../../../assets/paths/chest.webp');

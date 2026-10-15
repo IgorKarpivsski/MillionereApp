@@ -1,28 +1,5 @@
 import type { PackSlug } from '@fm/shared';
-import { useMemo } from 'react';
-import { View } from 'react-native';
-import { SvgXml } from 'react-native-svg';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import { packSvg } from './packScenes';
-import { packStyleSvg, type PackStyle } from './packStyles';
-
-type Look = 'scenes' | PackStyle;
-const LOOKS: Look[] = ['scenes', 'retro', 'neon', 'jersey', 'holo', 'mascot'];
-
-/** Which pack look is live — set on the server (app_config 'packs.style'), so it changes without an app update. */
-function usePackLook(): Look {
-  const { data } = useQuery({
-    queryKey: ['pack-style'],
-    staleTime: 30 * 60_000,
-    queryFn: async () => {
-      const { data: row } = await supabase.from('app_config').select('value').eq('key', 'packs.style').maybeSingle();
-      const v = row?.value as string | undefined;
-      return LOOKS.includes(v as Look) ? (v as Look) : 'retro';
-    },
-  });
-  return data ?? 'retro';
-}
+import { Image, View } from 'react-native';
 
 export const PACK_NAMES: Record<PackSlug, string> = {
   bronze: 'חבילת ארד',
@@ -32,16 +9,36 @@ export const PACK_NAMES: Record<PackSlug, string> = {
   legendary: 'חבילה אגדית',
 };
 
-/** A foil pack with an illustrated scene per tier (see ./packArt.ts). Original art. */
+/* eslint-disable @typescript-eslint/no-require-imports */
+export const PACK_IMAGES: Record<PackSlug, number> = {
+  bronze: require('../../../assets/packs/bronze.webp'),
+  silver: require('../../../assets/packs/silver.webp'),
+  gold: require('../../../assets/packs/gold.webp'),
+  epic: require('../../../assets/packs/epic.webp'),
+  legendary: require('../../../assets/packs/legendary.webp'),
+};
+/* eslint-enable @typescript-eslint/no-require-imports */
+
+/** Glow color behind each pack tier. */
+export const PACK_GLOW: Record<PackSlug, string> = {
+  bronze: '#D98A4E',
+  silver: '#9CC8FF',
+  gold: '#FFC93C',
+  epic: '#C35CFF',
+  legendary: '#FF7AD9',
+};
+
+/** A 3D foil pack (AI-illustrated, see tools art manifest). */
 export function PackArt({ slug, width = 120 }: { slug: PackSlug; width?: number }) {
-  const look = usePackLook();
-  const xml = useMemo(
-    () => (look === 'scenes' ? packSvg(slug, width, `${slug}${Math.round(width)}`) : packStyleSvg(look, slug, width, `${look}${slug}${Math.round(width)}`)),
-    [look, slug, width],
-  );
+  const height = width * 1.45;
   return (
-    <View accessible accessibilityRole="image" accessibilityLabel={PACK_NAMES[slug]} style={{ width, height: width * 1.45 }}>
-      <SvgXml xml={xml} width={width} height={width * 1.45} />
+    <View
+      accessible
+      accessibilityRole="image"
+      accessibilityLabel={PACK_NAMES[slug]}
+      style={{ width, height, borderRadius: width * 0.08, overflow: 'hidden' }}
+    >
+      <Image source={PACK_IMAGES[slug]} style={{ width, height }} resizeMode="cover" />
     </View>
   );
 }
