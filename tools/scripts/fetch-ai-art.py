@@ -12,7 +12,12 @@ for line in Path("art/manifest.tsv").read_text().splitlines():
     if p.exists():
         continue
     try:
-        data = urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=60).read()
+        data = urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=120).read()
+        if p.suffix in (".mp4", ".mp3", ".m4a", ".wav", ".mov"):
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_bytes(data)  # media: keep the original bytes
+            print("ok", out, p.stat().st_size)
+            continue
         im = Image.open(io.BytesIO(data)).convert("RGBA")
         w = int(width)
         if im.width > w:
