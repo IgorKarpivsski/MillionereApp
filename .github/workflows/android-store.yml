@@ -9,6 +9,11 @@ name: Android store build
 
 on:
   workflow_dispatch:
+    inputs:
+      upload:
+        description: 'Send the bundle straight to Google Play closed testing (Alpha)'
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -90,6 +95,33 @@ jobs:
       - name: Remove the unlocked key
         if: always()
         run: rm -f "$RUNNER_TEMP/upload.jks"
+
+      # The Play service-account key sits in the repo only encrypted, with the same
+      # password as the upload key. With it, the bundle goes to Play by itself.
+      - name: Unlock the Play upload account
+        id: play
+        if: ${{ inputs.upload && hashFiles('apps/mobile/signing/play-service-account.json.enc') != '' }}
+        env:
+          PW: ${{ secrets.UPLOAD_KEY_PASSWORD }}
+        run: |
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
+            -in apps/mobile/signing/play-service-account.json.enc -out "$RUNNER_TEMP/play.json" -pass env:PW
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Send to Google Play (closed testing)
+        if: steps.play.outputs.ok == 'true'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJson: ${{ runner.temp }}/play.json
+          packageName: com.haaluf.trivia
+          releaseFiles: out/*.aab
+          track: alpha
+          status: completed
+          inAppUpdatePriority: 2
+
+      - name: Remove the Play key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/play.json"
 
       - uses: actions/upload-artifact@v4
         with:
