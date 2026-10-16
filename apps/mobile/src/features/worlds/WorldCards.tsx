@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { AppText, Sheen } from '@/design-system/components';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
@@ -41,13 +41,17 @@ export function WorldsGrid() {
   const worlds = useWorldsConfig();
   const { data } = useWorldsState();
   const reduced = useReducedMotion();
+  const { width } = useWindowDimensions();
+  // Explicit size: percentage width + aspectRatio is unreliable on Android images.
+  const cellW = Math.floor((width - space.lg * 2 - space.md) / 2);
+  const coverSize = { width: cellW, height: Math.round(cellW / 1.15) };
   return (
     <View style={styles.grid}>
       {worlds.map((w, i) => {
         const st = data?.worlds.find((x) => x.slug === w.slug);
         const passed = st ? Object.values(st.stars).filter((n) => n > 0).length : 0;
         return (
-          <Animated.View key={w.slug} entering={reduced ? undefined : FadeInDown.delay(40 * i).springify().damping(16)} style={styles.cell}>
+          <Animated.View key={w.slug} entering={reduced ? undefined : FadeInDown.delay(40 * i).springify().damping(16)} style={{ width: cellW }}>
             <Pressable
               onPress={() => router.push({ pathname: '/world/[slug]', params: { slug: w.slug } })}
               accessibilityRole="button"
@@ -55,9 +59,9 @@ export function WorldsGrid() {
               style={({ pressed }) => [styles.world, { backgroundColor: shade(w.color, -0.4), shadowColor: w.color }, pressed && styles.pressed]}
             >
               {WORLD_IMAGES[w.icon] ? (
-                <Image source={WORLD_IMAGES[w.icon]!} style={styles.cover} resizeMode="cover" />
+                <Image source={WORLD_IMAGES[w.icon]!} style={coverSize} resizeMode="cover" />
               ) : (
-                <View style={[styles.cover, styles.coverFallback]}>
+                <View style={[coverSize, styles.coverFallback]}>
                   <WorldBadge icon={w.icon} color={w.color} size={62} />
                 </View>
               )}
@@ -154,7 +158,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 6,
   },
-  coverFade: { position: 'absolute', left: 0, right: 0, top: '35%', bottom: 0 },
+  coverFade: { position: 'absolute', left: 0, right: 0, top: '30%', bottom: 0 },
   cover: { width: '100%', aspectRatio: 1.15 },
   coverFallback: { alignItems: 'center', justifyContent: 'center' },
   body: { paddingHorizontal: space.sm, paddingTop: 6, paddingBottom: space.sm, gap: 5 },

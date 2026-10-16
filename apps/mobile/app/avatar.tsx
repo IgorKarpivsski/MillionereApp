@@ -16,7 +16,7 @@ import { Image, Pressable, ScrollView, StyleSheet, View, useWindowDimensions } f
 import { AVATAR_3D_IDS, AVATARS_3D } from '@/lib/avatars3d';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgXml } from 'react-native-svg';
-import { AppText, StickerButton, useToast, Backdrop } from '@/design-system/components';
+import { AppText, StickerButton, useToast, Backdrop, Glow } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { playSound } from '@/design-system/feedback/sound';
 import { colors, palette, radius, space } from '@/design-system/tokens';
@@ -254,6 +254,7 @@ export default function AvatarScreen() {
       </View>
 
       <View style={styles.stage}>
+        <Glow size={300} strength={0.45} />
         <View style={styles.spot} />
         <View>
           <View accessible accessibilityRole="image" accessibilityLabel={`${t.preview}: ${optionLabel('species', spec.species)}`}>
@@ -361,7 +362,7 @@ const styles = StyleSheet.create({
     paddingVertical: space.sm,
   },
   iconBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
-  stage: { alignItems: 'center', justifyContent: 'center', height: 190 },
+  stage: { alignItems: 'center', justifyContent: 'center', height: 224, marginBottom: space.xs },
   big3d: { width: 170, height: 170, borderRadius: 85, borderWidth: 4, borderColor: '#FFFFFF' },
   label3d: { paddingHorizontal: space.md, marginBottom: space.xs },
   strip3d: { gap: space.sm, paddingHorizontal: space.md, paddingBottom: space.sm },
@@ -370,13 +371,12 @@ const styles = StyleSheet.create({
   thumb3dImg: { width: '100%', height: '100%' },
   spot: {
     position: 'absolute',
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    backgroundColor: palette.night700,
-    borderWidth: 3,
-    borderColor: colors.led,
-    opacity: 0.6,
+    width: 204,
+    height: 204,
+    borderRadius: 102,
+    backgroundColor: 'rgba(255,176,0,0.10)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,176,0,0.55)',
   },
   tabsBar: { flexGrow: 0 },
   tabs: { gap: space.sm, paddingHorizontal: space.lg, paddingVertical: space.sm },
