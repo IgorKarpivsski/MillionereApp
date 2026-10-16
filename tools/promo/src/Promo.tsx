@@ -407,7 +407,7 @@ function WorldsScene() {
           const s = spring({ frame: frame - 4 - i * 3, fps: FPS, config: { damping: 12 } });
           const col = i % 4;
           const row = Math.floor(i / 4);
-          const x = 60 + col * 245 + (row % 2 ? 60 : 0);
+          const x = i === 12 ? 425 : 60 + col * 245 + (row % 2 ? 60 : 0);
           const y = row * 260 + Math.sin((frame + i * 9) / 14) * 8;
           return (
             <div
@@ -446,7 +446,7 @@ function PackScene() {
     <AbsoluteFill>
       {frame < CUT ? (
         <>
-          <Clip src="pack.mp4" zoom={0.0015} />
+          <Clip src="pack.mp4" from={45} zoom={0.0015} />
           <Headline text="פותחים חבילות" top={170} size={104} delay={4} />
         </>
       ) : (
@@ -476,8 +476,8 @@ function PackScene() {
             const n = STICKERS.length;
             const side = i - (n - 1) / 2;
             const sp = spring({ frame: frame - CUT - 4 - i * 4, fps: FPS, config: { damping: 11 } });
-            const x = 540 + side * 150 - 130;
-            const y = 1080 + Math.abs(side) * 40 - sp * 120;
+            const x = 540 + side * 138 - 130;
+            const y = 900 + Math.abs(side) * 46 - sp * 60;
             const rare = RARE.has(i);
             return (
               <div
@@ -492,13 +492,13 @@ function PackScene() {
                   background: rare ? `linear-gradient(160deg, ${GOLD}, #FF7AD9)` : '#2C1A6E',
                   padding: 8,
                   boxShadow: rare ? `0 0 50px ${GOLD}` : '0 18px 40px rgba(0,0,0,0.6)',
-                  transform: `translateY(${(1 - sp) * 500}px) rotate(${side * 7 * sp}deg) scale(${0.4 + sp * 0.6})`,
+                  transform: `translateY(${(1 - sp) * 500}px) rotate(${side * 8 * sp}deg) scale(${(0.4 + sp * 0.6) * (side === 0 ? 1.12 : 0.92 - Math.abs(side) * 0.04)})`,
                   opacity: sp,
                   zIndex: 10 - Math.abs(side),
                 }}
               >
                 <Img src={staticFile(`stickers/${s}.webp`)} style={{ width: 244, height: 244, borderRadius: 20, objectFit: 'cover' }} />
-                <div style={{ height: 62, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FONT, fontWeight: 700, fontSize: 34, color: rare ? NIGHT : '#FFFFFF' }}>
+                <div style={{ height: 62, display: 'flex', alignItems: 'center', justifyContent: 'center', direction: 'rtl', fontFamily: FONT, fontWeight: 700, fontSize: 38, color: rare ? NIGHT : '#FFFFFF' }}>
                   {rare ? 'אגדית!' : 'חדשה!'}
                 </div>
               </div>
