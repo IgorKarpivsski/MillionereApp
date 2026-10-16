@@ -65,7 +65,8 @@ export function SessionTools({
   const callTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const q = payload.question;
-  const counts = payload.boosts ?? boostState?.counts ?? {};
+  // The server's run payload wins once it has a count; the store state fills in the rest (e.g. welcome boosts).
+  const counts: Record<string, number> = { ...(boostState?.counts ?? {}), ...(payload.boosts ?? {}) };
   const qBoosts = payload.question_boosts ?? [];
   const runBoosts = payload.run_boosts ?? [];
   const hintCoins = boostState?.hint_coins ?? 20;
