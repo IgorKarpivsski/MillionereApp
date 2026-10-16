@@ -15,7 +15,7 @@ import {
 } from 'remotion';
 
 export const FPS = 30;
-export const DURATION = 24 * FPS;
+export const DURATION = 22 * FPS;
 
 const FONT = '"IBM Plex Sans Hebrew", sans-serif';
 const GOLD = '#FFC93C';
@@ -254,7 +254,7 @@ const CATS: { label: string; img: string }[] = [
   { label: 'היסטוריה', img: 'worlds/history.webp' },
   { label: 'כדורגל', img: 'worlds/football.webp' },
 ];
-const CAT_AT = [24, 42, 62, 86];
+const CAT_AT = [26, 39, 54, 74];
 const ANSWERS = ['פיל אפריקני', 'לווייתן כחול', "ג'ירפה", 'היפופוטם'];
 
 function QuestionScene() {
@@ -376,7 +376,8 @@ const WORLDS = ['nature', 'space', 'science', 'history', 'israel', 'geography', 
 
 function WorldsScene() {
   const frame = useCurrentFrame();
-  const count = Math.round(interpolate(frame, [6, 40], [1, 13], { ...clamp, easing: Easing.out(Easing.cubic) }));
+  const title = spring({ frame: frame - 2, fps: FPS, config: { damping: 10 } });
+  const sub = interpolate(frame, [20, 32], [0, 1], clamp);
   return (
     <AbsoluteFill>
       <Img
@@ -398,8 +399,8 @@ function WorldsScene() {
           textShadow: '0 6px 24px rgba(0,0,0,0.8)',
         }}
       >
-        <div style={{ fontSize: 230, color: GOLD, lineHeight: 1 }}>{count}</div>
-        <div style={{ fontSize: 96 }}>עולמות ידע</div>
+        <div style={{ fontSize: 150, color: GOLD, lineHeight: 1.1, transform: `scale(${title})` }}>עולמות ידע</div>
+        <div style={{ fontSize: 76, opacity: sub }}>בכל נושא שאפשר לדמיין</div>
       </div>
       {/* world cards fanning in */}
       <div style={{ position: 'absolute', top: 700, left: 0, right: 0, height: 1000 }}>
@@ -440,8 +441,8 @@ const RARE = new Set([0, 2, 4]);
 
 function PackScene() {
   const frame = useCurrentFrame();
-  const CUT = 66; // AI clip of the sloth tearing the pack, then the stickers
-  const counter = Math.round(interpolate(frame, [CUT + 10, CUT + 55], [0, 180], { ...clamp, easing: Easing.out(Easing.cubic) }));
+  const CUT = 42; // AI clip of the sloth tearing the pack, then the stickers
+  const title = spring({ frame: frame - CUT - 4, fps: FPS, config: { damping: 9 } });
   return (
     <AbsoluteFill>
       {frame < CUT ? (
@@ -469,8 +470,8 @@ function PackScene() {
               textShadow: '0 6px 24px rgba(0,0,0,0.85)',
             }}
           >
-            <div style={{ fontSize: 210, color: GOLD, lineHeight: 1 }}>{counter}</div>
-            <div style={{ fontSize: 92 }}>מדבקות לאסוף!</div>
+            <div style={{ fontSize: 140, color: GOLD, lineHeight: 1.1, transform: `scale(${title})` }}>מדבקות נדירות</div>
+            <div style={{ fontSize: 84, opacity: title }}>אספו את כולן!</div>
           </div>
           {STICKERS.map((s, i) => {
             const n = STICKERS.length;
@@ -573,7 +574,7 @@ function FriendsScene() {
 
 function FinaleScene() {
   const frame = useCurrentFrame();
-  const END = 40; // trophy clip, then the end card
+  const END = 30; // trophy clip, then the end card
   const card = spring({ frame: frame - END, fps: FPS, config: { damping: 11 } });
   const pulse = 1 + 0.03 * Math.sin((frame - END) / 5);
   return (
@@ -624,7 +625,7 @@ function FinaleScene() {
 /* ------------------------------------------------------------------ */
 
 // Scene starts (frames). The narration starts at 0.4s; cuts follow its sentences.
-const T = { hook: 0, q: 115, worlds: 232, pack: 318, friends: 452, finale: 548 };
+const T = { hook: 0, q: 107, worlds: 220, pack: 317, friends: 415, finale: 514 };
 
 export const Promo: React.FC = () => {
   const frame = useCurrentFrame();
@@ -658,7 +659,7 @@ export const Promo: React.FC = () => {
 
       <Audio src={staticFile('theme.m4a')} volume={musicVol} loop />
       <Sequence from={12}>
-        <Audio src={staticFile('vo.mp3')} volume={1} />
+        <Audio src={staticFile('vo2.mp3')} volume={1} />
       </Sequence>
       <Sequence from={T.hook + 62}>
         <Audio src={staticFile('sfx/level_up.wav')} volume={0.6} />
@@ -672,16 +673,16 @@ export const Promo: React.FC = () => {
       <Sequence from={T.q + 80}>
         <Audio src={staticFile('sfx/coins.wav')} volume={0.5} />
       </Sequence>
-      <Sequence from={T.pack + 62}>
+      <Sequence from={T.pack + 38}>
         <Audio src={staticFile('sfx/pack_open.wav')} volume={0.7} />
       </Sequence>
-      <Sequence from={T.pack + 70}>
+      <Sequence from={T.pack + 46}>
         <Audio src={staticFile('sfx/rare_reveal.wav')} volume={0.6} />
       </Sequence>
       <Sequence from={T.friends + 60}>
         <Audio src={staticFile('sfx/solved.wav')} volume={0.5} />
       </Sequence>
-      <Sequence from={T.finale + 40}>
+      <Sequence from={T.finale + 30}>
         <Audio src={staticFile('sfx/level_up.wav')} volume={0.6} />
       </Sequence>
     </AbsoluteFill>
