@@ -12,6 +12,7 @@ import { colors, radius, space } from '@/design-system/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { storeApi } from '@/features/store/api';
 import { useAdReward, useStore } from '@/features/store/hooks';
+import { BoostShop } from '@/features/boosts/BoostShop';
 import { DealCard } from '@/features/engage/DealCard';
 import { useDeals } from '@/features/engage/hooks';
 import { formatNumber } from '@/lib/format';
@@ -175,6 +176,8 @@ export default function ShopScreen() {
         ) : null}
 
         {deals ? <DealCard state={deals} /> : null}
+
+        <BoostShop />
 
         <AppText variant="heading">{t.vipTitle}</AppText>
         {store?.products.filter((p) => p.kind === 'vip').map((p) => <Item key={p.sku} p={p} />)}

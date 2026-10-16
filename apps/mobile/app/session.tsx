@@ -19,8 +19,15 @@ import { QuestionImageView } from '@/features/quiz/QuestionImage';
 import { AnswerTile, type AnswerState } from '@/features/quiz/ui';
 import { askForRemindersOnce } from '@/features/reminders/useReminders';
 import { useSettingsStore } from '@/features/settings/store';
-import { useAdReward } from '@/features/store/hooks';
-import { useWorldsConfig, worldBySlug } from '@/features/worlds/api';
+import { useAdReward, useStore } from '@/features/store/hooks';
+import { gameFinished } from '@/features/store/interstitial';
+import { ArmedChips, SessionTools, type FriendPick } from '@/features/boosts/SessionTools';
+import { boostsApi, useBoosts } from '@/features/boosts/api';
+import { BoostIcon } from '@/features/boosts/meta';
+import { requestId } from '@/features/collection/api';
+import { queryKeys } from '@/lib/queryClient';
+import { useQueryClient } from '@tanstack/react-query';
+import { championLevels, levelLabel, useWorldsConfig, worldBySlug } from '@/features/worlds/api';
 import { useSession, type SessionState } from '@/features/worlds/useSession';
 import { WorldBadge } from '@/features/worlds/WorldBadge';
 import { shade } from '@/features/worlds/worldArt';
@@ -122,22 +129,72 @@ function BigStar({ lit, delay, size }: { lit: boolean; delay: number; size: numb
   );
 }
 
+/** A failed level: a heart buys a few more questions instead of starting over. */
+function ContinueOffer({ hearts, onContinue }: { hearts: number; onContinue: () => void }) {
+  const toast = useToast();
+  const qc = useQueryClient();
+  const { data: boostState } = useBoosts();
+  const [busy, setBusy] = useState(false);
+  const price = boostState?.prices.heart ?? 150;
+  const have = boostState?.counts.heart ?? hearts;
+  return (
+    <View style={styles.continueBox}>
+      <BoostIcon boost="heart" size={46} count={have} />
+      <View style={styles.flex}>
+        <StickerButton
+          label={have > 0 ? strings.heart.continue : fmt(strings.heart.buyContinue, { n: price })}
+          tone="danger"
+          fullWidth
+          loading={busy}
+          onPress={async () => {
+            if (have < 1) {
+              setBusy(true);
+              try {
+                await boostsApi.buy('heart', requestId());
+                void qc.invalidateQueries({ queryKey: queryKeys.myState });
+              } catch (e) {
+                setBusy(false);
+                toast((e as Error).message.includes('insufficient') ? strings.boosts.noCoins : strings.errors.generic, 'error');
+                return;
+              }
+            }
+            onContinue();
+          }}
+        />
+      </View>
+    </View>
+  );
+}
+
 function ResultView({
   s,
   world,
   color,
+  levels,
   onAgain,
   onNext,
+  onContinue,
 }: {
   s: SessionState;
   world: string;
   color: string;
+  levels: number;
   onAgain: () => void;
   onNext: (() => void) | null;
+  onContinue: () => void;
 }) {
   const reduced = useReducedMotion();
   const sum = s.summary!;
   const quick = sum.world === 'mix';
+  const { data: store } = useStore();
+  useEffect(() => {
+    // Between-games ad (every few games, never for "no ads" players), after the stars land.
+    const id = setTimeout(() => {
+      if (store) void gameFinished(store.ad_free);
+    }, 2600);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => {
     void askForRemindersOnce();
     if (sum.correct < 7 || useSettingsStore.getState().reviewAsked) return;
@@ -168,7 +225,7 @@ function ResultView({
         {title}
       </AppText>
       <AppText color={colors.textMuted} align="center">
-        {quick ? fmt(t.correctOf, { n: sum.correct, total: sum.total }) : `${world} · ${fmt(strings.worlds.level, { n: sum.level })} · ${fmt(t.correctOf, { n: sum.correct, total: sum.total })}`}
+        {quick ? fmt(t.correctOf, { n: sum.correct, total: sum.total }) : `${world} · ${levelLabel(sum.level, levels)} · ${fmt(t.correctOf, { n: sum.correct, total: sum.total })}`}
       </AppText>
 
       <Card kind="sticker" style={styles.finalCard}>
@@ -211,6 +268,17 @@ function ResultView({
         ) : null}
       </Card>
 
+      {sum.champion_opened ? (
+        <Card kind="sticker" padding={space.md}>
+          <AppText variant="heading" color={colors.led} align="center">
+            {`👑 ${strings.champion.opened}`}
+          </AppText>
+          <AppText color={colors.textMuted} align="center">
+            {strings.champion.body}
+          </AppText>
+        </Card>
+      ) : null}
+      {sum.can_continue ? <ContinueOffer hearts={sum.hearts} onContinue={onContinue} /> : null}
       {onNext ? <StickerButton label={t.nextLevel} icon="arrow-back" size="lg" fullWidth onPress={onNext} /> : null}
       <StickerButton
         label={quick ? t.playAgain : sum.stars > 0 ? strings.worlds.replay : t.again}
@@ -269,7 +337,8 @@ export default function SessionScreen() {
   const [target, setTarget] = useState({ world: params.world ?? 'mix', level: params.level ? Number(params.level) : null });
   const worlds = useWorldsConfig();
   const w = worldBySlug(worlds, target.world);
-  const { state: s, start, answer, timeUp, next, fifty } = useSession(target.world, target.level, params.run);
+  const { state: s, start, answer, timeUp, next, fifty, boost, hint, callFriend, continueRun } = useSession(target.world, target.level, params.run);
+  const [friendPick, setFriendPick] = useState<FriendPick | null>(null);
   const { data: energy } = useEnergy();
   const showEnergy = useEnergySheet((x) => x.show);
   const toast = useToast();
@@ -286,7 +355,13 @@ export default function SessionScreen() {
 
   useEffect(() => {
     if (s.notice === 'no_coins') toast(t.noCoins, 'error');
+    else if (s.notice === 'offline') toast(strings.call.noneOnline, 'info');
+    else if (s.notice === 'ad_cap') toast(strings.errors.rateLimited, 'info');
+    else if (s.notice === 'lifeline' || s.notice === 'no_boost') toast(strings.boosts.used, 'info');
   }, [s.notice, toast]);
+  useEffect(() => {
+    if (s.reveal?.shielded) toast(strings.boosts.shieldSaved, 'success');
+  }, [s.reveal, toast]);
 
   // A right answer moves on by itself; a wrong one waits so the player can read the explanation.
   useEffect(() => {
@@ -352,11 +427,11 @@ export default function SessionScreen() {
 
   if (s.phase === 'finished' && s.summary) {
     const sum = s.summary;
-    const canNext = sum.world !== 'mix' && sum.stars > 0 && sum.level < w.levels;
+    const canNext = sum.world !== 'mix' && sum.stars > 0 && sum.level < w.levels + championLevels(w.levels);
     return (
       <SafeAreaView style={styles.root}>
         <Backdrop />
-        <ResultView s={s} world={w.name} color={w.color} onAgain={() => again()} onNext={canNext ? () => again(sum.level + 1) : null} />
+        <ResultView s={s} world={w.name} color={w.color} levels={w.levels} onAgain={() => again()} onNext={canNext ? () => again(sum.level + 1) : null} onContinue={() => void continueRun()} />
       </SafeAreaView>
     );
   }
@@ -371,7 +446,7 @@ export default function SessionScreen() {
             <WorldBadge icon={w.icon} color={w.color} size={110} />
           </Animated.View>
           <AppText variant="title">{w.name}</AppText>
-          {target.level ? <AppText color={colors.textMuted}>{fmt(strings.worlds.level, { n: target.level })}</AppText> : null}
+          {target.level ? <AppText color={colors.textMuted}>{levelLabel(target.level, w.levels)}</AppText> : null}
           <AppText color={colors.textMuted}>{t.starting}</AppText>
           <View style={styles.tip}>
             <Ionicons name="flash" size={16} color={colors.led} />
@@ -419,6 +494,7 @@ export default function SessionScreen() {
             ))}
           </View>
         </View>
+        <ArmedChips shield={s.payload.shield} doubled={s.payload.doubled} />
         <View style={styles.scoreBox} accessible accessibilityLabel={`${t.score} ${s.score}`}>
           <Led size="number">{formatNumber(s.score)}</Led>
         </View>
@@ -429,7 +505,7 @@ export default function SessionScreen() {
           <WorldBadge icon={qWorld.icon} color={qWorld.color} size={34} />
           <AppText variant="label" color={colors.textMuted} style={styles.flex}>
             {qWorld.name}
-            {s.payload.level ? ` · ${fmt(strings.worlds.level, { n: s.payload.level })}` : ''}
+            {s.payload.level ? ` · ${levelLabel(s.payload.level, w.levels)}` : ''}
           </AppText>
           <Led size="ledM" color={secs <= 5 && answering ? colors.danger : colors.text}>
             {String(secs).padStart(2, '0')}
@@ -441,7 +517,7 @@ export default function SessionScreen() {
           running={answering}
           color={secs <= 5 ? colors.danger : qWorld.color}
         />
-        {answering ? (
+        {answering && !s.payload.frozen ? (
           <View style={styles.speedPill} accessible accessibilityLabel={fmt(t.speedA11y, { n: secs * POINTS_PER_SECOND })}>
             <Ionicons name="flash" size={14} color={colors.led} />
             <AppText variant="caption" color={colors.led} style={styles.bold}>
@@ -460,6 +536,17 @@ export default function SessionScreen() {
           {q.image ? <QuestionImageView image={q.image} /> : null}
         </Animated.View>
 
+        {friendPick && answering ? (
+          <View style={styles.callBanner} accessibilityLiveRegion="polite">
+            <Ionicons name="call" size={18} color={colors.correct} />
+            <AppText variant="label" style={styles.flex}>
+              {friendPick.slot == null
+                ? fmt(strings.call.waiting, { name: friendPick.name, n: friendPick.waiting ?? '' })
+                : fmt(strings.call.answered, { name: friendPick.name })}
+            </AppText>
+            {friendPick.slot == null ? <ActivityIndicator color={colors.correct} /> : null}
+          </View>
+        ) : null}
         <View style={styles.answers}>
           {q.answers.map((a, i) => (
             <AnswerTile
@@ -468,6 +555,7 @@ export default function SessionScreen() {
               text={a.text}
               state={stateFor(a.slot)}
               disabled={!answering}
+              expertPick={friendPick?.slot === a.slot}
               fill
               onPress={() => void answer(a.slot)}
             />
@@ -518,21 +606,18 @@ export default function SessionScreen() {
             />
           </Animated.View>
         ) : (
-          <Pressable
-            onPress={() => void fifty()}
-            disabled={!answering || s.busy5050 || q.removed.length > 0}
-            accessibilityRole="button"
-            accessibilityLabel={`${t.fifty} ${used5050 ? fmt(t.fiftyCost, { n: 30 }) : t.fiftyFree}`}
-            style={({ pressed }) => [styles.fifty, (q.removed.length > 0 || !answering) && styles.fiftyOff, pressed && styles.pressed]}
-          >
-            {s.busy5050 ? <ActivityIndicator color={colors.led} /> : <Ionicons name="contrast" size={20} color={colors.text} />}
-            <AppText variant="label">{t.fifty}</AppText>
-            <View style={[styles.fiftyTag, used5050 ? styles.fiftyTagPaid : null]}>
-              <AppText variant="caption" color={colors.textOnBright} style={styles.bold}>
-                {used5050 ? fmt(t.fiftyCost, { n: 30 }) : t.fiftyFree}
-              </AppText>
-            </View>
-          </Pressable>
+          <SessionTools
+            payload={s.payload}
+            answering={answering}
+            busyTool={s.busyTool}
+            busy5050={s.busy5050}
+            used5050={used5050}
+            onFifty={() => void fifty()}
+            onBoost={boost}
+            onHint={(pay) => void hint(pay)}
+            onCall={callFriend}
+            onFriendPick={setFriendPick}
+          />
         )}
       </View>
 
@@ -627,6 +712,26 @@ const styles = StyleSheet.create({
   revealHead: { flexDirection: 'row', alignItems: 'center' },
   link: { textDecorationLine: 'underline', marginTop: space.xs },
   footer: { paddingHorizontal: space.md, paddingBottom: space.sm, paddingTop: space.xs },
+  continueBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    padding: space.md,
+    borderRadius: radius.card,
+    backgroundColor: 'rgba(211,38,58,0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,138,128,0.5)',
+  },
+  callBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    padding: space.sm,
+    borderRadius: radius.control,
+    backgroundColor: 'rgba(30,158,90,0.22)',
+    borderWidth: 1,
+    borderColor: 'rgba(61,220,132,0.5)',
+  },
   fifty: {
     flexDirection: 'row',
     alignItems: 'center',

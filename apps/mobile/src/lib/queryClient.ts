@@ -30,6 +30,7 @@ export const queryKeys = {
   friends: ['friends'] as const,
   worlds: ['worlds-state'] as const,
   worldsConfig: ['worlds-config'] as const,
+  boosts: ['boosts'] as const,
   chat: (id: string) => ['chat', id] as const,
   dupes: (id: string) => ['dupes', id] as const,
 };

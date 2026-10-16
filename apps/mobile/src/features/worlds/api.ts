@@ -13,6 +13,7 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { rpc } from '@/features/profile/api';
 import { queryKeys } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
+import { fmt, strings } from '@/lib/i18n';
 
 /** Sessions: 10 questions from one world (or a mix). The server decides everything. */
 export const sessionApi = {
@@ -67,4 +68,14 @@ export function worldBySlug(list: WorldConfig[], slug: string | null | undefined
 export function useWorldsState() {
   const { session } = useAuth();
   return useQuery({ queryKey: queryKeys.worlds, queryFn: sessionApi.state, enabled: !!session, staleTime: 30_000 });
+}
+
+/** Champion tier size after a world's last level (mirrors public.champion_levels). */
+export function championLevels(levels: number): number {
+  return levels > 0 ? Math.max(5, Math.ceil(levels / 3)) : 0;
+}
+
+/** "שלב 7", or "אלוף 2" for the champion tier. */
+export function levelLabel(level: number, levels: number): string {
+  return levels > 0 && level > levels ? fmt(strings.champion.levelName, { n: level - levels }) : fmt(strings.worlds.level, { n: level });
 }

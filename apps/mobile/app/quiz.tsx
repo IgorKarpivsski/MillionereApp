@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 import * as StoreReview from 'expo-store-review';
 import { askForRemindersOnce } from '@/features/reminders/useReminders';
+import { gameFinished } from '@/features/store/interstitial';
 import { useSettingsStore } from '@/features/settings/store';
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,7 +27,7 @@ import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound, preloadSounds } from '@/design-system/feedback/sound';
 import { colors, radius, space } from '@/design-system/tokens';
 import { quizApi } from '@/features/quiz/api';
-import { useAdReward } from '@/features/store/hooks';
+import { useAdReward, useStore } from '@/features/store/hooks';
 import { AnswerTile, LifelineButton, type AnswerState } from '@/features/quiz/ui';
 import { useQuizRun, type QuizRunState } from '@/features/quiz/useQuizRun';
 import { formatNumber } from '@/lib/format';
@@ -133,6 +134,14 @@ function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => voi
   const sum = s.summary!;
   const won = daily ? sum.correct >= 6 : sum.status === 'won';
   const rival = daily ? 10 - sum.correct : sum.status === 'lost' || sum.status === 'timed_out' ? 1 : 0;
+  const { data: store } = useStore();
+  useEffect(() => {
+    const id = setTimeout(() => {
+      if (store) void gameFinished(store.ad_free);
+    }, 2600);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => {
     // After a finished game (never on first launch): ask once for reminders,
     // and after a good result, once ever, for a store rating.

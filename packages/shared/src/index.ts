@@ -249,6 +249,8 @@ export const WorldsStateSchema = z.object({
       unlocked: z.number().int(),
       stars: z.record(z.number().int()),
       total_stars: z.number().int(),
+      /** Extra hard levels after the world's last level. */
+      champion_levels: z.number().int().default(0),
     }),
   ),
   total_stars: z.number().int(),
@@ -269,6 +271,14 @@ export const SessionPayloadSchema = z.object({
   score: z.number().int(),
   total: z.number().int(),
   question_world: z.string().nullable(),
+  champion: z.boolean().default(false),
+  boosts: z.record(z.number().int()).default({}),
+  run_boosts: z.array(z.string()).default([]),
+  question_boosts: z.array(z.string()).default([]),
+  frozen: z.boolean().default(false),
+  shield: z.boolean().default(false),
+  doubled: z.boolean().default(false),
+  call_id: z.string().uuid().optional(),
 });
 export type SessionPayload = z.infer<typeof SessionPayloadSchema>;
 
@@ -290,11 +300,18 @@ export const SessionSummarySchema = z.object({
   chest: z.enum(['bronze', 'silver', 'gold', 'epic', 'legendary']).nullable(),
   first_clear: z.boolean(),
   unlocked: z.number().int().nullable(),
+  doubled: z.boolean().default(false),
+  champion: z.boolean().default(false),
+  champion_opened: z.boolean().default(false),
+  can_continue: z.boolean().default(false),
+  hearts: z.number().int().default(0),
 });
 export type SessionSummary = z.infer<typeof SessionSummarySchema>;
 
 export const SessionAnswerSchema = z.object({
   result: z.enum(['correct', 'wrong', 'timeout']),
+  /** A shield turned this mistake into a counted answer. */
+  shielded: z.boolean().default(false),
   correct_slot: SlotSchema,
   explanation: z.string(),
   points: z.number().int(),
@@ -305,6 +322,48 @@ export const SessionAnswerSchema = z.object({
   summary: SessionSummarySchema.nullable(),
 });
 export type SessionAnswer = z.infer<typeof SessionAnswerSchema>;
+
+export const BoostKindSchema = z.enum(['time', 'freeze', 'shield', 'skip', 'double', 'heart']);
+export type BoostKind = z.infer<typeof BoostKindSchema>;
+export const BoostsStateSchema = z.object({
+  counts: z.record(z.number().int()),
+  prices: z.record(z.number().int()),
+  hint_coins: z.number().int(),
+});
+export type BoostsState = z.infer<typeof BoostsStateSchema>;
+
+export const CallCandidateSchema = z.object({
+  id: z.string().uuid(),
+  username: z.string(),
+  avatar_id: z.string().nullable(),
+  level: z.number().int(),
+  online: z.boolean(),
+});
+export type CallCandidate = z.infer<typeof CallCandidateSchema>;
+export const CallCandidatesSchema = z.array(CallCandidateSchema);
+
+export const IncomingCallSchema = z.object({
+  id: z.string().uuid(),
+  from: z.string(),
+  avatar_id: z.string().nullable(),
+  seconds_left: z.number().int(),
+  question: z.object({
+    text: z.string(),
+    answers: z.array(z.object({ slot: z.number().int(), text: z.string() })),
+    removed: z.array(z.number().int()).default([]),
+  }),
+});
+export type IncomingCall = z.infer<typeof IncomingCallSchema>;
+export const PresencePingSchema = z.object({ calls: z.array(IncomingCallSchema) });
+
+export const CallStateSchema = z.object({
+  answer_slot: z.number().int().nullable(),
+  expired: z.boolean(),
+  seconds_left: z.number().int(),
+  friend: z.string().nullable(),
+});
+export type CallState = z.infer<typeof CallStateSchema>;
+export const BoostBuyResultSchema = z.object({ counts: z.record(z.number().int()) });
 
 export * from './legendArt';
 
@@ -425,9 +484,10 @@ export type StoreState = z.infer<typeof StoreStateSchema>;
 /* Energy, wheel, deals, season pass — mirrors *_engagement.sql               */
 /* -------------------------------------------------------------------------- */
 export const RewardSchema = z.object({
-  kind: z.enum(['coins', 'gems', 'dust', 'pack', 'tickets', 'cosmetic']),
+  kind: z.enum(['coins', 'gems', 'dust', 'pack', 'tickets', 'cosmetic', 'boost']),
   amount: z.number().int().default(1),
   pack: PackSlugSchema.optional(),
+  boost: z.string().optional(),
   item: z.string().optional(),
 });
 export type Reward = z.infer<typeof RewardSchema>;

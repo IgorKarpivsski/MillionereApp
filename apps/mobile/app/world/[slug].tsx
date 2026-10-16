@@ -10,7 +10,7 @@ import { AppText, BottomSheet, StickerButton, Backdrop } from '@/design-system/c
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { usePlaySession } from '@/features/engage/EnergySheet';
-import { useWorldsConfig, useWorldsState, worldBySlug } from '@/features/worlds/api';
+import { championLevels, levelLabel, useWorldsConfig, useWorldsState, worldBySlug } from '@/features/worlds/api';
 import { shade } from '@/features/worlds/worldArt';
 import { WorldBadge } from '@/features/worlds/WorldBadge';
 import { LevelNode } from '@/features/worlds/LevelNode';
@@ -20,6 +20,7 @@ import { physicalLeft } from '@/lib/rtl';
 
 const t = strings.worlds;
 const STEP = 104; // vertical distance between level nodes
+const CHAMP_GAP = 90; // room for the champion-tier banner
 const NODE = 78;
 
 function Stars({ n, size = 14 }: { n: number; size?: number }) {
@@ -56,12 +57,18 @@ export default function WorldScreen() {
   const unlocked = st?.unlocked ?? 1;
   const stars = st?.stars ?? {};
   const levels = w.levels;
+  const champ = st?.champion_levels || championLevels(levels);
+  const nodes = levels + champ;
+  const champColor = '#B8860B';
   const passed = Object.values(stars).filter((n) => n > 0).length;
 
   const pos = useMemo(() => {
     const amp = Math.min(110, width / 2 - NODE);
-    return Array.from({ length: levels }, (_, i) => ({ x: width / 2 + Math.sin(i * 0.95) * amp - NODE / 2, y: 40 + i * STEP }));
-  }, [levels, width]);
+    return Array.from({ length: nodes }, (_, i) => ({
+      x: width / 2 + Math.sin(i * 0.95) * amp - NODE / 2,
+      y: 40 + i * STEP + (i >= levels ? CHAMP_GAP : 0),
+    }));
+  }, [nodes, levels, width]);
 
   // Dotted road through the node centres (physical coordinates; nodes are placed with physicalLeft).
   const road = useMemo(() => {
@@ -78,12 +85,12 @@ export default function WorldScreen() {
 
   useEffect(() => {
     if (!data) return;
-    const y = Math.max(0, 40 + (unlocked - 1) * STEP - 220);
+    const y = Math.max(0, 40 + (unlocked - 1) * STEP + (unlocked > levels ? CHAMP_GAP : 0) - 220);
     const id = setTimeout(() => scroll.current?.scrollTo({ y, animated: true }), 350);
     return () => clearTimeout(id);
   }, [data, unlocked]);
 
-  const total = 40 + levels * STEP + 40;
+  const total = 40 + nodes * STEP + CHAMP_GAP + 40;
   const tileH = Math.round((width * 16) / 9);
   const sheetStars = sheet ? (stars[String(sheet)] ?? 0) : 0;
 
@@ -126,22 +133,42 @@ export default function WorldScreen() {
           <Path d={road} stroke="#FFF3D6" strokeWidth={28} strokeLinecap="round" fill="none" />
           <Path d={road} stroke={shade(w.color, 0.25)} strokeWidth={5} strokeLinecap="round" strokeDasharray="12 16" fill="none" />
         </Svg>
+        {champ > 0 ? (
+          <View style={[styles.champBanner, { top: 40 + levels * STEP + 4 }]} pointerEvents="none">
+            <LinearGradient colors={['#FFD46B', '#E08A00']} style={StyleSheet.absoluteFill} />
+            <AppText variant="heading" color={colors.textOnBright} align="center">
+              {`👑 ${strings.champion.title}`}
+            </AppText>
+            <AppText variant="caption" color={colors.textOnBright} align="center" style={styles.bold}>
+              {unlocked > levels ? strings.champion.body : strings.champion.locked}
+            </AppText>
+          </View>
+        ) : null}
         {pos.map((p, i) => {
           const lvl = i + 1;
           const s = stars[String(lvl)] ?? 0;
           const open = lvl <= unlocked;
           const current = lvl === unlocked && s === 0;
-          const chest = lvl % 5 === 0;
+          const champion = lvl > levels;
+          const chest = !champion && lvl % 5 === 0;
           return (
             <View key={lvl} style={[styles.nodeWrap, { top: p.y }, physicalLeft(p.x, NODE, width)]}>
               {current ? <Pulse color={w.color} /> : null}
               <Pressable
                 onPress={() => setSheet(lvl)}
                 accessibilityRole="button"
-                accessibilityLabel={`${fmt(t.level, { n: lvl })}${open ? `, ${s} כוכבים` : ', נעול'}`}
+                accessibilityLabel={`${levelLabel(lvl, levels)}${open ? `, ${s} כוכבים` : ', נעול'}`}
                 style={({ pressed }) => [pressed && styles.pressed]}
               >
-                <LevelNode size={NODE} level={lvl} color={w.color} chest={chest} state={!open ? 'locked' : current ? 'current' : s > 0 ? 'done' : 'open'} />
+                <LevelNode
+                  size={NODE}
+                  level={lvl}
+                  label={champion ? lvl - levels : lvl}
+                  crown={champion}
+                  color={champion ? champColor : w.color}
+                  chest={chest}
+                  state={!open ? 'locked' : current ? 'current' : s > 0 ? 'done' : 'open'}
+                />
               </Pressable>
               {open && !current ? <Stars n={s} /> : null}
               {current ? (
@@ -156,14 +183,19 @@ export default function WorldScreen() {
         })}
       </ScrollView>
 
-      <BottomSheet visible={sheet !== null} onClose={() => setSheet(null)} title={sheet ? fmt(t.levelOf, { n: sheet, total: levels }) : ''}>
+      <BottomSheet visible={sheet !== null} onClose={() => setSheet(null)} title={sheet ? (sheet > levels ? levelLabel(sheet, levels) : fmt(t.levelOf, { n: sheet, total: levels })) : ''}>
         {sheet !== null ? (
           <View style={styles.sheet}>
             <Stars n={sheetStars} size={30} />
             <AppText color={colors.textMuted} align="center">
               {sheet <= unlocked ? t.rules : t.locked}
             </AppText>
-            {sheet % 5 === 0 ? (
+            {sheet > levels ? (
+              <AppText variant="label" color={colors.led} align="center">
+                {strings.champion.body}
+              </AppText>
+            ) : null}
+            {sheet <= levels && sheet % 5 === 0 ? (
               <AppText variant="label" color={colors.led} align="center">
                 🎁 {t.chestHint}
               </AppText>
@@ -205,4 +237,16 @@ const styles = StyleSheet.create({
   stars: { flexDirection: 'row', gap: 1, marginTop: -2, paddingHorizontal: 6, paddingVertical: 1, borderRadius: 10, backgroundColor: 'rgba(0,0,0,0.45)' },
   here: { marginTop: 4, paddingHorizontal: space.md, paddingVertical: 2, borderRadius: radius.chip },
   sheet: { alignItems: 'center', gap: space.md },
+  champBanner: {
+    position: 'absolute',
+    left: space.lg,
+    right: space.lg,
+    height: 74,
+    justifyContent: 'center',
+    paddingHorizontal: space.md,
+    borderRadius: radius.card,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#FFF3D6',
+  },
 });

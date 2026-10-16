@@ -24,6 +24,8 @@ import { bindOnlineManager } from '@/lib/network';
 import { queryClient } from '@/lib/queryClient';
 import { ensureRTL } from '@/lib/rtl';
 import { AgeGate } from '@/features/settings/AgeGate';
+import { IncomingCallHost } from '@/features/boosts/IncomingCall';
+import { RemoveAdsUpsell } from '@/features/store/RemoveAdsUpsell';
 import { initAds } from '@/features/store/ads';
 import { useBackgroundMusic } from '@/design-system/feedback/music';
 import { EnergySheet } from '@/features/engage/EnergySheet';
@@ -91,6 +93,8 @@ function Gate() {
       <EnergySheet />
       <OfflineBanner />
       <AgeGate />
+      <IncomingCallHost />
+      <RemoveAdsUpsell />
     </>
   );
 }

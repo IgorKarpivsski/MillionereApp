@@ -16,9 +16,15 @@ export const LevelNode = memo(function LevelNode({
   color,
   state,
   chest,
+  label,
+  crown = false,
 }: {
   size: number;
   level: number;
+  /** Number shown on the node (defaults to the level). */
+  label?: number;
+  /** Champion tier node. */
+  crown?: boolean;
   color: string;
   state: 'done' | 'current' | 'open' | 'locked';
   chest: boolean;
@@ -51,14 +57,20 @@ export const LevelNode = memo(function LevelNode({
         ) : chest ? (
           <Image source={CHEST_IMAGE} style={{ width: size * 0.66, height: size * 0.66 }} resizeMode="contain" />
         ) : (
-          <Text maxFontSizeMultiplier={1.1} style={[styles.num, { fontSize: size * 0.38 }]}>{level}</Text>
+          <Text maxFontSizeMultiplier={1.1} style={[styles.num, { fontSize: size * 0.38 }]}>{label ?? level}</Text>
         )}
       </View>
+      {crown && !locked ? (
+        <View style={styles.crown} pointerEvents="none">
+          <Text style={{ fontSize: size * 0.3 }}>👑</Text>
+        </View>
+      ) : null}
     </View>
   );
 });
 
 const styles = StyleSheet.create({
+  crown: { position: 'absolute', top: -14, left: 0, right: 0, alignItems: 'center' },
   center: { alignItems: 'center', justifyContent: 'center' },
   num: {
     color: '#FFFFFF',

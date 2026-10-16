@@ -1,4 +1,4 @@
-import type { SessionPayload, SessionSummary } from '@fm/shared';
+import type { BoostKind, SessionPayload, SessionSummary } from '@fm/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { haptic } from '@/design-system/feedback/haptics';
@@ -6,6 +6,7 @@ import { playSound } from '@/design-system/feedback/sound';
 import { track } from '@/lib/analytics';
 import { queryKeys } from '@/lib/queryClient';
 import { RpcError } from '@/features/profile/api';
+import { boostsApi } from '@/features/boosts/api';
 import { sessionApi } from './api';
 
 export type SessionPhase = 'loading' | 'question' | 'locked' | 'reveal' | 'finished' | 'error';
@@ -17,6 +18,7 @@ export interface SessionReveal {
   explanation: string;
   points: number;
   speedBonus: number;
+  shielded: boolean;
 }
 
 export interface SessionState {
@@ -30,6 +32,8 @@ export interface SessionState {
   summary: SessionSummary | null;
   deadlineAt: number | null;
   busy5050: boolean;
+  /** A boost / hint / call request is in flight. */
+  busyTool: string | null;
   notice: string | null;
 }
 
@@ -43,6 +47,7 @@ const initial: SessionState = {
   summary: null,
   deadlineAt: null,
   busy5050: false,
+  busyTool: null,
   notice: null,
 };
 
@@ -139,8 +144,8 @@ export function useSession(world: string, level: number | null, resumeRun?: stri
             ...x,
             phase: 'reveal',
             score: r.score,
-            results: [...x.results, good],
-            reveal: { result: r.result, correctSlot: r.correct_slot, pickedSlot: slot >= 0 ? slot : null, explanation: r.explanation, points: r.points, speedBonus: r.speed_bonus },
+            results: [...x.results, good || r.shielded],
+            reveal: { result: r.result, correctSlot: r.correct_slot, pickedSlot: slot >= 0 ? slot : null, explanation: r.explanation, points: r.points, speedBonus: r.speed_bonus, shielded: r.shielded },
             summary,
           }));
           return;
@@ -195,5 +200,99 @@ export function useSession(world: string, level: number | null, resumeRun?: stri
     }
   }, [set, qc]);
 
-  return { state: s, start, answer, timeUp, next, fifty };
+  /** Applies a fresh payload for the same question (boost / hint / call): keeps the phase, resets the clock. */
+  const applySame = useCallback(
+    (p: SessionPayload) =>
+      set((x) => ({
+        ...x,
+        busyTool: null,
+        payload: p,
+        deadlineAt: p.question ? Date.now() + p.question.seconds_left * 1000 : x.deadlineAt,
+      })),
+    [set],
+  );
+
+  const toolError = useCallback(
+    (e: unknown) => {
+      const m = e instanceof RpcError ? e.message : '';
+      const notice = m.includes('insufficient') ? 'no_coins' : m.includes('no boost') ? 'no_boost' : m.includes('offline') ? 'offline' : m.includes('rate_limited') ? 'ad_cap' : 'lifeline';
+      set((x) => ({ ...x, busyTool: null, notice }));
+    },
+    [set],
+  );
+
+  const boost = useCallback(
+    async (kind: BoostKind) => {
+      const cur = sRef.current;
+      if (!cur.payload || cur.busyTool) return false;
+      if ((kind === 'time' || kind === 'freeze' || kind === 'skip') && cur.phase !== 'question') return false;
+      haptic('select');
+      set((x) => ({ ...x, busyTool: kind, notice: null }));
+      try {
+        const p = await boostsApi.use(cur.payload.run_id, kind);
+        void qc.invalidateQueries({ queryKey: queryKeys.boosts });
+        playSound(kind === 'skip' ? 'whistle' : 'answer_lock');
+        if (kind === 'skip') set((x) => ({ ...withQuestion(x, p), busyTool: null }));
+        else applySame(p);
+        return true;
+      } catch (e) {
+        toolError(e);
+        return false;
+      }
+    },
+    [set, qc, applySame, toolError],
+  );
+
+  const hint = useCallback(
+    async (pay: 'coins' | 'ad') => {
+      const cur = sRef.current;
+      if (!cur.payload || cur.phase !== 'question' || cur.busyTool) return;
+      set((x) => ({ ...x, busyTool: 'hint', notice: null }));
+      try {
+        const p = await boostsApi.hint(cur.payload.run_id, pay);
+        if (pay === 'coins') void qc.invalidateQueries({ queryKey: queryKeys.myState });
+        haptic('select');
+        applySame(p);
+      } catch (e) {
+        toolError(e);
+      }
+    },
+    [set, qc, applySame, toolError],
+  );
+
+  /** Calls a friend: the clock pauses on the server; returns the call id to follow. */
+  const callFriend = useCallback(
+    async (friendId: string) => {
+      const cur = sRef.current;
+      if (!cur.payload || cur.phase !== 'question' || cur.busyTool) return null;
+      set((x) => ({ ...x, busyTool: 'call', notice: null }));
+      try {
+        const p = await boostsApi.call(cur.payload.run_id, friendId);
+        applySame(p);
+        return p.call_id ?? null;
+      } catch (e) {
+        toolError(e);
+        return null;
+      }
+    },
+    [set, applySame, toolError],
+  );
+
+  /** Heart: keep going on a failed level with a few more questions. */
+  const continueRun = useCallback(async () => {
+    const cur = sRef.current;
+    const runId = cur.payload?.run_id;
+    if (!runId) return;
+    set((x) => ({ ...x, phase: 'loading', summary: null, reveal: null }));
+    try {
+      const p = await boostsApi.continueRun(runId);
+      void qc.invalidateQueries({ queryKey: queryKeys.boosts });
+      playSound('whistle');
+      set((x) => ({ ...withQuestion(x, p), results: x.results.slice(0, p.rung - 1) }));
+    } catch (e) {
+      fail(e);
+    }
+  }, [set, qc, fail]);
+
+  return { state: s, start, answer, timeUp, next, fifty, boost, hint, callFriend, continueRun };
 }

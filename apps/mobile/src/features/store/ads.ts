@@ -1,10 +1,10 @@
-import mobileAds, { AdEventType, MaxAdContentRating, RewardedAd, RewardedAdEventType, TestIds } from 'react-native-google-mobile-ads';
+import mobileAds, { AdEventType, InterstitialAd, MaxAdContentRating, RewardedAd, RewardedAdEventType, TestIds } from 'react-native-google-mobile-ads';
 import Constants from 'expo-constants';
 import { useSettingsStore } from '@/features/settings/store';
 
 /**
- * Opt-in rewarded ads only — the player taps "watch" and gets a reward.
- * No banners, no forced interstitials. Uses Google's test unit until the
+ * Rewarded ads (the player taps "watch" and gets a reward) and, every few games,
+ * one full-screen ad between games for players without "no ads" (see interstitial.ts). Uses Google's test unit until the
  * real AdMob unit id is configured (EXPO_PUBLIC_ADMOB_REWARDED_ANDROID).
  *
  * Google Play Families policy: the app's audience includes children, so every
@@ -18,6 +18,10 @@ const IS_STORE_BUILD = !__DEV__ && Constants.expoConfig?.extra?.appEnv === 'prod
 const UNIT = IS_STORE_BUILD
   ? process.env.EXPO_PUBLIC_ADMOB_REWARDED_ANDROID || 'ca-app-pub-4196315436564582/6070981024'
   : TestIds.REWARDED;
+/** Between-games ad. In the store build it needs its own AdMob unit; without one, none is shown. */
+const INTERSTITIAL_UNIT: string | null = IS_STORE_BUILD
+  ? process.env.EXPO_PUBLIC_ADMOB_INTERSTITIAL_ANDROID || null
+  : TestIds.INTERSTITIAL;
 let started = false;
 
 async function applyAudience(): Promise<void> {
@@ -68,5 +72,34 @@ export function showRewardedAd(): Promise<boolean> {
     });
     ad.load();
     setTimeout(() => finish(earned), 60_000);
+  });
+}
+
+/** Shows one full-screen ad between games. Resolves when it closes (or fails). */
+export function showInterstitialAd(): Promise<boolean> {
+  if (!INTERSTITIAL_UNIT) return Promise.resolve(false);
+  initAds();
+  return new Promise((resolve) => {
+    let done = false;
+    let shown = false;
+    const ad = InterstitialAd.createForAdRequest(INTERSTITIAL_UNIT, { requestNonPersonalizedAdsOnly: true });
+    const finish = () => {
+      if (done) return;
+      done = true;
+      unsubscribe();
+      resolve(shown);
+    };
+    const unsubscribe = ad.addAdEventsListener(({ type }) => {
+      if (type === AdEventType.LOADED) {
+        shown = true;
+        void ad.show();
+      } else if (type === AdEventType.CLOSED || type === AdEventType.ERROR) finish();
+    });
+    ad.load();
+    // Never hold the player: give up if the ad doesn't load quickly.
+    setTimeout(() => {
+      if (!shown) finish();
+    }, 8000);
+    setTimeout(finish, 90_000);
   });
 }
