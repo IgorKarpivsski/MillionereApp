@@ -63,6 +63,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ['react-native-google-mobile-ads', { androidAppId: ADMOB_ANDROID_APP_ID, iosAppId: ADMOB_IOS_APP_ID }],
     'expo-iap',
     ['expo-notifications', { icon: './assets/images/notification-icon.png', color: '#FFB000' }],
+    './plugins/withoutAudioServices',
     ['expo-build-properties', { android: { kotlinVersion: '2.2.0', compileSdkVersion: 36, targetSdkVersion: 36 } }],
   ],
   experiments: { typedRoutes: true },
