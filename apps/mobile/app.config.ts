@@ -64,7 +64,29 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-iap',
     ['expo-notifications', { icon: './assets/images/notification-icon.png', color: '#FFB000' }],
     './plugins/withoutAudioServices',
-    ['expo-build-properties', { android: { kotlinVersion: '2.2.0', compileSdkVersion: 36, targetSdkVersion: 36 } }],
+    [
+      'expo-build-properties',
+      {
+        android: {
+          kotlinVersion: '2.2.0',
+          compileSdkVersion: 36,
+          targetSdkVersion: 36,
+          // R8 for release builds (Play's code-optimization score). Native modules keep their own rules;
+          // these keep the reflection-loaded Expo / React Native / in-app purchase classes intact.
+          enableMinifyInReleaseBuilds: true,
+          extraProguardRules: [
+            '-keep class expo.modules.** { *; }',
+            '-keep class com.facebook.react.** { *; }',
+            '-keep class com.facebook.hermes.** { *; }',
+            '-keep class com.swmansion.** { *; }',
+            '-keep class dev.hyo.** { *; }',
+            '-keep class io.sentry.** { *; }',
+            '-dontwarn dev.hyo.**',
+            '-dontwarn io.sentry.**',
+          ].join('\n'),
+        },
+      },
+    ],
   ],
   experiments: { typedRoutes: true },
   extra: {
