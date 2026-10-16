@@ -18,7 +18,7 @@ import {
   useToast,
 } from '@/design-system/components';
 import { colors, rarityColors, space, type RarityKey } from '@/design-system/tokens';
-import { PackArt, PACK_GLOW, PACK_NAMES } from '@/features/collection/PackArt';
+import { GlowingPack, PACK_GLOW, PACK_NAMES } from '@/features/collection/PackArt';
 import { useCollection } from '@/features/collection/hooks';
 import { useMyState } from '@/features/profile/hooks';
 import { formatNumber } from '@/lib/format';
@@ -105,9 +105,7 @@ export default function PacksScreen() {
               style={StyleSheet.absoluteFill}
             />
             <View style={styles.packRow}>
-              <View style={[styles.packGlow, { shadowColor: PACK_GLOW[p.slug] }]}>
-                <PackArt slug={p.slug} width={104} />
-              </View>
+              <GlowingPack slug={p.slug} width={92} />
               <View style={styles.flex}>
                 <AppText variant="title">{PACK_NAMES[p.slug]}</AppText>
                 <View style={styles.chips}>
@@ -166,7 +164,6 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   packRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   packCard: { borderRadius: 24, borderWidth: 2, padding: space.md, overflow: 'hidden' },
-  packGlow: { shadowOpacity: 0.9, shadowRadius: 16, shadowOffset: { width: 0, height: 0 }, elevation: 10, borderRadius: 10 },
   ownedPill: { alignSelf: 'flex-start', paddingHorizontal: space.sm, paddingVertical: 3, borderRadius: 999, marginTop: space.xs },
   errorCard: { gap: space.sm, alignItems: 'center' },
   price: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: space.xxs },

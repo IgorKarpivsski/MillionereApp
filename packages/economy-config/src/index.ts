@@ -53,8 +53,8 @@ export const PACKS: readonly PackType[] = [
   { slug: 'bronze', items: 3, priceCoins: 500, priceGems: null, odds: { common: 70, uncommon: 25, rare: 5 }, guaranteed: null },
   { slug: 'silver', items: 4, priceCoins: 1_500, priceGems: null, odds: { common: 45, uncommon: 38, rare: 14, epic: 3 }, guaranteed: null },
   { slug: 'gold', items: 5, priceCoins: 4_000, priceGems: null, odds: { uncommon: 40, rare: 40, epic: 17, legendary: 3 }, guaranteed: 'rare' },
-  { slug: 'epic', items: 5, priceCoins: null, priceGems: 60, odds: { rare: 55, epic: 38, legendary: 6, iconic: 1 }, guaranteed: 'epic' },
-  { slug: 'legendary', items: 5, priceCoins: null, priceGems: null, odds: { epic: 60, legendary: 35, iconic: 5 }, guaranteed: 'legendary' },
+  { slug: 'epic', items: 6, priceCoins: null, priceGems: 60, odds: { rare: 55, epic: 38, legendary: 6, iconic: 1 }, guaranteed: 'epic' },
+  { slug: 'legendary', items: 7, priceCoins: null, priceGems: null, odds: { epic: 60, legendary: 35, iconic: 5 }, guaranteed: 'legendary' },
 ];
 
 export const DUST_FROM_DUPLICATE: Record<Rarity, number> = {

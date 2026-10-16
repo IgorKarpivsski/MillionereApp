@@ -409,6 +409,11 @@ export const he = {
     swipeToTear: 'החלק את האצבע על הקו כדי לקרוע (או הקש)',
     glowNew: 'זוהרת!',
     glowStamp: 'מדבקה זוהרת!',
+    tapToContinue: 'לחץ כדי להמשיך',
+    summary: '{n} מדבקות חדשות לאוסף!',
+    summaryOne: 'מדבקה חדשה אחת לאוסף!',
+    summaryNone: 'הפעם רק כפולות, והן הפכו לאבקה',
+    morePacks: 'לעוד חבילות',
   },
   collection: {
     title: 'אלבום האגדות',
