@@ -20,7 +20,7 @@ const UNIT = IS_STORE_BUILD
   : TestIds.REWARDED;
 /** Between-games ad. In the store build it needs its own AdMob unit; without one, none is shown. */
 const INTERSTITIAL_UNIT: string | null = IS_STORE_BUILD
-  ? process.env.EXPO_PUBLIC_ADMOB_INTERSTITIAL_ANDROID || null
+  ? process.env.EXPO_PUBLIC_ADMOB_INTERSTITIAL_ANDROID || 'ca-app-pub-4196315436564582/9714782372'
   : TestIds.INTERSTITIAL;
 let started = false;
 
