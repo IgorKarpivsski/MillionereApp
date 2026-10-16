@@ -16,6 +16,7 @@ export const WORLD_IMAGES: Record<string, ImageSourcePropType> = {
   food: require('../../../assets/worlds/food.webp'),
   ball: require('../../../assets/worlds/football.webp'),
   bolt: require('../../../assets/worlds/mix.webp'),
+  menorah: require('../../../assets/worlds/hanukkah.webp'),
 };
 
 /** Tall level-map background behind each world's path, keyed by world slug. */

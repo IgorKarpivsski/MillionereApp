@@ -42,6 +42,7 @@ export const DEFAULT_WORLDS: WorldConfig[] = [
   { slug: 'sport', name: 'ספורט', icon: 'medal', color: '#14A3B8', levels: 9 },
   { slug: 'food', name: 'אוכל', icon: 'food', color: '#EE8A2E', levels: 10 },
   { slug: 'football', name: 'כדורגל', icon: 'ball', color: '#1E9E4A', levels: 25 },
+  { slug: 'hanukkah', name: 'חנוכה', icon: 'menorah', color: '#2F6FE0', levels: 6 },
 ];
 
 export const MIX_WORLD: WorldConfig = { slug: 'mix', name: 'משחק מהיר', icon: 'bolt', color: '#FFB000', levels: 0 };
