@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Application from 'expo-application';
 import { router } from 'expo-router';
+import type React from 'react';
 import { useState } from 'react';
 import { Alert, Linking, Pressable, StyleSheet, Switch, View } from 'react-native';
 import { AppText, Card, Screen, StickerButton, useToast } from '@/design-system/components';
@@ -17,12 +18,33 @@ import { useIsOnline } from '@/lib/network';
 
 const t = strings.settings;
 type ToggleKey = 'sound' | 'music' | 'haptics' | 'reducedMotion' | 'extendedTime';
+type IconName = React.ComponentProps<typeof Ionicons>['name'];
+
+const ROW_ICONS: Record<string, IconName> = {
+  sound: 'volume-high',
+  music: 'musical-notes',
+  haptics: 'phone-portrait',
+  reducedMotion: 'pause-circle',
+  extendedTime: 'time',
+  largeText: 'text',
+  reminders: 'notifications',
+};
+
+/** Small lit icon chip at the start of each settings row. */
+function RowIcon({ name }: { name: IconName }) {
+  return (
+    <View style={styles.icon}>
+      <Ionicons name={name} size={18} color={colors.led} />
+    </View>
+  );
+}
 
 function ToggleRow({ k, label, hint }: { k: ToggleKey; label: string; hint?: string }) {
   const value = useSettingsStore((s) => s[k]);
   const toggle = useToggleSetting();
   return (
     <View style={styles.row}>
+      {ROW_ICONS[k] ? <RowIcon name={ROW_ICONS[k]} /> : null}
       <View style={styles.flex}>
         <AppText variant="bodyStrong">{label}</AppText>
         {hint ? (
@@ -35,7 +57,7 @@ function ToggleRow({ k, label, hint }: { k: ToggleKey; label: string; hint?: str
         value={value}
         onValueChange={(v) => toggle.mutate({ key: k, value: v })}
         accessibilityLabel={label}
-        trackColor={{ false: palette.night950, true: colors.primary }}
+        trackColor={{ false: 'rgba(255,255,255,0.18)', true: colors.primary }}
         thumbColor={colors.sticker}
         ios_backgroundColor={palette.night950}
       />
@@ -49,6 +71,7 @@ function LocalToggleRow({ k, label, hint }: { k: 'largeText' | 'reminders'; labe
   const set = useSettingsStore((s) => s.set);
   return (
     <View style={styles.row}>
+      {ROW_ICONS[k] ? <RowIcon name={ROW_ICONS[k]} /> : null}
       <View style={styles.flex}>
         <AppText variant="bodyStrong">{label}</AppText>
         <AppText variant="caption" color={colors.textMuted}>
@@ -65,7 +88,7 @@ function LocalToggleRow({ k, label, hint }: { k: 'largeText' | 'reminders'; labe
           }
         }}
         accessibilityLabel={label}
-        trackColor={{ false: palette.night950, true: colors.primary }}
+        trackColor={{ false: 'rgba(255,255,255,0.18)', true: colors.primary }}
         thumbColor={colors.sticker}
         ios_backgroundColor={palette.night950}
       />
@@ -73,9 +96,10 @@ function LocalToggleRow({ k, label, hint }: { k: 'largeText' | 'reminders'; labe
   );
 }
 
-function LinkRow({ label, onPress }: { label: string; onPress: () => void }) {
+function LinkRow({ label, onPress, icon = 'document-text' }: { label: string; onPress: () => void; icon?: IconName }) {
   return (
-    <Pressable onPress={onPress} accessibilityRole="link" style={styles.row}>
+    <Pressable onPress={onPress} accessibilityRole="link" style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
+      <RowIcon name={icon} />
       <AppText variant="bodyStrong" style={styles.flex}>
         {label}
       </AppText>
@@ -137,12 +161,12 @@ export default function SettingsScreen() {
         <ToggleRow k="reducedMotion" label={t.reducedMotion} hint={t.reducedMotionHint} />
         <LocalToggleRow k="largeText" label={t.largeText} hint={t.largeTextHint} />
         <ToggleRow k="extendedTime" label={t.extendedTime} hint={t.extendedTimeHint} />
-        <LinkRow label={t.a11yStatement} onPress={() => router.push('/legal/accessibility')} />
+        <LinkRow icon="accessibility" label={t.a11yStatement} onPress={() => router.push('/legal/accessibility')} />
       </Card>
 
       <Card>
-        <LinkRow label={strings.redeem.entry} onPress={() => setRedeemOpen(true)} />
-        {admin.data?.admin ? <LinkRow label={strings.admin.entry} onPress={() => router.push('/admin')} /> : null}
+        <LinkRow icon="gift" label={strings.redeem.entry} onPress={() => setRedeemOpen(true)} />
+        {admin.data?.admin ? <LinkRow icon="shield-checkmark" label={strings.admin.entry} onPress={() => router.push('/admin')} /> : null}
       </Card>
 
       <Card>
@@ -150,8 +174,8 @@ export default function SettingsScreen() {
           {t.legal}
         </AppText>
         <LinkRow label={t.terms} onPress={() => router.push('/legal/terms')} />
-        <LinkRow label={t.privacy} onPress={() => router.push('/legal/privacy')} />
-        <LinkRow label={t.support} onPress={() => void Linking.openURL(`mailto:${brand.supportEmail}`)} />
+        <LinkRow icon="lock-closed" label={t.privacy} onPress={() => router.push('/legal/privacy')} />
+        <LinkRow icon="mail" label={t.support} onPress={() => void Linking.openURL(`mailto:${brand.supportEmail}`)} />
       </Card>
 
       <StickerButton
@@ -183,6 +207,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.lg,
     paddingTop: space.md,
   },
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 52 },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    minHeight: 56,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(255,255,255,0.10)',
+  },
+  pressed: { opacity: 0.7 },
+  icon: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,176,0,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,176,0,0.3)',
+  },
   flex: { flex: 1 },
 });

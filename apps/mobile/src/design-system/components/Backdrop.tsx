@@ -11,6 +11,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
+import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 import { useReducedMotion } from '../feedback/reducedMotion';
 import { palette } from '../tokens';
 
@@ -88,3 +89,22 @@ export const Backdrop = memo(function Backdrop({ motes = 9, accent }: { motes?: 
 const styles = StyleSheet.create({
   root: { backgroundColor: palette.night950, overflow: 'hidden' },
 });
+
+/** A soft round light (static) to place behind a hero element: avatar, trophy, prize. */
+export function Glow({ color = '#FFB000', size = 220, strength = 0.55 }: { color?: string; size?: number; strength?: number }) {
+  const id = `glow${color.replace(/[^0-9a-z]/gi, '')}${size}`;
+  return (
+    <View pointerEvents="none" style={{ position: 'absolute', width: size, height: size }}>
+      <Svg width={size} height={size}>
+        <Defs>
+          <RadialGradient id={id} cx="50%" cy="50%" r="50%">
+            <Stop offset="0" stopColor={color} stopOpacity={strength} />
+            <Stop offset="0.5" stopColor={color} stopOpacity={strength * 0.3} />
+            <Stop offset="1" stopColor={color} stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Circle cx={size / 2} cy={size / 2} r={size / 2} fill={`url(#${id})`} />
+      </Svg>
+    </View>
+  );
+}

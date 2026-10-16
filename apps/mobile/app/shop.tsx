@@ -106,7 +106,7 @@ export default function ShopScreen() {
           </View>
         ) : null}
         <View style={styles.row}>
-          {p.kind === 'coins' ? <CoinIcon size={34} /> : p.kind === 'gems' ? <GemIcon size={34} /> : <TrophyLogo size={34} />}
+          <View style={styles.iconWell}>{p.kind === 'coins' ? <CoinIcon size={38} /> : p.kind === 'gems' ? <GemIcon size={38} /> : <TrophyLogo size={38} />}</View>
           <View style={styles.flex}>
             <AppText variant="label">{p.title}</AppText>
             <AppText variant="caption" color={colors.textDim}>
@@ -224,6 +224,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   flex: { flex: 1 },
   item: { gap: space.xs },
+  iconWell: { width: 54, height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,214,140,0.10)', borderWidth: 1, borderColor: 'rgba(255,214,140,0.25)' },
   badge: {
     position: 'absolute',
     top: 0,

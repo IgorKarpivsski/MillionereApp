@@ -9,6 +9,7 @@ import {
   AvatarBadge,
   BottomSheet,
   Card,
+  Glow,
   ProgressBar,
   Screen,
   Skeleton,
@@ -157,6 +158,9 @@ export default function ProfileScreen() {
   return (
     <Screen>
       <View style={styles.header}>
+        <View style={styles.glowSpot}>
+          <Glow size={300} strength={0.5} />
+        </View>
         <Pressable
           onPress={() => router.push('/avatar')}
           accessibilityRole="button"
@@ -221,12 +225,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: colors.led,
     borderWidth: 2,
-    borderColor: colors.bg,
+    borderColor: colors.bgDeep,
     alignItems: 'center',
     justifyContent: 'center',
   },
   flex: { flex: 1, gap: space.xxs },
   header: { alignItems: 'center', gap: space.md, paddingTop: space.md },
+  glowSpot: { position: 'absolute', top: -70, alignItems: 'center', justifyContent: 'center', width: 300, height: 300 },
   nameRow: { alignItems: 'center', gap: space.sm },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   levelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: space.md },

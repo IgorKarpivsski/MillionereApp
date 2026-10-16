@@ -33,7 +33,11 @@ export function BottomSheet({
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: colors.overlay },
   sheet: {
-    backgroundColor: colors.surface,
+    backgroundColor: '#1B1048',
+    shadowColor: colors.led,
+    shadowOpacity: 0.35,
+    shadowRadius: 18,
+    elevation: 16,
     borderTopStartRadius: radius.sheet,
     borderTopEndRadius: radius.sheet,
     borderTopWidth: 2,
