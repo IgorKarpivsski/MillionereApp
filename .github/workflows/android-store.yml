@@ -115,7 +115,7 @@ jobs:
           serviceAccountJson: ${{ runner.temp }}/play.json
           packageName: com.haaluf.trivia
           releaseFiles: out/*.aab
-          track: alpha
+          tracks: alpha
           status: completed
           inAppUpdatePriority: 2
 
@@ -124,6 +124,7 @@ jobs:
         run: rm -f "$RUNNER_TEMP/play.json"
 
       - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && hashFiles('out/*.aab') != '' }}
         with:
           name: aab
           path: out/*.aab
@@ -131,6 +132,7 @@ jobs:
       # Draft release: only the repo owner sees it, so the bundle can be
       # downloaded on the phone and uploaded to Play Console.
       - name: Draft release with the bundle
+        if: ${{ !cancelled() && hashFiles('out/*.aab') != '' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: store-build-${{ github.run_number }}
