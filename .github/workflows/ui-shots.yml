@@ -1,0 +1,60 @@
+name: UI screenshots
+
+# Installs the latest preview APK on an Android emulator, opens each screen
+# by deep link and commits the screenshots to the data-fetch branch
+# (shots/<run>/), so the design can be reviewed without a phone.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag of the APK (empty = latest android-build-*)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+      - name: Download APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${{ inputs.tag }}"
+          if [ -z "$tag" ]; then
+            tag=$(gh release list --limit 30 --json tagName -q '.[].tagName' | grep '^android-build-' | head -1)
+          fi
+          echo "APK from $tag"
+          mkdir -p apk && gh release download "$tag" --pattern '*.apk' --dir apk
+          ls -la apk
+      - name: Run emulator and capture
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash tools/scripts/ui-shots.sh
+      - name: Commit screenshots
+        if: always()
+        run: |
+          [ -d shots ] || exit 0
+          git config user.name "football-data-bot"
+          git config user.email "bot@users.noreply.github.com"
+          mv shots /tmp/shots
+          git fetch origin data-fetch
+          git checkout -B data-fetch origin/data-fetch
+          mkdir -p shots && rm -rf "shots/${{ github.run_number }}" && mv /tmp/shots "shots/${{ github.run_number }}"
+          git add shots
+          git commit -m "UI screenshots run ${{ github.run_number }}" || exit 0
+          git push origin data-fetch
