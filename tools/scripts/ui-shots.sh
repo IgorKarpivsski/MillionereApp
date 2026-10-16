@@ -14,6 +14,23 @@ calm() {
   # "Wait" button on an ANR dialog, if any.
   adb shell input keyevent KEYCODE_BACK >/dev/null 2>&1 || true
 }
+# Tap the first on-screen element whose text contains $1 (via a UI dump).
+tap_text() {
+  adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
+  adb pull /sdcard/ui.xml /tmp/ui.xml >/dev/null 2>&1 || return 1
+  xy=$(python3 - "$1" <<'PY'
+import re, sys
+want = sys.argv[1]
+xml = open('/tmp/ui.xml', encoding='utf-8').read()
+for m in re.finditer(r'(?:text|content-desc)="([^"]*)"[^>]*?bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', xml):
+    if want in m.group(1):
+        x1, y1, x2, y2 = map(int, m.groups()[1:])
+        print((x1 + x2) // 2, (y1 + y2) // 2)
+        break
+PY
+)
+  [ -n "$xy" ] && adb shell input tap $xy && echo "tapped '$1' at $xy"
+}
 shot() {
   adb exec-out screencap -p > "shots/$1.png"
   echo "shot $1"
@@ -26,6 +43,13 @@ shot 00_launch
 adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1
 sleep 5
 shot 01_after
+# First-run popups: the special deal, then the daily login gift.
+tap_text "אולי אחר כך"; sleep 4
+shot 02_deal_closed
+tap_text "קח את המתנה"; sleep 6
+shot 03_gift
+adb shell input keyevent KEYCODE_BACK; sleep 3
+shot 04_clear
 
 for route in "" play packs collection leaderboard profile shop wheel pass friends settings avatar match "world/history"; do
   name=${route//\//_}

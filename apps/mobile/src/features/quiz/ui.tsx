@@ -21,14 +21,14 @@ export type AnswerState =
   | 'dim';
 
 const look: Record<AnswerState, { bg: string; border: string; bw: number; text: string; opacity: number }> = {
-  idle: { bg: colors.board, border: colors.border, bw: 2, text: colors.text, opacity: 1 },
-  removed: { bg: colors.board, border: colors.board, bw: 2, text: colors.board, opacity: 0.35 },
+  idle: { bg: 'rgba(44,28,108,0.88)', border: colors.border, bw: 1.5, text: colors.text, opacity: 1 },
+  removed: { bg: colors.board, border: 'transparent', bw: 1.5, text: 'transparent', opacity: 0.3 },
   overturned: { bg: colors.board, border: colors.dangerLip, bw: 2, text: colors.textDim, opacity: 0.6 },
-  picked: { bg: colors.board, border: colors.led, bw: 3, text: colors.text, opacity: 1 },
-  correctPicked: { bg: colors.correctFill, border: colors.correct, bw: 3, text: colors.text, opacity: 1 },
-  correctMissed: { bg: colors.board, border: colors.correct, bw: 3, text: colors.text, opacity: 1 },
-  wrongPicked: { bg: '#4A1612', border: colors.danger, bw: 3, text: colors.text, opacity: 1 },
-  dim: { bg: colors.board, border: colors.border, bw: 2, text: colors.textDim, opacity: 0.55 },
+  picked: { bg: 'rgba(255,176,0,0.22)', border: colors.led, bw: 2.5, text: colors.text, opacity: 1 },
+  correctPicked: { bg: 'rgba(30,158,90,0.55)', border: colors.correct, bw: 2.5, text: colors.text, opacity: 1 },
+  correctMissed: { bg: 'rgba(30,158,90,0.25)', border: colors.correct, bw: 2.5, text: colors.text, opacity: 1 },
+  wrongPicked: { bg: 'rgba(184,50,42,0.5)', border: colors.danger, bw: 2.5, text: colors.text, opacity: 1 },
+  dim: { bg: colors.board, border: colors.border, bw: 1.5, text: colors.textDim, opacity: 0.55 },
 };
 
 export function AnswerTile({
