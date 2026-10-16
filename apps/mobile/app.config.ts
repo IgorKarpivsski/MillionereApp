@@ -64,6 +64,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-iap',
     ['expo-notifications', { icon: './assets/images/notification-icon.png', color: '#FFB000' }],
     './plugins/withoutAudioServices',
+    './plugins/withGradleHeap',
     [
       'expo-build-properties',
       {
