@@ -659,7 +659,7 @@ export const he = {
       gems: '{n} יהלומים',
       dust: '{n} אבקה',
       tickets: '{n} כרטיסים',
-      boost: '{name} x{n}',
+      boost: '{name} · {n} יחידות',
       packs: '{p} · {n} יחידות',
     },
     cosmetics: {
