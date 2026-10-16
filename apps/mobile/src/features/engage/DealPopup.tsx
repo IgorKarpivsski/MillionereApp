@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useQuery } from '@tanstack/react-query';
 import { usePathname } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
@@ -6,6 +7,7 @@ import Animated, { ZoomIn } from 'react-native-reanimated';
 import { StickerButton } from '@/design-system/components';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { colors, space } from '@/design-system/tokens';
+import { useSettingsStore } from '@/features/settings/store';
 import { strings } from '@/lib/i18n';
 import { DealCard } from './DealCard';
 import { useDeals } from './hooks';
@@ -21,9 +23,14 @@ export function DealPopup() {
   const path = usePathname();
   const reduced = useReducedMotion();
   const [open, setOpen] = useState(false);
+  // Shares the login calendar's cache (no extra request): wait until today's gift is taken,
+  // so two popups never stack on top of each other.
+  const { data: login } = useQuery<{ claimable: boolean }>({ queryKey: ['login-calendar'], enabled: false });
+  const ageAsked = useSettingsStore((s) => s.ageBand !== null);
+  const giftPending = !ageAsked || !login || login.claimable;
 
   useEffect(() => {
-    if (!data || data.bought || path !== '/') return;
+    if (!data || data.bought || path !== '/' || giftPending) return;
     let cancelled = false;
     const id = setTimeout(async () => {
       try {
@@ -39,7 +46,7 @@ export function DealPopup() {
       cancelled = true;
       clearTimeout(id);
     };
-  }, [data, path]);
+  }, [data, path, giftPending]);
 
   if (!data) return null;
   return (

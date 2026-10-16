@@ -9,6 +9,7 @@ import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound } from '@/design-system/feedback/sound';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { useSettingsStore } from '@/features/settings/store';
 import { rpc } from '@/features/profile/api';
 import { fmt, strings } from '@/lib/i18n';
 import { useRefreshEconomy } from './hooks';
@@ -30,6 +31,8 @@ export function LoginCalendar() {
   const reduced = useReducedMotion();
   const [busy, setBusy] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  // One popup at a time: the age question comes first.
+  const ageAsked = useSettingsStore((s) => s.ageBand !== null);
   const { data } = useQuery({
     queryKey: ['login-calendar'],
     queryFn: () => rpc('login_state', undefined, (x) => x as LoginState),
@@ -37,7 +40,7 @@ export function LoginCalendar() {
     staleTime: 60_000,
   });
   if (!data) return null;
-  const open = data.claimable && !dismissed;
+  const open = data.claimable && !dismissed && ageAsked;
 
   const claim = async () => {
     setBusy(true);

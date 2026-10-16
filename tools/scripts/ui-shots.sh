@@ -43,11 +43,13 @@ shot 00_launch
 adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1
 sleep 5
 shot 01_after
-# First-run popups: the special deal, then the daily login gift.
-tap_text "אולי אחר כך"; sleep 4
-shot 02_deal_closed
-tap_text "קח את המתנה"; sleep 6
+# First-run popups, by position (uiautomator never idles while the backdrop animates):
+# age question ("18+"), then the daily gift, then the deal (closed with back).
+adb shell input tap 351 2190; sleep 5
+shot 02_age_done
+adb shell input tap 540 1566; sleep 7
 shot 03_gift
+sleep 4
 adb shell input keyevent KEYCODE_BACK; sleep 3
 shot 04_clear
 
