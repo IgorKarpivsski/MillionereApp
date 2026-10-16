@@ -20,8 +20,7 @@ import {
   ProgressBar,
   StickerButton,
   TrophyLogo,
-  useToast,
-} from '@/design-system/components';
+  useToast, Backdrop } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound, preloadSounds } from '@/design-system/feedback/sound';
@@ -328,6 +327,7 @@ export default function QuizScreen() {
   if (s.phase === 'error' && s.notice === 'no_energy') {
     return (
       <SafeAreaView style={styles.root}>
+        <Backdrop />
         <View style={styles.center}>
           <EmptyState
             icon="ticket-outline"
@@ -345,6 +345,7 @@ export default function QuizScreen() {
   if (s.phase === 'error') {
     return (
       <SafeAreaView style={styles.root}>
+        <Backdrop />
         <View style={styles.center}>
           <EmptyState
             icon="cloud-offline-outline"
@@ -362,6 +363,7 @@ export default function QuizScreen() {
   if (s.phase === 'finished' && s.summary) {
     return (
       <SafeAreaView style={styles.root}>
+        <Backdrop />
         <ResultView
           s={s}
           daily={daily}
@@ -375,6 +377,7 @@ export default function QuizScreen() {
   if (!s.payload || !q) {
     return (
       <SafeAreaView style={styles.root}>
+        <Backdrop />
         <View style={styles.center}>
           <TrophyLogo size={96} />
           <AppText color={colors.textMuted}>{t.starting}</AppText>
@@ -415,6 +418,7 @@ export default function QuizScreen() {
 
   return (
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
+      <Backdrop />
       <Board s={s} daily={daily} onExit={exit} />
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
@@ -576,7 +580,7 @@ export default function QuizScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
+  root: { flex: 1, backgroundColor: colors.bgDeep },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, padding: space.xl },
   flex: { flex: 1 },
   bold: { fontFamily: 'IBMPlexSansHebrew_700Bold' },

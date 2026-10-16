@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import type { ComponentProps } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
@@ -15,8 +16,8 @@ const tones: Record<Tone, { face: string; lip: string; label: string; border?: s
   prize: { face: colors.prize, lip: colors.prizeLip, label: colors.textOnBright },
   danger: { face: colors.danger, lip: colors.dangerLip, label: colors.textOnBright },
   gem: { face: colors.gem, lip: colors.gemLip, label: colors.textOnBright },
-  ghost: { face: colors.board, lip: palette.night950, label: colors.text, border: colors.border },
-  outline: { face: colors.board, lip: palette.night950, label: colors.led, border: colors.led },
+  ghost: { face: '#2A1C66', lip: '#0E0826', label: colors.text, border: 'rgba(255,214,140,0.28)' },
+  outline: { face: '#211552', lip: '#0E0826', label: colors.led, border: colors.led },
 };
 
 const heights: Record<Size, number> = { lg: 58, md: 50, sm: hitTarget };
@@ -56,6 +57,7 @@ export function StickerButton({
   const reduced = useReducedMotion();
   const pressed = useSharedValue(0);
   const inactive = disabled || loading;
+  const bright = tone !== 'ghost' && tone !== 'outline';
 
   const faceStyle = useAnimatedStyle(() => ({ transform: [{ translateY: pressed.value * depth }] }));
 
@@ -79,15 +81,28 @@ export function StickerButton({
       hitSlop={size === 'sm' ? 6 : 0}
       style={[{ height: h + depth, opacity: inactive && !loading ? 0.45 : 1 }, fullWidth && styles.full, style]}
     >
-      <View style={[styles.lip, { top: depth, height: h, backgroundColor: t.lip }]} />
+      <View
+        style={[
+          styles.lip,
+          { top: depth, height: h, backgroundColor: t.lip },
+          bright && !inactive ? { shadowColor: t.face, shadowOpacity: 0.7, shadowRadius: 12, elevation: 8 } : null,
+        ]}
+      />
       <Animated.View
         style={[
           styles.face,
           { height: h, backgroundColor: t.face, paddingHorizontal: size === 'sm' ? space.lg : space.xl },
           t.border ? { borderWidth: 2, borderColor: t.border } : null,
+          bright && !inactive ? { elevation: 9, shadowOpacity: 0 } : null,
           faceStyle,
         ]}
       >
+        <LinearGradient
+          pointerEvents="none"
+          colors={bright ? ['rgba(255,255,255,0.45)', 'rgba(255,255,255,0.05)', 'rgba(0,0,0,0.08)'] : ['rgba(255,255,255,0.14)', 'rgba(255,255,255,0)']}
+          locations={bright ? [0, 0.5, 1] : [0, 0.6]}
+          style={StyleSheet.absoluteFill}
+        />
         {loading ? (
           <ActivityIndicator color={t.label} />
         ) : (
@@ -112,5 +127,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: space.sm,
+    overflow: 'hidden',
   },
 });

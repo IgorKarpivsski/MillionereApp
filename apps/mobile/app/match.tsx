@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, AvatarBadge, Card, Led, StickerButton, TrophyLogo, useToast } from '@/design-system/components';
+import { AppText, AvatarBadge, Card, Led, StickerButton, TrophyLogo, useToast, Backdrop } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound, preloadSounds } from '@/design-system/feedback/sound';
@@ -205,6 +205,7 @@ export default function MatchScreen() {
   if (!room) {
     return (
       <SafeAreaView style={styles.root}>
+        <Backdrop />
         <View style={styles.top}>
           <StickerButton label={strings.common.close} tone="ghost" size="sm" onPress={() => router.back()} />
         </View>
@@ -216,6 +217,7 @@ export default function MatchScreen() {
   if (!s) {
     return (
       <SafeAreaView style={[styles.root, styles.center]}>
+        <Backdrop />
         <ActivityIndicator color={colors.led} />
       </SafeAreaView>
     );
@@ -225,6 +227,7 @@ export default function MatchScreen() {
     const link = `footballmillionaire://match?code=${s.code}`;
     return (
       <SafeAreaView style={styles.root}>
+        <Backdrop />
         <View style={styles.top}>
           <StickerButton label={strings.common.close} tone="ghost" size="sm" onPress={() => router.back()} />
         </View>
@@ -255,6 +258,7 @@ export default function MatchScreen() {
   if (s.phase === 'countdown') {
     return (
       <SafeAreaView style={[styles.root, styles.center]}>
+        <Backdrop />
         <AppText variant="heading">{fmt(t.vs, { name: s.opponent?.username ?? '' })}</AppText>
         <Animated.View key={Math.ceil(left)} entering={ZoomIn}>
           <Led size="ledXL">{Math.max(1, Math.ceil(left))}</Led>
@@ -268,6 +272,7 @@ export default function MatchScreen() {
     const draw = s.my_score === s.opp_score;
     return (
       <SafeAreaView style={styles.root}>
+        <Backdrop />
         <ScrollView contentContainerStyle={[styles.center, styles.pad]}>
           <TrophyLogo size={win ? 120 : 80} color={win ? colors.led : colors.border} />
           <AppText variant="title" align="center">
@@ -301,6 +306,7 @@ export default function MatchScreen() {
 
   return (
     <SafeAreaView style={styles.root}>
+      <Backdrop />
       <Players s={s} />
       <ScrollView contentContainerStyle={styles.body}>
         <View style={styles.info}>
@@ -365,7 +371,7 @@ export default function MatchScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
+  root: { flex: 1, backgroundColor: colors.bgDeep },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg },
   pad: { padding: space.xl },
   top: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: space.lg, paddingTop: space.sm },

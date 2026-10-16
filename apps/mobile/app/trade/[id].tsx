@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, StickerButton, useToast } from '@/design-system/components';
+import { AppText, StickerButton, useToast, Backdrop } from '@/design-system/components';
 import { colors, radius, space } from '@/design-system/tokens';
 import { useCollection } from '@/features/collection/hooks';
 import { LegendCard } from '@/features/collection/LegendCard';
@@ -96,6 +96,7 @@ export default function TradeScreen() {
 
   return (
     <SafeAreaView style={styles.root}>
+      <Backdrop />
       <View style={styles.top}>
         <AppText variant="title" numberOfLines={1} style={styles.flex}>
           {fmt(t.tradeTitle, { name: peer })}
@@ -139,7 +140,7 @@ export default function TradeScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
+  root: { flex: 1, backgroundColor: colors.bgDeep },
   top: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: space.lg, paddingTop: space.sm },
   flex: { flex: 1 },
   body: { padding: space.lg, gap: space.md },

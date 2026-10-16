@@ -37,10 +37,12 @@ export const palette = {
 export const colors = {
   bg: palette.night900,
   bgDeep: palette.night950,
-  board: palette.night950,
-  surface: palette.night950,
-  surfaceRaised: palette.night700,
-  border: palette.night600,
+  /** Glass panels: translucent so the lit backdrop glows through. */
+  board: 'rgba(22,13,56,0.86)',
+  surface: 'rgba(22,13,56,0.86)',
+  surfaceRaised: 'rgba(64,44,140,0.72)',
+  /** A thin warm-gold hairline instead of heavy outlines. */
+  border: 'rgba(255,214,140,0.26)',
 
   text: palette.chalk,
   textMuted: palette.chalkDim,

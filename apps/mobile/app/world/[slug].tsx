@@ -6,7 +6,7 @@ import { Image, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } f
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
-import { AppText, BottomSheet, StickerButton } from '@/design-system/components';
+import { AppText, BottomSheet, StickerButton, Backdrop } from '@/design-system/components';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { usePlaySession } from '@/features/engage/EnergySheet';
@@ -89,8 +89,9 @@ export default function WorldScreen() {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      {WORLD_IMAGES[w.icon] ? <Image source={WORLD_IMAGES[w.icon]!} style={styles.glow} resizeMode="cover" blurRadius={2} /> : null}
-      <LinearGradient colors={[shade(w.color, -0.35) + 'CC', colors.bg]} locations={[0, 1]} style={styles.glow} />
+      <Backdrop />
+      {WORLD_IMAGES[w.icon] ? <Image source={WORLD_IMAGES[w.icon]!} style={[styles.glow, styles.glowArt]} resizeMode="cover" blurRadius={2} /> : null}
+      <LinearGradient colors={[shade(w.color, -0.35) + '99', 'rgba(26,16,66,0.55)', 'rgba(26,16,66,0)']} locations={[0, 0.7, 1]} style={styles.glow} />
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button" accessibilityLabel={strings.common.back}>
           <Ionicons name="arrow-forward" size={26} color={colors.text} />
@@ -187,8 +188,9 @@ export default function WorldScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
+  root: { flex: 1, backgroundColor: colors.bgDeep },
   glow: { position: 'absolute', top: 0, left: 0, right: 0, height: 320, width: '100%' },
+  glowArt: { opacity: 0.4 },
   flex: { flex: 1 },
   bold: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
   header: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingHorizontal: space.md, paddingTop: space.sm },

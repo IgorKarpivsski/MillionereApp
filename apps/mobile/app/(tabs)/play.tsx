@@ -2,7 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { TopBar } from '@/components/TopBar';
-import { AppText, Icon, Screen } from '@/design-system/components';
+import { AppText, Icon, Screen, Sheen } from '@/design-system/components';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { QuickPlayCard, WorldsGrid } from '@/features/worlds/WorldCards';
 import { strings } from '@/lib/i18n';
@@ -25,6 +25,7 @@ export default function PlayScreen() {
           style={({ pressed }) => [styles.mini, pressed && styles.pressed]}
         >
           <LinearGradient colors={['#7FD1FF', '#5C7CFF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+          <Sheen />
           <Icon name="daily" size={44} />
           <AppText variant="heading" color={colors.textOnBright} align="center">
             {strings.home.dailyTitle}
@@ -32,6 +33,7 @@ export default function PlayScreen() {
         </Pressable>
         <Pressable onPress={() => router.push('/match')} accessibilityRole="button" style={({ pressed }) => [styles.mini, pressed && styles.pressed]}>
           <LinearGradient colors={['#FF8AD8', '#B14CFF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+          <Sheen />
           <Icon name="friends" size={44} />
           <AppText variant="heading" color={colors.textOnBright} align="center">
             {strings.match.playCard}
@@ -52,7 +54,7 @@ const styles = StyleSheet.create({
     padding: space.md,
     borderRadius: radius.card,
     overflow: 'hidden',
-    borderWidth: 3,
-    borderColor: palette.night950,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.28)',
   },
 });

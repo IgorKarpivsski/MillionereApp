@@ -15,3 +15,4 @@ export * from './BottomSheet';
 export * from './Scoreboard';
 export * from '../icons/Icon';
 export * from './ChampionBadge';
+export * from './Backdrop';

@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeInUp, ZoomIn, useAnimatedStyle, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, BottomSheet, Card, EmptyState, Led, StickerButton, useToast } from '@/design-system/components';
+import { AppText, BottomSheet, Card, EmptyState, Led, StickerButton, useToast, Backdrop } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound, preloadSounds } from '@/design-system/feedback/sound';
@@ -155,7 +155,7 @@ function ResultView({
   const title = quick ? t.quickDone : sum.stars === 3 ? t.perfect : sum.stars > 0 ? t.passed : t.failed;
   return (
     <ScrollView contentContainerStyle={styles.result}>
-      <LinearGradient colors={[shade(color, -0.2), colors.bg]} style={styles.resultGlow} />
+      <LinearGradient colors={[shade(color, -0.2) + 'CC', shade(color, -0.5) + '00']} style={styles.resultGlow} />
       <View style={styles.starsRow}>
         <BigStar lit={sum.stars >= 1} delay={250} size={64} />
         <View style={styles.starMid}>
@@ -331,6 +331,7 @@ export default function SessionScreen() {
     const noEnergy = s.notice === 'no_energy';
     return (
       <SafeAreaView style={styles.root}>
+        <Backdrop />
         <View style={styles.center}>
           <EmptyState
             icon={noEnergy ? 'ticket-outline' : s.notice === 'locked' ? 'lock-closed-outline' : 'cloud-offline-outline'}
@@ -350,6 +351,7 @@ export default function SessionScreen() {
     const canNext = sum.world !== 'mix' && sum.stars > 0 && sum.level < w.levels;
     return (
       <SafeAreaView style={styles.root}>
+        <Backdrop />
         <ResultView s={s} world={w.name} color={w.color} onAgain={() => again()} onNext={canNext ? () => again(sum.level + 1) : null} />
       </SafeAreaView>
     );
@@ -359,6 +361,7 @@ export default function SessionScreen() {
   if (!s.payload || !q) {
     return (
       <SafeAreaView style={styles.root}>
+        <Backdrop />
         <View style={styles.center}>
           <Animated.View entering={reduced ? undefined : ZoomIn.springify()}>
             <WorldBadge icon={w.icon} color={w.color} size={110} />
@@ -392,7 +395,8 @@ export default function SessionScreen() {
 
   return (
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
-      <LinearGradient colors={[shade(qWorld.color, -0.45), colors.bg]} style={styles.bgGlow} />
+      <Backdrop />
+      <LinearGradient colors={[shade(qWorld.color, -0.45) + 'CC', shade(qWorld.color, -0.6) + '00']} style={styles.bgGlow} />
       <View style={styles.top}>
         <Pressable onPress={exit} hitSlop={12} accessibilityRole="button" accessibilityLabel={t.exit}>
           <Ionicons name="close" size={26} color={colors.textMuted} />
@@ -529,7 +533,7 @@ export default function SessionScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
+  root: { flex: 1, backgroundColor: colors.bgDeep },
   bgGlow: { position: 'absolute', top: 0, left: 0, right: 0, height: 320 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.md, padding: space.xl },
   flex: { flex: 1 },

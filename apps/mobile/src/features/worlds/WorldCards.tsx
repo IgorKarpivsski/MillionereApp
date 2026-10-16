@@ -3,7 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { AppText } from '@/design-system/components';
+import { AppText, Sheen } from '@/design-system/components';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { usePlaySession } from '@/features/engage/EnergySheet';
@@ -21,6 +21,7 @@ export function QuickPlayCard() {
   return (
     <Pressable onPress={() => play('mix')} accessibilityRole="button" accessibilityLabel={t.quickPlay} style={({ pressed }) => [styles.quick, pressed && styles.pressed]}>
       <LinearGradient colors={['#FFC53D', '#FF8A3D']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+      <Sheen strength={0.35} />
       <Image source={WORLD_IMAGES.bolt} style={styles.quickArt} />
       <View style={styles.flex}>
         <AppText variant="title" color={colors.textOnBright}>
@@ -51,7 +52,7 @@ export function WorldsGrid() {
               onPress={() => router.push({ pathname: '/world/[slug]', params: { slug: w.slug } })}
               accessibilityRole="button"
               accessibilityLabel={`${w.name}, ${fmt(t.progress, { n: passed })}`}
-              style={({ pressed }) => [styles.world, { backgroundColor: shade(w.color, -0.4), borderBottomColor: shade(w.color, -0.65) }, pressed && styles.pressed]}
+              style={({ pressed }) => [styles.world, { backgroundColor: shade(w.color, -0.4), shadowColor: w.color }, pressed && styles.pressed]}
             >
               {WORLD_IMAGES[w.icon] ? (
                 <Image source={WORLD_IMAGES[w.icon]!} style={styles.cover} resizeMode="cover" />
@@ -60,6 +61,7 @@ export function WorldsGrid() {
                   <WorldBadge icon={w.icon} color={w.color} size={62} />
                 </View>
               )}
+              <LinearGradient colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.35)']} style={styles.coverFade} pointerEvents="none" />
               <View style={styles.body}>
                 <AppText variant="heading" align="center" numberOfLines={1} color="#FFFFFF" style={styles.worldName}>
                   {w.name}
@@ -133,16 +135,26 @@ const styles = StyleSheet.create({
     padding: space.lg,
     borderRadius: 24,
     overflow: 'hidden',
-    borderBottomWidth: 6,
-    borderBottomColor: '#C2571A',
+    backgroundColor: '#FF8A3D',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.55)',
+    shadowColor: '#FF9A3D',
+    shadowOpacity: 0.6,
+    shadowRadius: 16,
+    elevation: 10,
   },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: space.md },
   cell: { width: '48%' },
   world: {
     borderRadius: 22,
-    borderBottomWidth: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
     overflow: 'hidden',
+    shadowOpacity: 0.55,
+    shadowRadius: 12,
+    elevation: 6,
   },
+  coverFade: { position: 'absolute', left: 0, right: 0, top: '35%', bottom: 0 },
   cover: { width: '100%', aspectRatio: 1.15 },
   coverFallback: { alignItems: 'center', justifyContent: 'center' },
   body: { paddingHorizontal: space.sm, paddingTop: 6, paddingBottom: space.sm, gap: 5 },
@@ -161,7 +173,7 @@ const styles = StyleSheet.create({
     padding: space.md,
     borderRadius: radius.card,
     overflow: 'hidden',
-    borderWidth: 3,
-    borderColor: palette.night950,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.28)',
   },
 });

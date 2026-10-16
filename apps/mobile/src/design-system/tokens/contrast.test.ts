@@ -6,8 +6,12 @@ import { contrastRatio } from './contrast.ts';
 const AA_TEXT = 4.5;
 const AA_LARGE = 3;
 
+/** Glass surfaces are translucent; over the dark backdrop they composite to about these. */
+const SURFACE = palette.night950;
+const RAISED = palette.night700;
+
 test('body text passes WCAG AA on every surface', () => {
-  for (const bg of [colors.bg, colors.bgDeep, colors.surface, colors.surfaceRaised]) {
+  for (const bg of [colors.bg, colors.bgDeep, SURFACE, RAISED]) {
     assert.ok(contrastRatio(colors.text, bg) >= AA_TEXT, `text on ${bg}`);
     assert.ok(contrastRatio(colors.textMuted, bg) >= AA_TEXT, `muted text on ${bg}`);
   }
@@ -29,14 +33,14 @@ test('accent colors stand out from the background (non-text 3:1)', () => {
 
 test('every rarity frame is distinguishable from the surface', () => {
   for (const [name, r] of Object.entries(rarityColors)) {
-    assert.ok(contrastRatio(r.fill, colors.surface) >= AA_LARGE, `${name} frame vs surface`);
+    assert.ok(contrastRatio(r.fill, SURFACE) >= AA_LARGE, `${name} frame vs surface`);
     assert.ok(r.label.length > 0, `${name} has a Hebrew label`);
   }
 });
 
 test('scoreboard captions and the question card stay readable', () => {
-  assert.ok(contrastRatio(colors.textDim, colors.board) >= AA_TEXT, 'dim caption on board');
-  assert.ok(contrastRatio(colors.led, colors.board) >= AA_TEXT, 'LED digits on board');
+  assert.ok(contrastRatio(colors.textDim, SURFACE) >= AA_TEXT, 'dim caption on board');
+  assert.ok(contrastRatio(colors.led, SURFACE) >= AA_TEXT, 'LED digits on board');
   assert.ok(contrastRatio(colors.cardText, colors.card) >= AA_TEXT, 'question text on card');
   assert.ok(contrastRatio(colors.cardMuted, colors.card) >= AA_TEXT, 'card caption');
   assert.ok(contrastRatio(colors.text, colors.correctFill) >= AA_TEXT, 'answer text on correct fill');

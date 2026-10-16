@@ -2,7 +2,7 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppText, Icon, type IconName } from '@/design-system/components';
+import { AppText, GLASS_EDGE, GlassFill, Icon, type IconName } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { colors, palette, radius, space } from '@/design-system/tokens';
@@ -70,6 +70,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   return (
     <View style={[styles.outer, { paddingBottom: Math.max(insets.bottom, space.sm) }]}>
       <View style={styles.bar} accessibilityRole="tablist">
+        <GlassFill strong />
         {state.routes.map((route, i) => {
           if (HIDDEN.has(route.name)) return null;
           const options = descriptors[route.key]?.options;
@@ -98,20 +99,23 @@ const styles = StyleSheet.create({
   bar: {
     flexDirection: 'row',
     backgroundColor: palette.night950,
-    borderRadius: radius.card,
-    borderWidth: 2,
-    borderColor: colors.border,
+    borderRadius: radius.sheet,
+    borderWidth: 1,
+    borderColor: GLASS_EDGE,
+    overflow: 'hidden',
     paddingVertical: space.sm,
     paddingHorizontal: space.xs,
   },
   tab: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2, minHeight: 52 },
   lamp: {
     position: 'absolute',
-    top: -space.sm - 1,
-    width: 28,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: colors.led,
+    top: -2,
+    width: 54,
+    height: 46,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,176,0,0.16)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,176,0,0.45)',
   },
   on: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
 });

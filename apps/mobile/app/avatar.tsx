@@ -16,7 +16,7 @@ import { Image, Pressable, ScrollView, StyleSheet, View, useWindowDimensions } f
 import { AVATAR_3D_IDS, AVATARS_3D } from '@/lib/avatars3d';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgXml } from 'react-native-svg';
-import { AppText, StickerButton, useToast } from '@/design-system/components';
+import { AppText, StickerButton, useToast, Backdrop } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { playSound } from '@/design-system/feedback/sound';
 import { colors, palette, radius, space } from '@/design-system/tokens';
@@ -234,6 +234,7 @@ export default function AvatarScreen() {
 
   return (
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
+      <Backdrop />
       <View style={styles.header}>
         <Pressable
           onPress={() => router.back()}
@@ -351,7 +352,7 @@ export default function AvatarScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
+  root: { flex: 1, backgroundColor: colors.bgDeep },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

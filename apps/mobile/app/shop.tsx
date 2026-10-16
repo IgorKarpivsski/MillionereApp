@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ParentalGate } from '@/components/ParentalGate';
-import { AppText, Card, CoinIcon, GemIcon, Led, StickerButton, TrophyLogo, useToast } from '@/design-system/components';
+import { AppText, Card, CoinIcon, GemIcon, Led, StickerButton, TrophyLogo, useToast, Backdrop } from '@/design-system/components';
 import { playSound } from '@/design-system/feedback/sound';
 import { colors, radius, space } from '@/design-system/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
@@ -134,6 +134,7 @@ export default function ShopScreen() {
 
   return (
     <SafeAreaView style={styles.root}>
+      <Backdrop />
       <View style={styles.top}>
         <AppText variant="title">{t.title}</AppText>
         <StickerButton label={strings.common.close} tone="ghost" size="sm" onPress={() => router.back()} />
@@ -217,7 +218,7 @@ export default function ShopScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
+  root: { flex: 1, backgroundColor: colors.bgDeep },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: space.lg, paddingTop: space.sm },
   body: { padding: space.lg, gap: space.md },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md },

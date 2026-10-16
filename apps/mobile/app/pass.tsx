@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, ProgressBar, StickerButton, useToast } from '@/design-system/components';
+import { AppText, ProgressBar, StickerButton, useToast, Backdrop } from '@/design-system/components';
 import { playSound } from '@/design-system/feedback/sound';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { useBuyPremium, useClaimTier, usePass } from '@/features/engage/hooks';
@@ -98,6 +98,7 @@ export default function PassScreen() {
   if (!data.active) {
     return (
       <SafeAreaView style={styles.root}>
+        <Backdrop />
         <Header />
         <AppText align="center" color={colors.textMuted} style={styles.pad}>
           {t.noSeason}
@@ -136,8 +137,9 @@ export default function PassScreen() {
 
   return (
     <SafeAreaView style={styles.root}>
+      <Backdrop />
       <Header />
-      <LinearGradient colors={[palette.violetDeep, palette.night900]} style={styles.hero}>
+      <LinearGradient colors={['rgba(117,89,214,0.85)', 'rgba(30,18,80,0.75)']} style={styles.hero}>
         <AppText variant="heading">{s.title}</AppText>
         <AppText variant="caption" color={colors.textMuted}>
           {fmt(t.seasonEnds, { d: new Date(s.ends).toLocaleDateString('he-IL') })}
@@ -224,7 +226,7 @@ function Header() {
 
 const ROW = 104;
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
+  root: { flex: 1, backgroundColor: colors.bgDeep },
   pad: { padding: space.xl },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: space.lg, paddingTop: space.sm },
   hero: { margin: space.md, padding: space.lg, borderRadius: radius.board, gap: space.sm, borderWidth: 2, borderColor: palette.violet },

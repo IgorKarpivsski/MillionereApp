@@ -5,7 +5,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, BottomSheet, StickerButton, useToast } from '@/design-system/components';
+import { AppText, BottomSheet, StickerButton, useToast, Backdrop } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { RpcError } from '@/features/profile/api';
@@ -85,6 +85,7 @@ export default function ChatScreen() {
 
   return (
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
+      <Backdrop />
       <View style={styles.top}>
         <Pressable onPress={() => router.back()} style={styles.back} accessibilityRole="button" accessibilityLabel={strings.common.close}>
           <Ionicons name="chevron-forward" size={26} color={colors.text} />
@@ -148,7 +149,7 @@ export default function ChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
+  root: { flex: 1, backgroundColor: colors.bgDeep },
   flex: { flex: 1 },
   top: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: space.md, paddingVertical: space.sm },
   back: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },

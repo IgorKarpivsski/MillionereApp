@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { AppText, AvatarBadge, CoinIcon, GemIcon, Led, Skeleton, TicketIcon } from '@/design-system/components';
+import { AppText, AvatarBadge, CoinIcon, GemIcon, GLASS_EDGE, GlassFill, Led, Skeleton, TicketIcon } from '@/design-system/components';
 import { colors, radius, space } from '@/design-system/tokens';
 import { useEnergySheet } from '@/features/engage/EnergySheet';
 import { useCountdownTo, useEnergy } from '@/features/engage/hooks';
@@ -80,6 +80,7 @@ export function TopBar() {
   const { data } = useMyState();
   return (
     <View style={styles.bar}>
+      <GlassFill />
       {data ? (
         <Pressable
           onPress={() => router.push('/(tabs)/profile')}
@@ -131,10 +132,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
     paddingVertical: space.sm,
     gap: space.sm,
-    borderRadius: radius.board,
-    backgroundColor: colors.board,
-    borderWidth: 2,
-    borderColor: colors.border,
+    borderRadius: radius.sheet,
+    borderWidth: 1,
+    borderColor: GLASS_EDGE,
+    overflow: 'hidden',
   },
   who: { flexDirection: 'row', alignItems: 'center', gap: space.sm, flexShrink: 1 },
   whoText: { flexShrink: 1 },

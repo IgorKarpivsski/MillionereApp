@@ -11,6 +11,7 @@ import {
   Led,
   LiveTicker,
   Screen,
+  Sheen,
   Skeleton,
   StatTile,
   StickerButton,
@@ -82,6 +83,7 @@ function DailyCard() {
   return (
     <View style={styles.matchShell}>
       <LinearGradient colors={['#3E8EF7', '#5C4CE0', '#7B2FD0']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+      <Sheen />
       <View style={styles.matchHead}>
         <View style={styles.dailyTitle}>
           <Icon name="daily" size={40} />
@@ -150,6 +152,7 @@ function DailyExtras() {
         accessibilityLabel={e.wheelTitle}
       >
         <LinearGradient colors={['#FFC93C', '#FF8A3D']} style={StyleSheet.absoluteFill} />
+        <Sheen />
         <Icon name="wheel" size={52} />
         <AppText variant="label" color={colors.textOnBright}>{e.wheelTitle}</AppText>
         <AppText variant="caption" color={colors.textOnBright} align="center" style={styles.sideTight}>
@@ -164,6 +167,7 @@ function DailyExtras() {
         accessibilityLabel={e.passTitle}
       >
         <LinearGradient colors={['#B49CFF', '#5C7CFF']} style={StyleSheet.absoluteFill} />
+        <Sheen />
         <Icon name="pass" size={52} />
         <AppText variant="label" color={colors.textOnBright}>{e.passTitle}</AppText>
         <AppText variant="caption" color={colors.textOnBright} align="center" style={styles.sideTight}>
@@ -189,6 +193,7 @@ function LeagueEntry() {
       accessibilityLabel={label}
     >
       <LinearGradient colors={['#2E2263', '#4B2A8A']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
+      <Sheen />
       <LeagueBadge tier={data.tier} size={44} />
       <AppText variant="label" style={styles.flex}>
         {label}
@@ -208,6 +213,7 @@ function FriendsEntry() {
       accessibilityLabel={unread > 0 ? `${strings.social.entry}, ${unread}` : strings.social.entry}
     >
       <LinearGradient colors={['#14A3B8', '#2F5FD0']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
+      <Sheen />
       <Icon name="friends" size={40} />
       <Icon name="chat" size={30} />
       <AppText variant="label" style={styles.flex}>
@@ -282,8 +288,8 @@ const styles = StyleSheet.create({
     gap: space.md,
     padding: space.lg,
     borderRadius: 24,
-    borderWidth: 3,
-    borderColor: palette.night950,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.28)',
     overflow: 'hidden',
   },
   heroRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
@@ -292,8 +298,8 @@ const styles = StyleSheet.create({
     gap: space.md,
     padding: space.lg,
     borderRadius: 22,
-    borderWidth: 3,
-    borderColor: palette.night950,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.28)',
     overflow: 'hidden',
   },
   pitchLines: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', opacity: 0.12 },
@@ -320,8 +326,8 @@ const styles = StyleSheet.create({
     gap: space.xxs,
     padding: space.md,
     borderRadius: 20,
-    borderWidth: 3,
-    borderColor: palette.night950,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.28)',
     overflow: 'hidden',
   },
   dailyTitle: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
@@ -335,8 +341,8 @@ const styles = StyleSheet.create({
     gap: space.md,
     padding: space.md,
     borderRadius: 20,
-    borderWidth: 3,
-    borderColor: palette.night950,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.28)',
     overflow: 'hidden',
   },
   count: { minWidth: 24, height: 24, borderRadius: 12, backgroundColor: colors.danger, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
