@@ -62,7 +62,7 @@ export async function rescheduleReminders(): Promise<void> {
   }
 }
 
-/** Asks once for permission, after the player has finished a game (never on first launch). */
+/** Asks once for permission (on launch, right after the age question; again from settings). */
 export async function askForRemindersOnce(): Promise<void> {
   const s = useSettingsStore.getState();
   if (s.remindersAsked || !s.reminders) return;
@@ -88,6 +88,14 @@ export async function askForRemindersOnce(): Promise<void> {
 
 /** Mount once at the root: re-plans reminders whenever the app goes to the background. */
 export function useReminders(): void {
+  // Ask for notification permission when the app opens, once the age question is answered
+  // (one prompt at a time). askForRemindersOnce() itself only ever asks once per device.
+  const ageAsked = useSettingsStore((st) => st.ageBand !== null);
+  useEffect(() => {
+    if (!ageAsked) return;
+    const id = setTimeout(() => void askForRemindersOnce(), 1500);
+    return () => clearTimeout(id);
+  }, [ageAsked]);
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
       if (state === 'background') void rescheduleReminders();

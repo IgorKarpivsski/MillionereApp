@@ -30,6 +30,7 @@ import { useAdReward } from '@/features/store/hooks';
 import { AnswerTile, LifelineButton, type AnswerState } from '@/features/quiz/ui';
 import { useQuizRun, type QuizRunState } from '@/features/quiz/useQuizRun';
 import { formatNumber } from '@/lib/format';
+import { goHome } from '@/lib/goHome';
 import { fmt, strings } from '@/lib/i18n';
 import { QuestionImageView } from '@/features/quiz/QuestionImage';
 
@@ -224,7 +225,7 @@ function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => voi
         <StickerButton label={t.again} icon="refresh" size="lg" fullWidth onPress={onAgain} />
       )}
       <DoubleCoins runId={s.payload?.run_id} coins={sum.coins} />
-      <StickerButton label={t.home} tone="ghost" fullWidth onPress={() => router.back()} />
+      <StickerButton label={t.home} icon="home" tone="ghost" fullWidth onPress={goHome} />
     </ScrollView>
   );
 }

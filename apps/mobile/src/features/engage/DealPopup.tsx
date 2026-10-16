@@ -1,69 +1,73 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useQuery } from '@tanstack/react-query';
-import { usePathname } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
-import Animated, { ZoomIn } from 'react-native-reanimated';
-import { StickerButton } from '@/design-system/components';
-import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { AppText, Led } from '@/design-system/components';
 import { colors, space } from '@/design-system/tokens';
-import { useSettingsStore } from '@/features/settings/store';
 import { strings } from '@/lib/i18n';
-import { DealCard } from './DealCard';
-import { useDeals } from './hooks';
+import { useCountdownTo, useDeals } from './hooks';
+import { RewardIcon } from './rewards';
 
-const KEY = 'deal-popup-seen-window';
+const t = strings.engage;
 
 /**
- * Pops the new deal once per deal window, only on the home screen and a few
- * seconds after it settles — never in the middle of a game.
+ * The current deal as a slim banner on the home screen (it used to pop up on
+ * launch; now nothing pops up by itself). Tapping opens the shop where it can be bought.
  */
-export function DealPopup() {
+export function DealBanner() {
   const { data } = useDeals();
-  const path = usePathname();
-  const reduced = useReducedMotion();
-  const [open, setOpen] = useState(false);
-  // Shares the login calendar's cache (no extra request): wait until today's gift is taken,
-  // so two popups never stack on top of each other.
-  const { data: login } = useQuery<{ claimable: boolean }>({ queryKey: ['login-calendar'], enabled: false });
-  const ageAsked = useSettingsStore((s) => s.ageBand !== null);
-  const giftPending = !ageAsked || !login || login.claimable;
-
-  useEffect(() => {
-    if (!data || data.bought || path !== '/' || giftPending) return;
-    let cancelled = false;
-    const id = setTimeout(async () => {
-      try {
-        const seen = await AsyncStorage.getItem(KEY);
-        if (cancelled || seen === String(data.window)) return;
-        await AsyncStorage.setItem(KEY, String(data.window));
-        setOpen(true);
-      } catch {
-        // storage unavailable: skip the popup rather than nag every launch
-      }
-    }, 3500);
-    return () => {
-      cancelled = true;
-      clearTimeout(id);
-    };
-  }, [data, path, giftPending]);
-
-  if (!data) return null;
+  const left = useCountdownTo(data?.ends_at);
+  if (!data || data.bought) return null;
+  const { deal } = data;
+  const off = Math.round((1 - deal.price.amount / deal.was) * 100);
   return (
-    <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-      <Pressable style={styles.overlay} onPress={() => setOpen(false)} accessibilityRole="button" accessibilityLabel={strings.common.close} />
-      <View style={styles.center} pointerEvents="box-none">
-        <Animated.View entering={reduced ? undefined : ZoomIn.springify().damping(14)} style={styles.box} accessibilityViewIsModal>
-          <DealCard state={data} onDone={() => setOpen(false)} />
-          <StickerButton label={strings.engage.later} tone="ghost" fullWidth onPress={() => setOpen(false)} />
-        </Animated.View>
+    <Pressable
+      onPress={() => router.push('/shop')}
+      accessibilityRole="button"
+      accessibilityLabel={`${t.dealTitle}: ${deal.title}, -${off}%`}
+      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+    >
+      <View style={styles.badge}>
+        <AppText variant="label" color={colors.text} style={styles.bold}>
+          {`-${off}%`}
+        </AppText>
       </View>
-    </Modal>
+      {deal.rewards[0] ? <RewardIcon r={deal.rewards[0]} size={36} /> : null}
+      <View style={styles.flex}>
+        <AppText variant="caption" color={colors.danger} style={styles.bold}>
+          {t.dealTitle}
+        </AppText>
+        <AppText variant="label" numberOfLines={1}>
+          {deal.title}
+        </AppText>
+      </View>
+      {left ? (
+        <Led size="ledS" color={colors.textMuted}>
+          {left}
+        </Led>
+      ) : null}
+      <Ionicons name="chevron-back" size={20} color={colors.text} />
+    </Pressable>
   );
 }
 
+/** Kept for older imports: the deal no longer pops up by itself. */
+export function DealPopup() {
+  return null;
+}
+
 const styles = StyleSheet.create({
-  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.overlay },
-  center: { flex: 1, justifyContent: 'center', padding: space.lg },
-  box: { gap: space.sm },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    padding: space.md,
+    borderRadius: 18,
+    backgroundColor: 'rgba(184,50,42,0.22)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,90,78,0.55)',
+  },
+  pressed: { transform: [{ scale: 0.98 }] },
+  badge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, backgroundColor: colors.danger },
+  bold: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
+  flex: { flex: 1 },
 });

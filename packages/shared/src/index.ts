@@ -298,6 +298,8 @@ export const SessionAnswerSchema = z.object({
   correct_slot: SlotSchema,
   explanation: z.string(),
   points: z.number().int(),
+  /** Part of `points` earned by answering fast (seconds left x points per second). */
+  speed_bonus: z.number().int().default(0),
   score: z.number().int(),
   correct_count: z.number().int(),
   summary: SessionSummarySchema.nullable(),

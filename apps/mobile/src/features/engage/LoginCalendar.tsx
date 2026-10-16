@@ -1,15 +1,14 @@
 import type { Reward } from '@fm/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Modal, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { ZoomIn } from 'react-native-reanimated';
-import { AppText, StickerButton, useToast } from '@/design-system/components';
+import { AppText, Glow, Sheen, StickerButton, useToast } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound } from '@/design-system/feedback/sound';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
-import { useSettingsStore } from '@/features/settings/store';
 import { rpc } from '@/features/profile/api';
 import { fmt, strings } from '@/lib/i18n';
 import { useRefreshEconomy } from './hooks';
@@ -22,7 +21,10 @@ interface LoginState {
 }
 const t = strings.login;
 
-/** Pops up once a day with the 7-day calendar; day 7 is the big prize. */
+/**
+ * The 7-day login gift. Never pops up on its own: while today's gift is waiting,
+ * a glowing card on the home screen says so, and tapping it opens the calendar.
+ */
 export function LoginCalendar() {
   const { session } = useAuth();
   const qc = useQueryClient();
@@ -30,9 +32,7 @@ export function LoginCalendar() {
   const refresh = useRefreshEconomy();
   const reduced = useReducedMotion();
   const [busy, setBusy] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
-  // One popup at a time: the age question comes first.
-  const ageAsked = useSettingsStore((s) => s.ageBand !== null);
+  const [open, setOpen] = useState(false);
   const { data } = useQuery({
     queryKey: ['login-calendar'],
     queryFn: () => rpc('login_state', undefined, (x) => x as LoginState),
@@ -40,7 +40,7 @@ export function LoginCalendar() {
     staleTime: 60_000,
   });
   if (!data) return null;
-  const open = data.claimable && !dismissed && ageAsked;
+  if (!data.claimable && !open) return null;
 
   const claim = async () => {
     setBusy(true);
@@ -51,16 +51,46 @@ export function LoginCalendar() {
       toast(fmt(t.got, { label: rewardLabel(r.reward) }), 'success');
       refresh();
       void qc.invalidateQueries({ queryKey: ['login-calendar'] });
-      setDismissed(true);
+      setOpen(false);
     } catch {
-      setDismissed(true);
+      setOpen(false);
     } finally {
       setBusy(false);
     }
   };
 
+  const today = data.days[data.day];
   return (
-    <Modal visible={open} transparent animationType="fade" onRequestClose={() => setDismissed(true)} statusBarTranslucent>
+    <>
+    <Pressable
+      onPress={() => {
+        haptic('tap');
+        setOpen(true);
+      }}
+      accessibilityRole="button"
+      accessibilityLabel={`${t.title}. ${t.cardBody}`}
+      style={({ pressed }) => [styles.homeCard, pressed && styles.pressed]}
+    >
+      <Sheen strength={0.4} />
+      <View style={styles.giftSpot}>
+        <Glow color="#FFFFFF" size={110} strength={0.6} />
+        {today ? <RewardIcon r={today} size={52} /> : null}
+      </View>
+      <View style={styles.flex}>
+        <AppText variant="heading" color={colors.textOnBright}>
+          {t.cardTitle}
+        </AppText>
+        <AppText variant="caption" color={colors.textOnBright} style={styles.bold}>
+          {today ? fmt(t.cardBody2, { n: data.day + 1, label: rewardLabel(today) }) : t.cardBody}
+        </AppText>
+      </View>
+      <View style={styles.cta}>
+        <AppText variant="label" color={colors.led}>
+          {t.cardCta}
+        </AppText>
+      </View>
+    </Pressable>
+    <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)} statusBarTranslucent>
       <View style={styles.scrim}>
         <Animated.View entering={reduced ? undefined : ZoomIn.springify().damping(13)} style={styles.card} accessibilityViewIsModal>
           <AppText variant="title" align="center">
@@ -99,10 +129,30 @@ export function LoginCalendar() {
         </Animated.View>
       </View>
     </Modal>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
+  homeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    padding: space.md,
+    borderRadius: 22,
+    overflow: 'hidden',
+    backgroundColor: '#FFB000',
+    borderWidth: 1.5,
+    borderColor: '#FFE7A0',
+    shadowColor: '#FFB000',
+    shadowOpacity: 0.8,
+    shadowRadius: 18,
+    elevation: 12,
+  },
+  pressed: { transform: [{ scale: 0.97 }] },
+  giftSpot: { width: 64, height: 64, alignItems: 'center', justifyContent: 'center' },
+  flex: { flex: 1, gap: 2 },
+  cta: { paddingHorizontal: space.md, paddingVertical: space.sm, borderRadius: 999, backgroundColor: palette.night950 },
   scrim: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', alignItems: 'center', justifyContent: 'center', padding: space.lg },
   card: {
     width: '100%',
@@ -110,8 +160,8 @@ const styles = StyleSheet.create({
     gap: space.md,
     padding: space.lg,
     borderRadius: radius.sheet,
-    backgroundColor: colors.bg,
-    borderWidth: 3,
+    backgroundColor: '#1D1150',
+    borderWidth: 2,
     borderColor: colors.led,
   },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, justifyContent: 'center' },

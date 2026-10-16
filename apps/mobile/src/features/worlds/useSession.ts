@@ -16,6 +16,7 @@ export interface SessionReveal {
   pickedSlot: number | null;
   explanation: string;
   points: number;
+  speedBonus: number;
 }
 
 export interface SessionState {
@@ -139,7 +140,7 @@ export function useSession(world: string, level: number | null, resumeRun?: stri
             phase: 'reveal',
             score: r.score,
             results: [...x.results, good],
-            reveal: { result: r.result, correctSlot: r.correct_slot, pickedSlot: slot >= 0 ? slot : null, explanation: r.explanation, points: r.points },
+            reveal: { result: r.result, correctSlot: r.correct_slot, pickedSlot: slot >= 0 ? slot : null, explanation: r.explanation, points: r.points, speedBonus: r.speed_bonus },
             summary,
           }));
           return;

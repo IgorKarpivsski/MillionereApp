@@ -27,7 +27,6 @@ import { AgeGate } from '@/features/settings/AgeGate';
 import { initAds } from '@/features/store/ads';
 import { useBackgroundMusic } from '@/design-system/feedback/music';
 import { EnergySheet } from '@/features/engage/EnergySheet';
-import { DealPopup } from '@/features/engage/DealPopup';
 import { useReminders } from '@/features/reminders/useReminders';
 
 ensureRTL();
@@ -90,7 +89,6 @@ function Gate() {
         <Stack.Screen name="trade/[id]" options={{ presentation: 'modal' }} />
       </Stack>
       <EnergySheet />
-      <DealPopup />
       <OfflineBanner />
       <AgeGate />
     </>

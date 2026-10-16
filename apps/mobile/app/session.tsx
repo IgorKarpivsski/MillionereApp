@@ -25,6 +25,7 @@ import { useSession, type SessionState } from '@/features/worlds/useSession';
 import { WorldBadge } from '@/features/worlds/WorldBadge';
 import { shade } from '@/features/worlds/worldArt';
 import { formatNumber } from '@/lib/format';
+import { goHome } from '@/lib/goHome';
 import { fmt, strings } from '@/lib/i18n';
 
 const t = strings.session;
@@ -227,7 +228,10 @@ function ResultView({
         fullWidth
         onPress={() => void Share.share({ message: fmt(t.share, { n: sum.correct, w: quick ? t.quickDone : world }) })}
       />
-      <StickerButton label={quick ? t.home : t.toMap} tone="ghost" fullWidth onPress={() => router.back()} />
+      <View style={styles.endRow}>
+        {quick ? null : <StickerButton label={t.toMap} icon="map" tone="ghost" style={styles.flex} onPress={() => router.back()} />}
+        <StickerButton label={t.home} icon="home" tone="ghost" style={styles.flex} onPress={goHome} />
+      </View>
     </ScrollView>
   );
 }
@@ -369,6 +373,12 @@ export default function SessionScreen() {
           <AppText variant="title">{w.name}</AppText>
           {target.level ? <AppText color={colors.textMuted}>{fmt(strings.worlds.level, { n: target.level })}</AppText> : null}
           <AppText color={colors.textMuted}>{t.starting}</AppText>
+          <View style={styles.tip}>
+            <Ionicons name="flash" size={16} color={colors.led} />
+            <AppText variant="caption" color={colors.text} style={styles.bold}>
+              {t.speedTip}
+            </AppText>
+          </View>
           <ActivityIndicator color={colors.led} />
         </View>
       </SafeAreaView>
@@ -431,6 +441,14 @@ export default function SessionScreen() {
           running={answering}
           color={secs <= 5 ? colors.danger : qWorld.color}
         />
+        {answering ? (
+          <View style={styles.speedPill} accessible accessibilityLabel={fmt(t.speedA11y, { n: secs * POINTS_PER_SECOND })}>
+            <Ionicons name="flash" size={14} color={colors.led} />
+            <AppText variant="caption" color={colors.led} style={styles.bold}>
+              {fmt(t.speedLive, { n: secs * POINTS_PER_SECOND })}
+            </AppText>
+          </View>
+        ) : null}
 
         <Animated.View key={q.id} entering={reduced ? undefined : FadeInUp.duration(280)} style={styles.qCard}>
           <AppText variant="caption" color={colors.cardMuted} style={styles.bold}>
@@ -469,6 +487,14 @@ export default function SessionScreen() {
                   </Animated.View>
                 ) : null}
               </View>
+              {reveal.speedBonus > 0 ? (
+                <View style={styles.speedLine}>
+                  <Ionicons name="flash" size={14} color={colors.led} />
+                  <AppText variant="caption" color={colors.led} style={styles.bold}>
+                    {fmt(t.speedGot, { n: reveal.speedBonus })}
+                  </AppText>
+                </View>
+              ) : null}
               <AppText color={colors.textMuted}>{reveal.explanation}</AppText>
               <Pressable onPress={() => setReportOpen(true)} accessibilityRole="button" hitSlop={8}>
                 <AppText variant="caption" color={colors.textDim} style={styles.link}>
@@ -532,7 +558,36 @@ export default function SessionScreen() {
   );
 }
 
+/** Mirrors app_config.session.points_per_second on the server. */
+const POINTS_PER_SECOND = 10;
+
 const styles = StyleSheet.create({
+  endRow: { flexDirection: 'row', gap: space.sm, alignSelf: 'stretch' },
+  speedPill: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: space.sm,
+    paddingVertical: 2,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,176,0,0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,176,0,0.4)',
+  },
+  speedLine: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: -4 },
+  tip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: space.md,
+    paddingHorizontal: space.md,
+    paddingVertical: space.sm,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,176,0,0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,176,0,0.4)',
+  },
   root: { flex: 1, backgroundColor: colors.bgDeep },
   bgGlow: { position: 'absolute', top: 0, left: 0, right: 0, height: 320 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.md, padding: space.xl },

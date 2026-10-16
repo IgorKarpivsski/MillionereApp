@@ -15,7 +15,7 @@ export interface ReminderInput {
 }
 
 export interface Reminder {
-  id: 'wheel' | 'streak' | 'daily' | 'energy';
+  id: 'wheel' | 'streak' | 'daily' | 'energy' | 'comeback2' | 'comeback5';
   at: Date;
   title: string;
   body: string;
@@ -66,6 +66,11 @@ export function planReminders(i: ReminderInput): Reminder[] {
       push({ id: 'daily', at: new Date(reset + 9 * 3600_000), title: 'אתגר יומי חדש!', body: `שמור על הרצף${i.streak > 0 ? ` של ${i.streak} ימים` : ''} — האלוף כבר מחכה.` });
     }
   }
+
+  // Haven't opened the app in a while: a nudge after 2 days, another after 5.
+  // Every time the app goes to the background these move forward, so active players never see them.
+  push({ id: 'comeback2', at: new Date(now + 2 * 86_400_000), title: 'האלוף מתגעגע אליך 🦥', body: 'שאלות חדשות מחכות לך, והפרס היומי עוד לא נאסף.' });
+  push({ id: 'comeback5', at: new Date(now + 5 * 86_400_000), title: 'מזמן לא ראינו אותך!', body: 'חזור לשחק, יש לך מתנה שמחכה בפנים.' });
 
   const e = i.energy;
   if (e && !e.unlimited && e.tickets < e.max && e.next_at) {

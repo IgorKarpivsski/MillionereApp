@@ -14,6 +14,7 @@ import { matchApi } from '@/features/match/api';
 import { RpcError } from '@/features/profile/api';
 import { AnswerTile, type AnswerState } from '@/features/quiz/ui';
 import { queryKeys } from '@/lib/queryClient';
+import { goHome } from '@/lib/goHome';
 import { fmt, strings } from '@/lib/i18n';
 import { QuestionImageView } from '@/features/quiz/QuestionImage';
 
@@ -285,7 +286,7 @@ export default function MatchScreen() {
             </Animated.View>
           ) : null}
           <StickerButton label={t.rematch} icon="refresh" size="lg" fullWidth onPress={() => setRoom(null)} />
-          <StickerButton label={strings.quiz.home} tone="ghost" fullWidth onPress={() => router.back()} />
+          <StickerButton label={strings.quiz.home} icon="home" tone="ghost" fullWidth onPress={goHome} />
         </ScrollView>
       </SafeAreaView>
     );

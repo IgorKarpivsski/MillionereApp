@@ -26,6 +26,7 @@ import { useUnreadTotal } from '@/features/social/hooks';
 import { useLeague } from '@/features/league/api';
 import { LeagueBadge } from '@/features/league/LeagueBadge';
 import { LoginCalendar } from '@/features/engage/LoginCalendar';
+import { DealBanner } from '@/features/engage/DealPopup';
 import { useCollection } from '@/features/collection/hooks';
 import { PackArt } from '@/features/collection/PackArt';
 import { useClaimWelcomeBonus, useMyState } from '@/features/profile/hooks';
@@ -246,10 +247,10 @@ export default function HomeScreen() {
       <LiveTicker items={t.ticker} />
 
       {isLoading ? <Skeleton height={140} rounded={18} /> : null}
-      {data && !data.welcome_bonus_claimed ? <WelcomeBonus /> : null}
-
       <LoginCalendar />
+      {data && !data.welcome_bonus_claimed ? <WelcomeBonus /> : null}
       <PlayNowHero />
+      <DealBanner />
       <DailyCard />
       <DailyExtras />
       <LeagueEntry />
