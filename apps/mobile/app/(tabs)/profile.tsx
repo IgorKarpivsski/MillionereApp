@@ -82,7 +82,7 @@ function EditNameSheet({ visible, onClose, current }: { visible: boolean; onClos
 }
 
 function LinkAccountCard() {
-  const { link } = useAuth();
+  const { link, signIn } = useAuth();
   const toast = useToast();
   const online = useIsOnline();
   const [busy, setBusy] = useState<Provider | null>(null);
@@ -92,9 +92,23 @@ function LinkAccountCard() {
     const res = await link(p);
     setBusy(null);
     if (res.ok) toast(t.linked, 'success');
-    else if (res.reason === 'identity_taken') toast(strings.errors.identityTaken, 'error');
+    else if (res.reason === 'identity_taken') askSwitch(p);
     else if (res.reason !== 'cancelled') toast(strings.errors.generic, 'error');
   };
+
+  // This Google account already belongs to a saved player (e.g. from another phone): switch to it.
+  const switchTo = async (p: Provider) => {
+    setBusy(p);
+    const res = await signIn(p);
+    setBusy(null);
+    if (res.ok) toast(t.welcomeBack, 'success');
+    else if (res.reason !== 'cancelled') toast(strings.errors.generic, 'error');
+  };
+  const askSwitch = (p: Provider) =>
+    Alert.alert(t.switchTitle, t.switchBody, [
+      { text: strings.common.cancel, style: 'cancel' },
+      { text: t.switchConfirm, onPress: () => void switchTo(p) },
+    ]);
 
   return (
     <Card kind="sticker" tint={palette.night700}>
@@ -127,6 +141,11 @@ function LinkAccountCard() {
           loading={busy === 'google'}
           onPress={() => void go('google')}
         />
+        <Pressable onPress={() => askSwitch('google')} disabled={!online || busy !== null} accessibilityRole="button" hitSlop={8}>
+          <AppText variant="label" color={colors.led} align="center" style={styles.haveAccount}>
+            {t.haveAccount}
+          </AppText>
+        </Pressable>
       </View>
     </Card>
   );
@@ -236,6 +255,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   levelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: space.md },
   linkButtons: { gap: space.sm, marginTop: space.lg },
+  haveAccount: { paddingVertical: space.xs },
   input: {
     height: 56,
     borderRadius: radius.control,
