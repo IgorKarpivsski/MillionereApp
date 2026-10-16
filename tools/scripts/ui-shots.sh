@@ -53,8 +53,9 @@ sleep 4
 adb shell input keyevent KEYCODE_BACK; sleep 3
 shot 04_clear
 
-for route in "" play packs collection leaderboard profile shop wheel pass friends settings avatar match "world/history"; do
+for route in "session?world=mix" "" play packs collection leaderboard profile shop wheel pass friends settings avatar match "world/history"; do
   name=${route//\//_}
+  name=${name//[?=]/_}
   [ -z "$name" ] && name=home
   adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1
   adb shell am start -W -a android.intent.action.VIEW -d "$SCHEME://$route" "$PKG" >/dev/null
