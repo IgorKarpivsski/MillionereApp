@@ -1,0 +1,4 @@
+--------- beginning of main
+10-17 03:46:17.831  5738  5770 I ReactNativeJS: Running "main"
+10-17 03:47:40.334  5738  5770 I ReactNativeJS: Running "main"
+10-17 03:54:48.580  5738  5770 E ReactNativeJS: '[Expo-IAP]', 'initConnection failed:', { [Error: Failed to initialize connection] code: 'init-connection' }
