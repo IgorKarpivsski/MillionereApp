@@ -84,7 +84,7 @@ sleep 120; shot m_random_done
 open_route profile; sleep 8; shot s_profile
 for k in 1 2 3; do adb shell input swipe 540 1900 540 700 500; sleep 2; shot "s_profile_$k"; done
 
-for route in "session?world=mix" play packs collection leaderboard profile shop wheel pass friends settings avatar match "world/history"; do
+for route in mistakes submit-question event "session?world=mix" play packs collection leaderboard profile shop wheel pass friends settings avatar match "world/history"; do
   name=${route//\//_}
   name=${name//[?=]/_}
   [ -z "$name" ] && name=home
