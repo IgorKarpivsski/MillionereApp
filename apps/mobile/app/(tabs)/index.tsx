@@ -20,6 +20,7 @@ import { WORLD_IMAGES } from '@/features/worlds/worldImages';
 import { TourTarget, useTourStore } from '@/features/tour/Tour';
 import { useSettingsStore } from '@/features/settings/store';
 import { fmt, gx, strings } from '@/lib/i18n';
+import { GenderPrompt, useGenderPromptStore } from '@/features/profile/gender';
 
 const t = strings.modes;
 
@@ -216,16 +217,31 @@ function FirstTour() {
   );
   const name = data?.profile.username;
   const gender = data?.profile.gender;
+  const genderSkipped = useGenderPromptStore((s) => s.dismissed);
+  const genderPending = gender == null && !genderSkipped;
   useEffect(() => {
-    if (!name || !onboarded || tourDone || !focused) return;
+    if (!name || !onboarded || tourDone || !focused || genderPending) return;
     // let the screen lay out (and the targets measure) before dimming it
     const id = setTimeout(() => start(name, gender, () => set({ tourDone: true })), 1400);
     return () => {
       clearTimeout(id);
       stop();
     };
-  }, [name, gender, onboarded, tourDone, focused, start, stop, set]);
+  }, [name, gender, genderPending, onboarded, tourDone, focused, start, stop, set]);
   return null;
+}
+
+/** Ask existing players whether they're a boy or a girl (once, after onboarding). */
+function GenderPromptGate() {
+  const onboarded = useSettingsStore((s) => s.onboarded);
+  const [focused, setFocused] = useState(true);
+  useFocusEffect(
+    useCallback(() => {
+      setFocused(true);
+      return () => setFocused(false);
+    }, []),
+  );
+  return <GenderPrompt enabled={onboarded && focused} />;
 }
 
 export default function HomeScreen() {
@@ -236,6 +252,7 @@ export default function HomeScreen() {
       <Modes />
       <Social />
       <FirstTour />
+      <GenderPromptGate />
     </Screen>
   );
 }

@@ -801,6 +801,17 @@ export const he = {
     deleteConfirm: 'מחק לצמיתות',
     deleted: 'החשבון נמחק',
     version: 'גרסה {v}',
+    aboutMe: 'פנייה אליי',
+    aboutMeHint: 'ככה העצלן ידע אם לכתוב "מוכן" או "מוכנה"',
+    genderSaved: 'נשמר!',
+    genderError: 'לא הצלחנו לשמור. נסו שוב.',
+  },
+  gender: {
+    male: 'בן',
+    female: 'בת',
+    other: 'אחר',
+    promptTitle: 'רגע, איך לפנות אליך? 🦥',
+    promptBody: 'כדי שהעצלן ידבר אליך נכון, ספר/י לנו מי את/ה:',
   },
   engage: {
     tickets: 'כרטיסים',

@@ -15,6 +15,8 @@ import { AdminUnlockSheet, RedeemSheet } from '@/features/admin/CodeSheets';
 import { brand } from '@/lib/brand';
 import { fmt, strings } from '@/lib/i18n';
 import { useIsOnline } from '@/lib/network';
+import { GenderChoice, useSaveGender } from '@/features/profile/gender';
+import { useMyState } from '@/features/profile/hooks';
 
 const t = strings.settings;
 type ToggleKey = 'sound' | 'music' | 'haptics' | 'reducedMotion' | 'extendedTime';
@@ -147,6 +149,8 @@ export default function SettingsScreen() {
         </View>
       }
     >
+      <GenderCard />
+
       <Card>
         <ToggleRow k="sound" label={t.sound} />
         <ToggleRow k="music" label={t.music} />
@@ -196,6 +200,36 @@ export default function SettingsScreen() {
       <RedeemSheet visible={redeemOpen} onClose={() => setRedeemOpen(false)} />
       <AdminUnlockSheet visible={unlockOpen} onClose={() => setUnlockOpen(false)} />
     </Screen>
+  );
+}
+
+/** Boy / girl / other, so Hebrew texts address the player correctly. */
+function GenderCard() {
+  const { data } = useMyState();
+  const save = useSaveGender();
+  const toast = useToast();
+  const online = useIsOnline();
+  const current = save.isPending ? save.variables : data?.profile.gender;
+  return (
+    <Card>
+      <AppText variant="label" color={colors.textMuted} accessibilityRole="header">
+        {t.aboutMe}
+      </AppText>
+      <AppText variant="caption" color={colors.textMuted}>
+        {t.aboutMeHint}
+      </AppText>
+      <GenderChoice
+        value={current}
+        disabled={!online || save.isPending || !data}
+        onPick={(g) => {
+          if (g === data?.profile.gender) return;
+          save.mutate(g, {
+            onSuccess: () => toast(t.genderSaved, 'success'),
+            onError: () => toast(t.genderError, 'error'),
+          });
+        }}
+      />
+    </Card>
   );
 }
 
