@@ -1,10 +1,4 @@
 {
- "כותרת שלא קיימת בכלל 123": {
-  "missing": "no such article"
- },
- "צדק (כוכב לכת)": {
-  "missing": "no free lead image"
- },
  "ג'ירפה": {
   "file": "Giraffa_camelopardalis_-_Disney's_Animal_Kingdom_Lodge_-_01-_2010-01-19.jpg",
   "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f7/Giraffa_camelopardalis_-_Disney%27s_Animal_Kingdom_Lodge_-_01-_2010-01-19.jpg/500px-Giraffa_camelopardalis_-_Disney%27s_Animal_Kingdom_Lodge_-_01-_2010-01-19.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
@@ -16,5 +10,20 @@
   "license": "Attribution",
   "restrictions": "",
   "idx": 1
+ },
+ "כותרת שלא קיימת בכלל 123": {
+  "missing": "no such article"
+ },
+ "צדק (כוכב לכת)": {
+  "file": "Jupiter OPAL 2024.png",
+  "thumb": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Jupiter_OPAL_2024.png/500px-Jupiter_OPAL_2024.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "w": 500,
+  "h": 453,
+  "mime": "image/png",
+  "page": "https://commons.wikimedia.org/wiki/File:Jupiter_OPAL_2024.png",
+  "artist": "NASA/STSCI (S.T.A.R.S)",
+  "license": "Public domain",
+  "restrictions": "",
+  "idx": 2
  }
 }
