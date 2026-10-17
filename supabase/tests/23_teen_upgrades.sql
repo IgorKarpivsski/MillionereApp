@@ -66,7 +66,9 @@ begin
   -- missions
   s := public.missions_state();
   perform test.assert(jsonb_array_length(s -> 'missions') = 3, 'three missions');
-  k := s -> 'missions' -> 0 ->> 'key';
+  -- the blitz games above may already complete a mission: pick one still open
+  select m ->> 'key' into k from jsonb_array_elements(s -> 'missions') m
+   where (m ->> 'progress')::int < (m ->> 'target')::int limit 1;
   perform test.assert_raises(format('select public.mission_claim(%L)', k), 'not done', 'cannot claim unfinished');
   perform test.assert_raises($q$select public.mission_claim('nope')$q$, 'invalid_input', 'unknown mission');
 
