@@ -13,3 +13,4 @@ supabase/.temp/
 supabase/.branches/
 .DS_Store
 coverage/
+data/kids-images/thumbs/
