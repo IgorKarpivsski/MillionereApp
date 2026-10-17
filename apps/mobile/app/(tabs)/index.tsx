@@ -17,7 +17,7 @@ import { useMyState } from '@/features/profile/hooks';
 import { useDailyStatus } from '@/features/quiz/hooks';
 import { useUnreadTotal } from '@/features/social/hooks';
 import { WORLD_IMAGES } from '@/features/worlds/worldImages';
-import { Tour, TourTarget } from '@/features/tour/Tour';
+import { TourTarget, useTourStore } from '@/features/tour/Tour';
 import { useSettingsStore } from '@/features/settings/store';
 import { fmt, gx, strings } from '@/lib/i18n';
 
@@ -205,6 +205,8 @@ function FirstTour() {
   const onboarded = useSettingsStore((s) => s.onboarded);
   const tourDone = useSettingsStore((s) => s.tourDone);
   const set = useSettingsStore((s) => s.set);
+  const start = useTourStore((s) => s.start);
+  const stop = useTourStore((s) => s.stop);
   const [focused, setFocused] = useState(true);
   useFocusEffect(
     useCallback(() => {
@@ -212,24 +214,18 @@ function FirstTour() {
       return () => setFocused(false);
     }, []),
   );
-  const [ready, setReady] = useState(false);
-  // let the screen lay out (and the targets measure) before dimming it
+  const name = data?.profile.username;
+  const gender = data?.profile.gender;
   useEffect(() => {
-    if (!data || !onboarded || tourDone) return;
-    const id = setTimeout(() => setReady(true), 1400);
-    return () => clearTimeout(id);
-  }, [data, onboarded, tourDone]);
-  return (
-    <Tour
-      visible={ready && focused && onboarded && !tourDone}
-      name={data?.profile.username ?? ''}
-      gender={data?.profile.gender}
-      onDone={() => {
-        setReady(false);
-        set({ tourDone: true });
-      }}
-    />
-  );
+    if (!name || !onboarded || tourDone || !focused) return;
+    // let the screen lay out (and the targets measure) before dimming it
+    const id = setTimeout(() => start(name, gender, () => set({ tourDone: true })), 1400);
+    return () => {
+      clearTimeout(id);
+      stop();
+    };
+  }, [name, gender, onboarded, tourDone, focused, start, stop, set]);
+  return null;
 }
 
 export default function HomeScreen() {

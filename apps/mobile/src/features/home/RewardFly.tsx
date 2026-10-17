@@ -1,5 +1,5 @@
 import type { Reward } from '@fm/shared';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, {
   Easing,
@@ -110,10 +110,11 @@ function Burst({ f }: { f: Flight }) {
   );
 }
 
-function Single({ f }: { f: Flight }) {
+function Single({ f, origin }: { f: Flight; origin: Point }) {
   const targets = useFly((s) => s.targets);
   const { width } = useWindowDimensions();
-  const to = targets[f.kind] ?? targets.coins ?? { x: width * 0.2, y: 60 };
+  const t0 = targets[f.kind] ?? targets.coins ?? { x: width * 0.2, y: 60 };
+  const to = { x: t0.x - origin.x, y: t0.y - origin.y };
   return (
     <>
       <Burst f={f} />
@@ -133,12 +134,23 @@ export function RewardFlyHost() {
     if (!reduced) return;
     for (const f of flights) land(f.id, f.kind);
   }, [reduced, flights, land]);
-  if (reduced || flights.length === 0) return null;
+  const ref = useRef<View>(null);
+  const [origin, setOrigin] = useState<Point | null>(null);
+  // Always mounted (empty), so we know where this layer sits in the window:
+  // positions are measured in window coordinates and shifted by that origin.
   return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      {flights.map((f) => (
-        <Single key={f.id} f={f} />
-      ))}
+    <View
+      ref={ref}
+      collapsable={false}
+      pointerEvents="none"
+      onLayout={() => ref.current?.measureInWindow((x, y) => setOrigin({ x, y }))}
+      style={styles.layer}
+    >
+      {!reduced && origin
+        ? flights.map((f) => (
+            <Single key={f.id} f={{ ...f, from: { x: f.from.x - origin.x, y: f.from.y - origin.y } }} origin={origin} />
+          ))
+        : null}
     </View>
   );
 }
@@ -168,6 +180,8 @@ export function FlyTarget({ kind, children }: { kind: Kind; children: React.Reac
 }
 
 const styles = StyleSheet.create({
+  // physical coordinates: no RTL mirroring of left/top in this layer
+  layer: { ...StyleSheet.absoluteFillObject, zIndex: 900, elevation: 900, direction: 'ltr' },
   particle: { position: 'absolute', left: 0, top: 0 },
   ring: {
     position: 'absolute',

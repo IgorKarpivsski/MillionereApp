@@ -27,6 +27,7 @@ import { AgeGate } from '@/features/settings/AgeGate';
 import { useSettingsStore } from '@/features/settings/store';
 import { IncomingCallHost } from '@/features/boosts/IncomingCall';
 import { RewardFlyHost } from '@/features/home/RewardFly';
+import { TourHost } from '@/features/tour/Tour';
 import { RemoveAdsUpsell } from '@/features/store/RemoveAdsUpsell';
 import { initAds } from '@/features/store/ads';
 import { useBackgroundMusic } from '@/design-system/feedback/music';
@@ -114,6 +115,7 @@ function Gate() {
       <AgeGate />
       <IncomingCallHost />
       <RewardFlyHost />
+      <TourHost />
       <RemoveAdsUpsell />
     </>
   );

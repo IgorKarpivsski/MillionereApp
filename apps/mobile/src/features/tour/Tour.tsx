@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Modal, Pressable, StyleSheet, View, useWindowDimensions, type ViewStyle } from 'react-native';
+import { BackHandler, Pressable, StyleSheet, View, useWindowDimensions, type ViewStyle } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -20,7 +20,13 @@ import { fmt, gx, strings } from '@/lib/i18n';
 
 type Rect = { x: number; y: number; w: number; h: number };
 
+type Gender = 'male' | 'female' | 'other' | null | undefined;
+
 interface TourStore {
+  /** the running tour, if any (shown by TourHost at the app root) */
+  session: { name: string; gender: Gender; onDone: () => void } | null;
+  start: (name: string, gender: Gender, onDone: () => void) => void;
+  stop: () => void;
   targets: Record<string, Rect>;
   /** bumps whenever targets should measure themselves again */
   tick: number;
@@ -29,6 +35,9 @@ interface TourStore {
 }
 
 export const useTourStore = create<TourStore>((set) => ({
+  session: null,
+  start: (name, gender, onDone) => set({ session: { name, gender, onDone } }),
+  stop: () => set({ session: null }),
   targets: {},
   tick: 0,
   setTarget: (id, r) => set((s) => ({ targets: { ...s.targets, [id]: r } })),
@@ -78,11 +87,29 @@ function Arrow({ down }: { down: boolean }) {
   );
 }
 
+/** Mounted once at the app root, above the tab bar, in the same coordinates the targets measure in. */
+export function TourHost() {
+  const session = useTourStore((s) => s.session);
+  const stop = useTourStore((s) => s.stop);
+  if (!session) return null;
+  return (
+    <Tour
+      visible
+      name={session.name}
+      gender={session.gender}
+      onDone={() => {
+        stop();
+        session.onDone();
+      }}
+    />
+  );
+}
+
 /**
  * The sloth's guided tour of the home screen: a dimmed screen with a spotlight on
  * one thing at a time, an arrow pointing at it and a line of explanation.
  */
-export function Tour({
+function Tour({
   visible,
   name,
   gender,
@@ -98,6 +125,15 @@ export function Tour({
   const remeasure = useTourStore((s) => s.remeasure);
   const reduced = useReducedMotion();
   const [i, setI] = useState(0);
+  const rootRef = useRef<View>(null);
+  const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null);
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      onDone();
+      return true;
+    });
+    return () => sub.remove();
+  }, [onDone]);
 
   const all: Step[] = [
     { text: `${fmt(t.hello, { name })}\n${gx(t.intro, gender)}` },
@@ -126,7 +162,9 @@ export function Tour({
     if (last) onDone();
     else setI(i + 1);
   };
-  const r = step.target ? targets[step.target] : undefined;
+  const raw = step.target ? targets[step.target] : undefined;
+  // targets are measured in window coordinates; shift them into this overlay's own
+  const r = raw && origin ? { ...raw, x: raw.x - origin.x, y: raw.y - origin.y } : undefined;
   const pad = 8;
   const hole = r ? { x: r.x - pad, y: r.y - pad, w: r.w + pad * 2, h: r.h + pad * 2 } : null;
   const below = hole ? hole.y + hole.h / 2 < H / 2 : false;
@@ -155,7 +193,12 @@ export function Tour({
   );
 
   return (
-    <Modal visible transparent statusBarTranslucent animationType="fade" onRequestClose={onDone}>
+    <View
+      ref={rootRef}
+      collapsable={false}
+      onLayout={() => rootRef.current?.measureInWindow((x, y) => setOrigin({ x, y }))}
+      style={styles.root}
+    >
       <View style={StyleSheet.absoluteFill}>
         {hole ? (
           <>
@@ -164,6 +207,8 @@ export function Tour({
             <Pressable onPress={next} style={[styles.dim, { left: 0, top: hole.y + hole.h, width: W, height: Math.max(0, H - hole.y - hole.h) }]} />
             <Pressable onPress={next} style={[styles.dim, { left: 0, top: hole.y, width: Math.max(0, hole.x), height: hole.h }]} />
             <Pressable onPress={next} style={[styles.dim, { left: hole.x + hole.w, top: hole.y, width: Math.max(0, W - hole.x - hole.w), height: hole.h }]} />
+            {/* the spotlit thing itself isn't pressable during the tour */}
+            <Pressable onPress={next} style={{ position: 'absolute', left: hole.x, top: hole.y, width: hole.w, height: hole.h }} />
             <Animated.View
               key={`h${i}`}
               entering={reduced ? undefined : FadeIn}
@@ -202,11 +247,13 @@ export function Tour({
           </Pressable>
         )}
       </View>
-    </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  // physical left/top here: the targets were measured physically, so no RTL mirroring
+  root: { ...StyleSheet.absoluteFillObject, zIndex: 1000, elevation: 1000, direction: 'ltr' },
   dim: { position: 'absolute', backgroundColor: 'rgba(8,4,24,0.82)' },
   center: { alignItems: 'center', justifyContent: 'center', padding: space.lg },
   centerCol: { alignItems: 'center', gap: space.md, alignSelf: 'stretch' },
@@ -224,6 +271,7 @@ const styles = StyleSheet.create({
   arrowWrap: { width: 44, position: 'relative' },
   arrowShadow: { textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 6 },
   card: {
+    direction: 'rtl',
     alignSelf: 'stretch',
     backgroundColor: '#FFF8EA',
     borderRadius: radius.sheet,
