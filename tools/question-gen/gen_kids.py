@@ -24,6 +24,8 @@ def norm(s):
     return re.sub(r"\s+", " ", s).strip().lower()
 
 
+# Every import tags its rows; kids rows without the current batch were removed from the source files.
+BATCH = "2026-10-17"
 IMAGES = Path(__file__).parents[2] / "data" / "kids-images"
 OK_LICENSE = re.compile(r"(CC0|Public domain|PD|CC BY|CC-BY|GFDL|Attribution|FAL|Free Art)", re.I)
 
@@ -33,7 +35,7 @@ def photo(c, title):
     if not c or c.get("missing") or c.get("thumbErr") or not c.get("thumb"):
         return None
     lic = (c.get("license") or "").strip()
-    if not OK_LICENSE.search(lic) or c.get("mime") not in ("image/jpeg", "image/png", "image/webp"):
+    if not OK_LICENSE.search(lic) or c.get("mime") not in ("image/jpeg", "image/png", "image/webp", "image/svg+xml"):
         return None
     if (c.get("w") or 0) < 160 or (c.get("h") or 0) < 100:
         return None
@@ -86,7 +88,7 @@ def photo_rows(seen, errors):
             rows.append({
                 "id": f"q_{h}", "text_he": q, "answers_he": opts, "explanation_he": expl or f"התשובה הנכונה: {c}.",
                 "category": world if world != "football" else "legends", "topic": "kids", "difficulty": "medium" if hard else "easy",
-                "obscurity": 0.35 if hard else 0.1, "tags": {"audience": "kids", "wiki": title}, "template": "kids_photo:" + world,
+                "obscurity": 0.35 if hard else 0.1, "tags": {"audience": "kids", "wiki": title, "batch": BATCH}, "template": "kids_photo:" + world,
                 "source_urls": ["https://he.wikipedia.org/wiki/" + title.replace(" ", "_"), img["page"]], "verified_by": "editorial",
                 "volatile": False, "generator": "kids-2026.10.2", "image": img,
             })
@@ -127,7 +129,7 @@ def main():
             rows.append({
                 "id": f"q_{h}", "text_he": q, "answers_he": opts, "explanation_he": expl,
                 "category": world if world != "football" else "legends", "topic": "kids", "difficulty": "medium" if hard else "easy",
-                "obscurity": 0.35 if hard else 0.05, "tags": {"audience": "kids"}, "template": "kids:" + world,
+                "obscurity": 0.35 if hard else 0.05, "tags": {"audience": "kids", "batch": BATCH}, "template": "kids:" + world,
                 "source_urls": ["https://he.wikipedia.org/"], "verified_by": "editorial", "volatile": False,
                 "generator": "kids-2026.10.1", "image": None,
             })

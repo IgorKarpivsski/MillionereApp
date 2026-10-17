@@ -1,0 +1,25 @@
+name: Import kids questions
+
+# Loads content/kids/questions.jsonl into Supabase. The import token is
+# single-use: it is disabled on the server right after the import.
+on:
+  push:
+    branches: [kids-images]
+    paths: ['content/kids/questions.jsonl', '.github/workflows/import-kids.yml']
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Import
+        run: |
+          set -a; . apps/mobile/public-config.env; set +a
+          node tools/question-gen/import.mjs
+        env:
+          QUESTIONS_FILE: content/kids/questions.jsonl
+          IMPORT_TOKEN: e630bd00e2c9827ef93d4e8d03d41d44add8a3cb1728bf2a
