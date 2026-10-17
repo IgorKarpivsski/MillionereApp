@@ -21,6 +21,7 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import type { Provider } from '@/features/auth/oauth';
 import { RpcError } from '@/features/profile/api';
 import { useMyState, useUpdateProfile } from '@/features/profile/hooks';
+import { googlePhotoUrl, pickAndUploadPhoto, useSetPhoto } from '@/features/profile/photo';
 import { formatNumber, ltr } from '@/lib/format';
 import { strings } from '@/lib/i18n';
 import { useIsOnline } from '@/lib/network';
@@ -77,6 +78,57 @@ function EditNameSheet({ visible, onClose, current }: { visible: boolean; onClos
         {valid || !name ? t.nameHint : strings.errors.usernameInvalid}
       </AppText>
       <StickerButton label={strings.common.save} fullWidth disabled={!valid} loading={update.isPending} onPress={save} />
+    </BottomSheet>
+  );
+}
+
+function PhotoSheet({ visible, onClose, hasPhoto }: { visible: boolean; onClose: () => void; hasPhoto: boolean }) {
+  const { session } = useAuth();
+  const setPhoto = useSetPhoto();
+  const toast = useToast();
+  const [busy, setBusy] = useState<'device' | 'google' | 'remove' | null>(null);
+  const google = googlePhotoUrl(session);
+  const save = async (kind: 'device' | 'google' | 'remove') => {
+    setBusy(kind);
+    try {
+      const url = kind === 'device' ? await pickAndUploadPhoto(session!.user.id) : kind === 'google' ? google : null;
+      if (kind === 'device' && !url) return;
+      await setPhoto.mutateAsync(url);
+      toast(kind === 'remove' ? t.photoRemoved : t.photoSaved, 'success');
+      onClose();
+    } catch {
+      toast(strings.errors.generic, 'error');
+    } finally {
+      setBusy(null);
+    }
+  };
+  return (
+    <BottomSheet visible={visible} onClose={onClose} title={t.photoTitle}>
+      <StickerButton label={t.photoDevice} icon="images" fullWidth loading={busy === 'device'} disabled={busy !== null || !session} onPress={() => void save('device')} />
+      {google ? (
+        <StickerButton label={t.photoGoogle} icon="logo-google" tone="outline" fullWidth loading={busy === 'google'} disabled={busy !== null} onPress={() => void save('google')} />
+      ) : (
+        <AppText variant="caption" color={colors.textMuted} align="center">
+          {t.photoGoogleHint}
+        </AppText>
+      )}
+      <StickerButton
+        label={t.editAvatar}
+        icon="color-palette"
+        tone="ghost"
+        fullWidth
+        disabled={busy !== null}
+        onPress={() => {
+          onClose();
+          router.push('/avatar');
+        }}
+      />
+      {hasPhoto ? (
+        <StickerButton label={t.photoRemove} icon="trash" tone="ghost" fullWidth loading={busy === 'remove'} disabled={busy !== null} onPress={() => void save('remove')} />
+      ) : null}
+      <AppText variant="caption" color={colors.textDim} align="center">
+        {t.photoPrivate}
+      </AppText>
     </BottomSheet>
   );
 }
@@ -155,6 +207,7 @@ export default function ProfileScreen() {
   const { data } = useMyState();
   const { isGuest, signOut } = useAuth();
   const [editing, setEditing] = useState(false);
+  const [photoOpen, setPhotoOpen] = useState(false);
 
   if (!data) {
     return (
@@ -181,17 +234,17 @@ export default function ProfileScreen() {
           <Glow size={300} strength={0.5} />
         </View>
         <Pressable
-          onPress={() => router.push('/avatar')}
+          onPress={() => setPhotoOpen(true)}
           accessibilityRole="button"
-          accessibilityLabel={t.editAvatar}
+          accessibilityLabel={t.photoTitle}
           style={({ pressed }) => (pressed ? { transform: [{ scale: 0.96 }] } : null)}
         >
-          <AvatarBadge avatarId={data.profile.avatar_id} level={data.profile.level} size={120} ring={colors.led} />
+          <AvatarBadge avatarId={data.profile.avatar_id} photo={data.profile.photo_url} level={data.profile.level} size={120} ring={colors.led} />
           <View style={styles.editDot}>
-            <Ionicons name="brush" size={16} color={colors.textOnBright} />
+            <Ionicons name="camera" size={16} color={colors.textOnBright} />
           </View>
         </Pressable>
-        <StickerButton label={t.editAvatar} size="sm" tone="outline" icon="color-palette" onPress={() => router.push('/avatar')} />
+        <StickerButton label={t.photoTitle} size="sm" tone="outline" icon="camera" onPress={() => setPhotoOpen(true)} />
         <View style={styles.nameRow}>
           <AppText variant="title" numberOfLines={1}>
             {data.profile.username}
@@ -230,6 +283,7 @@ export default function ProfileScreen() {
       ) : null}
 
       <EditNameSheet visible={editing} onClose={() => setEditing(false)} current={data.profile.username} />
+      <PhotoSheet visible={photoOpen} onClose={() => setPhotoOpen(false)} hasPhoto={!!data.profile.photo_url} />
     </Screen>
   );
 }

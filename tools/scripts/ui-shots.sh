@@ -53,12 +53,32 @@ sleep 4
 adb shell input keyevent KEYCODE_BACK; sleep 3
 shot 04_clear
 
-for route in "session?world=mix" "" play packs collection leaderboard profile shop wheel pass friends settings avatar match "world/history"; do
+open_route() {
+  adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1
+  adb shell am start -W -a android.intent.action.VIEW -d "$SCHEME://$1" "$PKG" >/dev/null
+}
+
+# Game modes, played a little.
+open_route ""; sleep 10; shot m_home
+adb shell input swipe 540 1700 540 700 500; sleep 3; shot m_home_2
+adb shell input swipe 540 1700 540 700 500; sleep 3; shot m_home_3
+open_route blitz; sleep 8; shot m_blitz
+tap_text "צא לדרך"; sleep 6; shot m_blitz_go
+sleep 3; adb shell input tap 540 1500; sleep 2; shot m_blitz_play
+sleep 65; shot m_blitz_done
+open_route family; sleep 8; shot m_family
+tap_text "פתח חדר חדש"; sleep 6; shot m_family_room
+adb shell input swipe 540 1700 540 800 500; sleep 2; shot m_family_room_2
+open_route "match?mode=random"; sleep 6; shot m_random
+sleep 10; shot m_random_offer
+tap_text "שחק נגד העצלן"; sleep 9; shot m_random_vs
+sleep 6; shot m_random_q
+
+for route in "session?world=mix" play packs collection leaderboard profile shop wheel pass friends settings avatar match "world/history"; do
   name=${route//\//_}
   name=${name//[?=]/_}
   [ -z "$name" ] && name=home
-  adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1
-  adb shell am start -W -a android.intent.action.VIEW -d "$SCHEME://$route" "$PKG" >/dev/null
+  open_route "$route"
   sleep 10
   shot "r_$name"
   adb shell input swipe 540 1700 540 800 500

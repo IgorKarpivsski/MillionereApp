@@ -9,6 +9,7 @@
 export const ICON_NAMES = [
   'home', 'play', 'packs', 'album', 'podium', 'wheel', 'pass', 'shop', 'friends', 'chat',
   'deal', 'ticket', 'daily', 'trophy', 'whistle', 'gloves', 'boot', 'gem', 'coin', 'fire', 'settings', 'lock',
+  'timer', 'dice', 'family', 'gift', 'globe', 'bolt',
 ] as const;
 export type IconName = (typeof ICON_NAMES)[number];
 
@@ -132,6 +133,39 @@ function draw(name: IconName, k: Ink): string {
     case 'settings':
       return `<path d="M21 4 L27 4 L28 10 L32 12 L37 8 L41 12 L37 17 L39 21 L44 22 L44 27 L39 28 L37 32 L41 37 L37 41 L32 37 L28 39 L27 44 L21 44 L20 39 L16 37 L11 41 L7 37 L11 32 L9 28 L4 27 L4 22 L9 21 L11 17 L7 12 L11 8 L16 12 L20 10 Z" fill="${k.b}" ${s}/>` +
         `<circle cx="24" cy="24.5" r="7" fill="${k.w}" ${s}/>`;
+    case 'timer': // stopwatch
+      return `<rect x="20" y="3" width="8" height="5" rx="1.5" fill="${k.c}" ${s}/>` +
+        `<path d="M36 10 L40 6" ${s}/>` +
+        `<circle cx="24" cy="27" r="17" fill="${k.w}" ${s}/>` +
+        `<path d="M24 27 L24 13 A14 14 0 0 1 36.1 20 Z" fill="${k.a}"/>` +
+        `<circle cx="24" cy="27" r="17" fill="none" ${s}/>` +
+        `<path d="M24 27 L31 19" ${s}/><circle cx="24" cy="27" r="3" fill="${k.ink}"/>` +
+        `<path d="M12 22 Q14 16 19 14" stroke="${k.hi}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
+    case 'dice': // two dice, one tilted
+      return `<rect x="5" y="15" width="22" height="22" rx="5" fill="${k.w}" ${s} transform="rotate(-12 16 26)"/>` +
+        `<circle cx="11" cy="21" r="2.4" fill="${k.ink}"/><circle cx="16" cy="26" r="2.4" fill="${k.ink}"/><circle cx="21" cy="31" r="2.4" fill="${k.ink}"/>` +
+        `<rect x="23" y="9" width="20" height="20" rx="5" fill="${k.c}" ${s} transform="rotate(14 33 19)"/>` +
+        `<circle cx="29" cy="15" r="2.2" fill="${k.w}"/><circle cx="37" cy="23" r="2.2" fill="${k.w}"/><circle cx="37" cy="14" r="2.2" fill="${k.w}"/><circle cx="29" cy="24" r="2.2" fill="${k.w}"/>`;
+    case 'family': // house with three faces
+      return `<path d="M5 22 L24 6 L43 22 L39 22 L39 42 L9 42 L9 22 Z" fill="${k.a}" ${s}/>` +
+        `<path d="M31 9 L31 4 L36 4 L36 13" fill="${k.c}" ${s}/>` +
+        `<circle cx="17" cy="29" r="5" fill="${k.w}" ${S(k, 2)}/><circle cx="31" cy="29" r="5" fill="${k.w}" ${S(k, 2)}/><circle cx="24" cy="34" r="4" fill="${k.b}" ${S(k, 2)}/>` +
+        `<path d="M15 29 L15 29.1 M19 29 L19 29.1 M29 29 L29 29.1 M33 29 L33 29.1" stroke="${k.ink}" stroke-width="2.2" stroke-linecap="round"/>` +
+        `<path d="M12 22 L22 13" stroke="${k.hi}" stroke-width="2.4" stroke-linecap="round"/>`;
+    case 'gift':
+      return `<rect x="6" y="18" width="36" height="9" rx="2" fill="${k.c}" ${s}/>` +
+        `<rect x="9" y="27" width="30" height="16" rx="2" fill="${k.c}" ${s}/>` +
+        `<path d="M24 18 L24 43" stroke="${k.a}" stroke-width="5"/><path d="M24 18 L24 43" fill="none" ${S(k, 1.4)}/>` +
+        `<path d="M24 18 Q14 4 11 12 Q10 17 24 18 Q38 17 37 12 Q34 4 24 18 Z" fill="${k.a}" ${s}/>` +
+        `<path d="M12 31 L12 38" stroke="${k.hi}" stroke-width="2.4" stroke-linecap="round"/>`;
+    case 'globe':
+      return `<circle cx="24" cy="24" r="18" fill="#5CB8FF" ${s}/>` +
+        `<path d="M14 12 Q20 14 18 20 Q14 24 18 28 Q22 30 20 38 M30 8 Q28 14 33 16 Q40 18 38 26 Q34 30 36 37" fill="none" stroke="${k.b2}" stroke-width="5" stroke-linecap="round"/>` +
+        `<circle cx="24" cy="24" r="18" fill="none" ${s}/>` +
+        `<path d="M12 18 Q14 12 20 9" stroke="${k.hi}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
+    case 'bolt':
+      return `<path d="M28 3 L9 27 L21 27 L17 45 L39 18 L26 18 Z" fill="${k.a}" ${s}/>` +
+        `<path d="M24 10 L15 23" stroke="${k.hi}" stroke-width="2.4" stroke-linecap="round"/>`;
     case 'lock':
       return `<path d="M15 21 L15 14 Q15 5 24 5 Q33 5 33 14 L33 21" fill="none" ${s}/>` +
         `<rect x="9" y="20" width="30" height="23" rx="5" fill="${k.a}" ${s}/><circle cx="24" cy="30" r="3.2" fill="${k.ink}"/><path d="M24 31 L24 37" ${s}/>`;

@@ -16,16 +16,19 @@ export const AvatarBadge = memo(function AvatarBadge({
   level,
   size = 52,
   ring = colors.border,
+  photo,
 }: {
   avatarId: string;
   level?: number;
   size?: number;
   ring?: string;
+  /** the player's own photo; shown instead of the drawn avatar */
+  photo?: string | null;
 }) {
   const img = AVATARS_3D[avatarId];
   const xml = useMemo(
-    () => img ? '' : avatarSvg(specFromAvatarId(avatarId), { size, round: true, uid: avatarId.replace(/[^a-z0-9]/gi, '') + size }),
-    [img, avatarId, size],
+    () => img || photo ? '' : avatarSvg(specFromAvatarId(avatarId), { size, round: true, uid: avatarId.replace(/[^a-z0-9]/gi, '') + size }),
+    [img, photo, avatarId, size],
   );
   return (
     <View
@@ -35,7 +38,13 @@ export const AvatarBadge = memo(function AvatarBadge({
       accessibilityLabel={level != null ? `דמות השחקן, שלב ${level}` : 'דמות השחקן'}
     >
       <View style={[styles.circle, { width: size, height: size, borderRadius: size / 2, borderColor: ring }]}>
-        {img ? <Image source={img} style={{ width: size, height: size }} resizeMode="cover" /> : <SvgXml xml={xml} width={size - 4} height={size - 4} />}
+        {photo ? (
+          <Image source={{ uri: photo }} style={{ width: size, height: size }} resizeMode="cover" />
+        ) : img ? (
+          <Image source={img} style={{ width: size, height: size }} resizeMode="cover" />
+        ) : (
+          <SvgXml xml={xml} width={size - 4} height={size - 4} />
+        )}
       </View>
       {level != null ? (
         <View style={[styles.level, { minWidth: Math.max(22, size * 0.42) }]}>

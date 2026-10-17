@@ -17,5 +17,7 @@ export const AVATARS_3D: Record<string, number> = {
   avatar_44: require('../../assets/avatars/a44.webp'),
   avatar_45: require('../../assets/avatars/a45.webp'),
   avatar_46: require('../../assets/avatars/a46.webp'),
+  /** the computer opponent in random matches */
+  bot_sloth: require('../../assets/avatars/bot_sloth.webp'),
 };
-export const AVATAR_3D_IDS = Object.keys(AVATARS_3D);
+export const AVATAR_3D_IDS = Object.keys(AVATARS_3D).filter((id) => id !== 'bot_sloth');

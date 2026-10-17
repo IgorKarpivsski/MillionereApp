@@ -63,6 +63,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ['react-native-google-mobile-ads', { androidAppId: ADMOB_ANDROID_APP_ID, iosAppId: ADMOB_IOS_APP_ID }],
     'expo-iap',
     ['expo-notifications', { icon: './assets/images/notification-icon.png', color: '#FFB000' }],
+    ['expo-image-picker', { photosPermission: 'כדי לבחור תמונת פרופיל מהתמונות שלך', cameraPermission: false, microphonePermission: false }],
     './plugins/withoutAudioServices',
     './plugins/withGradleHeap',
     [

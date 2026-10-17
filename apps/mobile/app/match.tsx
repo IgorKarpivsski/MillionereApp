@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, AvatarBadge, Card, Led, StickerButton, TrophyLogo, useToast, Backdrop } from '@/design-system/components';
+import { AppText, AvatarBadge, Card, Led, Sloth, StickerButton, TrophyLogo, useToast, Backdrop } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound, preloadSounds } from '@/design-system/feedback/sound';
@@ -96,6 +96,59 @@ function Lobby({ onRoom, initialCode }: { onRoom: (id: string) => void; initialC
   );
 }
 
+const r = strings.random;
+
+/** Random opponent: matchmaking, then — if nobody is around — an offer to play the sloth. */
+function Searching({ room, onCancel }: { room: string; onCancel: () => void }) {
+  const [secs, setSecs] = useState(0);
+  const [offer, setOffer] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const toast = useToast();
+  useEffect(() => {
+    const id = setInterval(() => setSecs((x) => x + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+  useEffect(() => {
+    if (secs === 10) setOffer(true);
+  }, [secs]);
+  return (
+    <ScrollView contentContainerStyle={[styles.lobby, styles.grow]}>
+      <Sloth size={140} say={offer ? r.botTitle : r.searching} />
+      <View style={styles.waitRow}>
+        <ActivityIndicator color={colors.led} />
+        <Led size="ledM">{`00:${String(secs).padStart(2, '0')}`}</Led>
+      </View>
+      <AppText color={colors.textMuted} align="center">
+        {offer ? r.botBody : r.searchingBody}
+      </AppText>
+      {offer ? (
+        <>
+          <StickerButton
+            label={r.botPlay}
+            icon="game-controller"
+            tone="prize"
+            size="lg"
+            fullWidth
+            loading={busy}
+            onPress={async () => {
+              setBusy(true);
+              try {
+                await matchApi.bot(room);
+              } catch {
+                toast(strings.errors.generic, 'error');
+              } finally {
+                setBusy(false);
+              }
+            }}
+          />
+          <StickerButton label={r.keepWaiting} tone="outline" fullWidth onPress={() => { setOffer(false); setSecs(0); }} />
+        </>
+      ) : null}
+      <StickerButton label={r.cancel} tone="ghost" fullWidth onPress={onCancel} />
+    </ScrollView>
+  );
+}
+
 function useMatchState(room: string | null) {
   const [s, setS] = useState<MatchState | null>(null);
   const [fetchedAt, setFetchedAt] = useState(0);
@@ -154,17 +207,41 @@ function Players({ s }: { s: MatchState }) {
         <AppText variant="caption" numberOfLines={1} style={styles.pname}>
           {s.opponent?.username ?? '…'}
         </AppText>
+        {s.is_bot ? (
+          <AppText variant="caption" color={colors.textDim} numberOfLines={1} style={styles.botTag}>
+            {strings.random.botTag}
+          </AppText>
+        ) : null}
       </View>
     </View>
   );
 }
 
 export default function MatchScreen() {
-  const params = useLocalSearchParams<{ code?: string }>();
+  const params = useLocalSearchParams<{ code?: string; mode?: string }>();
+  const toast = useToast();
+  const random = params.mode === 'random';
   const [room, setRoom] = useState<string | null>(null);
+  const [finding, setFinding] = useState(false);
+  const find = useCallback(async () => {
+    setFinding(true);
+    setRoom(null);
+    try {
+      const f = await matchApi.find();
+      setRoom(f.room_id);
+    } catch {
+      toast(strings.errors.generic, 'error');
+      router.back();
+    } finally {
+      setFinding(false);
+    }
+  }, [toast]);
+  useEffect(() => {
+    if (random) void find();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [random]);
   const { s, left } = useMatchState(room);
   const [picked, setPicked] = useState<{ idx: number; slot: number } | null>(null);
-  const toast = useToast();
   const qc = useQueryClient();
   const lastPhase = useRef<string>('');
 
@@ -203,6 +280,16 @@ export default function MatchScreen() {
     return () => sub.remove();
   }, [live]);
 
+  if (!room && (random || finding)) {
+    return (
+      <SafeAreaView style={[styles.root, styles.center]}>
+        <Backdrop />
+        <Sloth size={140} say={r.searching} />
+        <ActivityIndicator color={colors.led} />
+      </SafeAreaView>
+    );
+  }
+
   if (!room) {
     return (
       <SafeAreaView style={styles.root}>
@@ -220,6 +307,21 @@ export default function MatchScreen() {
       <SafeAreaView style={[styles.root, styles.center]}>
         <Backdrop />
         <ActivityIndicator color={colors.led} />
+      </SafeAreaView>
+    );
+  }
+
+  if (s.kind === 'random' && s.phase === 'waiting') {
+    return (
+      <SafeAreaView style={styles.root}>
+        <Backdrop />
+        <Searching
+          room={s.room_id}
+          onCancel={() => {
+            void matchApi.cancel(s.room_id).catch(() => undefined);
+            router.back();
+          }}
+        />
       </SafeAreaView>
     );
   }
@@ -260,7 +362,10 @@ export default function MatchScreen() {
     return (
       <SafeAreaView style={[styles.root, styles.center]}>
         <Backdrop />
+        {s.kind === 'random' ? <AppText variant="title">{r.found}</AppText> : null}
+        <AvatarBadge avatarId={s.opponent?.avatar_id ?? 'avatar_01'} level={s.opponent?.level ?? 1} size={88} ring={colors.led} />
         <AppText variant="heading">{fmt(t.vs, { name: s.opponent?.username ?? '' })}</AppText>
+        {s.is_bot ? <AppText color={colors.textDim}>{r.botTag}</AppText> : null}
         <Animated.View key={Math.ceil(left)} entering={ZoomIn}>
           <Led size="ledXL">{Math.max(1, Math.ceil(left))}</Led>
         </Animated.View>
@@ -285,7 +390,13 @@ export default function MatchScreen() {
               <Led size="ledM">{`+${s.result.coins}`}</Led>
             </Animated.View>
           ) : null}
-          <StickerButton label={t.rematch} icon="refresh" size="lg" fullWidth onPress={() => setRoom(null)} />
+          <StickerButton
+            label={s.kind === 'random' ? r.again : t.rematch}
+            icon="refresh"
+            size="lg"
+            fullWidth
+            onPress={() => (s.kind === 'random' ? void find() : setRoom(null))}
+          />
           <StickerButton label={strings.quiz.home} icon="home" tone="ghost" fullWidth onPress={goHome} />
         </ScrollView>
       </SafeAreaView>
@@ -405,6 +516,8 @@ const styles = StyleSheet.create({
   },
   player: { alignItems: 'center', width: 90, gap: 2 },
   pname: { maxWidth: 90 },
+  botTag: { fontSize: 10, lineHeight: 13 },
+  grow: { flexGrow: 1, justifyContent: 'center' },
   digits: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   body: { padding: space.md, gap: space.md },
   info: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },

@@ -24,6 +24,8 @@ export const ProfileSchema = z.object({
   fav_teams: z.array(z.string()),
   is_guest: z.boolean(),
   created_at: z.string(),
+  /** the player's own photo (phone upload or Google picture); only the player sees it */
+  photo_url: z.string().nullable().optional(),
 });
 export type Profile = z.infer<typeof ProfileSchema>;
 
@@ -427,9 +429,20 @@ export type OpenPackResult = z.infer<typeof OpenPackResultSchema>;
 /* Friend match                                                               */
 /* -------------------------------------------------------------------------- */
 const PlayerMiniSchema = z.object({ username: z.string(), avatar_id: z.string(), level: z.number().int() });
+export const ModeQuestionSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  image: QuestionImageSchema.nullable().optional(),
+  category_name: z.string().nullable(),
+  answers: z.array(z.object({ slot: z.number().int(), text: z.string() })),
+});
+export type ModeQuestion = z.infer<typeof ModeQuestionSchema>;
+
 export const MatchStateSchema = z.object({
   room_id: z.string().uuid(),
   code: z.string(),
+  kind: z.enum(['friend', 'random']).default('friend'),
+  is_bot: z.boolean().default(false),
   phase: z.enum(['waiting', 'countdown', 'question', 'reveal', 'done', 'expired']),
   idx: z.number().int().nullable(),
   total: z.number().int(),
@@ -458,6 +471,65 @@ export const MatchStateSchema = z.object({
 });
 export type MatchState = z.infer<typeof MatchStateSchema>;
 export const MatchRoomSchema = z.object({ room_id: z.string().uuid(), code: z.string() });
+export const MatchFindSchema = MatchRoomSchema.extend({ matched: z.boolean().optional(), bot: z.boolean().optional() });
+
+/* Against the clock — mirrors 20261017000001_game_modes.sql */
+export const BlitzPayloadSchema = z.object({
+  run_id: z.string().uuid(),
+  status: z.enum(['active', 'done']),
+  seconds_left: z.number(),
+  total_seconds: z.number(),
+  correct: z.number().int(),
+  answered: z.number().int(),
+  best: z.number().int(),
+  coins: z.number().int().nullable(),
+  question: ModeQuestionSchema.nullable(),
+  countdown: z.number().optional(),
+  was_correct: z.boolean().nullable().optional(),
+  correct_slot: z.number().int().nullable().optional(),
+  new_best: z.boolean().optional(),
+  previous_best: z.number().int().optional(),
+});
+export type BlitzPayload = z.infer<typeof BlitzPayloadSchema>;
+export const BlitzInfoSchema = z.object({ best: z.number().int(), seconds: z.number().int() });
+
+/* Family room */
+export const FamilyPlayerSchema = z.object({
+  seat: z.number().int(),
+  username: z.string(),
+  avatar_id: z.string(),
+  level: z.number().int(),
+  me: z.boolean(),
+  host: z.boolean(),
+  online: z.boolean(),
+  left: z.boolean(),
+  score: z.number().int(),
+  correct: z.number().int(),
+  answered: z.boolean(),
+  slot: z.number().int().nullable().optional(),
+  points: z.number().int().nullable().optional(),
+});
+export type FamilyPlayer = z.infer<typeof FamilyPlayerSchema>;
+export const FamilyStateSchema = z.object({
+  room_id: z.string().uuid(),
+  code: z.string(),
+  status: z.enum(['waiting', 'playing', 'done', 'expired']),
+  phase: z.enum(['lobby', 'countdown', 'question', 'reveal', 'done']),
+  world: z.string(),
+  world_name: z.string().nullable(),
+  idx: z.number().int(),
+  total: z.number().int(),
+  seconds_left: z.number(),
+  answer_seconds: z.number().int(),
+  max_players: z.number().int(),
+  is_host: z.boolean(),
+  players: z.array(FamilyPlayerSchema),
+  question: ModeQuestionSchema.nullable(),
+  my_answer: z.number().int().nullable(),
+  reveal: z.object({ correct_slot: z.number().int(), explanation: z.string().nullable() }).nullable(),
+  result: z.object({ coins: z.number().nullable() }).nullable(),
+});
+export type FamilyState = z.infer<typeof FamilyStateSchema>;
 
 /* -------------------------------------------------------------------------- */
 /* Store & ads                                                                */

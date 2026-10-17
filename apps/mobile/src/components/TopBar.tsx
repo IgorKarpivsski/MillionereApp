@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText, AvatarBadge, CoinIcon, GemIcon, GLASS_EDGE, GlassFill, Led, Skeleton, TicketIcon } from '@/design-system/components';
 import { colors, radius, space } from '@/design-system/tokens';
 import { useEnergySheet } from '@/features/engage/EnergySheet';
+import { FlyTarget } from '@/features/home/RewardFly';
 import { useCountdownTo, useEnergy } from '@/features/engage/hooks';
 import { useMyState } from '@/features/profile/hooks';
 import { useToggleSetting } from '@/features/settings/hooks';
@@ -21,7 +22,9 @@ function Meter({ kind, amount }: { kind: 'coins' | 'gems'; amount: number }) {
       accessibilityLabel={`${formatNumber(amount)} ${strings.common[kind]}`}
     >
       <View style={styles.meterRow}>
-        <Icon size={16} />
+        <FlyTarget kind={kind}>
+          <Icon size={16} />
+        </FlyTarget>
         <Led color={kind === 'coins' ? colors.led : colors.gem}>{formatCompact(amount)}</Led>
       </View>
       <AppText variant="caption" color={colors.textDim}>
@@ -88,7 +91,7 @@ export function TopBar() {
           accessibilityLabel={`הפרופיל של ${data.profile.username}`}
           style={styles.who}
         >
-          <AvatarBadge avatarId={data.profile.avatar_id} level={data.profile.level} size={40} />
+          <AvatarBadge avatarId={data.profile.avatar_id} photo={data.profile.photo_url} level={data.profile.level} size={40} />
           <View style={styles.whoText}>
             <AppText variant="label" numberOfLines={1}>
               {data.profile.username}

@@ -25,6 +25,7 @@ import { queryClient } from '@/lib/queryClient';
 import { ensureRTL } from '@/lib/rtl';
 import { AgeGate } from '@/features/settings/AgeGate';
 import { IncomingCallHost } from '@/features/boosts/IncomingCall';
+import { RewardFlyHost } from '@/features/home/RewardFly';
 import { RemoveAdsUpsell } from '@/features/store/RemoveAdsUpsell';
 import { initAds } from '@/features/store/ads';
 import { useBackgroundMusic } from '@/design-system/feedback/music';
@@ -81,6 +82,8 @@ function Gate() {
         <Stack.Screen name="world/[slug]" />
         <Stack.Screen name="pack-open" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="match" options={{ gestureEnabled: false, animation: 'fade' }} />
+        <Stack.Screen name="blitz" options={{ gestureEnabled: false, animation: 'fade' }} />
+        <Stack.Screen name="family" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="shop" options={{ presentation: 'modal' }} />
         <Stack.Screen name="wheel" options={{ presentation: 'modal' }} />
         <Stack.Screen name="pass" />
@@ -94,6 +97,7 @@ function Gate() {
       <OfflineBanner />
       <AgeGate />
       <IncomingCallHost />
+      <RewardFlyHost />
       <RemoveAdsUpsell />
     </>
   );
