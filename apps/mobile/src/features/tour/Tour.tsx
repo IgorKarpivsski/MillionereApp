@@ -134,12 +134,12 @@ export function Tour({
 
   const card = (
     <Animated.View key={`c${i}`} entering={reduced ? undefined : FadeInDown.springify().damping(16)} style={styles.card}>
-      <View style={styles.cardRow}>
+      <Pressable onPress={next} style={styles.cardRow} accessibilityRole="button" accessibilityLabel={step.text}>
         {hole ? <Sloth head size={64} bob={false} /> : null}
         <AppText variant="bodyStrong" color={palette.night950} style={styles.text}>
           {step.text}
         </AppText>
-      </View>
+      </Pressable>
       <View style={styles.cardFoot}>
         <Pressable onPress={onDone} hitSlop={10} accessibilityRole="button">
           <AppText variant="caption" color="#6B5A9A" style={styles.bold}>

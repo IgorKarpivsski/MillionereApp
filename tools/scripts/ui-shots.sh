@@ -53,7 +53,7 @@ adb shell input tap 110 150; sleep 4; shot o4_nick
 adb shell input tap 110 150; sleep 6; shot o5_home
 sleep 3; shot o6_tour1
 for i in 2 3 4 5 6 7 8 9 10; do
-  adb shell input tap 540 40; sleep 3; shot "o6_tour$i"
+  adb shell input tap 540 1900; sleep 3; shot "o6_tour$i"
 done
 adb shell input keyevent KEYCODE_BACK; sleep 3
 shot 04_clear
