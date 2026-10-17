@@ -30,6 +30,7 @@ import { useAdReward, useStore } from '@/features/store/hooks';
 import { formatNumber } from '@/lib/format';
 import { fmt, strings } from '@/lib/i18n';
 import { kindOf, useFly } from './RewardFly';
+import { TourTarget } from '@/features/tour/Tour';
 
 const t = strings.bubbles;
 
@@ -268,11 +269,15 @@ export function BubbleColumns({ bubbles, center }: { bubbles: BubbleDef[]; cente
   const end = bubbles.filter((_, i) => i % 2 === 1);
   return (
     <View style={styles.columns}>
-      <View style={styles.col}>
-        {start.map((b, i) => (
-          <Bubble key={b.key} b={b} index={i * 2} />
-        ))}
-      </View>
+      {start.length ? (
+        <TourTarget id="bubbles" style={styles.col}>
+          {start.map((b, i) => (
+            <Bubble key={b.key} b={b} index={i * 2} />
+          ))}
+        </TourTarget>
+      ) : (
+        <View style={styles.col} />
+      )}
       <View style={styles.center}>{center}</View>
       <View style={styles.col}>
         {end.map((b, i) => (

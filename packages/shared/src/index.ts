@@ -26,6 +26,9 @@ export const ProfileSchema = z.object({
   created_at: z.string(),
   /** the player's own photo (phone upload or Google picture); only the player sees it */
   photo_url: z.string().nullable().optional(),
+  gender: z.enum(['male', 'female', 'other']).nullable().optional(),
+  fav_worlds: z.array(z.string()).optional(),
+  onboarded_at: z.string().nullable().optional(),
 });
 export type Profile = z.infer<typeof ProfileSchema>;
 
@@ -492,6 +495,44 @@ export const BlitzPayloadSchema = z.object({
 });
 export type BlitzPayload = z.infer<typeof BlitzPayloadSchema>;
 export const BlitzInfoSchema = z.object({ best: z.number().int(), seconds: z.number().int() });
+
+/* Player statistics (profile) */
+export const WorldStatSchema = z.object({
+  world: z.string(),
+  answered: z.number().int(),
+  correct: z.number().int(),
+  levels: z.number().int(),
+  stars: z.number().int(),
+  perfect: z.number().int(),
+});
+export type WorldStat = z.infer<typeof WorldStatSchema>;
+export const StatsSchema = z.object({
+  joined_at: z.string(),
+  level: z.number().int(),
+  xp: z.number(),
+  answered: z.number().int(),
+  correct: z.number().int(),
+  levels: z.number().int(),
+  stars: z.number().int(),
+  perfect: z.number().int(),
+  sessions: z.number().int(),
+  dailies: z.number().int(),
+  best_run: z.number().int(),
+  days_played: z.number().int(),
+  matches: z.number().int(),
+  match_wins: z.number().int(),
+  family: z.number().int(),
+  family_wins: z.number().int(),
+  blitz_games: z.number().int(),
+  blitz_best: z.number().int(),
+  streak: z.number().int(),
+  best_streak: z.number().int(),
+  stickers: z.number().int(),
+  stickers_total: z.number().int(),
+  puzzles: z.number().int(),
+  worlds: z.array(WorldStatSchema),
+});
+export type Stats = z.infer<typeof StatsSchema>;
 
 /* Family room */
 export const FamilyPlayerSchema = z.object({

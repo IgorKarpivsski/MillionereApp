@@ -6,10 +6,10 @@ import {
 } from '@expo-google-fonts/ibm-plex-sans-hebrew';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, router, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -24,6 +24,7 @@ import { bindOnlineManager } from '@/lib/network';
 import { queryClient } from '@/lib/queryClient';
 import { ensureRTL } from '@/lib/rtl';
 import { AgeGate } from '@/features/settings/AgeGate';
+import { useSettingsStore } from '@/features/settings/store';
 import { IncomingCallHost } from '@/features/boosts/IncomingCall';
 import { RewardFlyHost } from '@/features/home/RewardFly';
 import { RemoveAdsUpsell } from '@/features/store/RemoveAdsUpsell';
@@ -36,6 +37,19 @@ ensureRTL();
 initMonitoring();
 initAnalytics();
 void SplashScreen.preventAutoHideAsync();
+
+/** New players go through the first-run screens before anything else. */
+function OnboardingRedirect() {
+  const onboarded = useSettingsStore((s) => s.onboarded);
+  const segments = useSegments();
+  const [hydrated, setHydrated] = useState(useSettingsStore.persist.hasHydrated());
+  useEffect(() => useSettingsStore.persist.onFinishHydration(() => setHydrated(true)), []);
+  const here = segments[0] === 'onboarding' || segments[0] === 'legal';
+  useEffect(() => {
+    if (hydrated && !onboarded && !here) router.replace('/onboarding');
+  }, [hydrated, onboarded, here]);
+  return null;
+}
 
 /** Holds the splash until fonts are loaded and the player has a (guest) session. */
 function Gate() {
@@ -82,6 +96,7 @@ function Gate() {
         <Stack.Screen name="world/[slug]" />
         <Stack.Screen name="pack-open" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="match" options={{ gestureEnabled: false, animation: 'fade' }} />
+        <Stack.Screen name="onboarding" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="blitz" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="family" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="shop" options={{ presentation: 'modal' }} />
@@ -93,6 +108,7 @@ function Gate() {
         <Stack.Screen name="chat/[id]" />
         <Stack.Screen name="trade/[id]" options={{ presentation: 'modal' }} />
       </Stack>
+      <OnboardingRedirect />
       <EnergySheet />
       <OfflineBanner />
       <AgeGate />

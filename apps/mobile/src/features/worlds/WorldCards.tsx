@@ -11,6 +11,7 @@ import { fmt, strings } from '@/lib/i18n';
 import { MIX_WORLD, useWorldsConfig, useWorldsState } from './api';
 import { shade } from './worldArt';
 import { WorldBadge } from './WorldBadge';
+import { useMyState } from '@/features/profile/hooks';
 import { WORLD_IMAGES } from './worldImages';
 
 const t = strings.worlds;
@@ -38,8 +39,14 @@ export function QuickPlayCard() {
 
 /** The grid of knowledge worlds with each one's progress. */
 export function WorldsGrid() {
-  const worlds = useWorldsConfig();
+  const all = useWorldsConfig();
   const { data } = useWorldsState();
+  const { data: me } = useMyState();
+  // the player's favourite topics (from the first-run screens) come first
+  const favs = me?.profile.fav_worlds ?? [];
+  const worlds = favs.length
+    ? [...all].sort((a, b) => (favs.includes(a.slug) ? favs.indexOf(a.slug) : 99) - (favs.includes(b.slug) ? favs.indexOf(b.slug) : 99))
+    : all;
   const reduced = useReducedMotion();
   const { width } = useWindowDimensions();
   // Explicit size: percentage width + aspectRatio is unreliable on Android images.
@@ -66,6 +73,11 @@ export function WorldsGrid() {
                 </View>
               )}
               <LinearGradient colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.35)']} style={styles.coverFade} pointerEvents="none" />
+              {favs.includes(w.slug) ? (
+                <View style={styles.favTag}>
+                  <AppText style={styles.favHeart}>❤️</AppText>
+                </View>
+              ) : null}
               <View style={styles.body}>
                 <AppText variant="heading" align="center" numberOfLines={1} color="#FFFFFF" style={styles.worldName}>
                   {w.name}
@@ -127,6 +139,8 @@ export function WorldsStrip() {
 }
 
 const styles = StyleSheet.create({
+  favTag: { position: 'absolute', top: 8, start: 8, width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(14,8,40,0.6)', alignItems: 'center', justifyContent: 'center' },
+  favHeart: { fontSize: 15, lineHeight: 20 },
   strip: { gap: space.md, paddingVertical: space.xs },
   stripItem: { width: 70, alignItems: 'center', gap: 2 },
   stripName: { fontFamily: 'IBMPlexSansHebrew_700Bold' },

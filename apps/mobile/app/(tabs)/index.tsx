@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import { useMemo } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { TopBar } from '@/components/TopBar';
 import { AppText, Icon, Screen, Sheen, Sloth, StickerButton, useCountdownToMidnight } from '@/design-system/components';
@@ -17,7 +17,9 @@ import { useMyState } from '@/features/profile/hooks';
 import { useDailyStatus } from '@/features/quiz/hooks';
 import { useUnreadTotal } from '@/features/social/hooks';
 import { WORLD_IMAGES } from '@/features/worlds/worldImages';
-import { fmt, strings } from '@/lib/i18n';
+import { Tour, TourTarget } from '@/features/tour/Tour';
+import { useSettingsStore } from '@/features/settings/store';
+import { fmt, gx, strings } from '@/lib/i18n';
 
 const t = strings.modes;
 
@@ -34,8 +36,10 @@ function Hero() {
       bubbles={bubbles}
       center={
         <View style={styles.heroCenter}>
-          <Sloth size={148} say={name ? fmt(line, { name }) : t.slothHello[2]} />
-          <StickerButton label={strings.home.playCta} icon="play" size="lg" tone="prize" fullWidth onPress={() => play('mix')} />
+          <Sloth size={148} say={gx(name ? fmt(line, { name }) : t.slothHello[2]!, data?.profile.gender)} />
+          <TourTarget id="play" style={styles.stretch}>
+            <StickerButton label={strings.home.playCta} icon="play" size="lg" tone="prize" fullWidth onPress={() => play('mix')} />
+          </TourTarget>
         </View>
       }
     />
@@ -66,6 +70,7 @@ function Modes() {
   return (
     <>
       <SectionTitle>{t.title}</SectionTitle>
+      <TourTarget id="modes">
       <ModeTile
         wide
         index={0}
@@ -78,6 +83,7 @@ function Modes() {
         chipTone="gold"
         onPress={() => router.push('/family')}
       />
+      </TourTarget>
       <View style={styles.row}>
         <ModeTile
           index={1}
@@ -193,6 +199,39 @@ function Social() {
   );
 }
 
+/** First launch only: the sloth introduces himself and walks the new player around. */
+function FirstTour() {
+  const { data } = useMyState();
+  const onboarded = useSettingsStore((s) => s.onboarded);
+  const tourDone = useSettingsStore((s) => s.tourDone);
+  const set = useSettingsStore((s) => s.set);
+  const [focused, setFocused] = useState(true);
+  useFocusEffect(
+    useCallback(() => {
+      setFocused(true);
+      return () => setFocused(false);
+    }, []),
+  );
+  const [ready, setReady] = useState(false);
+  // let the screen lay out (and the targets measure) before dimming it
+  useEffect(() => {
+    if (!data || !onboarded || tourDone) return;
+    const id = setTimeout(() => setReady(true), 1400);
+    return () => clearTimeout(id);
+  }, [data, onboarded, tourDone]);
+  return (
+    <Tour
+      visible={ready && focused && onboarded && !tourDone}
+      name={data?.profile.username ?? ''}
+      gender={data?.profile.gender}
+      onDone={() => {
+        setReady(false);
+        set({ tourDone: true });
+      }}
+    />
+  );
+}
+
 export default function HomeScreen() {
   const { refetch, isRefetching } = useMyState();
   return (
@@ -200,12 +239,14 @@ export default function HomeScreen() {
       <Hero />
       <Modes />
       <Social />
+      <FirstTour />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   heroCenter: { alignItems: 'center', gap: space.sm, alignSelf: 'stretch' },
+  stretch: { alignSelf: 'stretch' },
   section: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.xs },
   sectionLine: { flex: 1, height: 2, borderRadius: 1, backgroundColor: 'rgba(255,214,140,0.35)' },
   row: { flexDirection: 'row', gap: space.md },

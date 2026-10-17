@@ -41,15 +41,20 @@ adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 >/dev/null
 sleep 50
 shot 00_launch
 adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1
-sleep 5
-shot 01_after
-# First-run popups, by position (uiautomator never idles while the backdrop animates):
-# age question ("18+"), then the daily gift, then the deal (closed with back).
-adb shell input tap 351 2190; sleep 5
-shot 02_age_done
-adb shell input tap 540 1566; sleep 7
-shot 03_gift
-sleep 4
+# First run: notifications → age wheel → about you → nickname → home + the sloth's tour.
+shot o1_notif
+adb shell input tap 540 2200; sleep 4; shot o1b_after_later
+shot o2_age
+adb shell input swipe 540 1500 540 1180 600; sleep 3; shot o2b_age_picked
+adb shell input tap 540 2200; sleep 4; shot o3_about
+adb shell input tap 300 1350; sleep 1
+adb shell input swipe 540 1900 540 1100 500; sleep 2; shot o3b_about_scrolled
+adb shell input tap 110 150; sleep 4; shot o4_nick
+adb shell input tap 110 150; sleep 6; shot o5_home
+sleep 3; shot o6_tour1
+for i in 2 3 4 5 6 7 8 9 10; do
+  adb shell input tap 900 1450; sleep 3; shot "o6_tour$i"
+done
 adb shell input keyevent KEYCODE_BACK; sleep 3
 shot 04_clear
 

@@ -6,6 +6,7 @@ import { AppText, GLASS_EDGE, GlassFill, Icon, type IconName } from '@/design-sy
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { colors, palette, radius, space } from '@/design-system/tokens';
+import { TourTarget } from '@/features/tour/Tour';
 
 /** Original illustrated sticker icons (src/design-system/icons/art.ts). */
 const ICONS: Record<string, IconName> = {
@@ -77,16 +78,17 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           const label = typeof options?.title === 'string' ? options.title : route.name;
           const focused = state.index === i;
           return (
-            <Tab
-              key={route.key}
-              name={route.name}
-              label={label}
-              focused={focused}
-              onPress={() => {
-                const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
-                if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
-              }}
-            />
+            <TourTarget key={route.key} id={`tab-${route.name}`} style={styles.tabWrap}>
+              <Tab
+                name={route.name}
+                label={label}
+                focused={focused}
+                onPress={() => {
+                  const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+                  if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
+                }}
+              />
+            </TourTarget>
           );
         })}
       </View>
@@ -106,6 +108,7 @@ const styles = StyleSheet.create({
     paddingVertical: space.sm,
     paddingHorizontal: space.xs,
   },
+  tabWrap: { flex: 1 },
   tab: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2, minHeight: 52 },
   lamp: {
     position: 'absolute',

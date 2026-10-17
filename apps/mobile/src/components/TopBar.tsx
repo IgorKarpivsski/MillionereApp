@@ -5,6 +5,7 @@ import { AppText, AvatarBadge, CoinIcon, GemIcon, GLASS_EDGE, GlassFill, Led, Sk
 import { colors, radius, space } from '@/design-system/tokens';
 import { useEnergySheet } from '@/features/engage/EnergySheet';
 import { FlyTarget } from '@/features/home/RewardFly';
+import { TourTarget } from '@/features/tour/Tour';
 import { useCountdownTo, useEnergy } from '@/features/engage/hooks';
 import { useMyState } from '@/features/profile/hooks';
 import { useToggleSetting } from '@/features/settings/hooks';
@@ -85,6 +86,7 @@ export function TopBar() {
     <View style={styles.bar}>
       <GlassFill />
       {data ? (
+        <TourTarget id="profile" style={styles.whoWrap}>
         <Pressable
           onPress={() => router.push('/(tabs)/profile')}
           accessibilityRole="button"
@@ -101,11 +103,15 @@ export function TopBar() {
             </AppText>
           </View>
         </Pressable>
+        </TourTarget>
       ) : (
         <Skeleton width={140} height={40} />
       )}
       <MusicToggle />
-      <Tickets />
+      <TourTarget id="tickets">
+        <Tickets />
+      </TourTarget>
+      <TourTarget id="wallet">
       <Pressable
         style={styles.wallet}
         onPress={() => router.push('/shop')}
@@ -121,6 +127,7 @@ export function TopBar() {
           <Skeleton width={120} height={40} />
         )}
       </Pressable>
+      </TourTarget>
     </View>
   );
 }
@@ -141,6 +148,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   who: { flexDirection: 'row', alignItems: 'center', gap: space.sm, flexShrink: 1 },
+  whoWrap: { flexShrink: 1 },
   whoText: { flexShrink: 1 },
   wallet: { flexDirection: 'row', gap: space.md },
   meter: { alignItems: 'center' },

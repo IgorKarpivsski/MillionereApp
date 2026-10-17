@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { formatCompact, formatNumber } from './format.ts';
-import { fmt, strings } from './i18n/index.ts';
+import { fmt, gx, strings } from './i18n/index.ts';
 
 test('formatNumber groups thousands', () => {
   assert.equal(formatNumber(1234), '1,234');
@@ -33,4 +33,10 @@ test('every Hebrew string is non-empty and has no stray Latin-only text', () => 
     }
   };
   walk(strings);
+});
+
+test('gx picks the gendered form', () => {
+  assert.equal(gx('את{ה|} מוכ{ן|נה}', 'female'), 'את מוכנה');
+  assert.equal(gx('את{ה|} מוכ{ן|נה}', 'male'), 'אתה מוכן');
+  assert.equal(gx('בוא{|י}', null), 'בוא');
 });

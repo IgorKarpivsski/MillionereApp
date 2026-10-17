@@ -17,6 +17,8 @@ const t = strings.ageGate;
  */
 export function AgeGate() {
   const ageBand = useSettingsStore((s) => s.ageBand);
+  // new players answer the age question inside the first-run screens
+  const onboarded = useSettingsStore((s) => s.onboarded);
   const set = useSettingsStore((s) => s.set);
   const [ready, setReady] = useState(useSettingsStore.persist.hasHydrated());
 
@@ -29,7 +31,7 @@ export function AgeGate() {
   };
 
   return (
-    <BottomSheet visible={ready && ageBand === null} onClose={() => undefined} title={t.title}>
+    <BottomSheet visible={ready && onboarded && ageBand === null} onClose={() => undefined} title={t.title}>
       <AppText color={colors.textMuted} align="center">
         {t.body}
       </AppText>

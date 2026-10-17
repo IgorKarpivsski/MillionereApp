@@ -13,3 +13,11 @@ export function fmt(template: string, vars: Record<string, string | number> = {}
     return String(v);
   });
 }
+
+/**
+ * Hebrew is gendered: "{m|f}" picks the masculine or feminine form
+ * ("מוכ{ן|נה}" → מוכן / מוכנה). Unknown or "other" gender uses the first form.
+ */
+export function gx(template: string, gender?: 'male' | 'female' | 'other' | null): string {
+  return template.replace(/\{([^{}|]*)\|([^{}|]*)\}/g, (_, m: string, f: string) => (gender === 'female' ? f : m));
+}

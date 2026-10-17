@@ -62,6 +62,18 @@ export async function rescheduleReminders(): Promise<void> {
   }
 }
 
+/** The first-run notifications screen: the player already chose "allow", so go straight to the system dialog. */
+export async function requestReminderPermission(): Promise<boolean> {
+  useSettingsStore.getState().set({ remindersAsked: true, reminders: true });
+  try {
+    await ensureChannel();
+    const p = await Notifications.requestPermissionsAsync();
+    return p.granted;
+  } catch {
+    return false;
+  }
+}
+
 /** Asks once for permission (on launch, right after the age question; again from settings). */
 export async function askForRemindersOnce(): Promise<void> {
   const s = useSettingsStore.getState();

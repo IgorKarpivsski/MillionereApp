@@ -182,5 +182,31 @@ begin
   perform test.fshift(room, 5 + 21);
   s := public.family_state(room);
   perform test.assert(s ->> 'phase' = 'reveal' and (s ->> 'idx')::int = 0, 'timeout reveals');
+
+  -- a's statistics: one blitz (2/4), one family game won (15/15)
+  s := public.my_stats();
+  perform test.assert((s ->> 'family')::int = 1 and (s ->> 'family_wins')::int = 1, 'family stats: ' || s::text);
+  perform test.assert((s ->> 'blitz_games')::int = 1 and (s ->> 'blitz_best')::int = 2, 'blitz stats');
+  perform test.assert((s ->> 'answered')::int = 15 + 3 and (s ->> 'correct')::int = 15 + 2, 'answer totals: ' || s::text);
+  perform test.assert(jsonb_array_length(s -> 'worlds') >= 1, 'per world');
+end $$;
+rollback;
+
+-- Onboarding preferences + statistics
+begin;
+create temp table ids2 as select test.new_user() as a;
+grant select on ids2 to authenticated;
+set local role authenticated;
+do $$
+declare a uuid := (select ids2.a from ids2); s jsonb;
+begin
+  perform test.login(a);
+  s := public.save_preferences('female', array['science', 'nope', 'geography']);
+  perform test.assert(s -> 'profile' ->> 'gender' = 'female', 'gender saved');
+  perform test.assert(s -> 'profile' -> 'fav_worlds' = '["science", "geography"]'::jsonb, 'unknown worlds dropped: ' || (s -> 'profile' -> 'fav_worlds')::text);
+  perform test.assert(s -> 'profile' ->> 'onboarded_at' is not null, 'onboarded');
+  perform test.assert_raises($q$select public.save_preferences('x', null)$q$, 'invalid_input', 'bad gender');
+  s := public.my_stats();
+  perform test.assert((s ->> 'answered')::int = 0 and (s ->> 'levels')::int = 0 and s ->> 'joined_at' is not null, 'empty stats: ' || s::text);
 end $$;
 rollback;

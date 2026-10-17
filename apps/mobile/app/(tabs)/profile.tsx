@@ -22,6 +22,8 @@ import type { Provider } from '@/features/auth/oauth';
 import { RpcError } from '@/features/profile/api';
 import { useMyState, useUpdateProfile } from '@/features/profile/hooks';
 import { googlePhotoUrl, pickAndUploadPhoto, useSetPhoto } from '@/features/profile/photo';
+import { StatsSection } from '@/features/profile/Stats';
+import { useSettingsStore } from '@/features/settings/store';
 import { formatNumber, ltr } from '@/lib/format';
 import { strings } from '@/lib/i18n';
 import { useIsOnline } from '@/lib/network';
@@ -276,6 +278,18 @@ export default function ProfileScreen() {
         </Card>
       )}
 
+      <StatsSection gender={data.profile.gender} />
+
+      <StickerButton
+        label={strings.tour.replay}
+        icon="school"
+        tone="ghost"
+        fullWidth
+        onPress={() => {
+          useSettingsStore.getState().set({ tourDone: false });
+          router.navigate('/(tabs)');
+        }}
+      />
       <StickerButton label={t.settings} icon="settings" tone="ghost" fullWidth onPress={() => router.push('/settings')} />
       <StickerButton label={t.signOut} icon="log-out" tone="ghost" fullWidth onPress={confirmSignOut} />
       {__DEV__ ? (
