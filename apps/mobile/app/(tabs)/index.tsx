@@ -256,10 +256,10 @@ export default function HomeScreen() {
     <Screen header={<TopBar />} onRefresh={() => void refetch()} refreshing={isRefetching}>
       <Hero />
       <NewbieBanner />
-      <EventCard />
-      <NextGoal />
-      <MissionsCard />
       <Modes />
+      <NextGoal />
+      <EventCard />
+      <MissionsCard />
       <Social />
       <FirstTour />
       <GenderPromptGate />
