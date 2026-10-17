@@ -63,16 +63,18 @@ open_route ""; sleep 10; shot m_home
 adb shell input swipe 540 1700 540 700 500; sleep 3; shot m_home_2
 adb shell input swipe 540 1700 540 700 500; sleep 3; shot m_home_3
 open_route blitz; sleep 8; shot m_blitz
-tap_text "צא לדרך"; sleep 6; shot m_blitz_go
-sleep 3; adb shell input tap 540 1500; sleep 2; shot m_blitz_play
-sleep 65; shot m_blitz_done
+adb shell input tap 540 1620; sleep 6; shot m_blitz_go
+for i in 1 2 3 4 5 6; do adb shell input tap 540 $((1350 + (i % 4) * 190)); sleep 2; done; shot m_blitz_play
+sleep 60; shot m_blitz_done
 open_route family; sleep 8; shot m_family
-tap_text "פתח חדר חדש"; sleep 6; shot m_family_room
+adb shell input tap 540 1290; sleep 6; shot m_family_room
 adb shell input swipe 540 1700 540 800 500; sleep 2; shot m_family_room_2
 open_route "match?mode=random"; sleep 6; shot m_random
 sleep 10; shot m_random_offer
-tap_text "שחק נגד העצלן"; sleep 9; shot m_random_vs
+adb shell input tap 540 1440; sleep 4; shot m_random_vs
 sleep 6; shot m_random_q
+adb shell input tap 540 1500; sleep 14; shot m_random_reveal
+sleep 120; shot m_random_done
 
 for route in "session?world=mix" play packs collection leaderboard profile shop wheel pass friends settings avatar match "world/history"; do
   name=${route//\//_}
