@@ -48,17 +48,32 @@ for (const t of titles) if (prev[t] && !prev[t].missing) result[t] = prev[t];
 
 // 1) title -> free lead image file
 const fileOf = {};
+const qidOf = {};
 for (let i = 0; i < todo.length; i += 40) {
   const batch = todo.slice(i, i + 40);
-  const j = await api(HEWIKI, { action: 'query', prop: 'pageimages', piprop: 'name', pilicense: 'free', redirects: '1', titles: batch.join('|') });
+  const j = await api(HEWIKI, { action: 'query', prop: 'pageimages|pageprops', piprop: 'name', pilicense: 'free', ppprop: 'wikibase_item', redirects: '1', titles: batch.join('|') });
   const back = {};
   for (const n of j.query?.normalized ?? []) back[n.to] = n.from;
   for (const r of j.query?.redirects ?? []) back[r.to] = back[r.from] ?? r.from;
   for (const p of j.query?.pages ?? []) {
     const from = back[p.title] ?? p.title;
     if (p.missing) result[from] = { missing: 'no such article' };
-    else if (!p.pageimage) result[from] = { missing: 'no free lead image' };
-    else fileOf[from] = p.pageimage;
+    else if (p.pageimage) fileOf[from] = p.pageimage;
+    else if (p.pageprops?.wikibase_item) qidOf[from] = p.pageprops.wikibase_item;
+    else result[from] = { missing: 'no free lead image' };
+  }
+  await sleep(300);
+}
+
+// 1b) no free lead image on the article: fall back to the Wikidata item's main image (P18, always on Commons)
+const qids = Object.entries(qidOf);
+for (let i = 0; i < qids.length; i += 40) {
+  const batch = qids.slice(i, i + 40);
+  const j = await api('https://www.wikidata.org/w/api.php', { action: 'wbgetentities', props: 'claims', ids: batch.map(([, q]) => q).join('|') });
+  for (const [t, q] of batch) {
+    const f = j.entities?.[q]?.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
+    if (f) fileOf[t] = f;
+    else result[t] = { missing: 'no free lead image' };
   }
   await sleep(300);
 }
@@ -100,11 +115,12 @@ for (const [t, v] of ok) {
   v.idx = ++n;
   const path = join(OUT, 'thumbs', `${n}.jpg`);
   try {
-    const res = await fetch(v.thumb.replace(/\/\d+px-/, '/240px-'), { headers: { 'User-Agent': UA } });
-    if (res.ok) writeFileSync(path, Buffer.from(await res.arrayBuffer()));
-    else console.warn(`thumb ${t}: HTTP ${res.status}`);
+    // the exact URL the app will load, so a broken one shows up on the sheet
+    const res = await fetch(v.thumb.split('?')[0], { headers: { 'User-Agent': UA } });
+    if (res.ok) { writeFileSync(path, Buffer.from(await res.arrayBuffer())); delete v.thumbErr; }
+    else v.thumbErr = `HTTP ${res.status}`;
   } catch (e) {
-    console.warn(`thumb ${t}: ${e.message}`);
+    v.thumbErr = e.message;
   }
   await sleep(150);
 }
