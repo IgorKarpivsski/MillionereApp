@@ -14,6 +14,7 @@ import { storeApi } from '@/features/store/api';
 import { useAdReward, useStore } from '@/features/store/hooks';
 import { BoostShop } from '@/features/boosts/BoostShop';
 import { DealCard } from '@/features/engage/DealCard';
+import { CurrencyHelpButton } from '@/features/teen/CurrencyHelp';
 import { useDeals } from '@/features/engage/hooks';
 import { formatNumber } from '@/lib/format';
 import { queryKeys } from '@/lib/queryClient';
@@ -137,7 +138,8 @@ export default function ShopScreen() {
     <SafeAreaView style={styles.root}>
       <Backdrop />
       <View style={styles.top}>
-        <AppText variant="title">{t.title}</AppText>
+        <AppText variant="title" style={styles.flex}>{t.title}</AppText>
+        <CurrencyHelpButton auto />
         <StickerButton label={strings.common.close} tone="ghost" size="sm" onPress={() => router.back()} />
       </View>
       <ScrollView contentContainerStyle={styles.body}>

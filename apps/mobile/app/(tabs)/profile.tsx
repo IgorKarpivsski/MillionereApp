@@ -24,6 +24,8 @@ import { useMyState, useUpdateProfile } from '@/features/profile/hooks';
 import { googlePhotoUrl, pickAndUploadPhoto, useSetPhoto } from '@/features/profile/photo';
 import { StatsSection } from '@/features/profile/Stats';
 import { useSettingsStore } from '@/features/settings/store';
+import { FlairSheet } from '@/features/teen/Flair';
+import { StreakFreezeCard } from '@/features/teen/StreakFreeze';
 import { formatNumber, ltr } from '@/lib/format';
 import { strings } from '@/lib/i18n';
 import { useIsOnline } from '@/lib/network';
@@ -210,6 +212,7 @@ export default function ProfileScreen() {
   const { isGuest, signOut } = useAuth();
   const [editing, setEditing] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
+  const [flairOpen, setFlairOpen] = useState(false);
 
   if (!data) {
     return (
@@ -241,7 +244,7 @@ export default function ProfileScreen() {
           accessibilityLabel={t.photoTitle}
           style={({ pressed }) => (pressed ? { transform: [{ scale: 0.96 }] } : null)}
         >
-          <AvatarBadge avatarId={data.profile.avatar_id} photo={data.profile.photo_url} level={data.profile.level} size={120} ring={colors.led} />
+          <AvatarBadge avatarId={data.profile.avatar_id} photo={data.profile.photo_url} frame={data.profile.frame} level={data.profile.level} size={120} ring={colors.led} />
           <View style={styles.editDot}>
             <Ionicons name="camera" size={16} color={colors.textOnBright} />
           </View>
@@ -251,7 +254,15 @@ export default function ProfileScreen() {
           <AppText variant="title" numberOfLines={1}>
             {data.profile.username}
           </AppText>
-          <StickerButton label={t.editName} size="sm" tone="ghost" icon="pencil" onPress={() => setEditing(true)} />
+          {data.profile.title ? (
+            <AppText variant="label" color={colors.led}>
+              {`★ ${data.profile.title} ★`}
+            </AppText>
+          ) : null}
+          <View style={styles.headerBtns}>
+            <StickerButton label={t.editName} size="sm" tone="ghost" icon="pencil" onPress={() => setEditing(true)} />
+            <StickerButton label={strings.teen.flairEdit} size="sm" tone="ghost" icon="ribbon" onPress={() => setFlairOpen(true)} />
+          </View>
         </View>
       </View>
 
@@ -280,6 +291,12 @@ export default function ProfileScreen() {
 
       <StatsSection gender={data.profile.gender} />
 
+      <StreakFreezeCard />
+      <View style={styles.entries}>
+        <StickerButton label={strings.teen.mistakesEntry} icon="refresh" tone="outline" fullWidth onPress={() => router.push('/mistakes')} />
+        <StickerButton label={strings.teen.submitEntry} icon="create" tone="outline" fullWidth onPress={() => router.push('/submit-question')} />
+      </View>
+
       <StickerButton
         label={strings.tour.replay}
         icon="school"
@@ -297,6 +314,7 @@ export default function ProfileScreen() {
       ) : null}
 
       <EditNameSheet visible={editing} onClose={() => setEditing(false)} current={data.profile.username} />
+      <FlairSheet visible={flairOpen} onClose={() => setFlairOpen(false)} />
       <PhotoSheet visible={photoOpen} onClose={() => setPhotoOpen(false)} hasPhoto={!!data.profile.photo_url} />
     </Screen>
   );
@@ -320,6 +338,8 @@ const styles = StyleSheet.create({
   header: { alignItems: 'center', gap: space.md, paddingTop: space.md },
   glowSpot: { position: 'absolute', top: -70, alignItems: 'center', justifyContent: 'center', width: 300, height: 300 },
   nameRow: { alignItems: 'center', gap: space.sm },
+  headerBtns: { flexDirection: 'row', gap: space.sm, flexWrap: 'wrap', justifyContent: 'center' },
+  entries: { gap: space.sm },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   levelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: space.md },
   linkButtons: { gap: space.sm, marginTop: space.lg },

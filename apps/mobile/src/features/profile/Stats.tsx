@@ -121,8 +121,9 @@ function Badge({ b, s }: { b: (typeof BADGES)[number]; s: Stats }) {
   );
 }
 
-export function StatsSection({ gender }: { gender?: 'male' | 'female' | 'other' | null }) {
-  const { data: s } = useStats();
+export function StatsSection({ gender, stats, title }: { gender?: 'male' | 'female' | 'other' | null; stats?: Stats; title?: string }) {
+  const own = useStats();
+  const s = stats ?? own.data;
   const worlds = useWorldsConfig();
   const reduced = useReducedMotion();
   if (!s) return null;
@@ -137,7 +138,7 @@ export function StatsSection({ gender }: { gender?: 'male' | 'female' | 'other' 
     <>
       <Animated.View entering={enter(0)}>
         <Card padding={space.md} style={styles.gap}>
-          <AppText variant="heading">{t.title}</AppText>
+          <AppText variant="heading">{title ?? t.title}</AppText>
           <AppText variant="caption" color={colors.textMuted}>
             {`${fmt(gx(t.since, gender), { date: since })} · ${fmt(t.days, { n: s.days_played })}`}
           </AppText>

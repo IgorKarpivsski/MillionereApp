@@ -2,6 +2,9 @@ import type { FamilyPlayer, FamilyState } from '@fm/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { markModeSeen } from '@/features/settings/store';
+import { ReactionLayer } from '@/features/teen/Reactions';
+import { ShareResultButton } from '@/features/teen/ShareResult';
 import { ActivityIndicator, Alert, BackHandler, Image, Pressable, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, Layout, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -355,6 +358,7 @@ function Results({ s, onAgain }: { s: FamilyState; onAgain: () => void }) {
   const top = players[0]?.score ?? 0;
   const champs = players.filter((p) => p.score === top && top > 0);
   const meChamp = champs.some((p) => p.me);
+  const myPlace = players.findIndex((p) => p.me) + 1;
   const coins = s.result?.coins ?? 0;
   useEffect(() => {
     if (!coins) return;
@@ -411,6 +415,12 @@ function Results({ s, onAgain }: { s: FamilyState; onAgain: () => void }) {
         ) : null}
       </View>
       <Sloth size={110} say={meChamp ? t.youChampion : strings.modes.slothHello[3]} />
+      {myPlace > 0 ? (
+        <ShareResultButton
+          big={myPlace === 1 ? '🥇' : `#${myPlace}`}
+          line={fmt(strings.teen.shareFamily, { place: myPlace, score: players[myPlace - 1]?.score ?? 0 })}
+        />
+      ) : null}
       <StickerButton label={t.again} icon="refresh" tone="prize" size="lg" fullWidth onPress={onAgain} />
       <StickerButton label={strings.quiz.home} icon="home" tone="ghost" fullWidth onPress={goHome} />
     </ScrollView>
@@ -423,6 +433,7 @@ function Results({ s, onAgain }: { s: FamilyState; onAgain: () => void }) {
 
 export default function FamilyScreen() {
   const params = useLocalSearchParams<{ code?: string }>();
+  useEffect(() => markModeSeen('family'), []);
   const [room, setRoom] = useState<string | null>(null);
   const { s, left, refresh } = useFamilyState(room);
   const [picked, setPicked] = useState<{ idx: number; slot: number } | null>(null);
@@ -579,6 +590,11 @@ export default function FamilyScreen() {
               {q.text}
             </AppText>
             {q.image ? <QuestionImageView image={q.image} /> : null}
+            {q.author ? (
+              <AppText variant="caption" color={colors.cardMuted}>
+                {`✍️ ${fmt(strings.teen.questionBy, { name: q.author })}`}
+              </AppText>
+            ) : null}
           </Animated.View>
         ) : null}
         <View style={styles.answers}>
@@ -620,6 +636,7 @@ export default function FamilyScreen() {
               : strings.match.fastBonus}
         </AppText>
       </ScrollView>
+      <ReactionLayer kind="family" room={s.room_id} live meName={s.players.find((p) => p.me)?.username ?? ''} />
     </SafeAreaView>
   );
 }

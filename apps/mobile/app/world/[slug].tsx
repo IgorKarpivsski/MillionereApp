@@ -20,7 +20,7 @@ import { physicalLeft } from '@/lib/rtl';
 
 const t = strings.worlds;
 const STEP = 104; // vertical distance between level nodes
-const CHAMP_GAP = 90; // room for the champion-tier banner
+const CHAMP_GAP = 90; // room for the champion-tier banner at the end of the road
 const NODE = 78;
 
 function Stars({ n, size = 14 }: { n: number; size?: number }) {
@@ -66,7 +66,7 @@ export default function WorldScreen() {
     const amp = Math.min(110, width / 2 - NODE);
     return Array.from({ length: nodes }, (_, i) => ({
       x: width / 2 + Math.sin(i * 0.95) * amp - NODE / 2,
-      y: 40 + i * STEP + (i >= levels ? CHAMP_GAP : 0),
+      y: 40 + i * STEP,
     }));
   }, [nodes, levels, width]);
 
@@ -85,7 +85,7 @@ export default function WorldScreen() {
 
   useEffect(() => {
     if (!data) return;
-    const y = Math.max(0, 40 + (unlocked - 1) * STEP + (unlocked > levels ? CHAMP_GAP : 0) - 220);
+    const y = Math.max(0, 40 + (unlocked - 1) * STEP - 220);
     const id = setTimeout(() => scroll.current?.scrollTo({ y, animated: true }), 350);
     return () => clearTimeout(id);
   }, [data, unlocked]);
@@ -134,7 +134,7 @@ export default function WorldScreen() {
           <Path d={road} stroke={shade(w.color, 0.25)} strokeWidth={5} strokeLinecap="round" strokeDasharray="12 16" fill="none" />
         </Svg>
         {champ > 0 ? (
-          <View style={[styles.champBanner, { top: 40 + levels * STEP + 4 }]} pointerEvents="none">
+          <View style={[styles.champBanner, { top: 40 + nodes * STEP - 6 }]} pointerEvents="none">
             <LinearGradient colors={['#FFD46B', '#E08A00']} style={StyleSheet.absoluteFill} />
             <AppText variant="heading" color={colors.textOnBright} align="center">
               {`👑 ${strings.champion.title}`}

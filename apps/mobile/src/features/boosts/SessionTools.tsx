@@ -61,6 +61,8 @@ export function SessionTools({
   const [buyFor, setBuyFor] = useState<BoostKind | null>(null);
   const [buying, setBuying] = useState(false);
   const [callOpen, setCallOpen] = useState(false);
+  // boosts stay tucked behind "+" so the question screen isn't crowded
+  const [boostsOpen, setBoostsOpen] = useState(false);
   const [friends, setFriends] = useState<CallCandidate[] | null>(null);
   const callTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -199,7 +201,18 @@ export function SessionTools({
           off={disabled || callUsed}
           onPress={() => void openCall()}
         />
+        <Pressable
+          onPress={() => setBoostsOpen((o) => !o)}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: boostsOpen }}
+          accessibilityLabel={strings.boosts.more}
+          style={({ pressed }) => [styles.more, boostsOpen && styles.moreOn, pressed && styles.pressed]}
+        >
+          <Ionicons name={boostsOpen ? 'close' : 'add'} size={22} color={boostsOpen ? colors.textOnBright : colors.led} />
+          {!boostsOpen && IN_GAME.some((b) => (counts[b] ?? 0) > 0) ? <View style={styles.moreDot} /> : null}
+        </Pressable>
       </View>
+      {boostsOpen ? (
       <View style={styles.boosts}>
         {IN_GAME.map((b) => (
           <Pressable
@@ -223,6 +236,7 @@ export function SessionTools({
           </Pressable>
         ))}
       </View>
+      ) : null}
 
       <BottomSheet visible={hintOpen} onClose={() => setHintOpen(false)} title={strings.hint.title}>
         <StickerButton
@@ -386,6 +400,18 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,214,140,0.3)',
   },
   toolOff: { opacity: 0.4 },
+  more: {
+    width: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.control,
+    backgroundColor: 'rgba(44,28,108,0.9)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,214,140,0.3)',
+  },
+  moreOn: { backgroundColor: colors.led },
+  moreDot: { position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: 4, backgroundColor: colors.correct },
   tag: { paddingHorizontal: 5, borderRadius: radius.chip, backgroundColor: colors.correct },
   tagPaid: { backgroundColor: colors.led },
   bold: { fontFamily: 'IBMPlexSansHebrew_700Bold' },

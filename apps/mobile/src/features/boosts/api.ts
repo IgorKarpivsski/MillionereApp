@@ -9,7 +9,6 @@ import {
   type BoostsState,
   type CallCandidate,
   type CallState,
-  type IncomingCall,
   type SessionPayload,
 } from '@fm/shared';
 import { useQuery } from '@tanstack/react-query';
@@ -31,7 +30,7 @@ export const boostsApi = {
   call: (runId: string, friend: string): Promise<SessionPayload> =>
     rpc('session_call_friend', { p_run: runId, p_friend: friend }, parsePayload),
   callState: (callId: string): Promise<CallState> => rpc('friend_call_state', { p_call: callId }, (x) => CallStateSchema.parse(x)),
-  ping: (): Promise<IncomingCall[]> => rpc('presence_ping', undefined, (x) => PresencePingSchema.parse(x).calls),
+  ping: () => rpc('presence_ping', undefined, (x) => PresencePingSchema.parse(x)),
   answerCall: (callId: string, slot: number): Promise<void> => rpc('friend_call_answer', { p_call: callId, p_slot: slot }, () => undefined),
 };
 

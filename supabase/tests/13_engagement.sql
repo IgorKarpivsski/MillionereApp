@@ -2,6 +2,8 @@
 begin;
 create temp table ids as select test.new_user() as a, test.new_user() as b;
 grant select on ids to authenticated;
+-- past the free first week
+update public.profiles set created_at = now() - interval '30 days' where id in (select a from ids union select b from ids);
 -- Keep the season "now" no matter when the tests run.
 update public.app_config
    set value = value || jsonb_build_object('starts', (current_date - 1)::text, 'ends', (current_date + 30)::text)

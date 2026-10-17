@@ -47,7 +47,7 @@ function Tickets() {
       onPress={show}
       style={styles.meter}
       accessibilityRole="button"
-      accessibilityLabel={data.unlimited ? strings.engage.unlimited : fmt(strings.engage.ticketsA11y, { n: data.tickets })}
+      accessibilityLabel={data.newbie_until ? strings.teen.freeWeekA11y : data.unlimited ? strings.engage.unlimited : fmt(strings.engage.ticketsA11y, { n: data.tickets })}
       hitSlop={8}
     >
       <View style={styles.meterRow}>
@@ -55,7 +55,7 @@ function Tickets() {
         <Led color={data.tickets < 1 && !data.unlimited ? colors.danger : colors.text}>{label}</Led>
       </View>
       <AppText variant="caption" color={colors.textDim}>
-        {next ?? strings.engage.tickets}
+        {data.newbie_until ? strings.teen.freeWeekShort : (next ?? strings.engage.tickets)}
       </AppText>
     </Pressable>
   );
@@ -93,13 +93,13 @@ export function TopBar() {
           accessibilityLabel={`הפרופיל של ${data.profile.username}`}
           style={styles.who}
         >
-          <AvatarBadge avatarId={data.profile.avatar_id} photo={data.profile.photo_url} level={data.profile.level} size={40} />
+          <AvatarBadge avatarId={data.profile.avatar_id} photo={data.profile.photo_url} frame={data.profile.frame} level={data.profile.level} size={40} />
           <View style={styles.whoText}>
             <AppText variant="label" numberOfLines={1}>
               {data.profile.username}
             </AppText>
             <AppText variant="caption" color={colors.textDim} numberOfLines={1}>
-              {fmt(strings.topBar.levelLine, { n: data.profile.level, rank: rankTitle(data.profile.level) })}
+              {data.profile.title ?? fmt(strings.topBar.levelLine, { n: data.profile.level, rank: rankTitle(data.profile.level) })}
             </AppText>
           </View>
         </Pressable>

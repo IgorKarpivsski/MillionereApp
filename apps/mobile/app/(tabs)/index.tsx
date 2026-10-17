@@ -19,6 +19,7 @@ import { useUnreadTotal } from '@/features/social/hooks';
 import { WORLD_IMAGES } from '@/features/worlds/worldImages';
 import { TourTarget, useTourStore } from '@/features/tour/Tour';
 import { useSettingsStore } from '@/features/settings/store';
+import { EventCard, MissionsCard, NewbieBanner, NextGoal } from '@/features/teen/HomeCards';
 import { fmt, gx, strings } from '@/lib/i18n';
 import { GenderPrompt, useGenderPromptStore } from '@/features/profile/gender';
 
@@ -64,6 +65,8 @@ function Modes() {
   const { data: energy } = useEnergy();
   const showEnergy = useEnergySheet((s) => s.show);
   const dailyDone = daily?.state === 'done';
+  const seen = useSettingsStore((s) => s.seenModes);
+  const isNew = (m: string) => !seen.includes(m);
   const needTicket = (go: () => void) => () => {
     if (energy && !energy.unlimited && energy.tickets < 1) showEnergy();
     else go();
@@ -80,8 +83,8 @@ function Modes() {
         icon="family"
         art={<Icon name="family" size={70} />}
         colors={['#FF6FB5', '#B14CFF', '#6A3CFF']}
-        chip={t.new}
-        chipTone="gold"
+        chip={isNew('family') ? t.new : strings.teen.free}
+        chipTone={isNew('family') ? 'gold' : 'green'}
         onPress={() => router.push('/family')}
       />
       </TourTarget>
@@ -92,7 +95,7 @@ function Modes() {
           body={t.blitzBody}
           icon="timer"
           colors={['#FF8A3D', '#E8463A']}
-          chip={blitz?.best ? fmt(t.blitzBest, { n: blitz.best }) : t.new}
+          chip={blitz?.best ? fmt(t.blitzBest, { n: blitz.best }) : isNew('blitz') ? t.new : null}
           chipTone={blitz?.best ? 'dark' : 'gold'}
           onPress={needTicket(() => router.push('/blitz'))}
         />
@@ -102,7 +105,7 @@ function Modes() {
           body={t.randomBody}
           icon="dice"
           colors={['#3DDC84', '#119E8C']}
-          chip={t.new}
+          chip={isNew('random') ? t.new : null}
           chipTone="gold"
           onPress={() => router.push({ pathname: '/match', params: { mode: 'random' } })}
         />
@@ -114,7 +117,8 @@ function Modes() {
           body={dailyDone ? t.dailyDone : t.dailyBody}
           icon="daily"
           colors={['#3E8EF7', '#5C4CE0']}
-          chip={countdown}
+          chip={dailyDone ? countdown : strings.teen.free}
+          chipTone={dailyDone ? 'dark' : 'green'}
           onPress={() => router.push({ pathname: '/quiz', params: { mode: 'daily' } })}
         />
         <ModeTile
@@ -123,6 +127,8 @@ function Modes() {
           body={t.friendBody}
           icon="friends"
           colors={['#14A3B8', '#2F5FD0']}
+          chip={strings.teen.free}
+          chipTone="green"
           onPress={() => router.push('/match')}
         />
       </View>
@@ -249,6 +255,10 @@ export default function HomeScreen() {
   return (
     <Screen header={<TopBar />} onRefresh={() => void refetch()} refreshing={isRefetching}>
       <Hero />
+      <NewbieBanner />
+      <EventCard />
+      <NextGoal />
+      <MissionsCard />
       <Modes />
       <Social />
       <FirstTour />

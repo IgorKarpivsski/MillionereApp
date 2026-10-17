@@ -17,6 +17,8 @@ import { useRefreshEconomy } from '@/features/engage/hooks';
 import { useMyState } from '@/features/profile/hooks';
 import { formatNumber } from '@/lib/format';
 import { fmt, strings } from '@/lib/i18n';
+import { teenApi, teenKeys } from '@/features/teen/api';
+import { useWorldsConfig, worldBySlug } from '@/features/worlds/api';
 
 const t = strings.admin;
 type Kind = GrantReward['kind'];
@@ -308,9 +310,51 @@ function HistoryTab() {
   );
 }
 
+function QuestionsTab() {
+  const qc = useQueryClient();
+  const toast = useToast();
+  const worlds = useWorldsConfig();
+  const list = useQuery({ queryKey: teenKeys.adminSubmissions, queryFn: teenApi.adminSubmissions });
+  const [busy, setBusy] = useState<number | null>(null);
+  const review = async (id: number, approve: boolean) => {
+    setBusy(id);
+    try {
+      await teenApi.review(id, approve);
+      haptic('success');
+      void qc.invalidateQueries({ queryKey: teenKeys.adminSubmissions });
+    } catch {
+      toast(strings.errors.generic, 'error');
+    } finally {
+      setBusy(null);
+    }
+  };
+  if (!list.data) return null;
+  if (list.data.length === 0) return <AppText color={colors.textMuted}>{strings.teen.adminSubEmpty}</AppText>;
+  return (
+    <View style={styles.gap}>
+      {list.data.map((q) => (
+        <Card key={q.id} padding={space.md}>
+          <AppText variant="caption" color={colors.led}>
+            {`${worldBySlug(worlds, q.world).name} · ${fmt(strings.teen.adminBy, { name: q.author })}`}
+          </AppText>
+          <AppText variant="label">{q.text}</AppText>
+          <AppText color={colors.correct}>{`✓ ${q.correct}`}</AppText>
+          {q.wrongs.map((w) => (
+            <AppText key={w} color={colors.textMuted}>{`✗ ${w}`}</AppText>
+          ))}
+          <View style={styles.reviewRow}>
+            <StickerButton label={strings.teen.adminApprove} icon="checkmark" size="sm" loading={busy === q.id} onPress={() => void review(q.id, true)} style={styles.flex} />
+            <StickerButton label={strings.teen.adminReject} icon="close" tone="danger" size="sm" disabled={busy === q.id} onPress={() => void review(q.id, false)} style={styles.flex} />
+          </View>
+        </Card>
+      ))}
+    </View>
+  );
+}
+
 export default function AdminScreen() {
   const status = useAdminStatus();
-  const [tab, setTab] = useState<'give' | 'codes' | 'history'>('give');
+  const [tab, setTab] = useState<'give' | 'codes' | 'history' | 'questions'>('give');
   return (
     <Screen
       header={
@@ -329,9 +373,10 @@ export default function AdminScreen() {
               { key: 'give', label: t.tabPlayers },
               { key: 'codes', label: t.tabCodes },
               { key: 'history', label: t.tabHistory },
+              { key: 'questions', label: strings.teen.adminSubTitle },
             ]}
           />
-          {tab === 'give' ? <GiveTab /> : tab === 'codes' ? <CodesTab /> : <HistoryTab />}
+          {tab === 'give' ? <GiveTab /> : tab === 'codes' ? <CodesTab /> : tab === 'history' ? <HistoryTab /> : <QuestionsTab />}
         </>
       ) : status.isLoading ? null : (
         <EmptyState icon="lock-closed" title={t.title} body={t.unlockBad} />
@@ -343,6 +388,7 @@ export default function AdminScreen() {
 const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: space.lg, paddingTop: space.md },
   gap: { gap: space.md },
+  reviewRow: { flexDirection: 'row', gap: space.sm, marginTop: space.sm },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, alignItems: 'center' },
   flex: { flex: 1 },
   chip: {

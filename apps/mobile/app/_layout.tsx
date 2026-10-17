@@ -100,6 +100,10 @@ function Gate() {
         <Stack.Screen name="onboarding" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="blitz" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="family" options={{ gestureEnabled: false, animation: 'fade' }} />
+        <Stack.Screen name="mistakes" />
+        <Stack.Screen name="submit-question" />
+        <Stack.Screen name="event" />
+        <Stack.Screen name="player/[id]" />
         <Stack.Screen name="shop" options={{ presentation: 'modal' }} />
         <Stack.Screen name="wheel" options={{ presentation: 'modal' }} />
         <Stack.Screen name="pass" />

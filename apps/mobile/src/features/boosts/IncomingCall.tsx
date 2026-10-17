@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import type { IncomingCall } from '@fm/shared';
+import type { IncomingCall, MatchInvite } from '@fm/shared';
+import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Modal, StyleSheet, View } from 'react-native';
 import Animated, { ZoomIn } from 'react-native-reanimated';
@@ -10,6 +11,7 @@ import { colors, space } from '@/design-system/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { AnswerTile } from '@/features/quiz/ui';
 import { fmt, strings } from '@/lib/i18n';
+import { teenApi } from '@/features/teen/api';
 import { boostsApi } from './api';
 
 const PING_MS = 8000;
@@ -25,13 +27,26 @@ export function IncomingCallHost() {
   const [secs, setSecs] = useState(0);
   const [sending, setSending] = useState(false);
   const handled = useRef(new Set<string>());
+  const [invite, setInvite] = useState<MatchInvite | null>(null);
+  const [joining, setJoining] = useState(false);
+  const seenInvites = useRef(new Set<number>());
 
   useEffect(() => {
     if (!session) return;
     let timer: ReturnType<typeof setInterval> | null = null;
     const ping = async () => {
       try {
-        const calls = await boostsApi.ping();
+        const { calls, invites } = await boostsApi.ping();
+        const inv = invites.find((i) => !seenInvites.current.has(i.id));
+        if (inv) {
+          seenInvites.current.add(inv.id);
+          setInvite((cur) => {
+            if (cur) return cur;
+            haptic('heavy');
+            playSound('whistle');
+            return inv;
+          });
+        }
         const fresh = calls.find((c) => !handled.current.has(c.id));
         if (fresh) {
           setCall((cur) => {
@@ -99,7 +114,45 @@ export function IncomingCallHost() {
     }
   };
 
+  const answerInvite = async (accept: boolean) => {
+    if (!invite) return;
+    const inv = invite;
+    setJoining(true);
+    try {
+      const room = await teenApi.answerInvite(inv.id, accept);
+      setInvite(null);
+      if (accept && room) router.push({ pathname: '/match', params: { room: room.room_id } });
+    } catch {
+      setInvite(null);
+      if (accept) toast(strings.teen.inviteGone, 'info');
+    } finally {
+      setJoining(false);
+    }
+  };
+
   return (
+    <>
+    <Modal visible={!!invite && !call} transparent animationType="fade" onRequestClose={() => void answerInvite(false)} statusBarTranslucent>
+      <View style={styles.scrim}>
+        {invite ? (
+          <Animated.View entering={ZoomIn.springify().damping(14)} style={styles.wrap}>
+            <Card kind="sticker" frame={colors.danger}>
+              <View style={styles.inviteHead}>
+                <AvatarBadge avatarId={invite.avatar_id ?? 'avatar_01'} size={72} ring={colors.danger} />
+                <AppText variant="title" align="center">
+                  {fmt(strings.teen.inviteTitle, { name: invite.from })}
+                </AppText>
+                <AppText color={colors.textMuted} align="center">
+                  {strings.teen.inviteBody}
+                </AppText>
+              </View>
+              <StickerButton label={strings.teen.inviteAccept} icon="flash" tone="prize" size="lg" fullWidth loading={joining} onPress={() => void answerInvite(true)} />
+              <StickerButton label={strings.teen.inviteDecline} tone="ghost" size="sm" fullWidth disabled={joining} onPress={() => void answerInvite(false)} style={styles.later} />
+            </Card>
+          </Animated.View>
+        ) : null}
+      </View>
+    </Modal>
     <Modal visible={!!call} transparent animationType="fade" onRequestClose={close} statusBarTranslucent>
       <View style={styles.scrim}>
         {call ? (
@@ -144,6 +197,7 @@ export function IncomingCallHost() {
         ) : null}
       </View>
     </Modal>
+    </>
   );
 }
 
@@ -152,6 +206,8 @@ const styles = StyleSheet.create({
   wrap: { width: '100%' },
   head: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginBottom: space.md },
   flex: { flex: 1 },
+  inviteHead: { alignItems: 'center', gap: space.sm, marginBottom: space.md },
+  later: { marginTop: space.sm },
   timer: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   question: { backgroundColor: colors.card, borderRadius: 16, padding: space.md, marginBottom: space.md },
   answers: { gap: space.sm, marginBottom: space.md },

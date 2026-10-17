@@ -28,7 +28,7 @@ export function ModeTile({
   art?: ReactNode;
   colors: [string, string, ...string[]];
   chip?: string | null;
-  chipTone?: 'dark' | 'gold' | 'red';
+  chipTone?: 'dark' | 'gold' | 'red' | 'green';
   wide?: boolean;
   index?: number;
   onPress: () => void;
@@ -63,7 +63,7 @@ export function ModeTile({
           {children}
         </View>
         {chip ? (
-          <View style={[styles.chip, chipTone === 'gold' && styles.chipGold, chipTone === 'red' && styles.chipRed]}>
+          <View style={[styles.chip, chipTone === 'gold' && styles.chipGold, chipTone === 'red' && styles.chipRed, chipTone === 'green' && styles.chipGreen]}>
             <AppText variant="caption" color={chipTone === 'gold' ? palette.night950 : colors.text} style={styles.chipText} numberOfLines={1}>
               {chip}
             </AppText>
@@ -121,5 +121,6 @@ const styles = StyleSheet.create({
   },
   chipGold: { backgroundColor: colors.led, borderColor: '#FFF3C4' },
   chipRed: { backgroundColor: colors.danger, borderColor: '#FFB4AE' },
+  chipGreen: { backgroundColor: '#1E9E5A' },
   chipText: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
 });

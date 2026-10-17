@@ -34,6 +34,7 @@ import { formatNumber } from '@/lib/format';
 import { goHome } from '@/lib/goHome';
 import { fmt, strings } from '@/lib/i18n';
 import { QuestionImageView } from '@/features/quiz/QuestionImage';
+import { StreakFreezeCard } from '@/features/teen/StreakFreeze';
 
 const t = strings.quiz;
 
@@ -181,6 +182,7 @@ function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => voi
           <AppText variant="heading">{fmt(t.streakNow, { n: sum.streak })}</AppText>
         </View>
       ) : null}
+      {daily ? <StreakFreezeCard /> : null}
 
       <Card kind="sticker" style={styles.finalCard}>
         <View style={styles.finalScore}>

@@ -29,6 +29,10 @@ interface SettingsState {
   onboarded: boolean;
   /** The sloth's guided tour of the home screen has been shown (or skipped). Device-only. */
   tourDone: boolean;
+  /** Game modes already tried, so their "new!" chip goes away. Device-only. */
+  seenModes: string[];
+  /** The four-currencies explainer was shown. Device-only. */
+  currencyHelpSeen: boolean;
   set: (patch: Partial<Omit<SettingsState, 'set' | 'hydrateFromServer'>>) => void;
   hydrateFromServer: (s: Settings) => void;
 }
@@ -49,6 +53,8 @@ export const useSettingsStore = create<SettingsState>()(
       ageBand: null,
       onboarded: false,
       tourDone: false,
+      seenModes: [],
+      currencyHelpSeen: false,
       set: (patch) => set(patch),
       hydrateFromServer: (s) =>
         set({ sound: s.sound, music: s.music, haptics: s.haptics, reducedMotion: s.reduced_motion, extendedTime: s.extended_time }),
@@ -66,7 +72,7 @@ export const useSettingsStore = create<SettingsState>()(
         }
         return p as unknown as SettingsState;
       },
-      partialize: ({ sound, music, haptics, reducedMotion, largeText, extendedTime, reminders, remindersAsked, leagueSeenWeek, reviewAsked, ageBand, onboarded, tourDone }) => ({
+      partialize: ({ sound, music, haptics, reducedMotion, largeText, extendedTime, reminders, remindersAsked, leagueSeenWeek, reviewAsked, ageBand, onboarded, tourDone, seenModes, currencyHelpSeen }) => ({
         sound,
         music,
         haptics,
@@ -80,7 +86,15 @@ export const useSettingsStore = create<SettingsState>()(
         ageBand,
         onboarded,
         tourDone,
+        seenModes,
+        currencyHelpSeen,
       }),
     },
   ),
 );
+
+/** Remember that a mode was played (drops its "new!" chip on the home screen). */
+export function markModeSeen(mode: string) {
+  const { seenModes, set } = useSettingsStore.getState();
+  if (!seenModes.includes(mode)) set({ seenModes: [...seenModes, mode] });
+}

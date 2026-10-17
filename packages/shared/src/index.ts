@@ -29,6 +29,10 @@ export const ProfileSchema = z.object({
   gender: z.enum(['male', 'female', 'other']).nullable().optional(),
   fav_worlds: z.array(z.string()).optional(),
   onboarded_at: z.string().nullable().optional(),
+  /** avatar ring unlocked by badges (bronze/silver/gold/fire/rainbow) */
+  frame: z.string().nullable().optional(),
+  /** a title unlocked by badges, shown under the name */
+  title: z.string().nullable().optional(),
 });
 export type Profile = z.infer<typeof ProfileSchema>;
 
@@ -214,6 +218,9 @@ export const DailyStatusSchema = z.object({
   streak: z.number().int(),
   streak_best: z.number().int(),
   seconds_to_reset: z.number().int(),
+  /** streak freezes in stock: each covers one missed day */
+  freezes: z.number().int().optional(),
+  freeze_coins: z.number().int().optional(),
 });
 export type DailyStatus = z.infer<typeof DailyStatusSchema>;
 
@@ -227,6 +234,7 @@ export const LeaderboardSchema = z.object({
       level: z.number().int(),
       points: z.number(),
       me: z.boolean(),
+      frame: z.string().nullable().optional(),
     }),
   ),
   me: z.object({ rank: z.number().int().nullable(), points: z.number(), games: z.number().int() }),
@@ -276,6 +284,8 @@ export const SessionPayloadSchema = z.object({
   score: z.number().int(),
   total: z.number().int(),
   question_world: z.string().nullable(),
+  /** the player who wrote this question (community questions) */
+  question_author: z.string().nullable().optional(),
   champion: z.boolean().default(false),
   boosts: z.record(z.number().int()).default({}),
   run_boosts: z.array(z.string()).default([]),
@@ -359,7 +369,9 @@ export const IncomingCallSchema = z.object({
   }),
 });
 export type IncomingCall = z.infer<typeof IncomingCallSchema>;
-export const PresencePingSchema = z.object({ calls: z.array(IncomingCallSchema) });
+export const MatchInviteSchema = z.object({ id: z.number().int(), from: z.string(), avatar_id: z.string() });
+export type MatchInvite = z.infer<typeof MatchInviteSchema>;
+export const PresencePingSchema = z.object({ calls: z.array(IncomingCallSchema), invites: z.array(MatchInviteSchema).default([]) });
 
 export const CallStateSchema = z.object({
   answer_slot: z.number().int().nullable(),
@@ -431,12 +443,19 @@ export type OpenPackResult = z.infer<typeof OpenPackResultSchema>;
 /* -------------------------------------------------------------------------- */
 /* Friend match                                                               */
 /* -------------------------------------------------------------------------- */
-const PlayerMiniSchema = z.object({ username: z.string(), avatar_id: z.string(), level: z.number().int() });
+const PlayerMiniSchema = z.object({
+  username: z.string(),
+  avatar_id: z.string(),
+  level: z.number().int(),
+  frame: z.string().nullable().optional(),
+  title: z.string().nullable().optional(),
+});
 export const ModeQuestionSchema = z.object({
   id: z.string(),
   text: z.string(),
   image: QuestionImageSchema.nullable().optional(),
   category_name: z.string().nullable(),
+  author: z.string().nullable().optional(),
   answers: z.array(z.object({ slot: z.number().int(), text: z.string() })),
 });
 export type ModeQuestion = z.infer<typeof ModeQuestionSchema>;
@@ -464,6 +483,7 @@ export const MatchStateSchema = z.object({
       text: z.string(),
       image: QuestionImageSchema.nullable().optional(),
       category_name: z.string().nullable(),
+      author: z.string().nullable().optional(),
       answers: z.array(z.object({ slot: z.number().int(), text: z.string() })),
     })
     .nullable(),
@@ -613,6 +633,8 @@ export const EnergyStateSchema = z.object({
   unlimited: z.boolean(),
   gem_refill: z.number().int(),
   ad_left: z.number().int(),
+  /** set during a new player's first week: tickets are free until then */
+  newbie_until: z.string().nullable().optional(),
 });
 export type EnergyState = z.infer<typeof EnergyStateSchema>;
 
@@ -741,3 +763,124 @@ export const LeagueStateSchema = z.object({
 });
 export type LeagueState = z.infer<typeof LeagueStateSchema>;
 export * from './objectArt';
+
+/* -------------------------------------------------------------------------- */
+/* Teen upgrades — mirrors 20261017000005_teen_upgrades.sql                   */
+/* -------------------------------------------------------------------------- */
+export const MissionSchema = z.object({
+  key: z.string(),
+  title: z.string(),
+  target: z.number().int(),
+  coins: z.number().int(),
+  icon: z.string(),
+  progress: z.number().int(),
+  claimed: z.boolean(),
+});
+export type Mission = z.infer<typeof MissionSchema>;
+export const MissionsStateSchema = z.object({
+  day: z.string(),
+  missions: z.array(MissionSchema),
+  bonus_gems: z.number().int(),
+  bonus_claimed: z.boolean(),
+  seconds_to_reset: z.number().int(),
+  coins: z.number().int().optional(),
+  bonus: z.boolean().optional(),
+});
+export type MissionsState = z.infer<typeof MissionsStateSchema>;
+
+export const MistakeSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  image: QuestionImageSchema.nullable().optional(),
+  explanation: z.string().nullable(),
+  category_name: z.string().nullable(),
+  answers: z.array(z.object({ text: z.string(), correct: z.boolean() })),
+  at: z.string(),
+});
+export type Mistake = z.infer<typeof MistakeSchema>;
+
+export const REACTION_EMOJIS = ['😂', '🔥', '😱', '👏', '😎', '🤯', '💪', '😴'] as const;
+export const ReactionSchema = z.object({
+  id: z.number().int(),
+  emoji: z.string(),
+  me: z.boolean(),
+  username: z.string(),
+  avatar_id: z.string(),
+  seat: z.number().int().nullable().optional(),
+});
+export type Reaction = z.infer<typeof ReactionSchema>;
+
+export const FRAME_KEYS = ['bronze', 'silver', 'gold', 'fire', 'rainbow'] as const;
+export const FlairSchema = z.object({
+  frames: z.array(z.object({ key: z.string(), need: z.number().int(), unlocked: z.boolean() })),
+  titles: z.array(
+    z.object({ text: z.string(), unlocked: z.boolean(), badge: z.string().optional(), world: z.string().optional() }),
+  ),
+  tiers: z.record(z.number().int()),
+  frame: z.string().nullable(),
+  title: z.string().nullable(),
+});
+export type Flair = z.infer<typeof FlairSchema>;
+
+export const FriendProfileSchema = z.object({
+  id: z.string().uuid(),
+  profile: z.object({
+    username: z.string(),
+    avatar_id: z.string(),
+    level: z.number().int(),
+    frame: z.string().nullable().optional(),
+    title: z.string().nullable().optional(),
+    gender: z.enum(['male', 'female', 'other']).nullable().optional(),
+  }),
+  stats: StatsSchema.omit({ xp: true }),
+  tiers: z.record(z.number().int()),
+});
+export type FriendProfile = z.infer<typeof FriendProfileSchema>;
+
+export const RankRowSchema = z.object({
+  rank: z.number().int(),
+  username: z.string(),
+  avatar_id: z.string(),
+  level: z.number().int().optional(),
+  frame: z.string().nullable().optional(),
+  points: z.number(),
+  me: z.boolean(),
+});
+export type RankRow = z.infer<typeof RankRowSchema>;
+export const FriendsBoardSchema = z.object({ rows: z.array(RankRowSchema) });
+
+export const EventStateSchema = z.union([
+  z.object({ active: z.literal(false) }),
+  z.object({
+    active: z.literal(true),
+    world: z.string(),
+    coins_mult: z.number(),
+    ends_at: z.string(),
+    rows: z.array(RankRowSchema),
+    me: z.object({ rank: z.number().int(), points: z.number() }).nullable(),
+  }),
+]);
+export type EventState = z.infer<typeof EventStateSchema>;
+
+export const SubmissionSchema = z.object({
+  id: z.number().int(),
+  world: z.string(),
+  text: z.string(),
+  status: z.enum(['pending', 'approved', 'rejected']),
+  created_at: z.string(),
+});
+export type Submission = z.infer<typeof SubmissionSchema>;
+export const AdminSubmissionSchema = z.object({
+  id: z.number().int(),
+  world: z.string(),
+  text: z.string(),
+  correct: z.string(),
+  wrongs: z.array(z.string()),
+  author: z.string(),
+  created_at: z.string(),
+});
+export type AdminSubmission = z.infer<typeof AdminSubmissionSchema>;
+export const MistakesSchema = z.array(MistakeSchema);
+export const ReactionsSchema = z.array(ReactionSchema);
+export const SubmissionsSchema = z.array(SubmissionSchema);
+export const AdminSubmissionsSchema = z.array(AdminSubmissionSchema);

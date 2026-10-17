@@ -98,15 +98,23 @@ function FriendRow({ f }: { f: Friend }) {
 
   return (
     <View style={styles.friend}>
-      <AvatarBadge avatarId={f.avatar_id} level={f.level} size={44} />
-      <View style={styles.flex}>
-        <AppText variant="label" numberOfLines={1}>
-          {f.username}
-        </AppText>
-        <AppText variant="caption" color={f.unread > 0 ? colors.led : colors.textDim}>
-          {f.status === 'pending' && !f.incoming ? t.waiting : f.unread > 0 ? fmt(t.unread, { n: f.unread }) : fmt(t.level, { n: f.level })}
-        </AppText>
-      </View>
+      <Pressable
+        disabled={f.status !== 'accepted'}
+        onPress={() => router.push({ pathname: '/player/[id]', params: { id: f.id } })}
+        accessibilityRole="button"
+        accessibilityLabel={`${strings.teen.viewProfile} ${f.username}`}
+        style={styles.who}
+      >
+        <AvatarBadge avatarId={f.avatar_id} level={f.level} size={44} />
+        <View style={styles.flex}>
+          <AppText variant="label" numberOfLines={1}>
+            {f.username}
+          </AppText>
+          <AppText variant="caption" color={f.unread > 0 ? colors.led : colors.textDim}>
+            {f.status === 'pending' && !f.incoming ? t.waiting : f.unread > 0 ? fmt(t.unread, { n: f.unread }) : fmt(t.level, { n: f.level })}
+          </AppText>
+        </View>
+      </Pressable>
       {f.status === 'pending' ? (
         f.incoming ? (
           <>
@@ -264,6 +272,7 @@ const styles = StyleSheet.create({
   gap: { gap: space.sm },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   flex: { flex: 1 },
+  who: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: space.md },
   center: { alignItems: 'center', gap: space.xs },
   codeRow: { alignItems: 'center', paddingVertical: space.sm },
   input: {

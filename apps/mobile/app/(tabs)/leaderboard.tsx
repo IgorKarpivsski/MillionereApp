@@ -2,23 +2,27 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { TopBar } from '@/components/TopBar';
-import { AppText, AvatarBadge, Card, EmptyState, Led, Screen, Skeleton } from '@/design-system/components';
+import { AppText, AvatarBadge, Card, EmptyState, Led, Screen, Skeleton, StickerButton } from '@/design-system/components';
 import { colors, radius, space } from '@/design-system/tokens';
 import { useLeague } from '@/features/league/api';
 import { LeagueView, SegmentTabs } from '@/features/league/LeagueView';
 import { useLeaderboard } from '@/features/quiz/hooks';
+import { useFriendsBoard } from '@/features/teen/api';
+import { RankList } from '@/features/teen/RankList';
 import { formatNumber } from '@/lib/format';
 import { strings } from '@/lib/i18n';
 
 const t = strings.leaderboard;
 
 export default function LeaderboardScreen() {
-  const [tab, setTab] = useState<'league' | 'all'>('league');
+  const [tab, setTab] = useState<'league' | 'friends' | 'all'>('league');
+  const friends = useFriendsBoard();
   const league = useLeague();
   const { data, isLoading, refetch, isRefetching } = useLeaderboard();
   const refresh = () => {
     void refetch();
     void league.refetch();
+    void friends.refetch();
   };
   return (
     <Screen header={<TopBar />} onRefresh={refresh} refreshing={isRefetching || league.isRefetching}>
@@ -27,11 +31,26 @@ export default function LeaderboardScreen() {
         onChange={setTab}
         options={[
           { key: 'league', label: t.tabLeague },
+          { key: 'friends', label: strings.teen.friendsTab },
           { key: 'all', label: t.tabAll },
         ]}
       />
       {tab === 'league' ? (
         league.data ? <LeagueView s={league.data} /> : <Skeleton height={300} rounded={18} />
+      ) : tab === 'friends' ? (
+        <>
+          <AppText variant="title">{strings.teen.friendsTab}</AppText>
+          <AppText color={colors.textMuted}>{t.body}</AppText>
+          {friends.data ? <RankList rows={friends.data.rows} /> : <Skeleton height={200} rounded={18} />}
+          {friends.data && friends.data.rows.length <= 1 ? (
+            <>
+              <AppText color={colors.textMuted} align="center">
+                {strings.teen.friendsEmpty}
+              </AppText>
+              <StickerButton label={strings.teen.friendsAdd} icon="person-add" tone="outline" fullWidth onPress={() => router.push('/friends')} />
+            </>
+          ) : null}
+        </>
       ) : (
         <AllTable data={data} isLoading={isLoading} />
       )}
@@ -72,7 +91,7 @@ function AllTable({ data, isLoading }: { data: ReturnType<typeof useLeaderboard>
             <Led size="number" color={r.rank === 1 ? colors.led : r.rank <= 3 ? colors.text : colors.textDim} style={styles.rank}>
               {r.rank}
             </Led>
-            <AvatarBadge avatarId={r.avatar_id} level={r.level} size={36} />
+            <AvatarBadge avatarId={r.avatar_id} level={r.level} frame={r.frame} size={36} />
             <AppText variant="label" numberOfLines={1} style={styles.flex}>
               {r.username}
             </AppText>

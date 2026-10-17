@@ -2,6 +2,7 @@ import type { MatchState } from '@fm/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { markModeSeen } from '@/features/settings/store';
 import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +16,9 @@ import { RpcError } from '@/features/profile/api';
 import { AnswerTile, type AnswerState } from '@/features/quiz/ui';
 import { queryKeys } from '@/lib/queryClient';
 import { goHome } from '@/lib/goHome';
+import { teenApi } from '@/features/teen/api';
+import { ReactionLayer } from '@/features/teen/Reactions';
+import { ShareResultButton } from '@/features/teen/ShareResult';
 import { fmt, strings } from '@/lib/i18n';
 import { QuestionImageView } from '@/features/quiz/QuestionImage';
 
@@ -186,7 +190,7 @@ function Players({ s }: { s: MatchState }) {
   return (
     <View style={styles.board}>
       <View style={styles.player}>
-        <AvatarBadge avatarId={s.me.avatar_id} level={s.me.level} size={34} />
+        <AvatarBadge avatarId={s.me.avatar_id} level={s.me.level} frame={s.me.frame} size={34} />
         <AppText variant="caption" numberOfLines={1} style={styles.pname}>
           {s.me.username}
         </AppText>
@@ -203,13 +207,17 @@ function Players({ s }: { s: MatchState }) {
         </Animated.View>
       </View>
       <View style={styles.player}>
-        <AvatarBadge avatarId={s.opponent?.avatar_id ?? 'avatar_01'} level={s.opponent?.level ?? 1} size={34} />
+        <AvatarBadge avatarId={s.opponent?.avatar_id ?? 'avatar_01'} level={s.opponent?.level ?? 1} frame={s.opponent?.frame} size={34} />
         <AppText variant="caption" numberOfLines={1} style={styles.pname}>
           {s.opponent?.username ?? '…'}
         </AppText>
         {s.is_bot ? (
           <AppText variant="caption" color={colors.textDim} numberOfLines={1} style={styles.botTag}>
             {strings.random.botTag}
+          </AppText>
+        ) : s.opponent?.title ? (
+          <AppText variant="caption" color={colors.led} numberOfLines={1} style={styles.botTag}>
+            {s.opponent.title}
           </AppText>
         ) : null}
       </View>
@@ -218,11 +226,19 @@ function Players({ s }: { s: MatchState }) {
 }
 
 export default function MatchScreen() {
-  const params = useLocalSearchParams<{ code?: string; mode?: string }>();
+  const params = useLocalSearchParams<{ code?: string; mode?: string; room?: string }>();
+  useEffect(() => {
+    if (params.mode === 'random') markModeSeen('random');
+  }, [params.mode]);
   const toast = useToast();
   const random = params.mode === 'random';
-  const [room, setRoom] = useState<string | null>(null);
+  const [room, setRoom] = useState<string | null>(params.room ?? null);
   const [finding, setFinding] = useState(false);
+  const [rematching, setRematching] = useState(false);
+  // an accepted invite (revenge round / challenge) opens the match with its room
+  useEffect(() => {
+    if (params.room) setRoom(params.room);
+  }, [params.room]);
   const find = useCallback(async () => {
     setFinding(true);
     setRoom(null);
@@ -391,11 +407,31 @@ export default function MatchScreen() {
             </Animated.View>
           ) : null}
           <StickerButton
-            label={s.kind === 'random' ? r.again : t.rematch}
-            icon="refresh"
+            label={s.is_bot ? r.again : win ? strings.teen.again : strings.teen.revenge}
+            icon={win || s.is_bot ? 'refresh' : 'flame'}
             size="lg"
+            tone={win || s.is_bot ? 'primary' : 'danger'}
             fullWidth
-            onPress={() => (s.kind === 'random' ? void find() : setRoom(null))}
+            loading={rematching}
+            onPress={async () => {
+              if (s.is_bot) return void find();
+              setRematching(true);
+              try {
+                const next = await teenApi.rematch(s.room_id);
+                toast(fmt(strings.teen.revengeSent, { name: s.opponent?.username ?? '' }), 'success');
+                setPicked(null);
+                setRoom(next.room_id);
+              } catch {
+                if (s.kind === 'random') void find();
+                else setRoom(null);
+              } finally {
+                setRematching(false);
+              }
+            }}
+          />
+          <ShareResultButton
+            big={`${s.my_score}:${s.opp_score}`}
+            line={fmt(win ? strings.teen.shareMatchWin : strings.teen.shareMatch, { me: s.my_score, opp: s.opp_score })}
           />
           <StickerButton label={strings.quiz.home} icon="home" tone="ghost" fullWidth onPress={goHome} />
         </ScrollView>
@@ -442,6 +478,11 @@ export default function MatchScreen() {
               {q.text}
             </AppText>
             {q.image ? <QuestionImageView image={q.image} /> : null}
+            {q.author ? (
+              <AppText variant="caption" color={colors.cardMuted}>
+                {`✍️ ${fmt(strings.teen.questionBy, { name: q.author })}`}
+              </AppText>
+            ) : null}
           </Animated.View>
         ) : null}
         <View style={styles.grid}>
@@ -478,6 +519,7 @@ export default function MatchScreen() {
               : t.fastBonus}
         </AppText>
       </ScrollView>
+      <ReactionLayer kind="match" room={s.room_id} live={!s.is_bot} meName={s.me.username} />
     </SafeAreaView>
   );
 }

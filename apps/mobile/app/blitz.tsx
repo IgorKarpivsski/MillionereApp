@@ -2,6 +2,7 @@ import type { BlitzPayload } from '@fm/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { markModeSeen } from '@/features/settings/store';
 import { ActivityIndicator, Alert, BackHandler, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,6 +19,7 @@ import { RpcError } from '@/features/profile/api';
 import { QuestionImageView } from '@/features/quiz/QuestionImage';
 import { AnswerTile, type AnswerState } from '@/features/quiz/ui';
 import { goHome } from '@/lib/goHome';
+import { ShareResultButton } from '@/features/teen/ShareResult';
 import { fmt, strings } from '@/lib/i18n';
 import { useStore } from '@/features/store/hooks';
 import { gameFinished } from '@/features/store/interstitial';
@@ -39,6 +41,7 @@ function useDeadline() {
 }
 
 export default function BlitzScreen() {
+  useEffect(() => markModeSeen('blitz'), []);
   const reduced = useReducedMotion();
   const qc = useQueryClient();
   const refresh = useRefreshEconomy();
@@ -294,6 +297,7 @@ export default function BlitzScreen() {
             fullWidth
             onPress={() => void start()}
           />
+          {p.correct > 0 ? <ShareResultButton big={String(p.correct)} line={fmt(strings.teen.shareBlitz, { n: p.correct })} /> : null}
           <StickerButton label={strings.quiz.home} icon="home" tone="ghost" fullWidth onPress={goHome} />
         </ScrollView>
       </SafeAreaView>
@@ -353,6 +357,11 @@ export default function BlitzScreen() {
               {q.text}
             </AppText>
             {q.image ? <QuestionImageView image={q.image} /> : null}
+            {q.author ? (
+              <AppText variant="caption" color={colors.cardMuted}>
+                {`✍️ ${fmt(strings.teen.questionBy, { name: q.author })}`}
+              </AppText>
+            ) : null}
           </Animated.View>
         ) : null}
         <View style={styles.answers}>

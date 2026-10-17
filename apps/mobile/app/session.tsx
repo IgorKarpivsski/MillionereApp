@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import * as StoreReview from 'expo-store-review';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeInUp, ZoomIn, useAnimatedStyle, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText, BottomSheet, Card, EmptyState, Led, StickerButton, useToast, Backdrop } from '@/design-system/components';
@@ -33,6 +33,7 @@ import { WorldBadge } from '@/features/worlds/WorldBadge';
 import { shade } from '@/features/worlds/worldArt';
 import { formatNumber } from '@/lib/format';
 import { goHome } from '@/lib/goHome';
+import { ShareResultButton } from '@/features/teen/ShareResult';
 import { fmt, strings } from '@/lib/i18n';
 
 const t = strings.session;
@@ -289,12 +290,9 @@ function ResultView({
         onPress={onAgain}
       />
       <DoubleCoins runId={s.payload?.run_id} coins={sum.coins} />
-      <StickerButton
-        label={strings.share.cta}
-        icon="share-social"
-        tone="outline"
-        fullWidth
-        onPress={() => void Share.share({ message: fmt(t.share, { n: sum.correct, w: quick ? t.quickDone : world }) })}
+      <ShareResultButton
+        big={quick ? `${sum.correct}/${sum.total}` : '⭐'.repeat(Math.max(1, sum.stars))}
+        line={quick ? fmt(t.share, { n: sum.correct, w: t.quickDone }) : fmt(strings.teen.shareSession, { stars: sum.stars, level: sum.level, world })}
       />
       <View style={styles.endRow}>
         {quick ? null : <StickerButton label={t.toMap} icon="map" tone="ghost" style={styles.flex} onPress={() => router.back()} />}
@@ -534,6 +532,11 @@ export default function SessionScreen() {
             {q.text}
           </AppText>
           {q.image ? <QuestionImageView image={q.image} /> : null}
+          {s.payload.question_author ? (
+            <AppText variant="caption" color={colors.cardMuted}>
+              {`✍️ ${fmt(strings.teen.questionBy, { name: s.payload.question_author })}`}
+            </AppText>
+          ) : null}
         </Animated.View>
 
         {friendPick && answering ? (
