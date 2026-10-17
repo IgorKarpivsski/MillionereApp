@@ -160,10 +160,10 @@ export function Tour({
         {hole ? (
           <>
             {/* four panes around the spotlight */}
-            <View style={[styles.dim, { left: 0, top: 0, width: W, height: Math.max(0, hole.y) }]} />
-            <View style={[styles.dim, { left: 0, top: hole.y + hole.h, width: W, height: Math.max(0, H - hole.y - hole.h) }]} />
-            <View style={[styles.dim, { left: 0, top: hole.y, width: Math.max(0, hole.x), height: hole.h }]} />
-            <View style={[styles.dim, { left: hole.x + hole.w, top: hole.y, width: Math.max(0, W - hole.x - hole.w), height: hole.h }]} />
+            <Pressable onPress={next} style={[styles.dim, { left: 0, top: 0, width: W, height: Math.max(0, hole.y) }]} />
+            <Pressable onPress={next} style={[styles.dim, { left: 0, top: hole.y + hole.h, width: W, height: Math.max(0, H - hole.y - hole.h) }]} />
+            <Pressable onPress={next} style={[styles.dim, { left: 0, top: hole.y, width: Math.max(0, hole.x), height: hole.h }]} />
+            <Pressable onPress={next} style={[styles.dim, { left: hole.x + hole.w, top: hole.y, width: Math.max(0, W - hole.x - hole.w), height: hole.h }]} />
             <Animated.View
               key={`h${i}`}
               entering={reduced ? undefined : FadeIn}
@@ -194,12 +194,12 @@ export function Tour({
             </View>
           </>
         ) : (
-          <View style={[styles.dim, StyleSheet.absoluteFill, styles.center]}>
+          <Pressable onPress={next} style={[styles.dim, StyleSheet.absoluteFill, styles.center]}>
             <Animated.View key={`s${i}`} entering={reduced ? undefined : FadeIn.duration(400)} style={styles.centerCol}>
               <Sloth size={190} />
               {card}
             </Animated.View>
-          </View>
+          </Pressable>
         )}
       </View>
     </Modal>

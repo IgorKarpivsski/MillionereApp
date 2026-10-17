@@ -53,7 +53,7 @@ adb shell input tap 110 150; sleep 4; shot o4_nick
 adb shell input tap 110 150; sleep 6; shot o5_home
 sleep 3; shot o6_tour1
 for i in 2 3 4 5 6 7 8 9 10; do
-  adb shell input tap 900 1450; sleep 3; shot "o6_tour$i"
+  adb shell input tap 540 40; sleep 3; shot "o6_tour$i"
 done
 adb shell input keyevent KEYCODE_BACK; sleep 3
 shot 04_clear
@@ -80,6 +80,9 @@ adb shell input tap 540 1440; sleep 4; shot m_random_vs
 sleep 6; shot m_random_q
 adb shell input tap 300 1430; sleep 14; shot m_random_reveal
 sleep 120; shot m_random_done
+
+open_route profile; sleep 8; shot s_profile
+for k in 1 2 3; do adb shell input swipe 540 1900 540 700 500; sleep 2; shot "s_profile_$k"; done
 
 for route in "session?world=mix" play packs collection leaderboard profile shop wheel pass friends settings avatar match "world/history"; do
   name=${route//\//_}
