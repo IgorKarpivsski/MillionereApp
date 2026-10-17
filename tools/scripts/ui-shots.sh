@@ -64,7 +64,7 @@ adb shell input swipe 540 1700 540 700 500; sleep 3; shot m_home_2
 adb shell input swipe 540 1700 540 700 500; sleep 3; shot m_home_3
 open_route blitz; sleep 8; shot m_blitz
 adb shell input tap 540 1620; sleep 6; shot m_blitz_go
-for i in 1 2 3 4 5 6; do adb shell input tap 540 $((1350 + (i % 4) * 190)); sleep 2; done; shot m_blitz_play
+for i in 1 2 3 4 5 6 7 8; do adb shell input tap 540 $((726 + (i % 4) * 168)); sleep 2; done; shot m_blitz_play
 sleep 60; shot m_blitz_done
 open_route family; sleep 8; shot m_family
 adb shell input tap 540 1290; sleep 6; shot m_family_room
@@ -73,7 +73,7 @@ open_route "match?mode=random"; sleep 6; shot m_random
 sleep 10; shot m_random_offer
 adb shell input tap 540 1440; sleep 4; shot m_random_vs
 sleep 6; shot m_random_q
-adb shell input tap 540 1500; sleep 14; shot m_random_reveal
+adb shell input tap 300 1430; sleep 14; shot m_random_reveal
 sleep 120; shot m_random_done
 
 for route in "session?world=mix" play packs collection leaderboard profile shop wheel pass friends settings avatar match "world/history"; do
