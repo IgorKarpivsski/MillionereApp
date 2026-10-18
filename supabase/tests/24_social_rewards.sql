@@ -41,6 +41,8 @@ create function test.points(p_run uuid) returns int language sql security define
 create function test.last_month_run(p_user uuid) returns void language sql security definer set search_path = '' as $$
   insert into public.quiz_runs (user_id, mode, world, level, status, ended_at, prize_points)
   values (p_user, 'session', 'geography', 1, 'won', public.israel_month_start() - interval '3 days', 5000) $$;
+create function test.unsettle_last_month() returns void language sql security definer set search_path = '' as $$
+  delete from public.month_awards where month = (public.israel_month_start(public.israel_month_start() - interval '1 day') at time zone 'Asia/Jerusalem')::date $$;
 create function test.family_done(p_room uuid) returns void language sql security definer set search_path = '' as $$
   update public.family_rooms set status = 'done', phase = 'done', finished_at = now() where id = p_room $$;
 create function test.start_now(p_room uuid) returns void language sql security definer set search_path = '' as $$
@@ -135,6 +137,7 @@ begin
   perform test.assert_raises(format('select public.claim_ad_reward(%L, %L)', 'double_points', run), 'already claimed', 'once');
 
   -- all-time and monthly tables; last month's winner is paid once
+  perform test.unsettle_last_month();
   perform test.last_month_run(b);
   g0 := test.gems(b);
   s := public.leaderboard_board('month');
