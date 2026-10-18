@@ -1,7 +1,7 @@
 import type { QuestionImage as QImage } from '@fm/shared';
 import * as WebBrowser from 'expo-web-browser';
 import { memo, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { AppText } from '@/design-system/components';
 import { colors, radius, space } from '@/design-system/tokens';
 import { QuestionMap } from './QuestionMap';
@@ -10,7 +10,10 @@ import { QuestionMap } from './QuestionMap';
 const UA = 'HaAlufTrivia/1.0 (Android; https://github.com/IgorKarpivsski/MillionereApp)';
 
 /** A Wikimedia Commons photo with its author/license credit underneath (required by the licenses). */
-export const QuestionPhoto = memo(function QuestionPhoto({ image, height = 200 }: { image: Extract<QImage, { kind: 'photo' }>; height?: number }) {
+export const QuestionPhoto = memo(function QuestionPhoto({ image, height: fixed }: { image: Extract<QImage, { kind: 'photo' }>; height?: number }) {
+  // keep the answers on screen on small phones: the photo gives way first
+  const { height: screenH } = useWindowDimensions();
+  const height = fixed ?? (screenH < 700 ? 120 : screenH < 800 ? 150 : 180);
   const [state, setState] = useState<'loading' | 'ok' | 'error'>('loading');
   const contain = image.fit === 'contain';
   return (

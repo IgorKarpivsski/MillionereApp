@@ -550,7 +550,8 @@ export default function SessionScreen() {
             {friendPick.slot == null ? <ActivityIndicator color={colors.correct} /> : null}
           </View>
         ) : null}
-        <View style={styles.answers}>
+        {/* photo questions: answers in a 2x2 grid so all four stay on screen without scrolling */}
+        <View style={q.image ? styles.grid : styles.answers}>
           {q.answers.map((a, i) => (
             <AnswerTile
               key={`${q.id}-${a.slot}`}
@@ -559,7 +560,7 @@ export default function SessionScreen() {
               state={stateFor(a.slot)}
               disabled={!answering}
               expertPick={friendPick?.slot === a.slot}
-              fill
+              fill={!q.image}
               onPress={() => void answer(a.slot)}
             />
           ))}
@@ -711,6 +712,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#CFC6F2',
   },
   answers: { gap: space.sm },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: space.sm },
   explain: { gap: space.xs },
   revealHead: { flexDirection: 'row', alignItems: 'center' },
   link: { textDecorationLine: 'underline', marginTop: space.xs },

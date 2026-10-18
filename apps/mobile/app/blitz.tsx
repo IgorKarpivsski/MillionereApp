@@ -364,11 +364,11 @@ export default function BlitzScreen() {
             ) : null}
           </Animated.View>
         ) : null}
-        <View style={styles.answers}>
+        <View style={q?.image ? styles.grid : styles.answers}>
           {q?.answers.map((a, i) => (
             <AnswerTile
               key={`${q.id}-${a.slot}`}
-              fill
+              fill={!q.image}
               index={i}
               text={a.text}
               state={stateFor(a.slot)}
@@ -423,5 +423,6 @@ const styles = StyleSheet.create({
   qCard: { backgroundColor: colors.card, borderRadius: radius.card, padding: space.lg, gap: space.sm },
   chip: { alignSelf: 'flex-start', paddingHorizontal: space.sm, paddingVertical: 2, borderRadius: 6, backgroundColor: colors.board },
   answers: { gap: space.sm },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: space.sm },
   cheer: { alignItems: 'center' },
 });

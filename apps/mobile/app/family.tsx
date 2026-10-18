@@ -597,9 +597,9 @@ export default function FamilyScreen() {
             ) : null}
           </Animated.View>
         ) : null}
-        <View style={styles.answers}>
+        <View style={q?.image ? styles.grid : styles.answers}>
           {q?.answers.map((a, i) => (
-            <View key={`${q.id}-${a.slot}`}>
+            <View key={`${q.id}-${a.slot}`} style={q.image ? styles.half : undefined}>
               <AnswerTile
                 fill
                 index={i}
@@ -725,6 +725,8 @@ const styles = StyleSheet.create({
   qCard: { backgroundColor: colors.card, borderRadius: radius.card, padding: space.lg, gap: space.sm },
   chip: { alignSelf: 'flex-start', paddingHorizontal: space.sm, paddingVertical: 2, borderRadius: 6, backgroundColor: colors.board },
   answers: { gap: space.sm },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: space.sm },
+  half: { width: '48.5%' },
   pickers: { flexDirection: 'row', gap: 4, position: 'absolute', bottom: -8, start: space.md },
   crown: { fontSize: 46, lineHeight: 56 },
   champRow: { flexDirection: 'row', gap: space.md },

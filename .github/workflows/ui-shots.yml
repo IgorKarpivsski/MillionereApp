@@ -5,6 +5,13 @@ name: UI screenshots
 # (shots/<run>/), so the design can be reviewed without a phone.
 on:
   workflow_dispatch:
+    inputs:
+      profile:
+        description: Emulator device profile
+        default: pixel_6
+      script:
+        description: Script under tools/scripts to run on the emulator
+        default: ui-shots.sh
 
 permissions:
   contents: write
@@ -75,10 +82,10 @@ jobs:
           api-level: 34
           arch: x86_64
           target: google_apis
-          profile: pixel_6
+          profile: ${{ inputs.profile || 'pixel_6' }}
           disable-animations: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: bash tools/scripts/ui-shots.sh
+          script: bash tools/scripts/${{ inputs.script || 'ui-shots.sh' }}
       - name: Commit screenshots
         if: always()
         run: |
