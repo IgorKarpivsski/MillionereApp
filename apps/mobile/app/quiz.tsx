@@ -433,7 +433,7 @@ export default function QuizScreen() {
       <Backdrop />
       <Board s={s} daily={daily} onExit={exit} />
 
-      <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scrollArea} contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <ProgressBar value={(rung - 1 + (reveal ? 1 : 0)) / total} accessibilityLabel={fmt(t.questionOf, { n: rung, total })} />
         <View style={styles.infoRow}>
           <AppText variant="caption" color={colors.textDim}>
@@ -473,20 +473,6 @@ export default function QuizScreen() {
           {q.image ? <QuestionImageView image={q.image} /> : null}
         </Animated.View>
 
-        <View style={styles.grid}>
-          {q.answers.map((a, i) => (
-            <AnswerTile
-              key={`${q.id}-${a.slot}`}
-              index={i}
-              text={a.text}
-              state={stateFor(a.slot)}
-              fansPct={fans ? fans[a.slot] : undefined}
-              expertPick={expert?.slot === a.slot && !reveal}
-              disabled={!answering}
-              onPress={() => void pick(a.slot)}
-            />
-          ))}
-        </View>
 
         {expertLine && !reveal ? (
           <View style={styles.hint}>
@@ -524,6 +510,23 @@ export default function QuizScreen() {
           </Animated.View>
         ) : null}
       </ScrollView>
+      {/* answers stay pinned under the question: always on screen, even on small phones */}
+      <View style={styles.answersDock}>
+          <View style={styles.grid}>
+            {q.answers.map((a, i) => (
+              <AnswerTile
+                key={`${q.id}-${a.slot}`}
+                index={i}
+                text={a.text}
+                state={stateFor(a.slot)}
+                fansPct={fans ? fans[a.slot] : undefined}
+                expertPick={expert?.slot === a.slot && !reveal}
+                disabled={!answering}
+                onPress={() => void pick(a.slot)}
+              />
+            ))}
+          </View>
+      </View>
 
       <View style={styles.footer}>
         {reveal ? (
@@ -592,6 +595,8 @@ export default function QuizScreen() {
 }
 
 const styles = StyleSheet.create({
+  scrollArea: { flex: 1 },
+  answersDock: { paddingHorizontal: space.md, paddingTop: space.xs, paddingBottom: space.sm },
   root: { flex: 1, backgroundColor: colors.bgDeep },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, padding: space.xl },
   flex: { flex: 1 },

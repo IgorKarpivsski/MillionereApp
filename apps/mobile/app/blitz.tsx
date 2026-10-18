@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { markModeSeen } from '@/features/settings/store';
-import { ActivityIndicator, Alert, BackHandler, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, BackHandler, Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText, Backdrop, EmptyState, Led, Sloth, StickerButton, TrophyLogo } from '@/design-system/components';
@@ -23,6 +23,9 @@ import { ShareResultButton } from '@/features/teen/ShareResult';
 import { fmt, strings } from '@/lib/i18n';
 import { useStore } from '@/features/store/hooks';
 import { gameFinished } from '@/features/store/interstitial';
+
+/** small phones: answers in a 2x2 grid so all four fit */
+const SMALL = Dimensions.get('window').height < 760;
 
 const t = strings.blitz;
 
@@ -343,7 +346,7 @@ export default function BlitzScreen() {
       <View style={styles.track}>
         <View style={[styles.fill, { width: `${frac * 100}%`, backgroundColor: urgent ? colors.danger : colors.led }]} />
       </View>
-      <ScrollView contentContainerStyle={styles.body}>
+      <ScrollView style={styles.scrollArea} contentContainerStyle={styles.body}>
         {q ? (
           <Animated.View key={q.id} entering={reduced ? undefined : FadeIn.duration(160)} style={styles.qCard}>
             {q.category_name ? (
@@ -364,30 +367,35 @@ export default function BlitzScreen() {
             ) : null}
           </Animated.View>
         ) : null}
-        <View style={q?.image ? styles.grid : styles.answers}>
-          {q?.answers.map((a, i) => (
-            <AnswerTile
-              key={`${q.id}-${a.slot}`}
-              fill={!q.image}
-              index={i}
-              text={a.text}
-              state={stateFor(a.slot)}
-              disabled={picked !== null || !!flash}
-              onPress={() => void answer(a.slot)}
-            />
-          ))}
-        </View>
         {streak >= 3 && streak % 3 === 0 ? (
           <Animated.View entering={reduced ? undefined : FadeIn} style={styles.cheer}>
             <Sloth head size={70} bob={false} say={t.slothCheer[(streak / 3) % t.slothCheer.length]} bubbleSide="side" />
           </Animated.View>
         ) : null}
       </ScrollView>
+      {/* answers stay pinned under the question: always on screen, even on small phones */}
+      <View style={styles.answersDock}>
+          <View style={q?.image || SMALL ? styles.grid : styles.answers}>
+            {q?.answers.map((a, i) => (
+              <AnswerTile
+                key={`${q.id}-${a.slot}`}
+                fill={!(q.image || SMALL)}
+                index={i}
+                text={a.text}
+                state={stateFor(a.slot)}
+                disabled={picked !== null || !!flash}
+                onPress={() => void answer(a.slot)}
+              />
+            ))}
+          </View>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollArea: { flex: 1 },
+  answersDock: { paddingHorizontal: space.md, paddingTop: space.xs, paddingBottom: space.sm },
   root: { flex: 1, backgroundColor: colors.bgDeep },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, padding: space.xl },
   center2: { alignItems: 'center', gap: space.xs },

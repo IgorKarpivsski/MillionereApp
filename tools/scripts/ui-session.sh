@@ -25,16 +25,17 @@ tap 110 150; sleep 8
 shot 01_home
 adb shell input keyevent KEYCODE_BACK; sleep 2
 n=0
-for world in nature food people mix; do
+for world in mix "nature&level=1"; do
   adb shell am start -W -a android.intent.action.VIEW -d "footballmillionaire://session?world=$world" "$PKG" >/dev/null
-  sleep 10
+  sleep 7
   for q in 1 2 3 4 5 6 7 8 9 10; do
     n=$((n+1))
-    shot "q$(printf %02d $n)_${world}"
-    # tap the first answer area roughly in the middle of the screen's lower half, then wait for the reveal
-    sleep 28
-    shot "q$(printf %02d $n)_${world}_reveal"
-    tap 540 2290; sleep 5
+    sleep 3
+    shot "q$(printf %02d $n)_${world%%&*}"
+    # every other question: tap where the answers sit (lower part of the screen) to check taps land
+    if [ $((n % 2)) -eq 0 ]; then tap 300 1880; sleep 4; else sleep 27; fi
+    shot "q$(printf %02d $n)_${world%%&*}_reveal"
+    tap 540 2160; sleep 5
   done
   adb shell input keyevent KEYCODE_BACK; sleep 3
 done

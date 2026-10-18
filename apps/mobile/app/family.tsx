@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { markModeSeen } from '@/features/settings/store';
 import { ReactionLayer } from '@/features/teen/Reactions';
 import { ShareResultButton } from '@/features/teen/ShareResult';
-import { ActivityIndicator, Alert, BackHandler, Image, Pressable, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, BackHandler, Dimensions, Image, Pressable, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, Layout, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText, AvatarBadge, Backdrop, Card, Icon, Led, Sloth, StickerButton, useToast } from '@/design-system/components';
@@ -23,6 +23,9 @@ import { WORLD_IMAGES } from '@/features/worlds/worldImages';
 import { goHome } from '@/lib/goHome';
 import { fmt, strings } from '@/lib/i18n';
 import { queryKeys } from '@/lib/queryClient';
+
+/** small phones: answers in a 2x2 grid so all four fit */
+const SMALL = Dimensions.get('window').height < 760;
 
 const t = strings.family;
 const COUNTS = [15, 20];
@@ -563,7 +566,7 @@ export default function FamilyScreen() {
     <SafeAreaView style={styles.root}>
       <Backdrop accent="#B14CFF" />
       <Strip s={s} />
-      <ScrollView contentContainerStyle={styles.body}>
+      <ScrollView style={styles.scrollArea} contentContainerStyle={styles.body}>
         <View style={styles.info}>
           <AppText variant="caption" color={colors.textDim}>
             {fmt(t.questionOf, { n: s.idx + 1, total: s.total })}
@@ -597,35 +600,6 @@ export default function FamilyScreen() {
             ) : null}
           </Animated.View>
         ) : null}
-        <View style={q?.image ? styles.grid : styles.answers}>
-          {q?.answers.map((a, i) => (
-            <View key={`${q.id}-${a.slot}`} style={q.image ? styles.half : undefined}>
-              <AnswerTile
-                fill
-                index={i}
-                text={a.text}
-                state={stateFor(a.slot)}
-                disabled={s.phase !== 'question' || mine !== null}
-                onPress={() => {
-                  setPicked({ idx: s.idx, slot: a.slot });
-                  playSound('answer_lock');
-                  haptic('tap');
-                  familyApi
-                    .answer(s.room_id, s.idx, a.slot)
-                    .then(refresh)
-                    .catch(() => toast(t.tooLate, 'error'));
-                }}
-              />
-              {pickers(a.slot).length ? (
-                <View style={styles.pickers}>
-                  {pickers(a.slot).map((p) => (
-                    <AvatarBadge key={p.seat} avatarId={p.avatar_id} size={24} ring={p.me ? colors.led : colors.border} />
-                  ))}
-                </View>
-              ) : null}
-            </View>
-          ))}
-        </View>
         <AppText variant="label" color={colors.textMuted} align="center">
           {s.phase === 'reveal'
             ? s.reveal?.explanation ?? ''
@@ -636,12 +610,46 @@ export default function FamilyScreen() {
               : strings.match.fastBonus}
         </AppText>
       </ScrollView>
+      {/* answers stay pinned under the question: always on screen, even on small phones */}
+      <View style={styles.answersDock}>
+          <View style={q?.image || SMALL ? styles.grid : styles.answers}>
+            {q?.answers.map((a, i) => (
+              <View key={`${q.id}-${a.slot}`} style={q.image || SMALL ? styles.half : undefined}>
+                <AnswerTile
+                  fill
+                  index={i}
+                  text={a.text}
+                  state={stateFor(a.slot)}
+                  disabled={s.phase !== 'question' || mine !== null}
+                  onPress={() => {
+                    setPicked({ idx: s.idx, slot: a.slot });
+                    playSound('answer_lock');
+                    haptic('tap');
+                    familyApi
+                      .answer(s.room_id, s.idx, a.slot)
+                      .then(refresh)
+                      .catch(() => toast(t.tooLate, 'error'));
+                  }}
+                />
+                {pickers(a.slot).length ? (
+                  <View style={styles.pickers}>
+                    {pickers(a.slot).map((p) => (
+                      <AvatarBadge key={p.seat} avatarId={p.avatar_id} size={24} ring={p.me ? colors.led : colors.border} />
+                    ))}
+                  </View>
+                ) : null}
+              </View>
+            ))}
+          </View>
+      </View>
       <ReactionLayer kind="family" room={s.room_id} live meName={s.players.find((p) => p.me)?.username ?? ''} />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollArea: { flex: 1 },
+  answersDock: { paddingHorizontal: space.md, paddingTop: space.xs, paddingBottom: space.sm },
   root: { flex: 1, backgroundColor: colors.bgDeep },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, padding: space.xl },
   center2: { alignItems: 'center', gap: space.sm },

@@ -456,7 +456,7 @@ export default function MatchScreen() {
     <SafeAreaView style={styles.root}>
       <Backdrop />
       <Players s={s} />
-      <ScrollView contentContainerStyle={styles.body}>
+      <ScrollView style={styles.scrollArea} contentContainerStyle={styles.body}>
         <View style={styles.info}>
           <AppText variant="caption" color={colors.textDim}>
             {fmt(strings.quiz.questionOf, { n: idx + 1, total: s.total })}
@@ -485,32 +485,6 @@ export default function MatchScreen() {
             ) : null}
           </Animated.View>
         ) : null}
-        <View style={styles.grid}>
-          {q?.answers.map((a, i) => (
-            <View key={`${q.id}-${a.slot}`} style={styles.tileWrap}>
-              <AnswerTile
-                fill
-                index={i}
-                text={a.text}
-                state={stateFor(a.slot)}
-                disabled={s.phase !== 'question' || mine !== null}
-                onPress={() => {
-                  setPicked({ idx, slot: a.slot });
-                  playSound('answer_lock');
-                  haptic('tap');
-                  matchApi.answer(s.room_id, idx, a.slot).catch(() => toast(t.tooLate, 'error'));
-                }}
-              />
-              {s.phase === 'reveal' && s.reveal?.opp_slot === a.slot ? (
-                <View style={styles.oppMark}>
-                  <AppText variant="caption" color={colors.textOnBright} numberOfLines={1}>
-                    {s.opponent?.username ?? ''}
-                  </AppText>
-                </View>
-              ) : null}
-            </View>
-          ))}
-        </View>
         <AppText variant="caption" color={colors.textDim} align="center">
           {s.phase === 'reveal'
             ? s.reveal?.explanation ?? ''
@@ -519,12 +493,43 @@ export default function MatchScreen() {
               : t.fastBonus}
         </AppText>
       </ScrollView>
+      {/* answers stay pinned under the question: always on screen, even on small phones */}
+      <View style={styles.answersDock}>
+          <View style={styles.grid}>
+            {q?.answers.map((a, i) => (
+              <View key={`${q.id}-${a.slot}`} style={styles.tileWrap}>
+                <AnswerTile
+                  fill
+                  index={i}
+                  text={a.text}
+                  state={stateFor(a.slot)}
+                  disabled={s.phase !== 'question' || mine !== null}
+                  onPress={() => {
+                    setPicked({ idx, slot: a.slot });
+                    playSound('answer_lock');
+                    haptic('tap');
+                    matchApi.answer(s.room_id, idx, a.slot).catch(() => toast(t.tooLate, 'error'));
+                  }}
+                />
+                {s.phase === 'reveal' && s.reveal?.opp_slot === a.slot ? (
+                  <View style={styles.oppMark}>
+                    <AppText variant="caption" color={colors.textOnBright} numberOfLines={1}>
+                      {s.opponent?.username ?? ''}
+                    </AppText>
+                  </View>
+                ) : null}
+              </View>
+            ))}
+          </View>
+      </View>
       <ReactionLayer kind="match" room={s.room_id} live={!s.is_bot} meName={s.me.username} />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollArea: { flex: 1 },
+  answersDock: { paddingHorizontal: space.md, paddingTop: space.xs, paddingBottom: space.sm },
   root: { flex: 1, backgroundColor: colors.bgDeep },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg },
   pad: { padding: space.xl },

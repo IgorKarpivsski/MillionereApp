@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import * as StoreReview from 'expo-store-review';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeInUp, ZoomIn, useAnimatedStyle, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText, BottomSheet, Card, EmptyState, Led, StickerButton, useToast, Backdrop } from '@/design-system/components';
@@ -332,6 +332,7 @@ function DoubleCoins({ runId, coins }: { runId?: string; coins: number }) {
 
 export default function SessionScreen() {
   const params = useLocalSearchParams<{ world?: string; level?: string; run?: string }>();
+  const { height: screenH } = useWindowDimensions();
   const [target, setTarget] = useState({ world: params.world ?? 'mix', level: params.level ? Number(params.level) : null });
   const worlds = useWorldsConfig();
   const w = worldBySlug(worlds, target.world);
@@ -460,6 +461,8 @@ export default function SessionScreen() {
 
   const rung = s.payload.rung;
   const answering = s.phase === 'question';
+  // photo questions and small phones: 2x2 answers take less height
+  const compact = !!q.image || screenH < 760;
   const reveal = s.reveal;
   const used5050 = s.payload.lifelines_used.filter((x) => x === '5050').length;
   const correctSoFar = s.results.filter(Boolean).length;
@@ -498,7 +501,7 @@ export default function SessionScreen() {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.flex} contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <View style={styles.qHead}>
           <WorldBadge icon={qWorld.icon} color={qWorld.color} size={34} />
           <AppText variant="label" color={colors.textMuted} style={styles.flex}>
@@ -550,21 +553,6 @@ export default function SessionScreen() {
             {friendPick.slot == null ? <ActivityIndicator color={colors.correct} /> : null}
           </View>
         ) : null}
-        {/* photo questions: answers in a 2x2 grid so all four stay on screen without scrolling */}
-        <View style={q.image ? styles.grid : styles.answers}>
-          {q.answers.map((a, i) => (
-            <AnswerTile
-              key={`${q.id}-${a.slot}`}
-              index={i}
-              text={a.text}
-              state={stateFor(a.slot)}
-              disabled={!answering}
-              expertPick={friendPick?.slot === a.slot}
-              fill={!q.image}
-              onPress={() => void answer(a.slot)}
-            />
-          ))}
-        </View>
 
         {reveal ? (
           <Animated.View entering={reduced ? undefined : FadeInDown.springify().damping(16)} accessibilityLiveRegion="assertive">
@@ -597,6 +585,23 @@ export default function SessionScreen() {
           </Animated.View>
         ) : null}
       </ScrollView>
+      {/* answers stay pinned above the tools: always on screen, even on small phones with a photo */}
+      <View style={styles.answersDock}>
+          <View style={compact ? styles.grid : styles.answers}>
+            {q.answers.map((a, i) => (
+              <AnswerTile
+                key={`${q.id}-${a.slot}`}
+                index={i}
+                text={a.text}
+                state={stateFor(a.slot)}
+                disabled={!answering}
+                expertPick={friendPick?.slot === a.slot}
+                fill={!compact}
+                onPress={() => void answer(a.slot)}
+              />
+            ))}
+          </View>
+      </View>
 
       <View style={styles.footer}>
         {reveal ? (
@@ -712,6 +717,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#CFC6F2',
   },
   answers: { gap: space.sm },
+  answersDock: { paddingHorizontal: space.md, paddingTop: space.xs },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: space.sm },
   explain: { gap: space.xs },
   revealHead: { flexDirection: 'row', alignItems: 'center' },
