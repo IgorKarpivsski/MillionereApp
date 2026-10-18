@@ -114,7 +114,7 @@ export default function ChatScreen() {
           </AppText>
         ) : (
           <>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quick} keyboardShouldPersistTaps="handled">
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickBar} contentContainerStyle={styles.quick} keyboardShouldPersistTaps="handled">
               {t.quick.map((q) => (
                 <Pressable key={q} onPress={() => void send(q)} style={styles.chip} accessibilityRole="button" accessibilityLabel={q}>
                   <AppText variant="caption">{q}</AppText>
@@ -160,8 +160,10 @@ const styles = StyleSheet.create({
   mine: { alignSelf: 'flex-start', backgroundColor: colors.led, borderBottomStartRadius: 4 },
   theirs: { alignSelf: 'flex-end', backgroundColor: colors.surfaceRaised, borderBottomEndRadius: 4 },
   time: { fontSize: 11 },
-  quick: { paddingHorizontal: space.md, gap: space.sm, paddingBottom: space.sm },
-  chip: { paddingHorizontal: space.md, paddingVertical: space.xs, borderRadius: radius.chip, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.board },
+  // a horizontal ScrollView grows to fill the screen unless told not to: keep the chips one line tall
+  quickBar: { flexGrow: 0, flexShrink: 0 },
+  quick: { paddingHorizontal: space.md, gap: space.sm, paddingBottom: space.sm, alignItems: 'center' },
+  chip: { alignSelf: 'center', paddingHorizontal: space.md, paddingVertical: space.xs, borderRadius: radius.chip, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.board },
   composer: { flexDirection: 'row', alignItems: 'flex-end', gap: space.sm, padding: space.md, borderTopWidth: 1, borderColor: colors.border },
   input: {
     flex: 1,

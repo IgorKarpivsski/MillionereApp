@@ -21,6 +21,7 @@ import { colors, rarityColors, space, type RarityKey } from '@/design-system/tok
 import { GlowingPack, PACK_GLOW, PACK_NAMES } from '@/features/collection/PackArt';
 import { useCollection } from '@/features/collection/hooks';
 import { useMyState } from '@/features/profile/hooks';
+import { TradeFriendSheet } from '@/features/social/FriendPicker';
 import { formatNumber } from '@/lib/format';
 import { fmt, strings } from '@/lib/i18n';
 
@@ -49,6 +50,7 @@ function OddsTable({ pack }: { pack: PackCatalogEntry }) {
 }
 
 export default function PacksScreen() {
+  const [tradeOpen, setTradeOpen] = useState(false);
   const { data, isLoading, isError, error, refetch, isRefetching } = useCollection();
   const { data: me } = useMyState();
   const [oddsFor, setOddsFor] = useState<PackCatalogEntry | null>(null);
@@ -82,6 +84,7 @@ export default function PacksScreen() {
           {fmt(t.pity, { n: data.pity_left })}
         </AppText>
       ) : null}
+      <StickerButton label={t.tradeDupes} icon="swap-horizontal" tone="outline" fullWidth onPress={() => setTradeOpen(true)} />
       {isLoading ? <Skeleton height={400} rounded={18} /> : null}
       {isError && !data ? (
         <Card padding={space.lg} style={styles.errorCard}>
@@ -152,6 +155,7 @@ export default function PacksScreen() {
         );
       })}
 
+      <TradeFriendSheet visible={tradeOpen} onClose={() => setTradeOpen(false)} />
       <BottomSheet visible={!!oddsFor} onClose={() => setOddsFor(null)} title={oddsFor ? `${t.odds}: ${PACK_NAMES[oddsFor.slug]}` : ''}>
         {oddsFor ? <OddsTable pack={oddsFor} /> : null}
         <StickerButton label={strings.common.close} tone="ghost" fullWidth onPress={() => setOddsFor(null)} />

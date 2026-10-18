@@ -1,5 +1,6 @@
 import {
   AdminSubmissionsSchema,
+  BoardSchema,
   EventStateSchema,
   FlairSchema,
   FriendProfileSchema,
@@ -47,6 +48,7 @@ export const teenApi = {
   answerInvite: (id: number, accept: boolean) =>
     rpc('match_invite_answer', { p_invite: id, p_accept: accept }, (x) => MatchRoomSchema.safeParse(x).data ?? null),
   event: () => rpc('event_state', undefined, (x) => EventStateSchema.parse(x)),
+  board: (kind: 'month' | 'all') => rpc('leaderboard_board', { p_kind: kind }, (x) => BoardSchema.parse(x)),
   submit: (world: string, text: string, correct: string, wrongs: string[]) =>
     rpc('submit_question', { p_world: world, p_text: text, p_correct: correct, p_wrongs: wrongs }, () => undefined),
   mySubmissions: () => rpc('my_submissions', undefined, (x) => SubmissionsSchema.parse(x)),
@@ -63,6 +65,7 @@ export const useMissions = () => useAuthedQuery(teenKeys.missions, teenApi.missi
 export const useMistakes = () => useAuthedQuery(teenKeys.mistakes, teenApi.mistakes);
 export const useFlair = () => useAuthedQuery(teenKeys.flair, teenApi.flair);
 export const useFriendsBoard = () => useAuthedQuery(teenKeys.friendsBoard, teenApi.friendsBoard);
+export const useBoard = (kind: 'month' | 'all') => useAuthedQuery(['board', kind], () => teenApi.board(kind), 60_000);
 export const useEvent = () => useAuthedQuery(teenKeys.event, teenApi.event, 60_000);
 export const useMySubmissions = () => useAuthedQuery(teenKeys.submissions, teenApi.mySubmissions);
 export const useFriendProfile = (id: string) => useAuthedQuery(teenKeys.friend(id), () => teenApi.friend(id));

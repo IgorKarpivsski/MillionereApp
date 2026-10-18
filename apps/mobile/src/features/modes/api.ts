@@ -33,4 +33,8 @@ export const familyApi = {
   answer: (room: string, idx: number, slot: number) =>
     rpc('family_answer', { p_room: room, p_idx: idx, p_slot: slot }, () => undefined),
   leave: (room: string) => rpc('family_leave', { p_room: room }, () => undefined),
+  invite: (room: string, friend: string) => rpc('family_invite', { p_room: room, p_friend: friend }, () => undefined),
+  again: (room: string) => rpc('family_again', { p_room: room }, (x) => MatchRoomSchema.parse(x)),
+  answerInvite: (id: number, accept: boolean) =>
+    rpc('family_invite_answer', { p_invite: id, p_accept: accept }, (x) => MatchRoomSchema.safeParse(x).data ?? null),
 };

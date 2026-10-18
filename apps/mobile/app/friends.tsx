@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { Friend, Trade } from '@fm/shared';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { Alert, Pressable, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText, AvatarBadge, Card, EmptyState, Led, StickerButton, useToast, Backdrop } from '@/design-system/components';
@@ -15,14 +15,22 @@ import { fmt, strings } from '@/lib/i18n';
 
 const t = strings.social;
 
-function TradeRow({ trade }: { trade: Trade }) {
+const TradeRow = memo(function TradeRow({ trade }: { trade: Trade }) {
   const { data: coll } = useCollection();
   const respond = useSocialAction((v: { accept: boolean }) => socialApi.respondTrade(trade.id, v.accept));
   const toast = useToast();
-  const give = coll?.items.find((i) => i.id === trade.give);
-  const want = trade.want ? coll?.items.find((i) => i.id === trade.want) : null;
+  const find = (ids: string[]) => ids.map((x) => coll?.items.find((i) => i.id === x)).filter((x) => !!x);
+  const give = find(trade.give_items ?? [trade.give]);
+  const want = find(trade.want_items ?? (trade.want ? [trade.want] : []));
   // From MY point of view: incoming → I receive `give` and hand over `want`.
   const [left, right] = trade.incoming ? [give, want] : [want, give];
+  const cards = (list: typeof give) => (
+    <View style={styles.cardsWrap}>
+      {list.map((it) => (
+        <LegendCard key={it.id} item={it} width={list.length > 2 ? 52 : 72} />
+      ))}
+    </View>
+  );
   return (
     <Card kind="soft" padding={space.md} style={styles.gap}>
       <AppText variant="label">{trade.incoming ? fmt(t.tradeIn, { name: trade.peer_name }) : fmt(t.tradeOut, { name: trade.peer_name })}</AppText>
@@ -31,14 +39,14 @@ function TradeRow({ trade }: { trade: Trade }) {
           <AppText variant="caption" color={colors.correct}>
             {trade.incoming ? t.gives : t.wants}
           </AppText>
-          {left ? <LegendCard item={left} width={84} /> : <AppText color={colors.textDim}>{t.gift}</AppText>}
+          {left.length ? cards(left) : <AppText color={colors.textDim}>{t.gift}</AppText>}
         </View>
         <Ionicons name="swap-horizontal" size={28} color={colors.led} />
         <View style={styles.center}>
           <AppText variant="caption" color={colors.danger}>
             {trade.incoming ? t.wants : t.gives}
           </AppText>
-          {right ? <LegendCard item={right} width={84} /> : <AppText color={colors.correct}>{t.gift}</AppText>}
+          {right.length ? cards(right) : <AppText color={colors.correct}>{t.gift}</AppText>}
         </View>
       </View>
       <View style={styles.row}>
@@ -67,9 +75,18 @@ function TradeRow({ trade }: { trade: Trade }) {
       </View>
     </Card>
   );
+});
+
+/** "a minute ago", "3 hours ago", "2 days ago" */
+function ago(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (m < 60) return fmt(strings.time.minutes, { n: Math.max(1, m) });
+  if (m < 60 * 24) return fmt(strings.time.hours, { n: Math.floor(m / 60) });
+  return fmt(strings.time.days, { n: Math.floor(m / 1440) });
 }
 
-function FriendRow({ f }: { f: Friend }) {
+const FriendRow = memo(function FriendRow({ f }: { f: Friend }) {
   const respond = useSocialAction((accept: boolean) => socialApi.respond(f.id, accept));
   const remove = useSocialAction(() => socialApi.remove(f.id));
   const block = useSocialAction(() => socialApi.block(f.id));
@@ -105,13 +122,24 @@ function FriendRow({ f }: { f: Friend }) {
         accessibilityLabel={`${strings.teen.viewProfile} ${f.username}`}
         style={styles.who}
       >
-        <AvatarBadge avatarId={f.avatar_id} level={f.level} size={44} />
+        <View>
+          <AvatarBadge avatarId={f.avatar_id} photo={f.photo} level={f.level} size={44} />
+          {f.status === 'accepted' ? <View style={[styles.presence, { backgroundColor: f.online ? colors.correct : palette.night600 }]} /> : null}
+        </View>
         <View style={styles.flex}>
           <AppText variant="label" numberOfLines={1}>
             {f.username}
           </AppText>
-          <AppText variant="caption" color={f.unread > 0 ? colors.led : colors.textDim}>
-            {f.status === 'pending' && !f.incoming ? t.waiting : f.unread > 0 ? fmt(t.unread, { n: f.unread }) : fmt(t.level, { n: f.level })}
+          <AppText variant="caption" color={f.unread > 0 ? colors.led : f.online ? colors.correct : colors.textDim} numberOfLines={1}>
+            {f.status === 'pending' && !f.incoming
+              ? t.waiting
+              : f.unread > 0
+                ? fmt(t.unread, { n: f.unread })
+                : f.online
+                  ? `● ${t.online}`
+                  : ago(f.last_active)
+                    ? fmt(t.lastSeen, { t: ago(f.last_active)! })
+                    : fmt(t.level, { n: f.level })}
           </AppText>
         </View>
       </Pressable>
@@ -134,6 +162,14 @@ function FriendRow({ f }: { f: Friend }) {
             {f.unread > 0 ? <View style={styles.dot} /> : null}
           </Pressable>
           <Pressable
+            onPress={() => router.push({ pathname: '/trade/[id]', params: { id: f.id, name: f.username, mode: 'gift' } })}
+            style={styles.iconBtn}
+            accessibilityRole="button"
+            accessibilityLabel={`${t.giftBtn} ${f.username}`}
+          >
+            <Ionicons name="gift" size={21} color={colors.prize} />
+          </Pressable>
+          <Pressable
             onPress={() => router.push({ pathname: '/trade/[id]', params: { id: f.id, name: f.username } })}
             style={styles.iconBtn}
             accessibilityRole="button"
@@ -148,7 +184,7 @@ function FriendRow({ f }: { f: Friend }) {
       </Pressable>
     </View>
   );
-}
+});
 
 export default function FriendsScreen() {
   const { data } = useFriends(true);
@@ -273,6 +309,8 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   flex: { flex: 1 },
   who: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: space.md },
+  presence: { position: 'absolute', top: 0, start: 0, width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: palette.night950 },
+  cardsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, justifyContent: 'center', maxWidth: 160 },
   center: { alignItems: 'center', gap: space.xs },
   codeRow: { alignItems: 'center', paddingVertical: space.sm },
   input: {

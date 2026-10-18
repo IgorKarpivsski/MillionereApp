@@ -47,7 +47,7 @@ export default function PlayerScreen() {
         {data ? (
           <>
             <View style={styles.header}>
-              <AvatarBadge avatarId={data.profile.avatar_id} level={data.profile.level} frame={data.profile.frame} size={110} ring={colors.led} />
+              <AvatarBadge avatarId={data.profile.avatar_id} photo={data.profile.photo} level={data.profile.level} frame={data.profile.frame} size={110} ring={colors.led} />
               <AppText variant="title">{data.profile.username}</AppText>
               {data.profile.title ? (
                 <AppText variant="label" color={colors.led}>

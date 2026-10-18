@@ -9,13 +9,14 @@ import { LeagueView, SegmentTabs } from '@/features/league/LeagueView';
 import { useLeaderboard } from '@/features/quiz/hooks';
 import { useFriendsBoard } from '@/features/teen/api';
 import { RankList } from '@/features/teen/RankList';
+import { BoardView } from '@/features/teen/BoardView';
 import { formatNumber } from '@/lib/format';
 import { strings } from '@/lib/i18n';
 
 const t = strings.leaderboard;
 
 export default function LeaderboardScreen() {
-  const [tab, setTab] = useState<'league' | 'friends' | 'all'>('league');
+  const [tab, setTab] = useState<'league' | 'friends' | 'all' | 'month' | 'ever'>('league');
   const friends = useFriendsBoard();
   const league = useLeague();
   const { data, isLoading, refetch, isRefetching } = useLeaderboard();
@@ -30,9 +31,11 @@ export default function LeaderboardScreen() {
         value={tab}
         onChange={setTab}
         options={[
-          { key: 'league', label: t.tabLeague },
-          { key: 'friends', label: strings.teen.friendsTab },
-          { key: 'all', label: t.tabAll },
+          { key: 'league', label: t.tabLeagueShort },
+          { key: 'friends', label: t.tabFriends },
+          { key: 'all', label: strings.boards.week },
+          { key: 'month', label: strings.boards.month },
+          { key: 'ever', label: strings.boards.all },
         ]}
       />
       {tab === 'league' ? (
@@ -51,6 +54,10 @@ export default function LeaderboardScreen() {
             </>
           ) : null}
         </>
+      ) : tab === 'month' ? (
+        <BoardView kind="month" />
+      ) : tab === 'ever' ? (
+        <BoardView kind="all" />
       ) : (
         <AllTable data={data} isLoading={isLoading} />
       )}
@@ -91,7 +98,7 @@ function AllTable({ data, isLoading }: { data: ReturnType<typeof useLeaderboard>
             <Led size="number" color={r.rank === 1 ? colors.led : r.rank <= 3 ? colors.text : colors.textDim} style={styles.rank}>
               {r.rank}
             </Led>
-            <AvatarBadge avatarId={r.avatar_id} level={r.level} frame={r.frame} size={36} />
+            <AvatarBadge avatarId={r.avatar_id} photo={r.photo} level={r.level} frame={r.frame} size={36} />
             <AppText variant="label" numberOfLines={1} style={styles.flex}>
               {r.username}
             </AppText>

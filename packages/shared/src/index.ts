@@ -24,7 +24,7 @@ export const ProfileSchema = z.object({
   fav_teams: z.array(z.string()),
   is_guest: z.boolean(),
   created_at: z.string(),
-  /** the player's own photo (phone upload or Google picture); only the player sees it */
+  /** the player's own photo (phone upload or Google picture); shown to everyone instead of the drawn avatar */
   photo_url: z.string().nullable().optional(),
   gender: z.enum(['male', 'female', 'other']).nullable().optional(),
   fav_worlds: z.array(z.string()).optional(),
@@ -231,6 +231,7 @@ export const LeaderboardSchema = z.object({
       rank: z.number().int(),
       username: z.string(),
       avatar_id: z.string(),
+      photo: z.string().nullable().optional(),
       level: z.number().int(),
       points: z.number(),
       me: z.boolean(),
@@ -320,6 +321,8 @@ export const SessionSummarySchema = z.object({
   champion_opened: z.boolean().default(false),
   can_continue: z.boolean().default(false),
   hearts: z.number().int().default(0),
+  /** every question right: a champion's prize */
+  perfect: z.object({ coins: z.number().int(), gems: z.number().int() }).optional(),
 });
 export type SessionSummary = z.infer<typeof SessionSummarySchema>;
 
@@ -332,6 +335,9 @@ export const SessionAnswerSchema = z.object({
   points: z.number().int(),
   /** Part of `points` earned by answering fast (seconds left x points per second). */
   speed_bonus: z.number().int().default(0),
+  /** correct answers in a row, and the extra points the streak earned */
+  combo: z.number().int().default(0),
+  combo_bonus: z.number().int().default(0),
   score: z.number().int(),
   correct_count: z.number().int(),
   summary: SessionSummarySchema.nullable(),
@@ -351,6 +357,7 @@ export const CallCandidateSchema = z.object({
   id: z.string().uuid(),
   username: z.string(),
   avatar_id: z.string().nullable(),
+  photo: z.string().nullable().optional(),
   level: z.number().int(),
   online: z.boolean(),
 });
@@ -361,6 +368,7 @@ export const IncomingCallSchema = z.object({
   id: z.string().uuid(),
   from: z.string(),
   avatar_id: z.string().nullable(),
+  photo: z.string().nullable().optional(),
   seconds_left: z.number().int(),
   question: z.object({
     text: z.string(),
@@ -369,9 +377,15 @@ export const IncomingCallSchema = z.object({
   }),
 });
 export type IncomingCall = z.infer<typeof IncomingCallSchema>;
-export const MatchInviteSchema = z.object({ id: z.number().int(), from: z.string(), avatar_id: z.string() });
+export const MatchInviteSchema = z.object({ id: z.number().int(), from: z.string(), avatar_id: z.string(), photo: z.string().nullable().optional() });
 export type MatchInvite = z.infer<typeof MatchInviteSchema>;
-export const PresencePingSchema = z.object({ calls: z.array(IncomingCallSchema), invites: z.array(MatchInviteSchema).default([]) });
+export const FamilyInviteSchema = z.object({ id: z.number().int(), from: z.string(), avatar_id: z.string(), photo: z.string().nullable().optional(), world: z.string() });
+export type FamilyInvite = z.infer<typeof FamilyInviteSchema>;
+export const PresencePingSchema = z.object({
+  calls: z.array(IncomingCallSchema),
+  invites: z.array(MatchInviteSchema).default([]),
+  family_invites: z.array(FamilyInviteSchema).default([]),
+});
 
 export const CallStateSchema = z.object({
   answer_slot: z.number().int().nullable(),
@@ -446,6 +460,8 @@ export type OpenPackResult = z.infer<typeof OpenPackResultSchema>;
 const PlayerMiniSchema = z.object({
   username: z.string(),
   avatar_id: z.string(),
+  photo: z.string().nullable().optional(),
+
   level: z.number().int(),
   frame: z.string().nullable().optional(),
   title: z.string().nullable().optional(),
@@ -559,6 +575,8 @@ export const FamilyPlayerSchema = z.object({
   seat: z.number().int(),
   username: z.string(),
   avatar_id: z.string(),
+  photo: z.string().nullable().optional(),
+
   level: z.number().int(),
   me: z.boolean(),
   host: z.boolean(),
@@ -588,6 +606,8 @@ export const FamilyStateSchema = z.object({
   question: ModeQuestionSchema.nullable(),
   my_answer: z.number().int().nullable(),
   reveal: z.object({ correct_slot: z.number().int(), explanation: z.string().nullable() }).nullable(),
+  /** the host started a rematch with the same people: its code */
+  next_code: z.string().nullable().optional(),
   result: z.object({ coins: z.number().nullable() }).nullable(),
 });
 export type FamilyState = z.infer<typeof FamilyStateSchema>;
@@ -689,8 +709,11 @@ export const FriendSchema = z.object({
   id: z.string().uuid(),
   username: z.string(),
   avatar_id: z.string(),
+  photo: z.string().nullable().optional(),
   level: z.number().int(),
   status: z.enum(['pending', 'accepted']),
+  online: z.boolean().optional(),
+  last_active: z.string().nullable().optional(),
   incoming: z.boolean(),
   unread: z.number().int(),
   last_at: z.string().nullable(),
@@ -703,11 +726,14 @@ export const TradeSchema = z.object({
   peer_name: z.string(),
   give: z.string(),
   want: z.string().nullable(),
+  give_items: z.array(z.string()).optional(),
+  want_items: z.array(z.string()).optional(),
   created_at: z.string(),
 });
 export type Trade = z.infer<typeof TradeSchema>;
 export const FriendsStateSchema = z.object({
   code: z.string(),
+  gifts_left: z.number().int().optional(),
   friends: z.array(FriendSchema),
   trades: z.array(TradeSchema),
   blocked: z.array(z.object({ id: z.string().uuid(), username: z.string() })),
@@ -717,7 +743,7 @@ export const ChatMessageSchema = z.object({ id: z.number().int(), mine: z.boolea
 export type ChatMessage = z.infer<typeof ChatMessageSchema>;
 export const ChatHistorySchema = z.object({ messages: z.array(ChatMessageSchema), can_send: z.boolean() });
 export type ChatHistory = z.infer<typeof ChatHistorySchema>;
-export const FriendDupeSchema = z.object({ id: z.string(), count: z.number().int(), mine: z.number().int() });
+export const FriendDupeSchema = z.object({ id: z.string(), count: z.number().int(), mine: z.number().int(), rarity: z.string().optional() });
 export type FriendDupe = z.infer<typeof FriendDupeSchema>;
 export const ChatReportReasonSchema = z.enum(['rude', 'bullying', 'personal_info', 'spam', 'other']);
 export type ChatReportReason = z.infer<typeof ChatReportReasonSchema>;
@@ -754,6 +780,7 @@ export const LeagueStateSchema = z.object({
       rank: z.number().int(),
       username: z.string(),
       avatar_id: z.string(),
+      photo: z.string().nullable().optional(),
       level: z.number().int(),
       points: z.number(),
       me: z.boolean(),
@@ -827,6 +854,7 @@ export const FriendProfileSchema = z.object({
   profile: z.object({
     username: z.string(),
     avatar_id: z.string(),
+    photo: z.string().nullable().optional(),
     level: z.number().int(),
     frame: z.string().nullable().optional(),
     title: z.string().nullable().optional(),
@@ -841,6 +869,8 @@ export const RankRowSchema = z.object({
   rank: z.number().int(),
   username: z.string(),
   avatar_id: z.string(),
+  photo: z.string().nullable().optional(),
+
   level: z.number().int().optional(),
   frame: z.string().nullable().optional(),
   points: z.number(),
@@ -884,3 +914,14 @@ export const MistakesSchema = z.array(MistakeSchema);
 export const ReactionsSchema = z.array(ReactionSchema);
 export const SubmissionsSchema = z.array(SubmissionSchema);
 export const AdminSubmissionsSchema = z.array(AdminSubmissionSchema);
+
+/* All-time and monthly tables — mirrors 20261018000001_social_and_rewards.sql */
+export const BoardSchema = z.object({
+  kind: z.enum(['month', 'all']),
+  rows: z.array(RankRowSchema),
+  me: z.object({ rank: z.number().int(), points: z.number() }).nullable(),
+  ends_at: z.string().nullable().optional(),
+  prizes: z.array(z.object({ coins: z.number().int(), gems: z.number().int() })).nullable().optional(),
+  last_winners: z.array(RankRowSchema.partial({ level: true })).default([]),
+});
+export type Board = z.infer<typeof BoardSchema>;

@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 
 export const storeApi = {
   state: (): Promise<StoreState> => rpc('store_state', undefined, (x) => StoreStateSchema.parse(x)),
-  claimAd: (kind: 'double_run' | 'free_pack' | 'vip_daily', ref?: string) =>
+  claimAd: (kind: 'double_run' | 'free_pack' | 'vip_daily' | 'double_points', ref?: string) =>
     rpc('claim_ad_reward', { p_kind: kind, p_ref: ref ?? null }, (x) => x as Record<string, unknown>),
   /** Server-side verification with Google Play; grants only if Google confirms. */
   verify: async (sku: string, purchaseToken: string, type: 'in-app' | 'subs') => {

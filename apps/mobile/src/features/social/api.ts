@@ -23,6 +23,9 @@ export const socialApi = {
   dupes: (peer: string): Promise<FriendDupe[]> => rpc('friend_dupes', { p_user: peer }, (x) => FriendDupesSchema.parse(x)),
   offer: (peer: string, give: string, want: string | null) =>
     rpc('trade_offer', { p_to: peer, p_give: give, p_want: want }, (x) => x as { id: string }),
+  offerMulti: (peer: string, give: string[], want: string[]) =>
+    rpc('trade_offer_multi', { p_to: peer, p_give: give, p_want: want }, (x) => x as { id: string }),
+  gift: (peer: string, item: string) => rpc('sticker_gift', { p_to: peer, p_item: item }, (x) => x as { ok: boolean; left: number }),
   respondTrade: (offer: string, accept: boolean) =>
     rpc('trade_respond', { p_offer: offer, p_accept: accept }, (x) => x as { status: string }),
 };

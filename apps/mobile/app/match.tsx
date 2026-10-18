@@ -19,6 +19,7 @@ import { goHome } from '@/lib/goHome';
 import { teenApi } from '@/features/teen/api';
 import { ReactionLayer } from '@/features/teen/Reactions';
 import { ShareResultButton } from '@/features/teen/ShareResult';
+import { PostGameRank } from '@/features/teen/PostGame';
 import { fmt, strings } from '@/lib/i18n';
 import { QuestionImageView } from '@/features/quiz/QuestionImage';
 
@@ -190,7 +191,7 @@ function Players({ s }: { s: MatchState }) {
   return (
     <View style={styles.board}>
       <View style={styles.player}>
-        <AvatarBadge avatarId={s.me.avatar_id} level={s.me.level} frame={s.me.frame} size={34} />
+        <AvatarBadge avatarId={s.me.avatar_id} photo={s.me.photo} level={s.me.level} frame={s.me.frame} size={34} />
         <AppText variant="caption" numberOfLines={1} style={styles.pname}>
           {s.me.username}
         </AppText>
@@ -207,7 +208,7 @@ function Players({ s }: { s: MatchState }) {
         </Animated.View>
       </View>
       <View style={styles.player}>
-        <AvatarBadge avatarId={s.opponent?.avatar_id ?? 'avatar_01'} level={s.opponent?.level ?? 1} frame={s.opponent?.frame} size={34} />
+        <AvatarBadge avatarId={s.opponent?.avatar_id ?? 'avatar_01'} photo={s.opponent?.photo} level={s.opponent?.level ?? 1} frame={s.opponent?.frame} size={34} />
         <AppText variant="caption" numberOfLines={1} style={styles.pname}>
           {s.opponent?.username ?? '…'}
         </AppText>
@@ -379,7 +380,7 @@ export default function MatchScreen() {
       <SafeAreaView style={[styles.root, styles.center]}>
         <Backdrop />
         {s.kind === 'random' ? <AppText variant="title">{r.found}</AppText> : null}
-        <AvatarBadge avatarId={s.opponent?.avatar_id ?? 'avatar_01'} level={s.opponent?.level ?? 1} size={88} ring={colors.led} />
+        <AvatarBadge avatarId={s.opponent?.avatar_id ?? 'avatar_01'} photo={s.opponent?.photo} level={s.opponent?.level ?? 1} size={88} ring={colors.led} />
         <AppText variant="heading">{fmt(t.vs, { name: s.opponent?.username ?? '' })}</AppText>
         {s.is_bot ? <AppText color={colors.textDim}>{r.botTag}</AppText> : null}
         <Animated.View key={Math.ceil(left)} entering={ZoomIn}>
@@ -429,6 +430,7 @@ export default function MatchScreen() {
               }
             }}
           />
+          <PostGameRank points={0} />
           <ShareResultButton
             big={`${s.my_score}:${s.opp_score}`}
             line={fmt(win ? strings.teen.shareMatchWin : strings.teen.shareMatch, { me: s.my_score, opp: s.opp_score })}

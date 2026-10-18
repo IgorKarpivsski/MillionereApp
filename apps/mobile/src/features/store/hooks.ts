@@ -22,7 +22,7 @@ export function useAdReward() {
   const toast = useToast();
   const [busy, setBusy] = useState(false);
   const run = useCallback(
-    async (kind: 'double_run' | 'free_pack' | 'vip_daily', ref?: string) => {
+    async (kind: 'double_run' | 'free_pack' | 'vip_daily' | 'double_points', ref?: string) => {
       if (busy) return null;
       setBusy(true);
       try {

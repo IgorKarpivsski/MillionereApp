@@ -18,6 +18,8 @@ export interface SessionReveal {
   explanation: string;
   points: number;
   speedBonus: number;
+  combo: number;
+  comboBonus: number;
   shielded: boolean;
 }
 
@@ -145,7 +147,7 @@ export function useSession(world: string, level: number | null, resumeRun?: stri
             phase: 'reveal',
             score: r.score,
             results: [...x.results, good || r.shielded],
-            reveal: { result: r.result, correctSlot: r.correct_slot, pickedSlot: slot >= 0 ? slot : null, explanation: r.explanation, points: r.points, speedBonus: r.speed_bonus, shielded: r.shielded },
+            reveal: { result: r.result, correctSlot: r.correct_slot, pickedSlot: slot >= 0 ? slot : null, explanation: r.explanation, points: r.points, speedBonus: r.speed_bonus, combo: r.combo, comboBonus: r.combo_bonus, shielded: r.shielded },
             summary,
           }));
           return;

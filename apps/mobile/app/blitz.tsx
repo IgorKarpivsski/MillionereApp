@@ -20,6 +20,7 @@ import { QuestionImageView } from '@/features/quiz/QuestionImage';
 import { AnswerTile, type AnswerState } from '@/features/quiz/ui';
 import { goHome } from '@/lib/goHome';
 import { ShareResultButton } from '@/features/teen/ShareResult';
+import { PostGameRank } from '@/features/teen/PostGame';
 import { fmt, strings } from '@/lib/i18n';
 import { useStore } from '@/features/store/hooks';
 import { gameFinished } from '@/features/store/interstitial';
@@ -300,6 +301,7 @@ export default function BlitzScreen() {
             fullWidth
             onPress={() => void start()}
           />
+          <PostGameRank points={0} />
           {p.correct > 0 ? <ShareResultButton big={String(p.correct)} line={fmt(strings.teen.shareBlitz, { n: p.correct })} /> : null}
           <StickerButton label={strings.quiz.home} icon="home" tone="ghost" fullWidth onPress={goHome} />
         </ScrollView>

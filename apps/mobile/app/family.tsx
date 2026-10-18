@@ -1,14 +1,16 @@
-import type { FamilyPlayer, FamilyState } from '@fm/shared';
+import type { CallCandidate, FamilyPlayer, FamilyState } from '@fm/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { markModeSeen } from '@/features/settings/store';
 import { ReactionLayer } from '@/features/teen/Reactions';
 import { ShareResultButton } from '@/features/teen/ShareResult';
+import { PostGameRank } from '@/features/teen/PostGame';
 import { ActivityIndicator, Alert, BackHandler, Dimensions, Image, Pressable, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, Layout, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, AvatarBadge, Backdrop, Card, Icon, Led, Sloth, StickerButton, useToast } from '@/design-system/components';
+import { AppText, AvatarBadge, Backdrop, BottomSheet, Card, Icon, Led, Sloth, StickerButton, useToast } from '@/design-system/components';
+import { boostsApi } from '@/features/boosts/api';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound, preloadSounds } from '@/design-system/feedback/sound';
@@ -50,7 +52,12 @@ function useFamilyState(room: string | null) {
         if (!alive) return;
         setS(st);
         setFetchedAt(Date.now());
-        if (st.status === 'done' || st.status === 'expired') return;
+        if (st.status === 'expired' || (st.status === 'done' && st.next_code)) return;
+        if (st.status === 'done') {
+          // keep an eye out for the host's "play again" room
+          timer = setTimeout(poll, 3000);
+          return;
+        }
         timer = setTimeout(poll, st.phase === 'lobby' ? 1500 : 700);
       } catch {
         if (alive) timer = setTimeout(poll, 2000);
@@ -149,20 +156,33 @@ function Entry({ onRoom, initialCode }: { onRoom: (id: string) => void; initialC
 /* Pieces                                                              */
 /* ------------------------------------------------------------------ */
 
-function Seat({ p, size = 52 }: { p: FamilyPlayer | null; size?: number }) {
+function Seat({ p, size = 52, onInvite }: { p: FamilyPlayer | null; size?: number; onInvite?: () => void }) {
   if (!p) {
     return (
-      <View style={[styles.seat, { width: size + 18 }]}>
-        <View style={[styles.emptySeat, { width: size, height: size, borderRadius: size / 2 }]}>
-          <AppText color={colors.textDim}>+</AppText>
+      <Pressable
+        onPress={onInvite}
+        disabled={!onInvite}
+        accessibilityRole="button"
+        accessibilityLabel={t.inviteFriends}
+        style={({ pressed }) => [styles.seat, { width: size + 18 }, pressed && styles.pressedSeat]}
+      >
+        <View style={[styles.emptySeat, { width: size, height: size, borderRadius: size / 2 }, onInvite && styles.emptySeatOn]}>
+          <AppText variant="heading" color={onInvite ? colors.led : colors.textDim}>
+            +
+          </AppText>
         </View>
-      </View>
+        {onInvite ? (
+          <AppText variant="caption" color={colors.led} numberOfLines={1} style={styles.seatName}>
+            {t.inviteShort}
+          </AppText>
+        ) : null}
+      </Pressable>
     );
   }
   return (
     <Animated.View entering={ZoomIn.springify()} style={[styles.seat, { width: size + 18 }]}>
       <View style={!p.online && styles.offline}>
-        <AvatarBadge avatarId={p.avatar_id} level={p.level} size={size} ring={p.me ? colors.led : colors.border} />
+        <AvatarBadge avatarId={p.avatar_id} photo={p.photo} level={p.level} size={size} ring={p.me ? colors.led : colors.border} />
       </View>
       {p.host ? (
         <View style={styles.crownTag}>
@@ -213,6 +233,7 @@ function TopicPicker({ value, onChange, disabled }: { value: string; onChange: (
 function RoomLobby({ s, onLeave, refresh }: { s: FamilyState; onLeave: () => void; refresh: () => void }) {
   const toast = useToast();
   const [busy, setBusy] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
   const worlds = useWorldsConfig();
   const link = `footballmillionaire://family?code=${s.code}`;
   const active = s.players.filter((p) => !p.left);
@@ -245,7 +266,7 @@ function RoomLobby({ s, onLeave, refresh }: { s: FamilyState; onLeave: () => voi
         <AppText variant="label">{fmt(t.players, { n: active.length, max: s.max_players })}</AppText>
         <View style={styles.seats}>
           {seats.map((p, i) => (
-            <Seat key={p ? `p${p.seat}` : `e${i}`} p={p} />
+            <Seat key={p ? `p${p.seat}` : `e${i}`} p={p} onInvite={() => setInviteOpen(true)} />
           ))}
         </View>
         {active.length < 2 ? (
@@ -315,7 +336,62 @@ function RoomLobby({ s, onLeave, refresh }: { s: FamilyState; onLeave: () => voi
         </View>
       )}
       <StickerButton label={t.leave} tone="ghost" fullWidth onPress={onLeave} />
+      <InviteFriendsSheet room={s.room_id} inRoom={active.map((p) => p.username)} visible={inviteOpen} onClose={() => setInviteOpen(false)} />
     </ScrollView>
+  );
+}
+
+/** "+" on an empty seat: invite friends who are online right now. */
+function InviteFriendsSheet({ room, inRoom, visible, onClose }: { room: string; inRoom: string[]; visible: boolean; onClose: () => void }) {
+  const toast = useToast();
+  const [friends, setFriends] = useState<CallCandidate[] | null>(null);
+  const [sent, setSent] = useState<string[]>([]);
+  useEffect(() => {
+    if (!visible) return;
+    setFriends(null);
+    boostsApi.candidates().then(setFriends, () => setFriends([]));
+  }, [visible]);
+  const invite = async (f: CallCandidate) => {
+    try {
+      await familyApi.invite(room, f.id);
+      setSent((x) => [...x, f.id]);
+      toast(fmt(t.invited, { name: f.username }), 'success');
+    } catch {
+      toast(strings.errors.generic, 'error');
+    }
+  };
+  const list = (friends ?? []).filter((f) => !inRoom.includes(f.username));
+  return (
+    <BottomSheet visible={visible} onClose={onClose} title={t.inviteFriends}>
+      {friends === null ? <ActivityIndicator color={colors.led} /> : null}
+      {friends && list.length === 0 ? (
+        <AppText color={colors.textMuted} align="center">
+          {t.noFriendsOnline}
+        </AppText>
+      ) : null}
+      <ScrollView style={styles.inviteList} contentContainerStyle={styles.inviteBody}>
+        {list.map((f) => (
+          <View key={f.id} style={styles.inviteRow}>
+            <AvatarBadge avatarId={f.avatar_id ?? 'avatar_01'} photo={f.photo} size={40} />
+            <View style={styles.flex}>
+              <AppText variant="label" numberOfLines={1}>
+                {f.username}
+              </AppText>
+              <AppText variant="caption" color={f.online ? colors.correct : colors.textDim}>
+                {f.online ? strings.call.online : strings.call.offline}
+              </AppText>
+            </View>
+            <StickerButton
+              label={sent.includes(f.id) ? t.invitedShort : t.inviteShort}
+              size="sm"
+              tone={sent.includes(f.id) ? 'ghost' : 'primary'}
+              disabled={sent.includes(f.id)}
+              onPress={() => void invite(f)}
+            />
+          </View>
+        ))}
+      </ScrollView>
+    </BottomSheet>
   );
 }
 
@@ -328,7 +404,7 @@ function Strip({ s }: { s: FamilyState }) {
       {players.map((p) => (
         <Animated.View key={p.seat} layout={reduced ? undefined : Layout.springify()} style={styles.stripItem}>
           <View style={!p.online && styles.offline}>
-            <AvatarBadge avatarId={p.avatar_id} size={36} ring={p.me ? colors.led : p.answered ? colors.correct : colors.border} />
+            <AvatarBadge avatarId={p.avatar_id} photo={p.photo} size={36} ring={p.me ? colors.led : p.answered ? colors.correct : colors.border} />
           </View>
           {s.phase === 'question' && p.answered ? (
             <View style={styles.check}>
@@ -344,6 +420,9 @@ function Strip({ s }: { s: FamilyState }) {
               </AppText>
             </Animated.View>
           ) : null}
+          <AppText variant="caption" numberOfLines={1} style={styles.stripName}>
+            {p.me ? t.you : p.username}
+          </AppText>
           <Led size="ledS" color={p.me ? colors.led : colors.text}>
             {String(p.score)}
           </Led>
@@ -353,7 +432,22 @@ function Strip({ s }: { s: FamilyState }) {
   );
 }
 
-function Results({ s, onAgain }: { s: FamilyState; onAgain: () => void }) {
+function Results({ s, onNewRoom, onRoom }: { s: FamilyState; onNewRoom: () => void; onRoom: (id: string) => void }) {
+  const toast = useToast();
+  const [busy, setBusy] = useState(false);
+  // host: a new room with the same people (they get an invite); others: join it once it exists
+  const again = async () => {
+    setBusy(true);
+    try {
+      const r = s.is_host ? await familyApi.again(s.room_id) : s.next_code ? await familyApi.join(s.next_code) : null;
+      if (r) onRoom(r.room_id);
+      else onNewRoom();
+    } catch {
+      toast(strings.errors.generic, 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
   const reduced = useReducedMotion();
   const launch = useFly((x) => x.launch);
   const ref = useRef<View>(null);
@@ -377,7 +471,7 @@ function Results({ s, onAgain }: { s: FamilyState; onAgain: () => void }) {
         <AppText style={styles.crown}>👑</AppText>
         <View style={styles.champRow}>
           {champs.map((p) => (
-            <AvatarBadge key={p.seat} avatarId={p.avatar_id} level={p.level} size={96} ring={colors.led} />
+            <AvatarBadge key={p.seat} avatarId={p.avatar_id} photo={p.photo} level={p.level} size={96} ring={colors.led} />
           ))}
         </View>
         <AppText variant="title" align="center" color={colors.led}>
@@ -395,7 +489,7 @@ function Results({ s, onAgain }: { s: FamilyState; onAgain: () => void }) {
             <AppText variant="heading" style={styles.rank}>
               {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : String(i + 1)}
             </AppText>
-            <AvatarBadge avatarId={p.avatar_id} size={36} />
+            <AvatarBadge avatarId={p.avatar_id} photo={p.photo} size={36} />
             <View style={styles.flex}>
               <AppText variant="label" numberOfLines={1}>
                 {p.me ? `${p.username} (${t.you})` : p.username}
@@ -418,13 +512,30 @@ function Results({ s, onAgain }: { s: FamilyState; onAgain: () => void }) {
         ) : null}
       </View>
       <Sloth size={110} say={meChamp ? t.youChampion : strings.modes.slothHello[3]} />
+      <PostGameRank points={0} />
       {myPlace > 0 ? (
         <ShareResultButton
           big={myPlace === 1 ? '🥇' : `#${myPlace}`}
           line={fmt(strings.teen.shareFamily, { place: myPlace, score: players[myPlace - 1]?.score ?? 0 })}
         />
       ) : null}
-      <StickerButton label={t.again} icon="refresh" tone="prize" size="lg" fullWidth onPress={onAgain} />
+      {s.is_host || s.next_code ? (
+        <StickerButton
+          label={s.is_host ? t.againSame : t.joinAgain}
+          icon="refresh"
+          tone="prize"
+          size="lg"
+          fullWidth
+          loading={busy}
+          onPress={() => void again()}
+        />
+      ) : (
+        <View style={styles.waitRow}>
+          <ActivityIndicator color={colors.led} size="small" />
+          <AppText color={colors.textMuted}>{t.waitAgain}</AppText>
+        </View>
+      )}
+      <StickerButton label={t.newRoom} icon="add" tone="ghost" fullWidth onPress={onNewRoom} />
       <StickerButton label={strings.quiz.home} icon="home" tone="ghost" fullWidth onPress={goHome} />
     </ScrollView>
   );
@@ -435,9 +546,12 @@ function Results({ s, onAgain }: { s: FamilyState; onAgain: () => void }) {
 /* ------------------------------------------------------------------ */
 
 export default function FamilyScreen() {
-  const params = useLocalSearchParams<{ code?: string }>();
+  const params = useLocalSearchParams<{ code?: string; room?: string }>();
   useEffect(() => markModeSeen('family'), []);
-  const [room, setRoom] = useState<string | null>(null);
+  const [room, setRoom] = useState<string | null>(params.room ?? null);
+  useEffect(() => {
+    if (params.room) setRoom(params.room);
+  }, [params.room]);
   const { s, left, refresh } = useFamilyState(room);
   const [picked, setPicked] = useState<{ idx: number; slot: number } | null>(null);
   const toast = useToast();
@@ -528,7 +642,7 @@ export default function FamilyScreen() {
     return (
       <SafeAreaView style={styles.root}>
         <Backdrop accent="#FFB000" />
-        <Results s={s} onAgain={() => setRoom(null)} />
+        <Results s={s} onNewRoom={() => setRoom(null)} onRoom={(id) => { setPicked(null); setRoom(id); }} />
       </SafeAreaView>
     );
   }
@@ -634,7 +748,7 @@ export default function FamilyScreen() {
                 {pickers(a.slot).length ? (
                   <View style={styles.pickers}>
                     {pickers(a.slot).map((p) => (
-                      <AvatarBadge key={p.seat} avatarId={p.avatar_id} size={24} ring={p.me ? colors.led : colors.border} />
+                      <AvatarBadge key={p.seat} avatarId={p.avatar_id} photo={p.photo} size={24} ring={p.me ? colors.led : colors.border} />
                     ))}
                   </View>
                 ) : null}
@@ -681,6 +795,12 @@ const styles = StyleSheet.create({
   seat: { alignItems: 'center', gap: 2, paddingVertical: space.xs },
   emptySeat: { borderWidth: 2, borderStyle: 'dashed', borderColor: 'rgba(255,255,255,0.3)', alignItems: 'center', justifyContent: 'center' },
   seatName: { maxWidth: 70, fontFamily: 'IBMPlexSansHebrew_700Bold' },
+  stripName: { fontSize: 10, lineHeight: 13, maxWidth: 60 },
+  emptySeatOn: { borderColor: colors.led, borderStyle: 'solid' },
+  pressedSeat: { transform: [{ scale: 0.94 }] },
+  inviteList: { maxHeight: 360 },
+  inviteBody: { gap: space.sm },
+  inviteRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm, padding: space.sm, borderRadius: radius.board, backgroundColor: colors.board },
   crownTag: { position: 'absolute', top: -2, start: 2 },
   offline: { opacity: 0.4 },
   tiny: { fontSize: 11, lineHeight: 14, fontFamily: 'IBMPlexSansHebrew_700Bold' },

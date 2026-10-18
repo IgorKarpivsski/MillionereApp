@@ -1,10 +1,11 @@
 import { useEnergySheet } from '@/features/engage/EnergySheet';
-import { useEnergy } from '@/features/engage/hooks';
+import { useCountdownTo, useEnergy } from '@/features/engage/hooks';
+import { useDailyStatus } from '@/features/quiz/hooks';
 import { Ionicons } from '@expo/vector-icons';
 import { LADDER } from '@fm/economy-config';
-import type { LifelineKind, ReportReason } from '@fm/shared';
+import type { DailyStatus, LifelineKind, ReportReason } from '@fm/shared';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 import * as StoreReview from 'expo-store-review';
 import { askForRemindersOnce } from '@/features/reminders/useReminders';
@@ -21,7 +22,7 @@ import {
   ProgressBar,
   StickerButton,
   TrophyLogo,
-  useToast, Backdrop } from '@/design-system/components';
+  useToast, Backdrop, Sloth } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound, preloadSounds } from '@/design-system/feedback/sound';
@@ -35,6 +36,7 @@ import { goHome } from '@/lib/goHome';
 import { fmt, strings } from '@/lib/i18n';
 import { QuestionImageView } from '@/features/quiz/QuestionImage';
 import { StreakFreezeCard } from '@/features/teen/StreakFreeze';
+import { PostGameRank } from '@/features/teen/PostGame';
 
 const t = strings.quiz;
 
@@ -236,6 +238,7 @@ function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => voi
         <StickerButton label={t.again} icon="refresh" size="lg" fullWidth onPress={onAgain} />
       )}
       <DoubleCoins runId={s.payload?.run_id} coins={sum.coins} />
+      <PostGameRank runId={s.payload?.run_id} points={sum.prize_points} />
       <StickerButton label={t.home} icon="home" tone="ghost" fullWidth onPress={goHome} />
     </ScrollView>
   );
@@ -269,6 +272,36 @@ function DoubleCoins({ runId, coins }: { runId?: string; coins: number }) {
 /* Screen                                                              */
 /* ------------------------------------------------------------------ */
 
+/** Already played today: when the next challenge opens, and today's result. */
+function DailyCountdown({ status }: { status: DailyStatus }) {
+  const ends = useMemo(() => new Date(Date.now() + status.seconds_to_reset * 1000).toISOString(), [status.seconds_to_reset]);
+  const left = useCountdownTo(ends);
+  return (
+    <SafeAreaView style={styles.root}>
+      <Backdrop />
+      <View style={[styles.center, styles.countdown]}>
+        <Sloth size={150} say={t.dailyNextSay} />
+        <AppText variant="heading" align="center">
+          {t.dailyNextTitle}
+        </AppText>
+        <Led size="ledXL">{left ?? '00:00'}</Led>
+        {status.correct != null ? (
+          <AppText color={colors.textMuted} align="center">
+            {fmt(t.dailyToday, { n: status.correct })}
+          </AppText>
+        ) : null}
+        {status.streak > 0 ? (
+          <AppText variant="label" color={colors.led} align="center">
+            {`🔥 ${fmt(t.streakNow, { n: status.streak })}`}
+          </AppText>
+        ) : null}
+        <StickerButton label={strings.modes.quick} icon="play" tone="prize" fullWidth onPress={() => router.replace({ pathname: '/session', params: { world: 'mix' } })} />
+        <StickerButton label={t.home} tone="ghost" fullWidth onPress={() => router.back()} />
+      </View>
+    </SafeAreaView>
+  );
+}
+
 export default function QuizScreen() {
   const params = useLocalSearchParams<{ mode?: string }>();
   const daily = params.mode === 'daily';
@@ -280,10 +313,19 @@ export default function QuizScreen() {
   const reduced = useReducedMotion();
   const [reportOpen, setReportOpen] = useState(false);
 
+  // the daily challenge is once a day: if it's already played, show the countdown instead of starting
+  const { data: dailySt } = useDailyStatus();
+  const dailyDone = daily && dailySt?.state === 'done';
+  const dailyKnown = !daily || !!dailySt;
+  const started = useRef(false);
   useEffect(() => {
     preloadSounds(['whistle', 'tick', 'answer_lock', 'answer_correct', 'answer_wrong', 'var', 'coins']);
+  }, []);
+  useEffect(() => {
+    if (!dailyKnown || dailyDone || started.current) return;
+    started.current = true;
     void start();
-  }, [start]);
+  }, [start, dailyKnown, dailyDone]);
 
   useEffect(() => {
     if (s.notice === 'var') toast(t.varOverturned, 'info');
@@ -335,6 +377,10 @@ export default function QuizScreen() {
   }, [exit]);
 
   /* ---------- states without a question ---------- */
+
+  if (dailyDone && dailySt && s.phase !== 'finished' && !s.payload) {
+    return <DailyCountdown status={dailySt} />;
+  }
 
   if (s.phase === 'error' && s.notice === 'no_energy') {
     return (
@@ -595,6 +641,7 @@ export default function QuizScreen() {
 }
 
 const styles = StyleSheet.create({
+  countdown: { gap: space.md, padding: space.xl },
   scrollArea: { flex: 1 },
   answersDock: { paddingHorizontal: space.md, paddingTop: space.xs, paddingBottom: space.sm },
   root: { flex: 1, backgroundColor: colors.bgDeep },

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import type { IncomingCall, MatchInvite } from '@fm/shared';
+import type { FamilyInvite, IncomingCall, MatchInvite } from '@fm/shared';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Modal, StyleSheet, View } from 'react-native';
@@ -12,6 +12,7 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { AnswerTile } from '@/features/quiz/ui';
 import { fmt, strings } from '@/lib/i18n';
 import { teenApi } from '@/features/teen/api';
+import { familyApi } from '@/features/modes/api';
 import { boostsApi } from './api';
 
 const PING_MS = 8000;
@@ -30,13 +31,25 @@ export function IncomingCallHost() {
   const [invite, setInvite] = useState<MatchInvite | null>(null);
   const [joining, setJoining] = useState(false);
   const seenInvites = useRef(new Set<number>());
+  const [famInvite, setFamInvite] = useState<FamilyInvite | null>(null);
+  const seenFam = useRef(new Set<number>());
 
   useEffect(() => {
     if (!session) return;
     let timer: ReturnType<typeof setInterval> | null = null;
     const ping = async () => {
       try {
-        const { calls, invites } = await boostsApi.ping();
+        const { calls, invites, family_invites } = await boostsApi.ping();
+        const fam = family_invites.find((i) => !seenFam.current.has(i.id));
+        if (fam) {
+          seenFam.current.add(fam.id);
+          setFamInvite((cur) => {
+            if (cur) return cur;
+            haptic('heavy');
+            playSound('whistle');
+            return fam;
+          });
+        }
         const inv = invites.find((i) => !seenInvites.current.has(i.id));
         if (inv) {
           seenInvites.current.add(inv.id);
@@ -130,15 +143,52 @@ export function IncomingCallHost() {
     }
   };
 
+  const answerFamily = async (accept: boolean) => {
+    if (!famInvite) return;
+    const inv = famInvite;
+    setJoining(true);
+    try {
+      const room = await familyApi.answerInvite(inv.id, accept);
+      setFamInvite(null);
+      if (accept && room) router.push({ pathname: '/family', params: { room: room.room_id } });
+    } catch {
+      setFamInvite(null);
+      if (accept) toast(strings.teen.inviteGone, 'info');
+    } finally {
+      setJoining(false);
+    }
+  };
+
   return (
     <>
+    <Modal visible={!!famInvite && !call && !invite} transparent animationType="fade" onRequestClose={() => void answerFamily(false)} statusBarTranslucent>
+      <View style={styles.scrim}>
+        {famInvite ? (
+          <Animated.View entering={ZoomIn.springify().damping(14)} style={styles.wrap}>
+            <Card kind="sticker" frame={colors.prize}>
+              <View style={styles.inviteHead}>
+                <AvatarBadge avatarId={famInvite.avatar_id ?? 'avatar_01'} photo={famInvite.photo} size={72} ring={colors.prize} />
+                <AppText variant="title" align="center">
+                  {fmt(strings.family.familyInviteTitle, { name: famInvite.from })}
+                </AppText>
+                <AppText color={colors.textMuted} align="center">
+                  {strings.family.familyInviteBody}
+                </AppText>
+              </View>
+              <StickerButton label={strings.teen.inviteAccept} icon="people" tone="prize" size="lg" fullWidth loading={joining} onPress={() => void answerFamily(true)} />
+              <StickerButton label={strings.teen.inviteDecline} tone="ghost" size="sm" fullWidth disabled={joining} onPress={() => void answerFamily(false)} style={styles.later} />
+            </Card>
+          </Animated.View>
+        ) : null}
+      </View>
+    </Modal>
     <Modal visible={!!invite && !call} transparent animationType="fade" onRequestClose={() => void answerInvite(false)} statusBarTranslucent>
       <View style={styles.scrim}>
         {invite ? (
           <Animated.View entering={ZoomIn.springify().damping(14)} style={styles.wrap}>
             <Card kind="sticker" frame={colors.danger}>
               <View style={styles.inviteHead}>
-                <AvatarBadge avatarId={invite.avatar_id ?? 'avatar_01'} size={72} ring={colors.danger} />
+                <AvatarBadge avatarId={invite.avatar_id ?? 'avatar_01'} photo={invite.photo} size={72} ring={colors.danger} />
                 <AppText variant="title" align="center">
                   {fmt(strings.teen.inviteTitle, { name: invite.from })}
                 </AppText>
@@ -159,7 +209,7 @@ export function IncomingCallHost() {
           <Animated.View entering={ZoomIn.springify().damping(14)} style={styles.wrap}>
             <Card kind="sticker" frame={colors.correct}>
               <View style={styles.head}>
-                <AvatarBadge avatarId={call.avatar_id ?? 'avatar_01'} size={52} ring={colors.correct} />
+                <AvatarBadge avatarId={call.avatar_id ?? 'avatar_01'} photo={call.photo} size={52} ring={colors.correct} />
                 <View style={styles.flex}>
                   <AppText variant="heading">{fmt(strings.call.incomingTitle, { name: call.from })}</AppText>
                   <AppText variant="caption" color={colors.textMuted}>

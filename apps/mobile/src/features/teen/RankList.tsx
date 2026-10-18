@@ -13,7 +13,7 @@ export function RankList({ rows }: { rows: RankRow[] }) {
           <Led size="number" color={r.rank === 1 ? colors.led : r.rank <= 3 ? colors.text : colors.textDim} style={styles.rank}>
             {r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1]! : String(r.rank)}
           </Led>
-          <AvatarBadge avatarId={r.avatar_id} level={r.level} frame={r.frame} size={36} />
+          <AvatarBadge avatarId={r.avatar_id} photo={r.photo} level={r.level} frame={r.frame} size={36} />
           <AppText variant="label" numberOfLines={1} style={styles.flex}>
             {r.username}
           </AppText>

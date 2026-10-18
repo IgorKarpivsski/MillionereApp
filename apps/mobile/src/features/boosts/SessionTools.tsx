@@ -315,7 +315,7 @@ export function SessionTools({
               accessibilityLabel={`${f.username}, ${f.online ? strings.call.online : strings.call.offline}`}
               style={({ pressed }) => [styles.friend, !f.online && styles.friendOff, pressed && styles.pressed]}
             >
-              <AvatarBadge avatarId={f.avatar_id ?? 'avatar_01'} size={40} />
+              <AvatarBadge avatarId={f.avatar_id ?? 'avatar_01'} photo={f.photo} size={40} />
               <AppText variant="label" style={styles.flex} numberOfLines={1}>
                 {f.username}
               </AppText>

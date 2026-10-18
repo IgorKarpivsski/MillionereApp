@@ -126,7 +126,7 @@ export function LeagueView({ s }: { s: LeagueState }) {
               <Led size="number" color={r.rank === 1 ? colors.led : colors.text} style={styles.rank}>
                 {r.rank}
               </Led>
-              <AvatarBadge avatarId={r.avatar_id} size={38} />
+              <AvatarBadge avatarId={r.avatar_id} photo={r.photo} size={38} />
               <AppText variant="label" numberOfLines={1} style={styles.flex}>
                 {r.username}
               </AppText>

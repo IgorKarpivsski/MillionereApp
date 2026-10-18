@@ -34,6 +34,7 @@ import { shade } from '@/features/worlds/worldArt';
 import { formatNumber } from '@/lib/format';
 import { goHome } from '@/lib/goHome';
 import { ShareResultButton } from '@/features/teen/ShareResult';
+import { PerfectPrize, PostGameRank } from '@/features/teen/PostGame';
 import { fmt, strings } from '@/lib/i18n';
 
 const t = strings.session;
@@ -269,6 +270,7 @@ function ResultView({
         ) : null}
       </Card>
 
+      {sum.perfect ? <PerfectPrize prize={sum.perfect} /> : null}
       {sum.champion_opened ? (
         <Card kind="sticker" padding={space.md}>
           <AppText variant="heading" color={colors.led} align="center">
@@ -290,6 +292,7 @@ function ResultView({
         onPress={onAgain}
       />
       <DoubleCoins runId={s.payload?.run_id} coins={sum.coins} />
+      <PostGameRank runId={s.payload?.run_id} points={sum.prize_points} />
       <ShareResultButton
         big={quick ? `${sum.correct}/${sum.total}` : '⭐'.repeat(Math.max(1, sum.stars))}
         line={quick ? fmt(t.share, { n: sum.correct, w: t.quickDone }) : fmt(strings.teen.shareSession, { stars: sum.stars, level: sum.level, world })}
@@ -567,6 +570,13 @@ export default function SessionScreen() {
                   </Animated.View>
                 ) : null}
               </View>
+              {reveal.comboBonus > 0 ? (
+                <View style={styles.speedLine}>
+                  <AppText variant="label" color={colors.prize} style={styles.bold}>
+                    {fmt(strings.postGame.combo, { n: reveal.combo, b: reveal.comboBonus })}
+                  </AppText>
+                </View>
+              ) : null}
               {reveal.speedBonus > 0 ? (
                 <View style={styles.speedLine}>
                   <Ionicons name="flash" size={14} color={colors.led} />
