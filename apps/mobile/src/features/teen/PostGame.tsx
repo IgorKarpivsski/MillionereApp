@@ -41,7 +41,7 @@ export function PostGameRank({ runId, points }: { runId?: string | null; points:
     }
   };
   return (
-    <Card padding={space.md}>
+    <Card padding={space.md} style={styles.card}>
       <View style={styles.row}>
         <View style={styles.flex}>
           <AppText variant="caption" color={colors.textMuted}>
@@ -85,8 +85,8 @@ export function PerfectPrize({ prize }: { prize: { coins: number; gems: number }
     playSound('level_up');
   }, []);
   return (
-    <Animated.View entering={reduced ? undefined : ZoomIn.springify().damping(12)}>
-      <Card kind="sticker" frame={colors.led} padding={space.md}>
+    <Animated.View entering={reduced ? undefined : ZoomIn.springify().damping(12)} style={styles.card}>
+      <Card kind="sticker" frame={colors.led} padding={space.md} style={styles.card}>
         <AppText variant="title" align="center" color={colors.led}>
           {`🏆 ${t.perfectTitle}`}
         </AppText>
@@ -103,6 +103,8 @@ export function PerfectPrize({ prize }: { prize: { coins: number; gems: number }
 }
 
 const styles = StyleSheet.create({
+  // results screens centre their content: stretch so the card isn't squeezed to nothing
+  card: { alignSelf: 'stretch' },
   row: { flexDirection: 'row', gap: space.md },
   flex: { flex: 1, alignItems: 'center' },
   btn: { marginTop: space.sm },
