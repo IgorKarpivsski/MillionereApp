@@ -1,0 +1,38 @@
+{
+  "checked_at": "2026-10-18T03:48:59.947Z",
+  "package": "com.haaluf.trivia",
+  "tracks": [
+    {
+      "track": "production"
+    },
+    {
+      "track": "beta"
+    },
+    {
+      "track": "alpha",
+      "releases": [
+        {
+          "name": "0.1.0",
+          "versionCodes": [
+            "9"
+          ],
+          "status": "completed",
+          "inAppUpdatePriority": 2
+        }
+      ]
+    },
+    {
+      "track": "internal"
+    }
+  ],
+  "testers": {
+    "alpha": {},
+    "beta": {},
+    "internal": {}
+  },
+  "details": {
+    "defaultLanguage": "iw-IL",
+    "contactWebsite": "https://igorkarpivsski.github.io/MillionereApp/",
+    "contactEmail": "steamigor26@gmail.com"
+  }
+}
