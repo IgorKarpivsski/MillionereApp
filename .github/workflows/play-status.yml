@@ -1,0 +1,43 @@
+name: Play status
+
+# Reads the Google Play tracks (versions, release status, testers) and commits a
+# small JSON report to the data-fetch branch. Read-only: opens an edit and deletes it.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Unlock the Play account
+        env:
+          PW: ${{ secrets.UPLOAD_KEY_PASSWORD }}
+        run: |
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
+            -in apps/mobile/signing/play-service-account.json.enc -out "$RUNNER_TEMP/play.json" -pass env:PW
+      - name: Read tracks
+        env:
+          KEY_FILE: ${{ runner.temp }}/play.json
+          PKG: com.haaluf.trivia
+        run: node tools/scripts/play-status.mjs > /tmp/play-status.json; cat /tmp/play-status.json | head -c 300
+      - name: Remove the Play key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/play.json"
+      - name: Commit report
+        run: |
+          git config user.name "football-data-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git fetch origin data-fetch
+          git checkout -B data-fetch origin/data-fetch
+          mkdir -p status && cp /tmp/play-status.json status/play.json
+          git add status
+          git commit -m "Play status ${{ github.run_number }}" || exit 0
+          git push origin data-fetch
