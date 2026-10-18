@@ -996,7 +996,6 @@ export const he = {
     online: 'מחובר עכשיו',
     lastSeen: 'היה כאן {t}',
     giftBtn: 'מתנה',
-    andMore: '+{n}',
     mythicNote: 'מדבקות מיתיות אי אפשר להחליף — רק להשיג.',
   },
   teen: {
