@@ -63,3 +63,18 @@ export function claimWelcomeBonus(): Promise<{ amount: number; balance: number }
     return { amount: o.amount, balance: o.balance };
   });
 }
+
+/**
+ * After a rewarded ad, Google's confirmation can reach our server a few seconds
+ * after the ad closes: retry while the server says the view isn't verified yet.
+ */
+export async function afterAdVerified<T>(fn: () => Promise<T>): Promise<T> {
+  for (let i = 0; ; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      if (!(e instanceof RpcError && e.message.includes('not verified')) || i >= 7) throw e;
+      await new Promise((res) => setTimeout(res, 1500));
+    }
+  }
+}

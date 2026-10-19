@@ -47,7 +47,10 @@ Deno.serve(async (req: Request) => {
   const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
   // Throttle by IP (stored only as a salted hash).
-  const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0]?.trim() || 'unknown';
+  // The client can put anything at the front of x-forwarded-for; the proxy appends the real
+  // address last. Prefer the address the edge network saw.
+  const fwd = (req.headers.get('x-forwarded-for') ?? '').split(',').map((x) => x.trim()).filter(Boolean);
+  const ip = req.headers.get('cf-connecting-ip')?.trim() || req.headers.get('x-real-ip')?.trim() || fwd[fwd.length - 1] || 'unknown';
   const ipHash = await sha256(`${serviceKey.slice(-16)}:${ip}`);
   const { data: allowed, error: rlError } = await admin.rpc('guest_signup_allowed', {
     p_ip_hash: ipHash,

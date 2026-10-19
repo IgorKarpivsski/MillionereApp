@@ -13,7 +13,7 @@ import {
 } from '@fm/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/features/auth/AuthProvider';
-import { rpc } from '@/features/profile/api';
+import { afterAdVerified, rpc } from '@/features/profile/api';
 import { queryKeys } from '@/lib/queryClient';
 
 const parsePayload = (x: unknown) => SessionPayloadSchema.parse(x);
@@ -24,7 +24,8 @@ export const boostsApi = {
   buy: (boost: BoostKind, request: string): Promise<{ counts: Record<string, number> }> =>
     rpc('boost_buy', { p_boost: boost, p_request: request }, (x) => BoostBuyResultSchema.parse(x)),
   use: (runId: string, boost: BoostKind): Promise<SessionPayload> => rpc('session_boost', { p_run: runId, p_boost: boost }, parsePayload),
-  hint: (runId: string, pay: 'coins' | 'ad'): Promise<SessionPayload> => rpc('session_hint', { p_run: runId, p_pay: pay }, parsePayload),
+  hint: (runId: string, pay: 'coins' | 'ad'): Promise<SessionPayload> =>
+    afterAdVerified(() => rpc('session_hint', { p_run: runId, p_pay: pay }, parsePayload)),
   continueRun: (runId: string): Promise<SessionPayload> => rpc('session_continue', { p_run: runId }, parsePayload),
   candidates: (): Promise<CallCandidate[]> => rpc('call_candidates', undefined, (x) => CallCandidatesSchema.parse(x ?? [])),
   call: (runId: string, friend: string): Promise<SessionPayload> =>

@@ -11,12 +11,12 @@ import {
   type WheelState,
 } from '@fm/shared';
 import { requestId } from '@/features/collection/api';
-import { rpc } from '@/features/profile/api';
+import { afterAdVerified, rpc } from '@/features/profile/api';
 
 export const engageApi = {
   energy: (): Promise<EnergyState> => rpc('energy_state', undefined, (x) => EnergyStateSchema.parse(x)),
   refill: (how: 'gems' | 'ad'): Promise<EnergyState> =>
-    rpc('energy_refill', { p_how: how, p_request: requestId() }, (x) => EnergyStateSchema.parse(x)),
+    afterAdVerified(() => rpc('energy_refill', { p_how: how, p_request: requestId() }, (x) => EnergyStateSchema.parse(x))),
   wheel: (): Promise<WheelState> => rpc('wheel_state', undefined, (x) => WheelStateSchema.parse(x)),
   spin: (pay: 'free' | 'gems', id: string): Promise<WheelSpin> =>
     rpc('wheel_spin', { p_pay: pay, p_request: id }, (x) => WheelSpinSchema.parse(x)),

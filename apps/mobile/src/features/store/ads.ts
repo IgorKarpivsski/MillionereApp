@@ -1,5 +1,6 @@
 import mobileAds, { AdEventType, InterstitialAd, MaxAdContentRating, RewardedAd, RewardedAdEventType, TestIds } from 'react-native-google-mobile-ads';
 import Constants from 'expo-constants';
+import { supabase } from '@/lib/supabase';
 import { useSettingsStore } from '@/features/settings/store';
 
 /**
@@ -52,12 +53,17 @@ export function refreshAdAudience(): void {
 }
 
 /** Shows one rewarded ad. Resolves true only if the player earned the reward. */
-export function showRewardedAd(): Promise<boolean> {
+export async function showRewardedAd(userId?: string): Promise<boolean> {
   initAds();
+  const uid = userId ?? (await supabase.auth.getSession()).data.session?.user.id;
   return new Promise((resolve) => {
     let earned = false;
     let done = false;
-    const ad = RewardedAd.createForAdRequest(UNIT, { requestNonPersonalizedAdsOnly: true });
+    // Google tells our server (admob-ssv) that this player watched, so rewards can't be claimed without an ad.
+    const ad = RewardedAd.createForAdRequest(UNIT, {
+      requestNonPersonalizedAdsOnly: true,
+      ...(uid ? { serverSideVerificationOptions: { userId: uid } } : {}),
+    });
     const finish = (v: boolean) => {
       if (done) return;
       done = true;

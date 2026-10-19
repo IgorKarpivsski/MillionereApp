@@ -6,6 +6,7 @@ import { queryKeys } from '@/lib/queryClient';
 import { strings } from '@/lib/i18n';
 import { showRewardedAd } from './ads';
 import { storeApi } from './api';
+import { afterAdVerified } from '@/features/profile/api';
 
 export function useStore() {
   const { session } = useAuth();
@@ -17,6 +18,7 @@ export function useStore() {
  * Returns the server's reward payload, or null if nothing was granted.
  */
 export function useAdReward() {
+  const { session } = useAuth();
   const { data: store } = useStore();
   const qc = useQueryClient();
   const toast = useToast();
@@ -27,13 +29,13 @@ export function useAdReward() {
       setBusy(true);
       try {
         if (kind !== 'vip_daily' && !store?.ad_free) {
-          const ok = await showRewardedAd();
+          const ok = await showRewardedAd(session?.user.id);
           if (!ok) {
             toast(strings.store.adNotFinished, 'info');
             return null;
           }
         }
-        const r = await storeApi.claimAd(kind, ref);
+        const r = await afterAdVerified(() => storeApi.claimAd(kind, ref));
         void qc.invalidateQueries({ queryKey: queryKeys.store });
         void qc.invalidateQueries({ queryKey: queryKeys.myState });
         void qc.invalidateQueries({ queryKey: queryKeys.collection });
@@ -45,7 +47,7 @@ export function useAdReward() {
         setBusy(false);
       }
     },
-    [busy, store?.ad_free, qc, toast],
+    [busy, store?.ad_free, qc, toast, session?.user.id],
   );
   return { run, busy, adFree: !!store?.ad_free };
 }
