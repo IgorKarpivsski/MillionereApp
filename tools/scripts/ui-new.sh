@@ -45,9 +45,9 @@ shot 10_survival_intro
 swipe 540 1800 540 600; sleep 2
 shot 11_survival_board
 swipe 540 600 540 1800; sleep 2
-tapText "עלה לגבעה"; sleep 6
+tap 540 1202; sleep 7
 shot 12_survival_q1
-tap 540 1950; sleep 3
+tap 540 2000; sleep 3
 shot 13_survival_after1
 sleep 20
 shot 14_survival_timeout
@@ -55,19 +55,19 @@ adb shell input keyevent KEYCODE_BACK; sleep 2
 tapText "צא"; sleep 3
 go truefalse
 shot 20_tf_intro
-tapText "צא לדרך"; sleep 6
+tap 540 1540; sleep 7
 shot 21_tf_q1
-tapText "נכון"; sleep 2
+tap 800 2180; sleep 2
 shot 22_tf_after
-tapText "לא נכון"; sleep 2
+tap 280 2180; sleep 2
 shot 23_tf_after2
 adb shell input keyevent KEYCODE_BACK; sleep 2
 tapText "צא" || true; sleep 3
 go market
 shot 30_market
-tapText "ההצעות שלי"; sleep 4
+tap 295 358; sleep 4
 shot 31_market_mine
-tapText "הצעה חדשה"; sleep 3
+tap 540 560; sleep 3
 shot 32_market_new
 go invite
 shot 40_invite
