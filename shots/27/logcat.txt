@@ -1,0 +1,2 @@
+--------- beginning of main
+10-19 10:04:22.498  5460  5487 I ReactNativeJS: Running "main"
