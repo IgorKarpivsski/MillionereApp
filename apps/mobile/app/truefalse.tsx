@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import Animated, { FadeIn, FadeOut, ZoomIn } from 'react-native-reanimated';
+import Animated, { FadeOut, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText, Backdrop, EmptyState, Led, Sloth, StickerButton, TrophyLogo } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
@@ -330,7 +330,7 @@ export default function TrueFalseScreen() {
       </View>
       <ScrollView style={styles.scrollArea} contentContainerStyle={styles.body}>
         {q ? (
-          <Animated.View key={q.id} entering={reduced ? undefined : FadeIn.duration(140)} style={styles.qCard}>
+          <View key={q.id} style={styles.qCard}>
             {q.category_name ? (
               <View style={styles.chip}>
                 <AppText variant="caption" color={colors.led}>
@@ -355,7 +355,7 @@ export default function TrueFalseScreen() {
                 {fmt(t.rightWas, { a: flash.right })}
               </AppText>
             ) : null}
-          </Animated.View>
+          </View>
         ) : null}
       </ScrollView>
       <View style={styles.dock}>
