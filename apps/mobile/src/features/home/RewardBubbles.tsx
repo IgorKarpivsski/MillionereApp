@@ -22,7 +22,7 @@ import { playSound } from '@/design-system/feedback/sound';
 import { colors, palette } from '@/design-system/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useCollection } from '@/features/collection/hooks';
-import { useCountdownTo, useDeals, usePass, useRefreshEconomy, useWheel } from '@/features/engage/hooks';
+import { useDeals, usePass, useRefreshEconomy, useWheel } from '@/features/engage/hooks';
 import { RewardIcon, rewardLabel } from '@/features/engage/rewards';
 import { RpcError, rpc } from '@/features/profile/api';
 import { useClaimWelcomeBonus, useMyState } from '@/features/profile/hooks';
@@ -123,7 +123,6 @@ export function useRewardBubbles(): BubbleDef[] {
   const { data: wheel } = useWheel();
   const { data: pass } = usePass();
   const { data: deals } = useDeals();
-  const dealLeft = useCountdownTo(deals && !deals.bought ? deals.ends_at : null);
   const { data: coll } = useCollection();
   const { data: store } = useStore();
   const ad = useAdReward();
@@ -251,7 +250,7 @@ export function useRewardBubbles(): BubbleDef[] {
     const off = Math.round((1 - deals.deal.price.amount / deals.deal.was) * 100);
     out.push({
       key: 'deal',
-      label: dealLeft ?? t.deal,
+      label: t.deal,
       colors: ['#FF6B6B', '#C2185B'],
       icon: deals.deal.rewards[0] ? <RewardIcon r={deals.deal.rewards[0]} size={34} /> : <Icon name="deal" size={36} />,
       ready: false,
@@ -330,5 +329,5 @@ const styles = StyleSheet.create({
   },
   badgeReady: { backgroundColor: colors.led, borderColor: '#FFF3C4' },
   badgeText: { fontFamily: 'IBMPlexSansHebrew_700Bold', fontSize: 11, lineHeight: 14 },
-  label: { marginTop: 2, fontFamily: 'IBMPlexSansHebrew_700Bold', fontSize: 11, maxWidth: 74 },
+  label: { marginTop: 2, fontFamily: 'IBMPlexSansHebrew_700Bold', fontSize: 12, maxWidth: 78 },
 });

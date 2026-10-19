@@ -18,7 +18,7 @@ import { quizApi } from '@/features/quiz/api';
 import { QuestionImageView } from '@/features/quiz/QuestionImage';
 import { AnswerTile, type AnswerState } from '@/features/quiz/ui';
 import { askForRemindersOnce } from '@/features/reminders/useReminders';
-import { useSettingsStore } from '@/features/settings/store';
+import { markModeSeen, useSettingsStore } from '@/features/settings/store';
 import { useAdReward, useStore } from '@/features/store/hooks';
 import { gameFinished } from '@/features/store/interstitial';
 import { ArmedChips, SessionTools, type FriendPick } from '@/features/boosts/SessionTools';
@@ -334,6 +334,7 @@ function DoubleCoins({ runId, coins }: { runId?: string; coins: number }) {
 /* ------------------------------------------------------------------ */
 
 export default function SessionScreen() {
+  useEffect(() => markModeSeen('session'), []);
   const params = useLocalSearchParams<{ world?: string; level?: string; run?: string }>();
   const { height: screenH } = useWindowDimensions();
   const [target, setTarget] = useState({ world: params.world ?? 'mix', level: params.level ? Number(params.level) : null });

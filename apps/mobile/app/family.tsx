@@ -795,7 +795,7 @@ const styles = StyleSheet.create({
   seat: { alignItems: 'center', gap: 2, paddingVertical: space.xs },
   emptySeat: { borderWidth: 2, borderStyle: 'dashed', borderColor: 'rgba(255,255,255,0.3)', alignItems: 'center', justifyContent: 'center' },
   seatName: { maxWidth: 70, fontFamily: 'IBMPlexSansHebrew_700Bold' },
-  stripName: { fontSize: 10, lineHeight: 13, maxWidth: 60 },
+  stripName: { fontSize: 12, lineHeight: 15, maxWidth: 60 },
   emptySeatOn: { borderColor: colors.led, borderStyle: 'solid' },
   pressedSeat: { transform: [{ scale: 0.94 }] },
   inviteList: { maxHeight: 360 },

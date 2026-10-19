@@ -298,6 +298,8 @@ function FirstTour() {
 /** Ask existing players whether they're a boy or a girl (once, after onboarding). */
 function GenderPromptGate() {
   const onboarded = useSettingsStore((s) => s.onboarded);
+  const tourDone = useSettingsStore((s) => s.tourDone);
+  const seenModes = useSettingsStore((s) => s.seenModes);
   const [focused, setFocused] = useState(true);
   useFocusEffect(
     useCallback(() => {
@@ -305,7 +307,8 @@ function GenderPromptGate() {
       return () => setFocused(false);
     }, []),
   );
-  return <GenderPrompt enabled={onboarded && focused} />;
+  // not over the tour, and not before the first game: let new players play first
+  return <GenderPrompt enabled={onboarded && tourDone && seenModes.length > 0 && focused} />;
 }
 
 export default function HomeScreen() {

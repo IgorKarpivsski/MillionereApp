@@ -113,18 +113,31 @@ export default function InviteScreen() {
           </View>
 
           <View style={styles.card}>
-            <AppText variant="bodyStrong">{t.perFriend}</AppText>
-            <View style={styles.chips}>
-              {data.per_friend.map((r, i) => (
-                <RewardChip key={i} r={r} />
-              ))}
-            </View>
-            <AppText variant="bodyStrong">{t.friendGets}</AppText>
-            <View style={styles.chips}>
-              {data.welcome.map((r, i) => (
-                <RewardChip key={i} r={r} />
-              ))}
-            </View>
+            {JSON.stringify(data.per_friend) === JSON.stringify(data.welcome) ? (
+              <>
+                <AppText variant="bodyStrong">{t.both}</AppText>
+                <View style={styles.chips}>
+                  {data.per_friend.map((r, i) => (
+                    <RewardChip key={i} r={r} />
+                  ))}
+                </View>
+              </>
+            ) : (
+              <>
+                <AppText variant="bodyStrong">{t.perFriend}</AppText>
+                <View style={styles.chips}>
+                  {data.per_friend.map((r, i) => (
+                    <RewardChip key={i} r={r} />
+                  ))}
+                </View>
+                <AppText variant="bodyStrong">{t.friendGets}</AppText>
+                <View style={styles.chips}>
+                  {data.welcome.map((r, i) => (
+                    <RewardChip key={i} r={r} />
+                  ))}
+                </View>
+              </>
+            )}
           </View>
 
           <AppText variant="heading">{t.goals}</AppText>

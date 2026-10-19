@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   },
   sel: { borderColor: colors.led, backgroundColor: 'rgba(255,214,140,0.16)' },
   locked: { opacity: 0.55 },
-  lockText: { fontSize: 10, lineHeight: 13 },
+  lockText: { fontSize: 12, lineHeight: 15 },
   titles: { flexDirection: 'row', flexWrap: 'wrap', gap: space.xs },
   lockedTitle: { gap: 2 },
   dim: { opacity: 0.5 },

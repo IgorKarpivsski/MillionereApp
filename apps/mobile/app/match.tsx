@@ -565,7 +565,7 @@ const styles = StyleSheet.create({
   },
   player: { alignItems: 'center', width: 90, gap: 2 },
   pname: { maxWidth: 90 },
-  botTag: { fontSize: 10, lineHeight: 13 },
+  botTag: { fontSize: 12, lineHeight: 15 },
   grow: { flexGrow: 1, justifyContent: 'center' },
   digits: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   body: { padding: space.md, gap: space.md },

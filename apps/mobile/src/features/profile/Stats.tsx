@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   medal: { width: 62, height: 62, borderRadius: 31, borderWidth: 3, alignItems: 'center', justifyContent: 'center' },
   locked: { opacity: 0.5 },
   stars: { position: 'absolute', bottom: -8, paddingHorizontal: 6, borderRadius: 8 },
-  tiny: { fontSize: 10, lineHeight: 13 },
+  tiny: { fontSize: 12, lineHeight: 15 },
   bold: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
   bar: { alignSelf: 'stretch', height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.12)', overflow: 'hidden' },
   barFill: { height: '100%', borderRadius: 3 },

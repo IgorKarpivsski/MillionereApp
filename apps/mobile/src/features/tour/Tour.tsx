@@ -135,16 +135,12 @@ function Tour({
     return () => sub.remove();
   }, [onDone]);
 
+  // short on purpose: five cards, the rest is explained the first time it's opened
   const all: Step[] = [
     { text: `${fmt(t.hello, { name })}\n${gx(t.intro, gender)}` },
     { target: 'play', text: t.play },
     { target: 'bubbles', text: t.bubbles },
-    { target: 'wallet', text: t.wallet },
-    { target: 'tickets', text: t.tickets },
     { target: 'modes', text: gx(t.modes, gender) },
-    { target: 'tab-play', text: t.tabPlay },
-    { target: 'tab-packs', text: t.tabPacks },
-    { target: 'profile', text: t.profile },
     { text: fmt(gx(t.bye, gender), { name }) },
   ];
   // skip anything that isn't on screen (e.g. no prize bubbles right now)

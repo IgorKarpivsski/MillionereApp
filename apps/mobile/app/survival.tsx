@@ -12,6 +12,7 @@ import { playSound, preloadSounds } from '@/design-system/feedback/sound';
 import { colors, radius, space } from '@/design-system/tokens';
 import { useEnergySheet } from '@/features/engage/EnergySheet';
 import { useEnergy, useRefreshEconomy } from '@/features/engage/hooks';
+import { useMyState } from '@/features/profile/hooks';
 import { LeagueCountdown } from '@/features/league/LeagueView';
 import { survivalApi, useSurvivalInfo } from '@/features/modes/api';
 import { RpcError } from '@/features/profile/api';
@@ -104,6 +105,7 @@ export default function SurvivalScreen() {
   const refresh = useRefreshEconomy();
   const { data: info } = useSurvivalInfo();
   const { data: energy } = useEnergy();
+  const { data: me } = useMyState();
   const showEnergy = useEnergySheet((s) => s.show);
   const { data: store } = useStore();
   const adFree = !!store?.ad_free;
@@ -317,6 +319,9 @@ export default function SurvivalScreen() {
           <AppText variant="title" align="center">
             {timedOut ? t.timeout : t.down}
           </AppText>
+          <AppText color={colors.textMuted} align="center">
+            {t.cheer}
+          </AppText>
           <Led size="ledXL">{String(p.correct)}</Led>
           <AppText variant="heading" align="center">
             {fmt(t.score, { n: p.correct })}
@@ -329,15 +334,21 @@ export default function SurvivalScreen() {
               <AppText color={colors.textMuted} align="center">
                 {t.reviveBody}
               </AppText>
-              <StickerButton
-                label={fmt(t.revive, { n: p.revive_gems })}
-                icon="heart"
-                tone="gem"
-                size="lg"
-                fullWidth
-                loading={reviving}
-                onPress={() => void revive()}
-              />
+              {(me?.wallet.gems ?? 0) >= p.revive_gems ? (
+                <StickerButton
+                  label={fmt(t.revive, { n: p.revive_gems })}
+                  icon="heart"
+                  tone="gem"
+                  size="lg"
+                  fullWidth
+                  loading={reviving}
+                  onPress={() => void revive()}
+                />
+              ) : (
+                <AppText variant="label" color={colors.gem} align="center">
+                  {fmt(t.needGems, { n: p.revive_gems })}
+                </AppText>
+              )}
             </Animated.View>
           ) : null}
           <StickerButton label={t.giveUp} tone="ghost" fullWidth onPress={() => void finish()} />

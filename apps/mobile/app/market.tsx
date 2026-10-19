@@ -276,7 +276,10 @@ export default function MarketScreen() {
                     badge={(c) => `×${c.count}`}
                   />
                 ) : (
-                  <AppText color={colors.textDim}>{t.noDupes}</AppText>
+                  <View style={styles.emptyBox}>
+                    <AppText color={colors.textMuted}>{t.noDupes}</AppText>
+                    <StickerButton label={t.toPacks} icon="gift" size="sm" tone="outline" onPress={() => router.push('/(tabs)/packs')} />
+                  </View>
                 )}
                 {give ? (
                   <>
@@ -329,6 +332,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   body: { padding: space.lg, gap: space.md, paddingBottom: space.xxl },
   empty: { marginTop: space.xl },
+  emptyBox: { gap: space.sm, alignItems: 'flex-start' },
   listing: { gap: space.sm, padding: space.md, borderRadius: radius.card, backgroundColor: colors.board, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
   listingHot: { borderColor: colors.led, borderWidth: 2 },
   owner: { flexDirection: 'row', alignItems: 'center', gap: space.sm },

@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
   boosts: { flexDirection: 'row', justifyContent: 'space-between', marginTop: space.sm, paddingHorizontal: space.xs },
   boost: { alignItems: 'center', width: 62, gap: 2 },
   boostBusy: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center' },
-  boostLabel: { fontSize: 10, lineHeight: 13 },
+  boostLabel: { fontSize: 12, lineHeight: 15 },
   pressed: { transform: [{ scale: 0.94 }] },
   buyRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   flex: { flex: 1 },

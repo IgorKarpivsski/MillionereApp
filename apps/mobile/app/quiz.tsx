@@ -10,7 +10,7 @@ import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, Share, St
 import * as StoreReview from 'expo-store-review';
 import { askForRemindersOnce } from '@/features/reminders/useReminders';
 import { gameFinished } from '@/features/store/interstitial';
-import { useSettingsStore } from '@/features/settings/store';
+import { markModeSeen, useSettingsStore } from '@/features/settings/store';
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -303,6 +303,7 @@ function DailyCountdown({ status }: { status: DailyStatus }) {
 }
 
 export default function QuizScreen() {
+  useEffect(() => markModeSeen('quiz'), []);
   const params = useLocalSearchParams<{ mode?: string }>();
   const daily = params.mode === 'daily';
   const total = daily ? 10 : 12;
