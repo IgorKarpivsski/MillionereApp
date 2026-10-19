@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { ZoomIn } from 'react-native-reanimated';
-import { AppText, AvatarBadge, CoinIcon, GemIcon, Icon, Led, StickerButton } from '@/design-system/components';
+import { AppText, AvatarBadge, CoinIcon, GemIcon, Icon, Led, StickerButton, TitleTag } from '@/design-system/components';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound } from '@/design-system/feedback/sound';
 import { colors, palette, radius, space } from '@/design-system/tokens';
@@ -160,9 +160,12 @@ export function LeagueView({ s }: { s: LeagueState }) {
                 {r.rank}
               </Led>
               <AvatarBadge avatarId={r.avatar_id} photo={r.photo} size={38} />
-              <AppText variant="label" numberOfLines={1} style={styles.flex}>
-                {r.username}
-              </AppText>
+              <View style={styles.nameCol}>
+                <AppText variant="label" numberOfLines={1}>
+                  {r.username}
+                </AppText>
+                {r.title ? <TitleTag title={r.title} size="sm" /> : null}
+              </View>
               {up ? <Ionicons name="arrow-up-circle" size={20} color={colors.correct} /> : null}
               {down ? <Ionicons name="arrow-down-circle" size={20} color={colors.danger} /> : null}
               <Led size="number" color={r.me ? colors.led : colors.text}>
@@ -213,6 +216,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   prizes: { flexDirection: 'row', gap: space.sm },
+  nameCol: { flex: 1, gap: 3 },
   prizeAmt: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   timer: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: space.xs, flexWrap: 'wrap' },
   timerBox: { backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 10, paddingHorizontal: space.sm, paddingVertical: 2 },

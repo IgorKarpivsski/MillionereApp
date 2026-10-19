@@ -779,6 +779,7 @@ export const LeagueStateSchema = z.object({
     z.object({
       rank: z.number().int(),
       username: z.string(),
+      title: z.string().nullable().optional(),
       avatar_id: z.string(),
       photo: z.string().nullable().optional(),
       level: z.number().int(),
@@ -841,7 +842,7 @@ export const FRAME_KEYS = ['bronze', 'silver', 'gold', 'fire', 'rainbow'] as con
 export const FlairSchema = z.object({
   frames: z.array(z.object({ key: z.string(), need: z.number().int(), unlocked: z.boolean() })),
   titles: z.array(
-    z.object({ text: z.string(), unlocked: z.boolean(), badge: z.string().optional(), world: z.string().optional() }),
+    z.object({ text: z.string(), unlocked: z.boolean(), badge: z.string().optional(), world: z.string().optional(), hint: z.string().optional() }),
   ),
   tiers: z.record(z.number().int()),
   frame: z.string().nullable(),
@@ -873,6 +874,7 @@ export const RankRowSchema = z.object({
 
   level: z.number().int().optional(),
   frame: z.string().nullable().optional(),
+  title: z.string().nullable().optional(),
   points: z.number(),
   me: z.boolean(),
 });

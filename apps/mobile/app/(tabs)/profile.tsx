@@ -14,6 +14,7 @@ import {
   Screen,
   Skeleton,
   StickerButton,
+  TitleTag,
   useToast,
 } from '@/design-system/components';
 import { colors, fontFamily, palette, radius, space } from '@/design-system/tokens';
@@ -255,9 +256,7 @@ export default function ProfileScreen() {
             {data.profile.username}
           </AppText>
           {data.profile.title ? (
-            <AppText variant="label" color={colors.led}>
-              {`★ ${data.profile.title} ★`}
-            </AppText>
+            <TitleTag title={data.profile.title} size="lg" center />
           ) : null}
           <View style={styles.headerBtns}>
             <StickerButton label={t.editName} size="sm" tone="ghost" icon="pencil" onPress={() => setEditing(true)} />

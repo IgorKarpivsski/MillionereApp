@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { AppText, AvatarBadge, CoinIcon, GemIcon, GLASS_EDGE, GlassFill, Led, Skeleton, TicketIcon } from '@/design-system/components';
+import { AppText, AvatarBadge, CoinIcon, GemIcon, GLASS_EDGE, GlassFill, Led, Skeleton, TicketIcon, TitleTag } from '@/design-system/components';
 import { colors, radius, space } from '@/design-system/tokens';
 import { useEnergySheet } from '@/features/engage/EnergySheet';
 import { FlyTarget } from '@/features/home/RewardFly';
@@ -98,9 +98,13 @@ export function TopBar() {
             <AppText variant="label" numberOfLines={1}>
               {data.profile.username}
             </AppText>
-            <AppText variant="caption" color={colors.textDim} numberOfLines={1}>
-              {data.profile.title ?? fmt(strings.topBar.levelLine, { n: data.profile.level, rank: rankTitle(data.profile.level) })}
-            </AppText>
+            {data.profile.title ? (
+              <TitleTag title={data.profile.title} size="sm" />
+            ) : (
+              <AppText variant="caption" color={colors.textDim} numberOfLines={1}>
+                {fmt(strings.topBar.levelLine, { n: data.profile.level, rank: rankTitle(data.profile.level) })}
+              </AppText>
+            )}
           </View>
         </Pressable>
         </TourTarget>

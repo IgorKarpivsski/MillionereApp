@@ -3,7 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, AvatarBadge, Backdrop, Sloth, StickerButton, useToast } from '@/design-system/components';
+import { AppText, AvatarBadge, Backdrop, Sloth, StickerButton, TitleTag, useToast } from '@/design-system/components';
 import { colors, space } from '@/design-system/tokens';
 import { StatsSection } from '@/features/profile/Stats';
 import { teenApi, useFriendProfile } from '@/features/teen/api';
@@ -50,9 +50,7 @@ export default function PlayerScreen() {
               <AvatarBadge avatarId={data.profile.avatar_id} photo={data.profile.photo} level={data.profile.level} frame={data.profile.frame} size={110} ring={colors.led} />
               <AppText variant="title">{data.profile.username}</AppText>
               {data.profile.title ? (
-                <AppText variant="label" color={colors.led}>
-                  {`★ ${data.profile.title} ★`}
-                </AppText>
+                <TitleTag title={data.profile.title} size="lg" center />
               ) : null}
               <View style={styles.actions}>
                 <StickerButton label={t.friendChallenge} icon="flash" tone="prize" loading={busy} onPress={() => void challenge()} />

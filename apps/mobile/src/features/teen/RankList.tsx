@@ -1,6 +1,6 @@
 import type { RankRow } from '@fm/shared';
 import { StyleSheet, View } from 'react-native';
-import { AppText, AvatarBadge, Led } from '@/design-system/components';
+import { AppText, AvatarBadge, Led, TitleTag } from '@/design-system/components';
 import { colors, radius, space } from '@/design-system/tokens';
 import { formatNumber } from '@/lib/format';
 
@@ -14,9 +14,12 @@ export function RankList({ rows }: { rows: RankRow[] }) {
             {r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1]! : String(r.rank)}
           </Led>
           <AvatarBadge avatarId={r.avatar_id} photo={r.photo} level={r.level} frame={r.frame} size={36} />
-          <AppText variant="label" numberOfLines={1} style={styles.flex}>
-            {r.username}
-          </AppText>
+          <View style={styles.flex}>
+            <AppText variant="label" numberOfLines={1}>
+              {r.username}
+            </AppText>
+            {r.title ? <TitleTag title={r.title} size="sm" /> : null}
+          </View>
           <Led size="number" color={r.me ? colors.led : colors.text}>
             {formatNumber(r.points)}
           </Led>
@@ -27,7 +30,7 @@ export function RankList({ rows }: { rows: RankRow[] }) {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
+  flex: { flex: 1, gap: 3 },
   list: { gap: 6 },
   row: {
     flexDirection: 'row',

@@ -1,13 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { AppText, AvatarBadge, BottomSheet, StickerButton, useToast } from '@/design-system/components';
+import { AppText, AvatarBadge, BottomSheet, StickerButton, TitleTag, titleTier, useToast } from '@/design-system/components';
 import { colors, space } from '@/design-system/tokens';
 import { useMyState } from '@/features/profile/hooks';
 import { fmt, strings } from '@/lib/i18n';
 import { useFlair, useSetFlair } from './api';
 
 const t = strings.teen;
+const TIER_ORDER = { basic: 0, rare: 1, epic: 2, legendary: 3 } as const;
 const FRAME_NAMES = t.frameNames as Record<string, string>;
 
 function frameLock(key: string, need: number): string {
@@ -92,22 +93,35 @@ export function FlairSheet({ visible, onClose }: { visible: boolean; onClose: ()
             >
               <AppText variant="label">{t.flairNone}</AppText>
             </Pressable>
-            {data.titles.map((x) => (
-              <Pressable
-                key={x.text}
-                disabled={!x.unlocked}
-                onPress={() => setTitle(x.text)}
-                accessibilityRole="radio"
-                accessibilityState={{ selected: title === x.text, disabled: !x.unlocked }}
-                accessibilityLabel={x.unlocked ? x.text : `${x.text}, ${x.world ? t.flairLockedWorld : t.flairLockedTitle}`}
-                style={[styles.title, title === x.text && styles.sel, !x.unlocked && styles.locked]}
-              >
-                {!x.unlocked ? <Ionicons name="lock-closed" size={12} color={colors.textDim} /> : null}
-                <AppText variant="label" color={x.unlocked ? colors.text : colors.textDim}>
-                  {x.text}
-                </AppText>
-              </Pressable>
-            ))}
+            {[...data.titles]
+              .sort((a, b) => Number(b.unlocked) - Number(a.unlocked) || TIER_ORDER[titleTier(b.text)] - TIER_ORDER[titleTier(a.text)])
+              .map((x) => (
+                <Pressable
+                  key={x.text}
+                  disabled={!x.unlocked}
+                  onPress={() => setTitle(x.text)}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: title === x.text, disabled: !x.unlocked }}
+                  accessibilityLabel={x.unlocked ? x.text : `${x.text}, ${x.hint ?? (x.world ? t.flairLockedWorld : t.flairLockedTitle)}`}
+                  style={[styles.title, title === x.text && styles.sel, !x.unlocked && styles.locked]}
+                >
+                  {x.unlocked ? (
+                    <TitleTag title={x.text} size="md" />
+                  ) : (
+                    <View style={styles.lockedTitle}>
+                      <View style={styles.lockRow}>
+                        <Ionicons name="lock-closed" size={12} color={colors.textDim} />
+                        <AppText variant="label" color={colors.textDim}>
+                          {x.text}
+                        </AppText>
+                      </View>
+                      <AppText variant="caption" color={colors.textDim}>
+                        {x.hint ?? (x.world ? t.flairLockedWorld : t.flairLockedTitle)}
+                      </AppText>
+                    </View>
+                  )}
+                </Pressable>
+              ))}
           </View>
         </ScrollView>
       )}
@@ -152,6 +166,8 @@ const styles = StyleSheet.create({
   locked: { opacity: 0.55 },
   lockText: { fontSize: 10, lineHeight: 13 },
   titles: { flexDirection: 'row', flexWrap: 'wrap', gap: space.xs },
+  lockedTitle: { gap: 2 },
+  lockRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   title: {
     flexDirection: 'row',
     alignItems: 'center',
