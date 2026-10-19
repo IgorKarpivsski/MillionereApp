@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { ComponentProps } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { haptic } from '../feedback/haptics';
 import { useReducedMotion } from '../feedback/reducedMotion';
@@ -58,6 +58,9 @@ export function StickerButton({
   const pressed = useSharedValue(0);
   const inactive = disabled || loading;
   const bright = tone !== 'ghost' && tone !== 'outline';
+  // Glow only where it's a pure shadow (iOS). Android elevation lifts the lip into its own
+  // layer, and on some phones the face's label then disappears behind it.
+  const glow = bright && !inactive && Platform.OS === 'ios';
 
   const faceStyle = useAnimatedStyle(() => ({ transform: [{ translateY: pressed.value * depth }] }));
 
@@ -85,7 +88,7 @@ export function StickerButton({
         style={[
           styles.lip,
           { top: depth, height: h, backgroundColor: t.lip },
-          bright && !inactive ? { shadowColor: t.face, shadowOpacity: 0.7, shadowRadius: 12, elevation: 8 } : null,
+          glow ? { shadowColor: t.face, shadowOpacity: 0.7, shadowRadius: 12 } : null,
         ]}
       />
       <Animated.View
@@ -93,7 +96,6 @@ export function StickerButton({
           styles.face,
           { height: h, backgroundColor: t.face, paddingHorizontal: size === 'sm' ? space.lg : space.xl },
           t.border ? { borderWidth: 2, borderColor: t.border } : null,
-          bright && !inactive ? { elevation: 9, shadowOpacity: 0 } : null,
           faceStyle,
         ]}
       >
@@ -108,7 +110,7 @@ export function StickerButton({
         ) : (
           <>
             {icon ? <Ionicons name={icon} size={size === 'lg' ? 24 : 20} color={t.label} /> : null}
-            <AppText variant={size === 'sm' ? 'label' : 'button'} color={t.label} numberOfLines={1}>
+            <AppText variant={size === 'sm' ? 'label' : 'button'} color={t.label} numberOfLines={1} style={styles.label}>
               {label}
             </AppText>
           </>
@@ -120,6 +122,7 @@ export function StickerButton({
 
 const styles = StyleSheet.create({
   full: { alignSelf: 'stretch' },
+  label: { flexShrink: 1, zIndex: 1 },
   lip: { position: 'absolute', start: 0, end: 0, borderRadius: radius.control },
   face: {
     borderRadius: radius.control,
