@@ -59,7 +59,7 @@ Deno.serve(async (req: Request) => {
   const url = new URL(req.url);
   const query = url.search.startsWith('?') ? url.search.slice(1) : url.search;
   const at = query.indexOf('&signature=');
-  if (at < 0) return new Response('missing signature', { status: 400 });
+  if (at < 0) return new Response('ok', { status: 200 }); // unsigned (e.g. a console ping): record nothing
   const message = query.slice(0, at);
   const sig = url.searchParams.get('signature') ?? '';
   const keyId = url.searchParams.get('key_id') ?? '';
