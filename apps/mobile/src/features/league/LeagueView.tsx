@@ -1,10 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { LeagueState } from '@fm/shared';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { ZoomIn } from 'react-native-reanimated';
-import { AppText, AvatarBadge, Icon, Led, StickerButton } from '@/design-system/components';
+import { AppText, AvatarBadge, CoinIcon, GemIcon, Icon, Led, StickerButton } from '@/design-system/components';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound } from '@/design-system/feedback/sound';
 import { colors, palette, radius, space } from '@/design-system/tokens';
@@ -16,10 +16,31 @@ import { LeagueBadge, TIER_COLORS } from './LeagueBadge';
 
 const t = strings.league;
 
-function endsIn(seconds: number) {
-  const d = Math.floor(seconds / 86400);
-  const h = Math.floor((seconds % 86400) / 3600);
-  return d > 0 ? fmt(t.endsIn, { d, h }) : fmt(t.endsSoon, { h: Math.max(1, h) });
+/** Live countdown to the end of the league week: days + hh:mm:ss, ticking every second. */
+function LeagueCountdown({ seconds }: { seconds: number }) {
+  const endAt = useMemo(() => Date.now() + seconds * 1000, [seconds]);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const left = Math.max(0, Math.floor((endAt - now) / 1000));
+  const d = Math.floor(left / 86400);
+  const two = (n: number) => String(n).padStart(2, '0');
+  const clock = `${two(Math.floor((left % 86400) / 3600))}:${two(Math.floor((left % 3600) / 60))}:${two(left % 60)}`;
+  return (
+    <View style={styles.timer} accessibilityLabel={fmt(t.endsIn, { d, h: Math.floor((left % 86400) / 3600) })}>
+      <Ionicons name="time-outline" size={18} color={colors.textOnBright} />
+      <AppText variant="bodyStrong" color={colors.textOnBright}>
+        {t.endsLabel}
+      </AppText>
+      <View style={styles.timerBox}>
+        <Led size="number" color={colors.led}>
+          {d > 1 ? `${d} ${t.days} ${clock}` : d === 1 ? `${t.oneDay} ${clock}` : clock}
+        </Led>
+      </View>
+    </View>
+  );
 }
 
 /** Once per settled week: "you moved up / stayed / dropped" with the prize. */
@@ -79,12 +100,18 @@ export function LeagueView({ s }: { s: LeagueState }) {
           <AppText variant="title" color={colors.textOnBright}>
             {fmt(t.title, { name: s.tier_name })}
           </AppText>
-          <AppText variant="bodyStrong" color={colors.textOnBright}>
-            {endsIn(s.seconds_left)}
-          </AppText>
+          <LeagueCountdown seconds={s.seconds_left} />
         </View>
       </View>
-      <AppText color={colors.textMuted}>{rules}</AppText>
+      <View style={styles.explain}>
+        <AppText variant="bodyStrong" color={colors.led}>
+          {`🏆 ${t.prizesTitle}`}
+        </AppText>
+        <AppText color={colors.text}>{t.prizesBody}</AppText>
+        <AppText variant="caption" color={colors.textMuted}>
+          {rules}
+        </AppText>
+      </View>
 
       <View style={styles.prizes} accessibilityLabel={t.prizes}>
         {prizes.map(({ rank, r }) =>
@@ -93,13 +120,19 @@ export function LeagueView({ s }: { s: LeagueState }) {
               <AppText variant="caption" color={colors.textDim} align="center">
                 {rank === 10 ? fmt(t.prizeRange, { r: rank }) : fmt(t.prizeRank, { r: rank })}
               </AppText>
-              <Led size="number" color={colors.led}>
-                {formatNumber(r.coins)}
-              </Led>
+              <View style={styles.prizeAmt}>
+                <CoinIcon size={18} />
+                <Led size="number" color={colors.led}>
+                  {formatNumber(r.coins)}
+                </Led>
+              </View>
               {r.gems > 0 ? (
-                <AppText variant="caption" color={colors.gem}>
-                  {`+${r.gems} 💎`}
-                </AppText>
+                <View style={styles.prizeAmt}>
+                  <GemIcon size={15} />
+                  <AppText variant="caption" color={colors.gem}>
+                    {`+${r.gems}`}
+                  </AppText>
+                </View>
               ) : null}
             </View>
           ) : null,
@@ -180,6 +213,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   prizes: { flexDirection: 'row', gap: space.sm },
+  prizeAmt: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  timer: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: space.xs, flexWrap: 'wrap' },
+  timerBox: { backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 10, paddingHorizontal: space.sm, paddingVertical: 2 },
+  explain: { gap: 4, padding: space.md, borderRadius: radius.board, backgroundColor: colors.board, borderWidth: 1, borderColor: colors.led },
   prize: { flex: 1, alignItems: 'center', gap: 2, paddingVertical: space.sm, borderRadius: radius.board, backgroundColor: colors.board },
   list: { gap: 6 },
   row: {
