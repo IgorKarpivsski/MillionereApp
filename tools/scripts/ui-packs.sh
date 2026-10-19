@@ -23,13 +23,9 @@ tap 540 2200; sleep 4
 tap 110 150; sleep 4
 tap 110 150; sleep 8
 shot 01_home
-adb shell input keyevent KEYCODE_BACK; sleep 2
-n=0
-for world in mix "nature&level=1"; do
-  adb shell am start -W -a android.intent.action.VIEW -d "footballmillionaire://session?world=$world" "$PKG" >/dev/null
-  sleep 7
-  for q in 1 2 3 4 5 6 7 8 9 10; do
-    n=$((n+1))
+# who-are-you sheet: "other"
+tap 216 2190; sleep 4
+shot 02_home_clear
 for route in packs leaderboard; do
   adb shell am start -W -a android.intent.action.VIEW -d "footballmillionaire://$route" "$PKG" >/dev/null
   sleep 8
