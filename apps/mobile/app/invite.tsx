@@ -101,6 +101,9 @@ export default function InviteScreen() {
             <AppText variant="heading" align="center">
               {fmt(t.hero, { n: data.qualify_games })}
             </AppText>
+            <AppText variant="caption" color={colors.textDim} align="center">
+              {t.rule}
+            </AppText>
             <AppText variant="caption" color={colors.textDim}>
               {t.yourCode}
             </AppText>
@@ -185,7 +188,11 @@ export default function InviteScreen() {
                   {f.username}
                 </AppText>
                 <AppText variant="caption" color={f.qualified ? colors.correct : colors.textMuted}>
-                  {f.qualified ? t.qualified : fmt(t.progress, { g: f.games, n: data.qualify_games })}
+                  {f.qualified
+                    ? t.qualified
+                    : f.games >= data.qualify_games && f.days_ok === false
+                      ? t.waitDay
+                      : fmt(t.progress, { g: f.games, n: data.qualify_games })}
                 </AppText>
               </View>
             ))

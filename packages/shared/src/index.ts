@@ -1035,6 +1035,7 @@ export const ReferralStateSchema = z.object({
       photo: z.string().nullable().optional(),
       games: z.number().int(),
       qualified: z.boolean(),
+      days_ok: z.boolean().optional(),
     }),
   ),
   per_friend: z.array(ReferralRewardSchema),

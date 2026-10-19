@@ -4,6 +4,7 @@ update public.app_config set value = to_jsonb(encode(extensions.digest('S3CRET-C
 create temp table ids as select test.new_user() as boss, test.new_user() as p1, test.new_user() as p2, test.new_user() as p3, test.new_user() as p4;
 grant select on ids to authenticated;
 update public.profiles set username = 'טיקטוקר_1' where id = (select p1 from ids);
+update public.profiles set is_guest = false where id in ((select boss from ids), (select p4 from ids));
 
 set local role authenticated;
 do $$
@@ -15,7 +16,12 @@ begin
   perform test.assert((public.admin_status() ->> 'admin')::boolean = false, 'not admin by default');
   perform test.assert_raises($q$select public.admin_find_players('טיק')$q$, 'not_admin', 'find needs admin');
   perform test.assert_raises(format('select public.admin_grant(%L, %L, %L, %L)', p1, '{"kind":"gems","amount":10}', 'x', gen_random_uuid()), 'not_admin', 'grant needs admin');
-  perform test.assert_raises($q$select public.admin_claim('wrong')$q$, 'not_authorized', 'wrong code refused');
+  r := public.admin_claim('wrong');
+  perform test.assert(not (r ->> 'admin')::boolean and r ->> 'error' = 'not_authorized', 'wrong code refused');
+  perform test.login(p2);
+  r := public.admin_claim('S3CRET-CODE-123');
+  perform test.assert(not (r ->> 'admin')::boolean, 'guest accounts cannot become admin');
+  perform test.login(boss);
 
   r := public.admin_claim('S3CRET-CODE-123');
   perform test.assert((public.admin_status() ->> 'admin')::boolean, 'admin after claim');
@@ -41,7 +47,7 @@ begin
   r := public.redeem_code(' live100 ');
   perform test.assert((select w.gems from public.wallets w) = 200, 'promo paid');
   perform test.assert_raises($q$select public.redeem_code('LIVE100')$q$, 'code_already_redeemed', 'once per player');
-  perform test.assert_raises($q$select public.redeem_code('NOPE99')$q$, 'code_invalid', 'unknown code');
+  perform test.assert(public.redeem_code('NOPE99') ->> 'error' = 'code_invalid', 'unknown code');
 
   perform test.login(p2);
   perform public.redeem_code('LIVE100');

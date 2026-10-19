@@ -2,6 +2,7 @@ import type { OpenPackResult, PackSlug } from '@fm/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
+import { takePackTicket } from '@/features/collection/packIntent';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -428,7 +429,7 @@ function columnsFor(n: number) {
 }
 
 export default function PackOpenScreen() {
-  const params = useLocalSearchParams<{ pack: PackSlug; pay: 'token' | 'coins' | 'gems' }>();
+  const params = useLocalSearchParams<{ pack: PackSlug; pay: 'token' | 'coins' | 'gems'; ticket?: string }>();
   const pack = (params.pack ?? 'bronze') as PackSlug;
   const reduced = useReducedMotion();
   const toast = useToast();
@@ -459,9 +460,16 @@ export default function PackOpenScreen() {
   const flash = useSharedValue(0);
   const tearTicks = useRef(0);
 
+  // paying with coins or gems needs the ticket the packs screen left (not an outside link)
+  const pay = useRef<'token' | 'coins' | 'gems' | null>(null);
+  if (pay.current === null) {
+    const asked = params.pay ?? 'token';
+    pay.current = asked === 'token' || takePackTicket(pack, asked, params.ticket) ? asked : 'token';
+  }
+
   useEffect(() => {
     collectionApi
-      .open(pack, params.pay ?? 'token', req.current)
+      .open(pack, pay.current ?? 'token', req.current)
       .then((r) => {
         r.items.sort((a, b) => RANK.indexOf(a.rarity as Rarity) - RANK.indexOf(b.rarity as Rarity)); // best card last
         setResult(r);
@@ -473,7 +481,7 @@ export default function PackOpenScreen() {
         toast(e instanceof RpcError && e.code === 'insufficient_funds' ? t.noCoins : strings.errors.generic, 'error');
         router.back();
       });
-  }, [pack, params.pay, qc, toast]);
+  }, [pack, qc, toast]);
 
   const best = useMemo(() => (result ? result.items[result.items.length - 1] : null), [result]);
   const bestRank = best ? RANK.indexOf(best.rarity as Rarity) : 0;

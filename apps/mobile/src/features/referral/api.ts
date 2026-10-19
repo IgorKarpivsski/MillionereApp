@@ -1,10 +1,15 @@
 import { ReferralStateSchema, type ReferralState } from '@fm/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/features/auth/AuthProvider';
-import { rpc } from '@/features/profile/api';
+import { RpcError, rpc } from '@/features/profile/api';
 
 export const referralKey = ['referral'] as const;
-const parse = (x: unknown) => ReferralStateSchema.parse(x);
+const parse = (x: unknown) => {
+  // a wrong code comes back as {error} so the server can count the attempt
+  const e = (x as { error?: string } | null)?.error;
+  if (e) throw new RpcError('invalid_input', `invalid_input: ${e}`);
+  return ReferralStateSchema.parse(x);
+};
 
 export const referralApi = {
   state: (): Promise<ReferralState> => rpc('referral_state', undefined, parse),

@@ -21,6 +21,7 @@ import { colors, rarityColors, space, type RarityKey } from '@/design-system/tok
 import { GlowingPack, PACK_GLOW, PACK_NAMES } from '@/features/collection/PackArt';
 import { useCollection } from '@/features/collection/hooks';
 import { useMarket } from '@/features/market/api';
+import { makePackTicket } from '@/features/collection/packIntent';
 import { useMyState } from '@/features/profile/hooks';
 import { TradeFriendSheet } from '@/features/social/FriendPicker';
 import { formatNumber } from '@/lib/format';
@@ -61,7 +62,7 @@ export default function PacksScreen() {
   const paidBlocked = !!data?.paid_blocked_regions.includes(region);
 
   const open = (slug: PackSlug, pay: 'token' | 'coins' | 'gems') =>
-    router.push({ pathname: '/pack-open', params: { pack: slug, pay } });
+    router.push({ pathname: '/pack-open', params: { pack: slug, pay, ticket: pay === 'token' ? undefined : makePackTicket(slug, pay) } });
 
   const buy = (p: PackCatalogEntry) => {
     const cur = p.coins ? 'coins' : 'gems';
