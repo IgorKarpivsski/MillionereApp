@@ -102,7 +102,7 @@ export function FlairSheet({ visible, onClose }: { visible: boolean; onClose: ()
                   onPress={() => setTitle(x.text)}
                   accessibilityRole="radio"
                   accessibilityState={{ selected: title === x.text, disabled: !x.unlocked }}
-                  accessibilityLabel={x.unlocked ? x.text : `${x.text}, ${x.hint ?? (x.world ? t.flairLockedWorld : t.flairLockedTitle)}`}
+                  accessibilityLabel={x.unlocked ? x.text : `${x.text}, ${x.hint ?? (x.badge === 'ambassador' ? t.flairLockedAmbassador : x.world ? t.flairLockedWorld : t.flairLockedTitle)}`}
                   style={[styles.title, title === x.text && styles.sel]}
                 >
                   {x.unlocked ? (
@@ -116,7 +116,7 @@ export function FlairSheet({ visible, onClose }: { visible: boolean; onClose: ()
                         </View>
                       </View>
                       <AppText variant="caption" color={colors.textDim}>
-                        {x.hint ?? (x.world ? t.flairLockedWorld : t.flairLockedTitle)}
+                        {x.hint ?? (x.badge === 'ambassador' ? t.flairLockedAmbassador : x.world ? t.flairLockedWorld : t.flairLockedTitle)}
                       </AppText>
                     </View>
                   )}
