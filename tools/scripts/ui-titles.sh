@@ -25,9 +25,15 @@ tap 110 150; sleep 8
 shot 01_home
 tap 216 2190; sleep 4
 shot 02_home_before
-sleep 150
 adb shell am start -W -a android.intent.action.VIEW -d "footballmillionaire://profile" "$PKG" >/dev/null; sleep 8
 shot 10_profile
+tap 370 868; sleep 4
+shot 13_flair
+swipe 540 1900 540 900; sleep 2
+shot 14_flair_titles
+swipe 540 1900 540 900; sleep 2
+shot 15_flair_titles2
+adb shell input keyevent KEYCODE_BACK; sleep 2
 adb shell am start -W -a android.intent.action.VIEW -d "footballmillionaire://" "$PKG" >/dev/null; sleep 6
 shot 11_home_topbar
 adb shell am start -W -a android.intent.action.VIEW -d "footballmillionaire://survival" "$PKG" >/dev/null; sleep 8

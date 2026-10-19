@@ -103,17 +103,17 @@ export function FlairSheet({ visible, onClose }: { visible: boolean; onClose: ()
                   accessibilityRole="radio"
                   accessibilityState={{ selected: title === x.text, disabled: !x.unlocked }}
                   accessibilityLabel={x.unlocked ? x.text : `${x.text}, ${x.hint ?? (x.world ? t.flairLockedWorld : t.flairLockedTitle)}`}
-                  style={[styles.title, title === x.text && styles.sel, !x.unlocked && styles.locked]}
+                  style={[styles.title, title === x.text && styles.sel]}
                 >
                   {x.unlocked ? (
                     <TitleTag title={x.text} size="md" />
                   ) : (
                     <View style={styles.lockedTitle}>
                       <View style={styles.lockRow}>
-                        <Ionicons name="lock-closed" size={12} color={colors.textDim} />
-                        <AppText variant="label" color={colors.textDim}>
-                          {x.text}
-                        </AppText>
+                        <Ionicons name="lock-closed" size={14} color={colors.textDim} />
+                        <View style={styles.dim}>
+                          <TitleTag title={x.text} size="sm" />
+                        </View>
                       </View>
                       <AppText variant="caption" color={colors.textDim}>
                         {x.hint ?? (x.world ? t.flairLockedWorld : t.flairLockedTitle)}
@@ -167,6 +167,7 @@ const styles = StyleSheet.create({
   lockText: { fontSize: 10, lineHeight: 13 },
   titles: { flexDirection: 'row', flexWrap: 'wrap', gap: space.xs },
   lockedTitle: { gap: 2 },
+  dim: { opacity: 0.5 },
   lockRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   title: {
     flexDirection: 'row',
