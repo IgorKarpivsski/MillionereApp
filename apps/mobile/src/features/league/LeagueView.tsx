@@ -17,7 +17,7 @@ import { LeagueBadge, TIER_COLORS } from './LeagueBadge';
 const t = strings.league;
 
 /** Live countdown to the end of the league week: days + hh:mm:ss, ticking every second. */
-function LeagueCountdown({ seconds }: { seconds: number }) {
+export function LeagueCountdown({ seconds, label, color = colors.textOnBright }: { seconds: number; label?: string; color?: string }) {
   const endAt = useMemo(() => Date.now() + seconds * 1000, [seconds]);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -30,9 +30,9 @@ function LeagueCountdown({ seconds }: { seconds: number }) {
   const clock = `${two(Math.floor((left % 86400) / 3600))}:${two(Math.floor((left % 3600) / 60))}:${two(left % 60)}`;
   return (
     <View style={styles.timer} accessibilityLabel={fmt(t.endsIn, { d, h: Math.floor((left % 86400) / 3600) })}>
-      <Ionicons name="time-outline" size={18} color={colors.textOnBright} />
-      <AppText variant="bodyStrong" color={colors.textOnBright}>
-        {t.endsLabel}
+      <Ionicons name="time-outline" size={18} color={color} />
+      <AppText variant="bodyStrong" color={color}>
+        {label ?? t.endsLabel}
       </AppText>
       <View style={styles.timerBox}>
         <Led size="number" color={colors.led}>

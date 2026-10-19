@@ -26,6 +26,7 @@ import { ensureRTL } from '@/lib/rtl';
 import { AgeGate } from '@/features/settings/AgeGate';
 import { useSettingsStore } from '@/features/settings/store';
 import { IncomingCallHost } from '@/features/boosts/IncomingCall';
+import { AutoRedeem } from '@/features/referral/AutoRedeem';
 import { RewardFlyHost } from '@/features/home/RewardFly';
 import { TourHost } from '@/features/tour/Tour';
 import { RemoveAdsUpsell } from '@/features/store/RemoveAdsUpsell';
@@ -100,6 +101,10 @@ function Gate() {
         <Stack.Screen name="onboarding" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="blitz" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="family" options={{ gestureEnabled: false, animation: 'fade' }} />
+        <Stack.Screen name="survival" options={{ gestureEnabled: false, animation: 'fade' }} />
+        <Stack.Screen name="truefalse" options={{ gestureEnabled: false, animation: 'fade' }} />
+        <Stack.Screen name="market" />
+        <Stack.Screen name="invite" />
         <Stack.Screen name="mistakes" />
         <Stack.Screen name="submit-question" />
         <Stack.Screen name="event" />
@@ -118,6 +123,7 @@ function Gate() {
       <OfflineBanner />
       <AgeGate />
       <IncomingCallHost />
+      <AutoRedeem />
       <RewardFlyHost />
       <TourHost />
       <RemoveAdsUpsell />

@@ -3,7 +3,13 @@ import {
   BlitzPayloadSchema,
   FamilyStateSchema,
   MatchRoomSchema,
+  SurvivalInfoSchema,
+  SurvivalPayloadSchema,
+  TfInfoSchema,
+  TfPayloadSchema,
   type BlitzPayload,
+  type SurvivalPayload,
+  type TfPayload,
   type FamilyState,
 } from '@fm/shared';
 import { useQuery } from '@tanstack/react-query';
@@ -38,3 +44,30 @@ export const familyApi = {
   answerInvite: (id: number, accept: boolean) =>
     rpc('family_invite_answer', { p_invite: id, p_accept: accept }, (x) => MatchRoomSchema.safeParse(x).data ?? null),
 };
+
+export const survivalApi = {
+  info: () => rpc('survival_info', undefined, (x) => SurvivalInfoSchema.parse(x)),
+  start: (): Promise<SurvivalPayload> => rpc('survival_start', undefined, (x) => SurvivalPayloadSchema.parse(x)),
+  answer: (run: string, slot: number): Promise<SurvivalPayload> =>
+    rpc('survival_answer', { p_run: run, p_slot: slot }, (x) => SurvivalPayloadSchema.parse(x)),
+  revive: (run: string): Promise<SurvivalPayload> => rpc('survival_revive', { p_run: run }, (x) => SurvivalPayloadSchema.parse(x)),
+  finish: (run: string): Promise<SurvivalPayload> => rpc('survival_finish', { p_run: run }, (x) => SurvivalPayloadSchema.parse(x)),
+};
+
+export function useSurvivalInfo() {
+  const { session } = useAuth();
+  return useQuery({ queryKey: ['survival-info'], queryFn: survivalApi.info, enabled: !!session, staleTime: 60_000 });
+}
+
+export const tfApi = {
+  info: () => rpc('tf_info', undefined, (x) => TfInfoSchema.parse(x)),
+  start: (): Promise<TfPayload> => rpc('tf_start', undefined, (x) => TfPayloadSchema.parse(x)),
+  answer: (run: string, isTrue: boolean): Promise<TfPayload> =>
+    rpc('tf_answer', { p_run: run, p_true: isTrue }, (x) => TfPayloadSchema.parse(x)),
+  finish: (run: string): Promise<TfPayload> => rpc('tf_finish', { p_run: run }, (x) => TfPayloadSchema.parse(x)),
+};
+
+export function useTfInfo() {
+  const { session } = useAuth();
+  return useQuery({ queryKey: ['tf-info'], queryFn: tfApi.info, enabled: !!session, staleTime: 60_000 });
+}

@@ -97,7 +97,7 @@ begin
 
   -- flair: nothing unlocked yet
   s := public.my_flair();
-  perform test.assert(jsonb_array_length(s -> 'frames') = 5 and jsonb_array_length(s -> 'titles') >= 8, 'flair options');
+  perform test.assert(jsonb_array_length(s -> 'frames') = 6 and jsonb_array_length(s -> 'titles') >= 8, 'flair options');
   perform test.assert_raises($q$select public.set_flair('gold', null)$q$, 'invalid_input', 'locked frame');
   perform test.assert(public.set_flair(null, null) -> 'profile' ->> 'frame' is null, 'clear flair');
 

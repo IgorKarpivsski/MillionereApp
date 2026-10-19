@@ -925,3 +925,120 @@ export const BoardSchema = z.object({
   last_winners: z.array(RankRowSchema.partial({ level: true })).default([]),
 });
 export type Board = z.infer<typeof BoardSchema>;
+
+/* King of the hill — mirrors 20261019000001_survival_truefalse_market_referral.sql */
+export const SurvivalPayloadSchema = z.object({
+  run_id: z.string().uuid(),
+  status: z.enum(['active', 'down', 'done']),
+  correct: z.number().int(),
+  seconds_left: z.number(),
+  question_seconds: z.number().int(),
+  best: z.number().int(),
+  week_best: z.number().int(),
+  can_revive: z.boolean(),
+  revive_gems: z.number().int(),
+  coins: z.number().int().nullable(),
+  question: ModeQuestionSchema.nullable(),
+  countdown: z.number().optional(),
+  was_correct: z.boolean().nullable().optional(),
+  correct_slot: z.number().int().nullable().optional(),
+  new_best: z.boolean().optional(),
+  previous_best: z.number().int().optional(),
+  new_week_best: z.boolean().optional(),
+});
+export type SurvivalPayload = z.infer<typeof SurvivalPayloadSchema>;
+export const PrizeSchema = z.object({ coins: z.number().int(), gems: z.number().int() });
+export const SurvivalInfoSchema = z.object({
+  best: z.number().int(),
+  week_best: z.number().int(),
+  question_seconds: z.number().int(),
+  revive_gems: z.number().int(),
+  rows: z.array(RankRowSchema),
+  me: z.object({ rank: z.number().int(), points: z.number() }).nullable(),
+  ends_at: z.string(),
+  prizes: z.array(PrizeSchema),
+  last_winners: z.array(RankRowSchema.omit({ level: true, frame: true })),
+});
+export type SurvivalInfo = z.infer<typeof SurvivalInfoSchema>;
+
+/* True or false */
+export const TfPayloadSchema = z.object({
+  run_id: z.string().uuid(),
+  status: z.enum(['active', 'done']),
+  seconds_left: z.number(),
+  total_seconds: z.number().int(),
+  correct: z.number().int(),
+  answered: z.number().int(),
+  best: z.number().int(),
+  coins: z.number().int().nullable(),
+  question: z
+    .object({
+      id: z.string(),
+      text: z.string(),
+      claim: z.string(),
+      image: QuestionImageSchema.nullable().optional(),
+      category_name: z.string().nullable(),
+    })
+    .nullable(),
+  countdown: z.number().optional(),
+  was_correct: z.boolean().nullable().optional(),
+  was_true: z.boolean().optional(),
+  right_answer: z.string().nullable().optional(),
+  new_best: z.boolean().optional(),
+  previous_best: z.number().int().optional(),
+});
+export type TfPayload = z.infer<typeof TfPayloadSchema>;
+export const TfInfoSchema = z.object({ best: z.number().int(), seconds: z.number().int(), penalty_seconds: z.number().int() });
+
+/* Sticker market */
+const MarketItemSchema = z.object({ id: z.string(), name: z.string(), rarity: z.string() });
+export const MarketListingSchema = z.object({
+  id: z.number().int(),
+  status: z.enum(['open', 'done', 'cancelled']),
+  created_at: z.string(),
+  done_at: z.string().nullable(),
+  give: MarketItemSchema,
+  want: MarketItemSchema,
+  mine: z.boolean(),
+  owner: z.object({ username: z.string(), avatar_id: z.string(), photo: z.string().nullable().optional(), level: z.number().int() }),
+  taker: z.string().nullable(),
+  can_take: z.boolean(),
+  i_need: z.boolean(),
+});
+export type MarketListing = z.infer<typeof MarketListingSchema>;
+export const MarketStateSchema = z.object({
+  listings: z.array(MarketListingSchema),
+  mine: z.array(MarketListingSchema),
+  news: z.number().int(),
+  max_open: z.number().int(),
+  got: z.string().optional(),
+});
+export type MarketState = z.infer<typeof MarketStateSchema>;
+
+/* Friend brings friend */
+export const ReferralRewardSchema = z.object({
+  kind: z.string(),
+  amount: z.number().int(),
+  pack: z.string().optional(),
+});
+export type ReferralReward = z.infer<typeof ReferralRewardSchema>;
+export const ReferralStateSchema = z.object({
+  code: z.string(),
+  qualified: z.number().int(),
+  qualify_games: z.number().int(),
+  friends: z.array(
+    z.object({
+      username: z.string(),
+      avatar_id: z.string(),
+      photo: z.string().nullable().optional(),
+      games: z.number().int(),
+      qualified: z.boolean(),
+    }),
+  ),
+  per_friend: z.array(ReferralRewardSchema),
+  welcome: z.array(ReferralRewardSchema),
+  goals: z.array(z.object({ n: z.number().int(), rewards: z.array(ReferralRewardSchema), flair: z.boolean().optional(), reached: z.boolean() })),
+  invited_by: z.object({ username: z.string(), avatar_id: z.string(), photo: z.string().nullable().optional() }).nullable(),
+  can_redeem: z.boolean(),
+});
+export type ReferralState = z.infer<typeof ReferralStateSchema>;

@@ -13,6 +13,7 @@ const FRAME_NAMES = t.frameNames as Record<string, string>;
 function frameLock(key: string, need: number): string {
   if (key === 'fire') return t.flairLockedFire;
   if (key === 'rainbow') return t.flairLockedRainbow;
+  if (key === 'ambassador') return t.flairLockedAmbassador;
   return fmt(t.flairLockedFrame, { n: need });
 }
 

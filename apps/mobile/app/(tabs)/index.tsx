@@ -12,7 +12,8 @@ import { BubbleColumns, useRewardBubbles } from '@/features/home/RewardBubbles';
 import { ModeTile } from '@/features/home/ModeTile';
 import { useLeague } from '@/features/league/api';
 import { LeagueBadge } from '@/features/league/LeagueBadge';
-import { useBlitzInfo } from '@/features/modes/api';
+import { useBlitzInfo, useSurvivalInfo, useTfInfo } from '@/features/modes/api';
+import { useReferral } from '@/features/referral/api';
 import { useMyState } from '@/features/profile/hooks';
 import { useDailyStatus } from '@/features/quiz/hooks';
 import { useUnreadTotal } from '@/features/social/hooks';
@@ -62,6 +63,8 @@ function Modes() {
   const { data: daily } = useDailyStatus();
   const countdown = useCountdownToMidnight();
   const { data: blitz } = useBlitzInfo();
+  const { data: survival } = useSurvivalInfo();
+  const { data: tf } = useTfInfo();
   const { data: energy } = useEnergy();
   const showEnergy = useEnergySheet((s) => s.show);
   const dailyDone = daily?.state === 'done';
@@ -113,6 +116,28 @@ function Modes() {
       <View style={styles.row}>
         <ModeTile
           index={3}
+          title={t.survival}
+          body={t.survivalBody}
+          icon="trophy"
+          colors={['#8E5CFF', '#4B2BB5']}
+          chip={survival?.week_best ? fmt(t.survivalWeek, { n: survival.week_best }) : isNew('survival') ? t.new : null}
+          chipTone={survival?.week_best ? 'dark' : 'gold'}
+          onPress={needTicket(() => router.push('/survival'))}
+        />
+        <ModeTile
+          index={4}
+          title={t.tf}
+          body={t.tfBody}
+          icon="bolt"
+          colors={['#14B8A6', '#0E7490']}
+          chip={tf?.best ? fmt(t.blitzBest, { n: tf.best }) : isNew('tf') ? t.new : null}
+          chipTone={tf?.best ? 'dark' : 'gold'}
+          onPress={needTicket(() => router.push('/truefalse'))}
+        />
+      </View>
+      <View style={styles.row}>
+        <ModeTile
+          index={5}
           title={t.daily}
           body={dailyDone ? t.dailyDone : t.dailyBody}
           icon="daily"
@@ -122,7 +147,7 @@ function Modes() {
           onPress={() => router.push({ pathname: '/quiz', params: { mode: 'daily' } })}
         />
         <ModeTile
-          index={4}
+          index={6}
           title={t.friend}
           body={t.friendBody}
           icon="friends"
@@ -134,7 +159,7 @@ function Modes() {
       </View>
       <ModeTile
         wide
-        index={5}
+        index={7}
         title={t.worlds}
         body={t.worldsBody}
         art={<Image source={WORLD_IMAGES.globe!} style={styles.worldArt} />}
@@ -142,6 +167,39 @@ function Modes() {
         onPress={() => router.push('/(tabs)/play')}
       />
     </>
+  );
+}
+
+/** Friend brings friend: a bright banner with progress to the next goal. */
+function InviteBanner() {
+  const { data } = useReferral();
+  const r = strings.referral;
+  const next = data?.goals.find((g) => !g.reached);
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.invite, pressed && styles.pressed]}
+      onPress={() => router.push('/invite')}
+      accessibilityRole="button"
+      accessibilityLabel={r.homeTitle}
+    >
+      <LinearGradient colors={['#FF6FB5', '#FF9F43']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+      <Sheen />
+      <Icon name="gift" size={56} />
+      <View style={styles.inviteText}>
+        <AppText variant="heading" color={colors.textOnBright}>
+          {r.homeTitle}
+        </AppText>
+        <AppText variant="label" color={colors.textOnBright}>
+          {r.homeBody}
+        </AppText>
+        {data && data.qualified > 0 ? (
+          <AppText variant="caption" color={colors.textOnBright}>
+            {next ? `${fmt(r.homeProgress, { n: data.qualified })} · ${data.qualified}/${next.n}` : fmt(r.homeProgress, { n: data.qualified })}
+          </AppText>
+        ) : null}
+      </View>
+      <Ionicons name="chevron-back" size={26} color={colors.textOnBright} />
+    </Pressable>
   );
 }
 
@@ -257,6 +315,7 @@ export default function HomeScreen() {
       <Hero />
       <NewbieBanner />
       <Modes />
+      <InviteBanner />
       <NextGoal />
       <EventCard />
       <MissionsCard />
@@ -268,6 +327,17 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  invite: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    padding: space.md,
+    borderRadius: 22,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.35)',
+  },
+  inviteText: { flex: 1, gap: 2 },
   heroCenter: { alignItems: 'center', gap: space.sm, alignSelf: 'stretch' },
   stretch: { alignSelf: 'stretch' },
   section: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.xs },

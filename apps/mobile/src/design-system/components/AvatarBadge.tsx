@@ -14,6 +14,7 @@ export const FRAME_COLORS: Record<string, [string, string, ...string[]]> = {
   gold: ['#FFE98A', '#E0A400', '#FFD23F'],
   fire: ['#FFE14D', '#FF7A1A', '#E8203A'],
   rainbow: ['#FF4D6D', '#FFB13D', '#3DDC84', '#3E8EF7', '#B14CFF'],
+  ambassador: ['#7DF9FF', '#FFD23F', '#FF6FB5', '#7DF9FF'],
 };
 
 /**
