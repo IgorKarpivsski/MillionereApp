@@ -195,7 +195,7 @@ export default function InviteScreen() {
                 placeholderTextColor={colors.textDim}
                 autoCapitalize="characters"
                 autoCorrect={false}
-                style={styles.input}
+                style={[styles.input, code ? styles.inputCode : null]}
                 accessibilityLabel={t.codePlaceholder}
               />
               <StickerButton label={t.redeem} icon="gift" fullWidth disabled={code.length !== 6} loading={busy} onPress={() => void redeem()} />
@@ -233,6 +233,7 @@ const styles = StyleSheet.create({
   goalHead: { flexDirection: 'row', alignItems: 'center' },
   track: { height: 10, borderRadius: 5, backgroundColor: 'rgba(255,255,255,0.12)', overflow: 'hidden' },
   fill: { height: '100%', borderRadius: 5, backgroundColor: colors.led },
+  inputCode: { fontSize: 24, letterSpacing: 4 },
   friend: { flexDirection: 'row', alignItems: 'center', gap: space.sm, padding: space.sm, borderRadius: radius.board, backgroundColor: colors.board },
   input: {
     height: 52,
@@ -241,8 +242,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: 'rgba(0,0,0,0.3)',
     color: colors.text,
-    fontSize: 22,
-    letterSpacing: 4,
+    fontSize: 20,
     textAlign: 'center',
     fontFamily: 'IBMPlexSansHebrew_700Bold',
   },
