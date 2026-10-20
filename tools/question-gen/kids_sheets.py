@@ -14,13 +14,11 @@ COLS, ROWS, W, H, LABEL = 5, 4, 240, 180, 26
 
 images = json.loads((OUT / "images.json").read_text(encoding="utf-8"))
 ok = sorted(((v["idx"], t) for t, v in images.items() if not v.get("missing") and v.get("idx")))
-# Drafts waiting for review (kids/new/*.img.txt): only their photos go on the sheets.
+# Photos waiting for the eye check: kids/review_pending.list (one title per line). Only they go on the sheets.
 new_titles = set()
-for f in Path("tools/question-gen/kids/new").glob("*.img.txt"):
-    for line in f.read_text(encoding="utf-8").splitlines():
-        parts = [p.strip() for p in line.split("|")]
-        if not line.startswith("#") and len(parts) > 6 and parts[6]:
-            new_titles.add(parts[6])
+pending = Path("tools/question-gen/kids/review_pending.list")
+if pending.exists():
+    new_titles = {l.strip() for l in pending.read_text(encoding="utf-8").splitlines() if l.strip() and not l.startswith("#")}
 if new_titles:
     ok = [(i, t) for i, t in ok if t in new_titles]
 sheets = OUT / "sheets"
