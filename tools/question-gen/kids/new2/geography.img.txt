@@ -1,0 +1,2 @@
+# world: geography
+# format: question | correct | wrong1 | wrong2 | wrong3 | explanation | Hebrew Wikipedia article title whose lead photo shows the correct answer
