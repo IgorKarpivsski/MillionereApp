@@ -1,6 +1,6 @@
 """Checks a batch of new kids questions before they join the bank.
 
-    python3 tools/question-gen/check_new.py <world>
+    python3 tools/question-gen/check_new.py <world> [batch dir, default new]
 
 Reads kids/new/<world>.txt and kids/new/<world>.img.txt and reports, per line:
 bad format, duplicate options, too long/short, "which year" questions, the answer
@@ -31,8 +31,12 @@ def lines(p):
 
 def main():
     world = sys.argv[1]
+    batch = sys.argv[2] if len(sys.argv) > 2 else "new"
     seen_q, seen_t = {}, {}
-    for f in sorted(KIDS.glob("*.txt")):
+    earlier = sorted(KIDS.glob("*.txt"))
+    if batch != "new":  # a later batch must not repeat the bank nor the earlier drafts
+        earlier += sorted((KIDS / "new").glob("*.txt"))
+    for f in earlier:
         for n, l in lines(f):
             parts = [p.strip() for p in l.lstrip("*").split("|")]
             seen_q.setdefault(norm(parts[0]) + ("|" + parts[6] if f.name.endswith(".img.txt") and len(parts) > 6 else ""), f"{f.name}:{n}")
@@ -40,7 +44,7 @@ def main():
                 seen_t.setdefault(parts[6], f"{f.name}:{n}")
     errs = 0
     count = {"text": 0, "photo": 0}
-    for kind, f in (("text", KIDS / "new" / f"{world}.txt"), ("photo", KIDS / "new" / f"{world}.img.txt")):
+    for kind, f in (("text", KIDS / batch / f"{world}.txt"), ("photo", KIDS / batch / f"{world}.img.txt")):
         for n, l in lines(f):
             parts = [p.strip() for p in l.lstrip("*").split("|")]
             where = f"{f.name}:{n}"
