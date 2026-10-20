@@ -25,7 +25,7 @@ def norm(s):
 
 
 # Every import tags its rows; kids rows without the current batch were removed from the source files.
-BATCH = "2026-10-17"
+BATCH = "2026-10-20"
 IMAGES = Path(__file__).parents[2] / "data" / "kids-images"
 OK_LICENSE = re.compile(r"(CC0|Public domain|PD|CC BY|CC-BY|GFDL|Attribution|FAL|Free Art)", re.I)
 

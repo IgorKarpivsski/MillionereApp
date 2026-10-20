@@ -22,4 +22,4 @@ jobs:
           node tools/question-gen/import.mjs
         env:
           QUESTIONS_FILE: content/kids/questions.jsonl
-          IMPORT_TOKEN: e630bd00e2c9827ef93d4e8d03d41d44add8a3cb1728bf2a
+          IMPORT_TOKEN: e8a6860f62ca9b62d5ed5f88d5d1a042484c07f1143d940c

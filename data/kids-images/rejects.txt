@@ -39,3 +39,418 @@
 שעון חול  # an icon, not a photo
 שקשוקה  # looks like a pizza
 תאנה  # unclear plant, no fruit
+# eye check 2026-10-20
+א-רובע אל-ח'אלי  # abstract satellite texture, not recognizable desert
+אביב גפן  # unclear identity, doesn't look like him
+אבן אילת  # shows a hole in rock, not the green-blue stone
+אגם אוקיצ'ובי  # satellite image
+אגם אייר  # shows full water, contradicts answer
+אגם בוגוריה  # flamingos in photo give away answer
+אגם בלטון  # false-color satellite image
+אגם המלכים  # church described in question not shown
+אגם ואנקה  # lone tree described in question not shown
+אגם ויניפג  # labeled satellite map
+אגם מרקאיבו  # satellite image
+אודין  # engraving with name label
+אודם  # tiny ruby crystal on dark rock
+אוזניות  # headphones not main subject (rangefinder scene)
+אונגוג'ה  # map
+אוניברסיטת חיפה  # logo with text
+אופני הרים  # brand logo, no sport shown, parked bike
+אופניים  # mostly leg and shoe, bike partial
+אוקינאווה (אי)  # satellite image
+אור (עיר)  # map with Hebrew labels
+אורגנו  # flowering plant, could be confused with lavender
+אורז  # rice plant, not food
+אוריון (קבוצת כוכבים)  # star chart diagram
+אורנגאוטן  # map
+אטארי 2600  # brand logo/text on console
+אטלס (ירח)  # blob, doesn't show saucer shape clearly
+אי הפסחא  # labeled satellite image
+אי חג המולד  # globe map
+אי רובינזון קרוזו  # satellite image
+איי גלאפגוס  # satellite image
+אייוואר  # jar label "AJVAR" visible, brand
+איילית  # pinned dead specimen
+אינג'ניואיטי  # logo text "MARS HELICOPTER"
+איצוקושימה  # floating gate barely visible
+אירלנד (אי)  # satellite image
+אכידנה  # shows a mythological statue, not the animal
+אלכסיי ליאונוב  # name patch visible on suit
+אמו דריה  # satellite image
+אמפורה  # relief carving, not an amphora
+אמת מים  # shows Petra Siq channel, not aqueduct
+אנגלסי  # flag/coat of arms
+אנדראה בוצ'לי  # name plaque (star) in photo
+אנדרומדה (קבוצת כוכבים)  # star chart diagram
+אנמומטר  # engraving with caption text
+אנציקלופדיה  # "Atlas" text visible (wrong option)
+צ'ג'ו  # generic landscape, no described features
+צ'יימס  # black image with music symbols, no instrument
+צאלון נאה  # flower close-up, not the tree
+צימעס  # rice/meat dish, not clearly tzimmes
+ציפורן (תבלין)  # shows a tree, not the spice
+ציצית  # soldiers praying, tzitzit not clear
+צלופח חשמלי  # unclear/different fish
+צנון  # small illustration, radish tiny
+צפצפה מצויה  # leaves close-up, not the tree
+צפת  # emblem with text "צפת"
+קבוקי  # tiny detailed woodblock print
+קובה  # shows a street in Cuba, not the dish
+קובייה הונגרית  # drawing/diagram
+קוגל  # unclear cake, not recognizable kugel
+קוד QR  # black/broken image
+קוואי  # satellite image
+קוורץ  # mineral display case, not clear
+קולט אדים  # small hood in kitchen scene
+קוסומל  # Mexican flag visible gives away
+קטניות  # shows a tree, not legumes
+קינמון  # brown powder, could be paprika
+קירקוס מקסימוס  # scale model of Rome, not the site
+קלאב סנדוויץ'  # Coca-Cola can prominent
+קלהארי  # satellite map
+קנטאור (קבוצת כוכבים)  # star chart with name label
+קניש  # unclear, could be burekas
+קסטנייטות  # mounted on machine, unrecognizable
+קפדוקיה  # generic valley, no landmark features
+קפה ערבי  # shows pot and beans, not plant
+קפיצה לגובה  # Aquarius brand banner prominent
+קפיצה לרוחק  # tiny distant figures
+קפיצות סקי  # brand logo on skis prominent
+קציצה  # looks like kibbeh/fried balls cut open
+קצפת  # small detail on drinks
+קקאו  # beans, not the plant
+קרמל  # orange liquid, unclear
+אפולוניה  # generic cliff, fortress not visible
+אפרסק  # blossom, not the fruit
+אצטדיון אל-בית  # interior, tent shape not shown
+אצטדיון אנטוניו וספוצ'יו ליברטי  # generic stadium
+אצטדיון דייגו ארמנדו מראדונה (נאפולי)  # generic stadium interior
+אצטדיון האור (ליסבון)  # generic stadium interior
+אצטדיון הדרגאו  # generic stadium interior
+קרקס  # poster, not a place
+קשיו  # leaves only, no nut
+קשת (קבוצת כוכבים)  # star chart diagram
+קתדרלת קלן  # collage
+רוביקון  # generic harbor, unclear
+רוכסן  # diagram
+רוקפור  # logo
+ריבת חלב  # brown spread, ambiguous
+ריו גראנדה  # generic river
+ריו נגרו  # aerial, meeting of waters not visible
+ריין  # generic river, no cathedral
+ריקוטה  # unclear bowls in kitchen
+ריתוך  # dark, unclear
+רמב"ם – הקריה הרפואית לבריאות האדם  # generic building, sign text, no sea
+רמקול  # old technical illustration
+רעשן לתינוקות  # mixed baby toys, teethers fit wrong option
+רקמה  # histology slide, not embroidery
+שאנון (נהר)  # generic river
+שביט (משגר לוויינים)  # generic rocket launch
+שביט האלי  # generic comet, fits wrong options
+שדרות רוטשילד  # generic boulevard
+שונית המחסום הגדולה  # satellite map
+שור (קבוצת כוכבים)  # star chart diagram
+שחמט  # illustration with text labels (Ajedrez)
+שיאנג-צ'י  # board diagram with Chinese characters
+שיטפון  # high river, flood not clear
+שיקוקו  # satellite map
+שלד האדם  # chart of animal skeletons
+שלכת  # plant collage, not autumn
+שלפח  # flower, not the fruit
+שמנת  # looks like milk splash
+שעון שחמט  # unclear digital box
+שעון שמש  # small on wall, unclear
+שעורה  # botanical illustration with text
+שעם  # cork oak trees, not cork
+שקמה  # urban street trees, unclear
+שרכים  # small collage
+אצטדיון קייפטאון  # interior, no Table Mountain
+אקליפטוס  # generic tree
+אקספו תל אביב  # generic building with name text
+אקרובטיקה  # tiny figures
+ארבעת המינים  # species barely visible
+ארד  # corroded pile, unclear
+ארטמיס  # black/broken image
+תאומים (קבוצת כוכבים)  # star chart diagram
+תדמור  # ruins tiny/distant
+תוף  # marching band, sousaphone dominates; could fit trumpet
+תות לבן  # generic tree, not identifiable as mulberry
+תחבושת  # unclear white coil, not recognizable as bandage
+תחרה  # lace on lingerie-like garment
+תיאטרון הבימה  # building name sign visible
+תפוז  # tree with small green fruits, not the fruit
+תקליטון  # SONY brand label prominent
+תקליטן  # "MAJOR LAZER" text, no clear DJ
+תרד  # flowering plant, not recognizable spinach
+M87  # fuzzy blob, not clearly a galaxy
+Xbox (קונסולה)  # logo only
+אריה (קבוצת כוכבים)  # star chart diagram
+ארמון הפרלמנט  # building tiny in distance
+ארמון הקיץ  # palace tiny in distance
+ארמון צה'אנגדאק  # aerial city view, palace not clear
+באולינג  # Brunswick brand prominent
+באפין (אי)  # satellite/map view
+בובה  # cluttered pile of mixed toys
+בויוק מנדרס  # valley landscape, river not shown
+בוצ'ה (משחק כדור)  # black image
+בוראנו  # aerial lagoon, colorful houses not visible
+בורנאו  # map with text labels
+בינגו  # unclear scene
+ביסקוויט  # ad poster with "Biscuits" text
+ביצת פברז'ה  # tiny B&W photo of display
+בירימבאו  # only accessory parts, instrument not clear
+במיה  # plant buds, not the vegetable
+בן אל תבורי  # bare chest open shirt
+בניין קרייזלר  # map
+בסון  # black image
+בקר  # African buffalo, wrong species
+בקר צלוי  # meat slices tiny on plate
+ברבור (קבוצת כוכבים)  # star chart diagram
+ברוש מצוי  # shrub on cliff, not a clear cypress
+ברקוד  # technical diagram with text
+בשר  # hanging carcasses, gory for kids
+בתולה (קבוצת כוכבים)  # star chart diagram
+בתי הכנסת הספרדיים  # floor plan with Hebrew text
+ג'ונו (גשושית)  # mission logo
+ג'קפרוט  # unclear fruit, may not be jackfruit
+ג'רבה  # satellite view
+גאנגק'אר פואנסום  # distant mountains, peak not clear
+גדי (קבוצת כוכבים)  # star chart diagram
+גוזו  # satellite view
+גוטלנד  # generic meadow
+גיטרה בס  # sheet music notation, not the instrument
+גיטרת 12 מיתרים  # small photo, 12 strings not countable
+גיים בוי  # "GAME BOY" text on device gives answer away
+גיים בוי אדוונס  # "GAME BOY ADVANCE" text on device gives answer away
+גינאה החדשה  # map with text labels
+גלאי עשן  # wall with alarm panel, smoke detector not clear
+גלגל מים  # unclear bamboo structure, water wheel not recognizable
+גלויה  # blank text form, not clearly a postcard
+גלידה  # prominent brand logo on cups
+גלקסיה אליפטית  # diagram with text labels
+גרזן  # cluttered pile of small tools
+גרניטה  # unclear bowls, could be any dessert
+גשם  # dark blurry image, rain not visible
+דובדבן  # tree with no visible cherries
+דוברובניק  # flag/emblem instead of the city
+דולב מזרחי  # generic tree from below, not identifiable
+דונדורמה (גלידה טורקית)  # small unclear vendor scene
+דלוס  # generic landscape, ruins not clear
+דגים (קבוצת כוכבים)  # star chart, constellation not identifiable
+דלי (קבוצת כוכבים)  # star chart, constellation not identifiable
+דנקל  # shows a different tram (Jerusalem-style Citadis)
+דרקון (קבוצת כוכבים)  # star chart, constellation not identifiable
+האגורה  # city panorama, agora not visible
+האגם המערבי  # generic sunset lake, no pagodas/bridges
+האגם המר הגדול  # map with text labels
+האקדמיה לאמנות של פירנצה  # nondescript street, building not identifiable
+הארי סטיילס  # shirtless photo
+הבית הלבן  # dark line drawing, barely visible
+הגשר החדש (ברטיסלאבה)  # bridge tiny and distant
+הדובה הגדולה  # star chart, constellation not identifiable
+הווילה הרומאית בקזאלה  # interior ruins, no mosaics, unclear
+הולה הופ  # identifiable children
+הוקי רולר  # blurry, looks like ice skating, no stick
+היאבקות  # nude statue
+הים האירי  # dark unclear satellite image
+הכנסת  # seat chart diagram, not the building
+הכנרת  # satellite map-like image
+הכרזת העצמאות של ארצות הברית  # document title text gives answer away
+הליכה תחרותית  # blurry cropped legs
+המאוזוליאום בהליקרנסוס  # scattered ruins, wonder not depicted
+הפארק הלאומי צפון מזרח גרינלנד  # map
+הפארק הלאומי ת'ינגווטליר  # waterfall, rift not shown
+הר ארבל  # hazy distant view, mountain not clear
+הר הגלבוע  # generic hillside, fits Tabor/Meron too
+הר הרצל  # generic forest aerial, nothing identifiable
+הר מירון  # generic mountain, fits wrong options
+הר ציון  # generic city view, mount not identifiable
+הרולד לויד  # tiny figure in busy scene
+הרכבת התלויה של וופרטל  # logo only
+הרמב"ם  # engraving with name label text
+הרקולס (קבוצת כוכבים)  # star chart diagram
+השמורה הביוספרית של הדנאית המלכותית  # text sign only, no butterflies
+ווסטוק 1  # museum object unclear, looks like Sputnik
+ויליאם הכובש  # tapestry with name text visible
+ז'אן ד'ארק  # medieval sketch with text, unclear
+זימבבואה הגדולה  # ruins tiny and distant
+זעפרן  # flower plant, not the spice
+זקינתוס  # satellite map-like view
+חאן אל-עומדאן  # old engraving interior, no clock tower
+חוט דנטלי  # tooth X-ray, no floss
+חור שחור  # scientific image with text labels
+חזיון תעתועים  # unclear hazy landscape
+חידת שמונה המלכות  # diagram with one queen, contradicts answer
+חיפה  # coat of arms with city name text
+חליל צד  # black/broken image
+חלילית  # violin (wrong option) also in photo, cluttered
+חמסה  # pile of objects, hamsa not clear
+חמש אבנים  # statue, game tiny/unclear
+חפרפרת אירופית  # stuffed/dead specimen
+חצב מצוי  # botanical illustration
+חרוב מצוי  # generic tree, no pods
+חרוסת  # cluttered Seder ingredients, charoset unclear
+חרמש  # scythe barely visible
+חתול בר  # looks like a domestic tabby
+טאיפיי 101  # logo with name text
+טהיטי  # flag only
+טונה כחולת-סנפיר אטלנטית  # dead fish on deck
+טוסטר  # conveyor oven, unclear vs microwave
+טחינה  # machine, tahini not clear
+טירת אוסקה  # castle tiny among skyscrapers
+טירת טינטאג'ל  # castle ruins not clear
+טירת סטרלינג  # blurry aerial, castle unclear
+טלסקופ החלל קפלר  # technical diagram with labels
+טנגרם  # diagram with dimension labels
+יו-יו  # blurry yo-yo, identifiable minor
+יוגה  # deity statue, no people doing yoga
+ימת אונטריו  # whole Great Lakes satellite, not specific lake
+ימת סופיריור  # whole Great Lakes satellite, not specific lake
+יער גשם טרופי  # sparse misty trees, could be savanna
+יקושימה  # sea from ferry, no island forest
+ירק  # painting, vegetables unclear
+כדור טניס  # Penn brand logo prominent
+כדורסל  # B&W portrait of Naismith, not the sport
+כובע טמבל  # identifiable children, B&W group
+כוכב אניס  # plant leaves, not the spice
+כוכב האנושות  # starry sky streak, satellite not visible
+כוכבי ים  # small collage incl. non-starfish
+כלב גדול  # star chart diagram
+כף סוניו  # headland only, temple not visible
+כפור  # frost barely visible, unclear
+כריך מלפפון  # filling not visible, fits other sandwiches
+כרישה  # growing plant in garden, unclear
+לאפה  # shows lahmajun-like stack, not laffa
+לובר אבו דאבי  # promenade, museum/dome not shown
+לוח אם  # labeled diagram with text
+לונג איילנד  # satellite map view
+ליים  # collage with orange tree/flower, confusing
+לימון  # tree with tiny fruit
+לימונדה  # plain glass of ice water, unclear
+לירה (כלי נגינה)  # tiny lyre on vase painting
+לנה  # satellite map view
+לנסרוטה  # satellite map view
+מאזניים (קבוצת כוכבים)  # star chart diagram
+מאפין  # dark oven interior, muffins not visible
+מבצר נמרוד  # fortress tiny in landscape
+מברג  # DeWalt power drill, brand; fits drill option
+מגאפון  # B&W crowd, megaphone small
+מגדלי פטרונס  # logo with text
+מגילת העצמאות  # tiny unreadable scroll
+מגנה כרטה  # generic parchment, could be any document
+מגפון  # B&W crowd, megaphone small
+מד גשם  # sign reads "Rain gauge / מד גשם"
+מדבר ויקטוריה הגדול  # satellite map view
+מדבר סונורה  # photo shows the saguaro answer
+מוזיאון האקרופוליס  # museum tiny in cityscape
+מוזיאון ההעפלה וחיל הים  # drawing of ship, not museum
+מוזיאון המטרופוליטן לאמנות  # "THE MET" logo
+מוטוקרוס  # empty track, no bikes visible
+מונית  # looks like ordinary car
+מזרקה  # small collage
+מטקות  # B&W beach, paddles tiny
+מטרייה  # identifiable child
+מיזוג גלקסיות  # tiny blurry blob
+מכונת כביסה  # antique wooden washer, unrecognizable
+מכשיר קשר  # man with headset at screen, no walkie-talkie
+מכתש פרדפורט  # satellite image, unclear
+מלון (צמח)  # flowers only, no melon fruit
+מלטה (אי)  # satellite map view
+ממותה צמרית  # skeleton, fits elephant too
+ממילא  # road view, not the mall
+מנדולינה  # musical notation
+מנהרות הכותל  # sign text gives answer away
+מנהרות הכרמל  # road sign "23"
+מנורת המקדש  # diagram sheet of many menorahs
+מסגד חסן השני  # tiny silhouette at sunset, mosque not clear
+מסור מוזיקלי  # old B&W photo, saw barely visible
+מערבל בטון  # small portable mixer, not a vehicle
+מפוחית פה  # brand name text on harmonica
+מפלי טוגלה  # distant, waterfall barely visible
+מפרץ אילת  # satellite image, also shows Gulf of Suez
+מצה בריי  # looks like pizza/shakshuka
+מקהלה  # identifiable children (boys choir)
+מרוץ שליחים  # unclear, no relay visible, possibly kids
+מרז'ו  # satellite/map-like image
+מריונטה  # small B&W, puppet barely visible
+מרכז הממלכה  # skyline, tower not clear
+מרכז ז'ורז' פומפידו  # tiny in distant cityscape
+מרכז רפואי הדסה  # aerial view, hospital not identifiable
+מרציפן  # yellow paste in bowl, looks like halva/mash
+מרק עדשים  # ambiguous orange soup, fits other options
+משאית  # prominent brand text/logo
+משכן הכנסת  # aerial, not recognizable as Knesset
+משכן הנשיא  # map, not a photo
+משקפי שמש  # brand logo box prominent
+משקפיים  # identifiable child
+נאי  # just a stick, instrument unclear
+נבל (קבוצת כוכבים)  # star chart diagram with labels/logo
+נוגט  # packaging text gives answer
+נווה צדק  # skyline, neighborhood not clear
+נחלאות  # just a window, not alleys/neighborhood
+ניו הורייזונס  # mission logo patch with text
+נייבה (נהר, רוסיה)  # map with text
+נילוס  # jungle river section, not related to Cairo
+נינטנדו DS  # "Nintendo DS" text on screen gives answer
+נקודה כחולה חיוורת  # dot not visible, just streaks
+נרות שבת  # empty candlestick, no candles, ambiguous
+נשר (קבוצת כוכבים)  # star chart diagram
+סאימה (אגם)  # satellite map
+סבון  # ambiguous, could be cheese/butter
+סוזאפון  # crowd, instrument barely visible
+סולם  # ladder small on building wall
+סומטרה  # map
+סוקר סיטי  # interior only, calabash exterior not shown
+סורסטרומינג  # brand text on can
+סטייק  # raw meat, not a dish
+סטפס  # only shoes, no dance shown
+סינמטוגרף  # engraving with caption text
+סינתיסייזר  # old B&W, instrument unclear
+סירופ מייפל  # puddle, could be oil/honey
+סירניקי  # ambiguous fried balls
+סלטיק פארק  # generic stadium interior
+סלרי  # potted plant, looks like parsley
+סמית'סוניאן  # logo
+סן מרטן (אי)  # satellite image
+סנטוסה  # aerial greenery, not clear
+ספינג'  # look like buns/rolls, ambiguous
+ספינת אוויר  # vintage chart incl. hot-air balloons (wrong option)
+סקיילאב  # mission patch logo with text
+עגבנייה  # plants, not the tomato fruit
+עוגת גבינה  # packaged cake in fridge with Hebrew label naming it
+עוף החול  # coat of arms/seal with text, not a phoenix photo
+עט כדורי  # extreme macro of tip only, unclear
+עטרה (שמש)  # diagram of sun structure, not eclipse corona
+עין הורוס  # black image with two white shapes, not the symbol
+עמבה  # generic orange sauce bowl, could be other sauces
+עמק המוות  # satellite image
+עקרב (קבוצת כוכבים)  # star chart map
+ער אציל  # whole tree, not identifiable as bay laurel spice
+ערן זהבי  # sponsor logos prominent in background
+ערפילית עין החתול  # shape doesn't clearly read as cat's eye; same image as planetary nebula
+פאי  # number line with pi symbol, not a pie
+פאיסטום  # aerial view, temples tiny
+פארא הוקי קרח  # only sled equipment, could be luge; no sport shown
+פארקור  # cartoon drawing of running man
+פגסוס (קבוצת כוכבים)  # star chart map
+פוטבול אמריקאי  # prominent Wilson brand logo on ball
+פוטין  # photo of Vladimir Putin, not the dish
+פולנטה  # unclear jar of creamy food
+פונצ'ו  # riders from behind, poncho not clear
+פוקי (מאכל שמקורו בהוואי)  # generic salad bowl in shop, not poke
+פורמולה 1  # cars tiny and distant on circuit
+פטוצ'יני אלפרדו  # plain fettuccine nest, no alfredo sauce
+פטרוזיליה  # flowering plant, not recognizable parsley leaves
+פיטאיה  # flowers, not the fruit
+פין (אי)  # satellite image
+פיקוס הגומי  # trunk/aerial roots of tree, not a house plant
+פירוגי  # unclear dish, looks like quesadilla
+פלייסטיישן 3  # "PLAYSTATION 3" text on console gives answer away
+פסגת ההר הכחול  # dim generic mountain view
+פסגת ויקטוריה  # pavilion on hill, no skyline as question describes
+פרג  # white arctic poppy, not recognizable as poppy
+פריזבי  # close-up with brand text/Olympic logo
+פרמזן  # rind stamped with Parmigiano text
+פרסאוס (קבוצת כוכבים)  # star chart map
+צ'או פראיה  # generic river, no boats/temples/city
