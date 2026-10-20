@@ -14,3 +14,4 @@ supabase/.branches/
 .DS_Store
 coverage/
 data/kids-images/thumbs/
+__pycache__/
