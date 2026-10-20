@@ -12,6 +12,7 @@ import { colors, radius, space } from '@/design-system/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { storeApi } from '@/features/store/api';
 import { useAdReward, useStore } from '@/features/store/hooks';
+import { SUBS, freeTrialDays, openManageSubscription, recoverPurchases, verifyAndFinish } from '@/features/store/purchases';
 import { BoostShop } from '@/features/boosts/BoostShop';
 import { DealCard } from '@/features/engage/DealCard';
 import { CurrencyHelpButton } from '@/features/teen/CurrencyHelp';
@@ -21,8 +22,7 @@ import { queryKeys } from '@/lib/queryClient';
 import { fmt, strings } from '@/lib/i18n';
 
 const t = strings.store;
-const SUBS = new Set(['vip_monthly']);
-const CONSUMABLE = new Set(['coins_2000', 'coins_6000', 'coins_16000', 'gems_80', 'gems_300']);
+const dateHe = (iso: string) => new Date(iso).toLocaleDateString('he-IL', { day: 'numeric', month: 'long' });
 
 export default function ShopScreen() {
   const { data: store } = useStore();
@@ -34,14 +34,10 @@ export default function ShopScreen() {
   const [buying, setBuying] = useState<string | null>(null);
   const [gateFor, setGateFor] = useState<StoreProduct | null>(null);
 
-  const { connected, products, subscriptions, fetchProducts, requestPurchase, finishTransaction } = useIAP({
+  const { connected, products, subscriptions, fetchProducts, requestPurchase } = useIAP({
     onPurchaseSuccess: async (purchase: Purchase) => {
-      const sku = purchase.productId;
       try {
-        const token = purchase.purchaseToken;
-        if (!token) throw new Error('no token');
-        await storeApi.verify(sku, token, SUBS.has(sku) ? 'subs' : 'in-app');
-        await finishTransaction({ purchase, isConsumable: CONSUMABLE.has(sku) });
+        await verifyAndFinish(purchase);
         playSound('coins');
         toast(t.thanks, 'success');
         for (const k of [queryKeys.store, queryKeys.myState]) void qc.invalidateQueries({ queryKey: k });
@@ -93,6 +89,23 @@ export default function ShopScreen() {
   };
 
   const vipActive = !!store?.vip_until && new Date(store.vip_until) > new Date();
+  const sub = store?.sub ?? null;
+  const vipSku = store?.products.find((p) => p.kind === 'vip')?.sku;
+  const vipPrice = vipSku ? priceOf(vipSku) : null;
+  const trialDays = vipSku ? freeTrialDays(subscriptions.find((x) => x.id === vipSku)) : 0;
+  const [restoring, setRestoring] = useState(false);
+  const restore = async () => {
+    setRestoring(true);
+    try {
+      const n = await recoverPurchases();
+      for (const k of [queryKeys.store, queryKeys.myState]) void qc.invalidateQueries({ queryKey: k });
+      toast(n > 0 ? t.restored : t.nothingToRestore, n > 0 ? 'success' : 'info');
+    } catch {
+      toast(strings.errors.generic, 'error');
+    } finally {
+      setRestoring(false);
+    }
+  };
   const storeReady = connected && (products.length > 0 || subscriptions.length > 0);
 
   const Item = ({ p }: { p: StoreProduct }) => {
@@ -118,7 +131,11 @@ export default function ShopScreen() {
                   ? fmt(t.gemsLine, { n: formatNumber(p.amount) })
                   : p.kind === 'no_ads'
                     ? t.noAdsLine
-                    : t.vipLine}
+                    : price
+                      ? trialDays
+                        ? fmt(t.subTrial, { days: trialDays, price })
+                        : fmt(t.subPerMonth, { price })
+                      : t.vipLine}
             </AppText>
           </View>
           <StickerButton
@@ -182,6 +199,14 @@ export default function ShopScreen() {
         <BoostShop />
 
         <AppText variant="heading">{t.vipTitle}</AppText>
+        {sub && (sub.state === 'grace' || sub.state === 'on_hold' || sub.state === 'paused') ? (
+          <Card kind="sticker" frame={colors.danger} padding={space.md} style={styles.item}>
+            <AppText variant="label" color={colors.text}>
+              {sub.state === 'grace' ? t.subGrace : sub.state === 'on_hold' ? t.subOnHold : t.subPaused}
+            </AppText>
+            <StickerButton label={t.fixPayment} icon="card" tone="danger" size="sm" onPress={() => openManageSubscription(sub.sku)} />
+          </Card>
+        ) : null}
         {store?.products.filter((p) => p.kind === 'vip').map((p) => <Item key={p.sku} p={p} />)}
         <View style={styles.perks}>
           {t.vipPerks.map((perk) => (
@@ -190,6 +215,21 @@ export default function ShopScreen() {
             </AppText>
           ))}
         </View>
+        {sub && (sub.state === 'active' || sub.state === 'canceled') && sub.expires_at ? (
+          <AppText variant="label" color={colors.led}>
+            {fmt(sub.state === 'active' && sub.auto_renew ? t.subActive : t.subCanceled, { date: dateHe(sub.expires_at) })}
+          </AppText>
+        ) : vipActive && store?.vip_until && !sub ? (
+          <AppText variant="label" color={colors.led}>
+            {fmt(t.vipBonusNote, { date: dateHe(store.vip_until) })}
+          </AppText>
+        ) : null}
+        {vipPrice && !vipActive ? (
+          <AppText variant="caption" color={colors.textDim}>
+            {`${trialDays ? fmt(t.subTrialTerms, { price: vipPrice }) + ' ' : ''}${fmt(t.subTerms, { price: vipPrice })}`}
+          </AppText>
+        ) : null}
+        {sub ? <StickerButton label={t.manage} icon="settings" tone="ghost" size="sm" onPress={() => openManageSubscription(sub.sku)} /> : null}
 
         <AppText variant="heading">{t.coinsTitle}</AppText>
         {store?.products.filter((p) => p.kind === 'coins').map((p) => <Item key={p.sku} p={p} />)}
@@ -202,6 +242,7 @@ export default function ShopScreen() {
             {t.notReady}
           </AppText>
         ) : null}
+        <StickerButton label={t.restore} icon="refresh" tone="ghost" size="sm" loading={restoring} onPress={() => void restore()} />
         <AppText variant="caption" color={colors.textDim} align="center">
           {t.legal}
         </AppText>

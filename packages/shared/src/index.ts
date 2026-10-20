@@ -630,6 +630,16 @@ export const StoreStateSchema = z.object({
   free_pack_today: z.boolean(),
   vip_daily_today: z.boolean(),
   ad_free: z.boolean(),
+  /** the paid VIP subscription, if any (renewal date, payment problems, "manage") */
+  sub: z
+    .object({
+      sku: z.string(),
+      state: z.enum(['active', 'grace', 'on_hold', 'paused', 'canceled', 'expired']),
+      expires_at: z.string().nullable(),
+      auto_renew: z.boolean(),
+    })
+    .nullable()
+    .optional(),
 });
 export type StoreState = z.infer<typeof StoreStateSchema>;
 

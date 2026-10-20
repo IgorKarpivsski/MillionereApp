@@ -27,6 +27,7 @@ import { AgeGate } from '@/features/settings/AgeGate';
 import { useSettingsStore } from '@/features/settings/store';
 import { IncomingCallHost } from '@/features/boosts/IncomingCall';
 import { AutoRedeem } from '@/features/referral/AutoRedeem';
+import { PurchaseRecovery } from '@/features/store/PurchaseRecovery';
 import { RewardFlyHost } from '@/features/home/RewardFly';
 import { TourHost } from '@/features/tour/Tour';
 import { RemoveAdsUpsell } from '@/features/store/RemoveAdsUpsell';
@@ -124,6 +125,7 @@ function Gate() {
       <AgeGate />
       <IncomingCallHost />
       <AutoRedeem />
+      <PurchaseRecovery />
       <RewardFlyHost />
       <TourHost />
       <RemoveAdsUpsell />
