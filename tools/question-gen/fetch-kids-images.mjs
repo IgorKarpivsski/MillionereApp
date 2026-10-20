@@ -31,8 +31,10 @@ async function api(base, params) {
 }
 
 const titles = new Set();
-for (const f of readdirSync(SRC).filter((f) => f.endsWith('.img.txt'))) {
-  for (const line of readFileSync(join(SRC, f), 'utf8').split('\n')) {
+// the bank plus drafts waiting for review (kids/new)
+const imgFiles = [SRC, join(SRC, 'new')].filter((d) => existsSync(d)).flatMap((d) => readdirSync(d).filter((f) => f.endsWith('.img.txt')).map((f) => join(d, f)));
+for (const f of imgFiles) {
+  for (const line of readFileSync(f, 'utf8').split('\n')) {
     if (!line.trim() || line.startsWith('#')) continue;
     const parts = line.split('|').map((p) => p.trim());
     if (parts[6]) titles.add(parts[6]);
