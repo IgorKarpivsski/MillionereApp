@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-18T03:48:59.947Z",
+  "checked_at": "2026-10-20T03:03:24.795Z",
   "package": "com.haaluf.trivia",
   "tracks": [
     {
@@ -14,7 +14,7 @@
         {
           "name": "0.1.0",
           "versionCodes": [
-            "9"
+            "16"
           ],
           "status": "completed",
           "inAppUpdatePriority": 2
@@ -32,7 +32,14 @@
   },
   "details": {
     "defaultLanguage": "iw-IL",
-    "contactWebsite": "https://igorkarpivsski.github.io/MillionereApp/",
+    "contactWebsite": "https://igorkarpivsski.github.io",
     "contactEmail": "steamigor26@gmail.com"
+  },
+  "subscriptions": {
+    "status": 204,
+    "body": null
+  },
+  "inapp": {
+    "status": 403
   }
 }
