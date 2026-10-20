@@ -65,5 +65,7 @@ if (subs.status === 200) {
   }
 }
 const inapp = await call('GET', '/inappproducts');
-out.inapp = inapp.status === 200 ? (inapp.body?.inappproduct ?? []).map((p) => ({ sku: p.sku, status: p.status, price: p.defaultPrice })) : { status: inapp.status };
+out.inapp = inapp.status === 200 ? (inapp.body?.inappproduct ?? []).map((p) => ({ sku: p.sku, status: p.status, price: p.defaultPrice })) : { status: inapp.status, body: inapp.body };
+const otp = await call('GET', '/oneTimeProducts');
+out.oneTimeProducts = otp.status === 200 ? (otp.body?.oneTimeProducts ?? []).map((p) => ({ id: p.productId, options: (p.purchaseOptions ?? []).map((o) => o.state) })) : { status: otp.status, body: otp.body };
 console.log(JSON.stringify(out, null, 2));
