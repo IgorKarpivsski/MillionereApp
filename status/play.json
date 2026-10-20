@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-20T03:03:24.795Z",
+  "checked_at": "2026-10-20T03:04:52.016Z",
   "package": "com.haaluf.trivia",
   "tracks": [
     {
@@ -40,6 +40,17 @@
     "body": null
   },
   "inapp": {
-    "status": 403
+    "status": 403,
+    "body": {
+      "error": {
+        "code": 403,
+        "message": "Please migrate to the new publishing API.",
+        "status": "PERMISSION_DENIED"
+      }
+    }
+  },
+  "oneTimeProducts": {
+    "status": 204,
+    "body": null
   }
 }
