@@ -48,4 +48,22 @@ if (edit.status !== 200) {
   out.details = (await call('GET', `/edits/${id}/details`)).body;
   await call('DELETE', `/edits/${id}`);
 }
+// Monetization: what's set up in Play Console (subscriptions with base plans/offers, one-time products).
+const subs = await call('GET', '/subscriptions');
+out.subscriptions = subs.status === 200 ? (subs.body?.subscriptions ?? []).map((s) => ({
+  productId: s.productId,
+  basePlans: (s.basePlans ?? []).map((b) => ({ id: b.basePlanId, state: b.state, period: b.autoRenewingBasePlanType?.billingPeriodDuration,
+    grace: b.autoRenewingBasePlanType?.gracePeriodDuration, accountHold: b.autoRenewingBasePlanType?.accountHoldDuration,
+    resubscribe: b.autoRenewingBasePlanType?.resubscribeState, prices: (b.regionalConfigs ?? []).filter((r) => r.regionCode === 'IL').map((r) => r.price) })),
+  listings: (s.listings ?? []).map((l) => ({ lang: l.languageCode, title: l.title, benefits: l.benefits })),
+})) : { status: subs.status, body: subs.body };
+if (subs.status === 200) {
+  for (const s of out.subscriptions) {
+    const offers = await call('GET', `/subscriptions/${s.productId}/basePlans/-/offers`);
+    s.offers = offers.status === 200 ? (offers.body?.subscriptionOffers ?? []).map((o) => ({ id: o.offerId, basePlan: o.basePlanId, state: o.state,
+      phases: (o.phases ?? []).map((p) => ({ duration: p.duration, recurrences: p.recurrenceCount, free: !!p.regionalConfigs?.[0]?.free })) })) : offers.status;
+  }
+}
+const inapp = await call('GET', '/inappproducts');
+out.inapp = inapp.status === 200 ? (inapp.body?.inappproduct ?? []).map((p) => ({ sku: p.sku, status: p.status, price: p.defaultPrice })) : { status: inapp.status };
 console.log(JSON.stringify(out, null, 2));
