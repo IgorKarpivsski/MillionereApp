@@ -26,7 +26,8 @@ shot 01_home
 adb shell input keyevent KEYCODE_BACK; sleep 2
 n=0
 for world in "geography&level=1" "food&level=1" "science&level=1"; do
-  adb shell am start -W -a android.intent.action.VIEW -d "footballmillionaire://session?world=$world" "$PKG" >/dev/null
+  # the device shell splits on an unquoted &, so quote the whole link for it
+  adb shell "am start -W -a android.intent.action.VIEW -d 'footballmillionaire://session?world=$world' $PKG" >/dev/null
   sleep 7
   for q in 1 2 3 4 5 6 7 8 9 10; do
     n=$((n+1))
