@@ -411,6 +411,7 @@ export default function SessionScreen() {
 
   if (s.phase === 'error') {
     const noEnergy = s.notice === 'no_energy';
+    const locked = s.notice === 'locked';
     return (
       <SafeAreaView style={styles.root}>
         <Backdrop />
@@ -418,11 +419,11 @@ export default function SessionScreen() {
           <EmptyState
             icon={noEnergy ? 'ticket-outline' : s.notice === 'locked' ? 'lock-closed-outline' : 'cloud-offline-outline'}
             title={noEnergy ? strings.engage.outTitle : s.notice === 'locked' ? t.lockedErr : strings.quiz.error}
-            body={noEnergy ? strings.engage.freeModes : strings.errors.network}
-            actionLabel={noEnergy ? strings.engage.refillNow : strings.common.retry}
-            onAction={noEnergy ? showEnergy : () => void start()}
+            body={noEnergy ? strings.engage.freeModes : locked ? t.lockedBody : strings.errors.network}
+            actionLabel={noEnergy ? strings.engage.refillNow : locked ? t.toMap : strings.common.retry}
+            onAction={noEnergy ? showEnergy : locked ? () => router.back() : () => void start()}
           />
-          <StickerButton label={t.home} tone="ghost" onPress={() => router.back()} />
+          {locked ? null : <StickerButton label={t.home} tone="ghost" onPress={() => router.back()} />}
         </View>
       </SafeAreaView>
     );
