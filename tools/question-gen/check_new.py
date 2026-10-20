@@ -34,8 +34,10 @@ def main():
     batch = sys.argv[2] if len(sys.argv) > 2 else "new"
     seen_q, seen_t = {}, {}
     earlier = sorted(KIDS.glob("*.txt"))
-    if batch != "new":  # a later batch must not repeat the bank nor the earlier drafts
-        earlier += sorted((KIDS / "new").glob("*.txt"))
+    # a batch must not repeat the bank nor the other draft batches (kids/new, kids/new2, ...)
+    for d in sorted(KIDS.glob("new*")):
+        if d.is_dir() and d.name != batch:
+            earlier += sorted(d.glob("*.txt"))
     for f in earlier:
         for n, l in lines(f):
             parts = [p.strip() for p in l.lstrip("*").split("|")]
