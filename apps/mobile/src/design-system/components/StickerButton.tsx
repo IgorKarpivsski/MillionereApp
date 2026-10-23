@@ -91,30 +91,32 @@ export function StickerButton({
           glow ? { shadowColor: t.face, shadowOpacity: 0.7, shadowRadius: 12 } : null,
         ]}
       />
-      <Animated.View
-        style={[
-          styles.face,
-          { height: h, backgroundColor: t.face, paddingHorizontal: size === 'sm' ? space.lg : space.xl },
-          t.border ? { borderWidth: 2, borderColor: t.border } : null,
-          faceStyle,
-        ]}
-      >
-        <LinearGradient
+      {/* The face. Its colour and shine sit in their own clipped layer and the label in a plain row
+          above it: some Android phones (Samsung) drop the children of a borderless view that clips
+          with rounded corners, which left bright buttons blank. */}
+      <Animated.View style={[styles.face, { height: h }, faceStyle]}>
+        <View
           pointerEvents="none"
-          colors={bright ? ['rgba(255,255,255,0.45)', 'rgba(255,255,255,0.05)', 'rgba(0,0,0,0.08)'] : ['rgba(255,255,255,0.14)', 'rgba(255,255,255,0)']}
-          locations={bright ? [0, 0.5, 1] : [0, 0.6]}
-          style={StyleSheet.absoluteFill}
-        />
-        {loading ? (
-          <ActivityIndicator color={t.label} />
-        ) : (
-          <>
-            {icon ? <Ionicons name={icon} size={size === 'lg' ? 24 : 20} color={t.label} /> : null}
-            <AppText variant={size === 'sm' ? 'label' : 'button'} color={t.label} numberOfLines={1} style={styles.label}>
-              {label}
-            </AppText>
-          </>
-        )}
+          style={[styles.faceFill, { backgroundColor: t.face }, t.border ? { borderWidth: 2, borderColor: t.border } : null]}
+        >
+          <LinearGradient
+            colors={bright ? ['rgba(255,255,255,0.45)', 'rgba(255,255,255,0.05)', 'rgba(0,0,0,0.08)'] : ['rgba(255,255,255,0.14)', 'rgba(255,255,255,0)']}
+            locations={bright ? [0, 0.5, 1] : [0, 0.6]}
+            style={StyleSheet.absoluteFill}
+          />
+        </View>
+        <View style={[styles.content, { paddingHorizontal: size === 'sm' ? space.lg : space.xl }]}>
+          {loading ? (
+            <ActivityIndicator color={t.label} />
+          ) : (
+            <>
+              {icon ? <Ionicons name={icon} size={size === 'lg' ? 24 : 20} color={t.label} /> : null}
+              <AppText variant={size === 'sm' ? 'label' : 'button'} color={t.label} numberOfLines={1} style={styles.label}>
+                {label}
+              </AppText>
+            </>
+          )}
+        </View>
       </Animated.View>
     </Pressable>
   );
@@ -124,12 +126,7 @@ const styles = StyleSheet.create({
   full: { alignSelf: 'stretch' },
   label: { flexShrink: 1, zIndex: 1 },
   lip: { position: 'absolute', start: 0, end: 0, borderRadius: radius.control },
-  face: {
-    borderRadius: radius.control,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: space.sm,
-    overflow: 'hidden',
-  },
+  face: { borderRadius: radius.control },
+  faceFill: { ...StyleSheet.absoluteFillObject, borderRadius: radius.control, overflow: 'hidden' },
+  content: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm },
 });
