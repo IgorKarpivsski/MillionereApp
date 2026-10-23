@@ -65,12 +65,17 @@ begin
 
   -- missions
   s := public.missions_state();
-  perform test.assert(jsonb_array_length(s -> 'missions') = 3, 'three missions');
+  perform test.assert(jsonb_array_length(s -> 'missions') = 5 and jsonb_array_length(s -> 'week' -> 'missions') = 6, 'five daily and six weekly missions');
   -- the blitz games above may already complete a mission: pick one still open
   select m ->> 'key' into k from jsonb_array_elements(s -> 'missions') m
    where (m ->> 'progress')::int < (m ->> 'target')::int limit 1;
   perform test.assert_raises(format('select public.mission_claim(%L)', k), 'not done', 'cannot claim unfinished');
   perform test.assert_raises($q$select public.mission_claim('nope')$q$, 'invalid_input', 'unknown mission');
+  perform test.assert_raises($q$select public.mission_claim('w:nope')$q$, 'invalid_input', 'unknown weekly mission');
+  select m ->> 'key' into k from jsonb_array_elements(s -> 'week' -> 'missions') m
+   where (m ->> 'progress')::int < (m ->> 'target')::int limit 1;
+  perform test.assert(k like 'w:%', 'weekly keys are prefixed');
+  perform test.assert_raises(format('select public.mission_claim(%L)', k), 'not done', 'cannot claim an unfinished weekly mission');
 
   -- streak freeze: one missed day is covered
   perform test.streak(a, 5, test.today() - 2, 1);
@@ -97,7 +102,7 @@ begin
 
   -- flair: nothing unlocked yet
   s := public.my_flair();
-  perform test.assert(jsonb_array_length(s -> 'frames') = 6 and jsonb_array_length(s -> 'titles') >= 8, 'flair options');
+  perform test.assert(jsonb_array_length(s -> 'frames') = 7 and jsonb_array_length(s -> 'titles') >= 8, 'flair options');
   perform test.assert_raises($q$select public.set_flair('gold', null)$q$, 'invalid_input', 'locked frame');
   perform test.assert(public.set_flair(null, null) -> 'profile' ->> 'frame' is null, 'clear flair');
 

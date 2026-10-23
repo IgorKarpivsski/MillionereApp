@@ -142,9 +142,20 @@ begin
   g0 := test.gems(b);
   s := public.leaderboard_board('month');
   perform test.assert(jsonb_array_length(s -> 'prizes') = 3 and s ->> 'ends_at' is not null, 'monthly table');
-  perform test.assert(test.gems(b) = g0 + 50 and jsonb_array_length(s -> 'last_winners') >= 1, 'last month winner paid');
+  perform test.assert(test.gems(b) = g0 + 100 and jsonb_array_length(s -> 'last_winners') >= 1, 'last month winner paid');
   perform public.leaderboard_board('month');
-  perform test.assert(test.gems(b) = g0 + 50, 'paid only once');
+  perform test.assert(test.gems(b) = g0 + 100, 'paid only once');
+  perform test.assert(s ->> 'month_name' is not null, 'month name for the prizes');
+  -- the winner's month title, month frame and gold name colour
+  perform test.login(b);
+  s := public.my_flair();
+  perform test.assert(exists (select 1 from jsonb_array_elements(s -> 'frames') f where f ->> 'key' like 'm%' and (f ->> 'unlocked')::boolean), 'month frame unlocked');
+  perform test.assert(exists (select 1 from jsonb_array_elements(s -> 'titles') x where x ->> 'text' like 'אלו%' and (x ->> 'unlocked')::boolean), 'month champion title');
+  perform test.assert(exists (select 1 from jsonb_array_elements(s -> 'colors') x where x ->> 'key' = 'gold' and (x ->> 'unlocked')::boolean), 'gold name unlocked');
+  perform public.set_name_color('gold');
+  perform test.assert((select name_color from public.profiles where id = b) = 'gold', 'gold name set');
+  perform test.assert_raises($q$select public.set_name_color('purple')$q$, 'invalid_input', 'locked colour refused');
+  perform public.set_flair((select f ->> 'key' from jsonb_array_elements(s -> 'frames') f where f ->> 'key' like 'm%' and (f ->> 'unlocked')::boolean limit 1), null);
   s := public.leaderboard_board('all');
   perform test.assert(jsonb_array_length(s -> 'rows') >= 2, 'all-time table');
 end $$;
