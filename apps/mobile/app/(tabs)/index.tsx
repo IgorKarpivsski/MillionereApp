@@ -53,14 +53,12 @@ function Hero() {
       >
         <Sloth size={124} say={gx(lines[i % lines.length]!, gender)} />
       </Pressable>
-      <View style={styles.ctaRow}>
-        <TourTarget id="play" style={styles.flex}>
-          <StickerButton label={strings.home.playCta} icon="play" size="lg" tone="prize" fullWidth onPress={() => play('mix')} />
-        </TourTarget>
-        <TourTarget id="modes" style={styles.flex}>
-          <StickerButton label={h.allGames} icon="game-controller" size="lg" tone="gem" fullWidth onPress={() => router.push('/(tabs)/play')} />
-        </TourTarget>
-      </View>
+      <TourTarget id="play" style={styles.stretch}>
+        <StickerButton label={strings.home.playCta} icon="play" size="lg" tone="prize" fullWidth onPress={() => play('mix')} />
+      </TourTarget>
+      <TourTarget id="modes" style={styles.stretch}>
+        <StickerButton label={h.allGames} icon="game-controller" tone="gem" fullWidth onPress={() => router.push('/(tabs)/play')} />
+      </TourTarget>
     </View>
   );
 }
@@ -266,7 +264,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   slothWrap: { alignSelf: 'stretch', alignItems: 'center' },
-  ctaRow: { flexDirection: 'row', gap: space.sm, alignSelf: 'stretch' },
+  stretch: { alignSelf: 'stretch' },
   rewards: { gap: space.xs },
   section: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.xs },
   sectionLine: { flex: 1, height: 2, borderRadius: 1, backgroundColor: 'rgba(255,214,140,0.35)' },

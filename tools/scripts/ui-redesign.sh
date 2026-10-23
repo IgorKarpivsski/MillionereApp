@@ -23,8 +23,6 @@ tap 540 2200; sleep 4
 tap 110 150; sleep 4
 tap 110 150; sleep 8
 shot 01_home
-# who-are-you sheet: "other"
-tap 216 2190; sleep 4
 # tap the centre of the first view whose text contains $1
 tapText() {
   adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
@@ -41,6 +39,7 @@ swipe 540 1800 540 900; sleep 2
 shot 04_home_more
 # weekly missions tab
 swipe 540 900 540 1800; sleep 2
+swipe 540 1700 540 1100; sleep 2
 tapText "שבועיות" && sleep 2 && shot 05_home_weekly
 go() { adb shell "am start -W -a android.intent.action.VIEW -d 'footballmillionaire://$1' $PKG" >/dev/null; sleep 8; }
 go play
@@ -59,7 +58,7 @@ go collection
 shot 30_albums
 swipe 540 1800 540 900; sleep 2
 shot 31_albums_more
-go album/animals
+go album/ocean
 shot 32_album_cover
 swipe 900 1200 150 1200; sleep 2
 shot 33_album_page1
@@ -72,7 +71,9 @@ go leaderboard
 shot 40_league
 swipe 540 1800 540 900; sleep 2
 shot 41_league_more
-tapText "החודש" && sleep 4 && shot 42_month
+swipe 540 900 540 1800; sleep 2
+tap 346 400; sleep 5
+shot 42_month
 swipe 540 1800 540 900; sleep 2
 shot 43_month_more
 go profile
