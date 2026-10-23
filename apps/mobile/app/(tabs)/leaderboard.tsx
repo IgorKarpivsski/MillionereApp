@@ -89,7 +89,7 @@ function AllTable({ data, isLoading }: { data: ReturnType<typeof useLeaderboard>
 
       {isLoading ? <Skeleton height={300} rounded={18} /> : null}
       {data && data.rows.length === 0 ? (
-        <EmptyState icon="trophy-outline" title={t.emptyTitle} body={t.emptyBody} actionLabel={strings.worlds.play} onAction={() => router.push('/(tabs)/play')} />
+        <EmptyState icon="trophy-outline" title={t.emptyTitle} body={t.emptyBody} actionLabel={strings.worlds.play} onAction={() => router.push('/worlds')} />
       ) : null}
 
       <View style={styles.list}>

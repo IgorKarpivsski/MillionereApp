@@ -2,50 +2,66 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { TopBar } from '@/components/TopBar';
-import { AppText, Icon, Screen, Sheen, Sloth, StickerButton, useCountdownToMidnight } from '@/design-system/components';
+import { AppText, Icon, Screen, Sheen, Sloth, StickerButton } from '@/design-system/components';
+import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { colors, space } from '@/design-system/tokens';
-import { useEnergySheet, usePlaySession } from '@/features/engage/EnergySheet';
-import { useEnergy } from '@/features/engage/hooks';
-import { BubbleColumns, useRewardBubbles } from '@/features/home/RewardBubbles';
-import { ModeTile } from '@/features/home/ModeTile';
+import { usePlaySession } from '@/features/engage/EnergySheet';
+import { RewardGrid, useRewardBubbles } from '@/features/home/RewardBubbles';
 import { useLeague } from '@/features/league/api';
 import { LeagueBadge } from '@/features/league/LeagueBadge';
-import { useBlitzInfo, useSurvivalInfo, useTfInfo } from '@/features/modes/api';
 import { useReferral } from '@/features/referral/api';
 import { useMyState } from '@/features/profile/hooks';
-import { useDailyStatus } from '@/features/quiz/hooks';
 import { useUnreadTotal } from '@/features/social/hooks';
-import { WORLD_IMAGES } from '@/features/worlds/worldImages';
 import { TourTarget, useTourStore } from '@/features/tour/Tour';
 import { useSettingsStore } from '@/features/settings/store';
-import { EventCard, MissionsCard, NewbieBanner, NextGoal } from '@/features/teen/HomeCards';
+import { MissionsCard, NewbieBanner, NextGoal } from '@/features/teen/HomeCards';
 import { fmt, gx, strings } from '@/lib/i18n';
 import { GenderPrompt, useGenderPromptStore } from '@/features/profile/gender';
 
 const t = strings.modes;
+const h = strings.home;
 
-/** The sloth, centre stage, with every prize floating around him. */
+/** The sloth with a game tip (a new one every few seconds, or on tap) and the two ways in. */
 function Hero() {
   const { data } = useMyState();
-  const bubbles = useRewardBubbles();
   const play = usePlaySession();
   const name = data?.profile.username ?? '';
-  // a different line each time the app opens
-  const line = useMemo(() => t.slothHello[Math.floor(Math.random() * t.slothHello.length)]!, []);
+  const gender = data?.profile.gender;
+  const reduced = useReducedMotion();
+  // first a hello, then tips; a different start each time the app opens
+  const lines = useMemo(() => {
+    const hello = t.slothHello[Math.floor(Math.random() * t.slothHello.length)]!;
+    const start = Math.floor(Math.random() * h.tips.length);
+    return [name ? fmt(hello, { name }) : t.slothHello[2]!, ...h.tips.slice(start), ...h.tips.slice(0, start)];
+  }, [name]);
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (reduced) return;
+    const id = setInterval(() => setI((x) => (x + 1) % lines.length), 7000);
+    return () => clearInterval(id);
+  }, [lines.length, reduced]);
   return (
-    <BubbleColumns
-      bubbles={bubbles}
-      center={
-        <View style={styles.heroCenter}>
-          <Sloth size={148} say={gx(name ? fmt(line, { name }) : t.slothHello[2]!, data?.profile.gender)} />
-          <TourTarget id="play" style={styles.stretch}>
-            <StickerButton label={strings.home.playCta} icon="play" size="lg" tone="prize" fullWidth onPress={() => play('mix')} />
-          </TourTarget>
-        </View>
-      }
-    />
+    <View style={styles.hero}>
+      <LinearGradient colors={['rgba(255,214,140,0.16)', 'rgba(255,255,255,0.02)']} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill} />
+      <Pressable
+        onPress={() => setI((x) => (x + 1) % lines.length)}
+        accessibilityRole="button"
+        accessibilityLabel={`${gx(lines[i % lines.length]!, gender)}. ${h.tipA11y}`}
+        style={styles.slothWrap}
+      >
+        <Sloth size={124} say={gx(lines[i % lines.length]!, gender)} />
+      </Pressable>
+      <View style={styles.ctaRow}>
+        <TourTarget id="play" style={styles.flex}>
+          <StickerButton label={strings.home.playCta} icon="play" size="lg" tone="prize" fullWidth onPress={() => play('mix')} />
+        </TourTarget>
+        <TourTarget id="modes" style={styles.flex}>
+          <StickerButton label={h.allGames} icon="game-controller" size="lg" tone="gem" fullWidth onPress={() => router.push('/(tabs)/play')} />
+        </TourTarget>
+      </View>
+    </View>
   );
 }
 
@@ -59,114 +75,14 @@ function SectionTitle({ children }: { children: string }) {
   );
 }
 
-function Modes() {
-  const { data: daily } = useDailyStatus();
-  const countdown = useCountdownToMidnight();
-  const { data: blitz } = useBlitzInfo();
-  const { data: survival } = useSurvivalInfo();
-  const { data: tf } = useTfInfo();
-  const { data: energy } = useEnergy();
-  const showEnergy = useEnergySheet((s) => s.show);
-  const dailyDone = daily?.state === 'done';
-  const seen = useSettingsStore((s) => s.seenModes);
-  const isNew = (m: string) => !seen.includes(m);
-  const needTicket = (go: () => void) => () => {
-    if (energy && !energy.unlimited && energy.tickets < 1) showEnergy();
-    else go();
-  };
+/** Every gift and bonus waiting to be collected. */
+function Rewards() {
+  const bubbles = useRewardBubbles();
   return (
-    <>
-      <SectionTitle>{t.title}</SectionTitle>
-      <TourTarget id="modes">
-      <ModeTile
-        wide
-        index={0}
-        title={t.family}
-        body={t.familyBody}
-        icon="family"
-        art={<Icon name="family" size={70} />}
-        colors={['#FF6FB5', '#B14CFF', '#6A3CFF']}
-        chip={isNew('family') ? t.new : strings.teen.free}
-        chipTone={isNew('family') ? 'gold' : 'green'}
-        onPress={() => router.push('/family')}
-      />
-      </TourTarget>
-      <View style={styles.row}>
-        <ModeTile
-          index={1}
-          title={t.blitz}
-          body={t.blitzBody}
-          icon="timer"
-          colors={['#FF8A3D', '#E8463A']}
-          chip={blitz?.best ? fmt(t.blitzBest, { n: blitz.best }) : isNew('blitz') ? t.new : null}
-          chipTone={blitz?.best ? 'dark' : 'gold'}
-          onPress={needTicket(() => router.push('/blitz'))}
-        />
-        <ModeTile
-          index={2}
-          title={t.random}
-          body={t.randomBody}
-          icon="dice"
-          colors={['#3DDC84', '#119E8C']}
-          chip={isNew('random') ? t.new : null}
-          chipTone="gold"
-          onPress={() => router.push({ pathname: '/match', params: { mode: 'random' } })}
-        />
-      </View>
-      <View style={styles.row}>
-        <ModeTile
-          index={3}
-          title={t.survival}
-          body={t.survivalBody}
-          icon="trophy"
-          colors={['#8E5CFF', '#4B2BB5']}
-          chip={survival?.week_best ? fmt(t.survivalWeek, { n: survival.week_best }) : isNew('survival') ? t.new : null}
-          chipTone={survival?.week_best ? 'dark' : 'gold'}
-          onPress={needTicket(() => router.push('/survival'))}
-        />
-        <ModeTile
-          index={4}
-          title={t.tf}
-          body={t.tfBody}
-          icon="bolt"
-          colors={['#14B8A6', '#0E7490']}
-          chip={tf?.best ? fmt(t.blitzBest, { n: tf.best }) : isNew('tf') ? t.new : null}
-          chipTone={tf?.best ? 'dark' : 'gold'}
-          onPress={needTicket(() => router.push('/truefalse'))}
-        />
-      </View>
-      <View style={styles.row}>
-        <ModeTile
-          index={5}
-          title={t.daily}
-          body={dailyDone ? t.dailyDone : t.dailyBody}
-          icon="daily"
-          colors={['#3E8EF7', '#5C4CE0']}
-          chip={dailyDone ? countdown : strings.teen.free}
-          chipTone={dailyDone ? 'dark' : 'green'}
-          onPress={() => router.push({ pathname: '/quiz', params: { mode: 'daily' } })}
-        />
-        <ModeTile
-          index={6}
-          title={t.friend}
-          body={t.friendBody}
-          icon="friends"
-          colors={['#14A3B8', '#2F5FD0']}
-          chip={strings.teen.free}
-          chipTone="green"
-          onPress={() => router.push('/match')}
-        />
-      </View>
-      <ModeTile
-        wide
-        index={7}
-        title={t.worlds}
-        body={t.worldsBody}
-        art={<Image source={WORLD_IMAGES.globe!} style={styles.worldArt} />}
-        colors={['#2E8B57', '#1E6E8C']}
-        onPress={() => router.push('/(tabs)/play')}
-      />
-    </>
+    <View style={styles.rewards}>
+      <SectionTitle>{`🎁 ${h.rewardsTitle}`}</SectionTitle>
+      <RewardGrid bubbles={bubbles} empty={h.rewardsEmpty} />
+    </View>
   );
 }
 
@@ -317,11 +233,10 @@ export default function HomeScreen() {
     <Screen header={<TopBar />} onRefresh={() => void refetch()} refreshing={isRefetching}>
       <Hero />
       <NewbieBanner />
-      <Modes />
-      <InviteBanner />
-      <NextGoal />
-      <EventCard />
+      <Rewards />
       <MissionsCard />
+      <NextGoal />
+      <InviteBanner />
       <Social />
       <FirstTour />
       <GenderPromptGate />
@@ -341,12 +256,21 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.35)',
   },
   inviteText: { flex: 1, gap: 2 },
-  heroCenter: { alignItems: 'center', gap: space.sm, alignSelf: 'stretch' },
-  stretch: { alignSelf: 'stretch' },
+  hero: {
+    alignItems: 'center',
+    gap: space.sm,
+    padding: space.md,
+    borderRadius: 26,
+    borderWidth: 1,
+    borderColor: 'rgba(255,214,140,0.3)',
+    overflow: 'hidden',
+  },
+  slothWrap: { alignSelf: 'stretch', alignItems: 'center' },
+  ctaRow: { flexDirection: 'row', gap: space.sm, alignSelf: 'stretch' },
+  rewards: { gap: space.xs },
   section: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.xs },
   sectionLine: { flex: 1, height: 2, borderRadius: 1, backgroundColor: 'rgba(255,214,140,0.35)' },
   row: { flexDirection: 'row', gap: space.md },
-  worldArt: { width: 70, height: 70, borderRadius: 16 },
   small: {
     flex: 1,
     flexDirection: 'row',

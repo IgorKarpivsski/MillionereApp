@@ -1,20 +1,22 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { AppText, AvatarBadge, BottomSheet, StickerButton, TitleTag, titleTier, useToast } from '@/design-system/components';
+import { AppText, AvatarBadge, BottomSheet, NAME_COLORS, PlayerName, StickerButton, TitleTag, titleTier, useToast } from '@/design-system/components';
 import { colors, space } from '@/design-system/tokens';
 import { useMyState } from '@/features/profile/hooks';
 import { fmt, strings } from '@/lib/i18n';
-import { useFlair, useSetFlair } from './api';
+import { useFlair, useSetFlair, useSetNameColor } from './api';
 
 const t = strings.teen;
 const TIER_ORDER = { basic: 0, rare: 1, epic: 2, legendary: 3 } as const;
 const FRAME_NAMES = t.frameNames as Record<string, string>;
+const COLOR_NAMES = t.colorNames as Record<string, string>;
 
 function frameLock(key: string, need: number): string {
   if (key === 'fire') return t.flairLockedFire;
   if (key === 'rainbow') return t.flairLockedRainbow;
   if (key === 'ambassador') return t.flairLockedAmbassador;
+  if (/^m\d+$/.test(key)) return t.flairLockedMonth;
   return fmt(t.flairLockedFrame, { n: need });
 }
 
@@ -23,6 +25,8 @@ export function FlairSheet({ visible, onClose }: { visible: boolean; onClose: ()
   const { data } = useFlair();
   const { data: me } = useMyState();
   const save = useSetFlair();
+  const saveColor = useSetNameColor();
+  const [color, setColor] = useState<string | null>(null);
   const toast = useToast();
   const [frame, setFrame] = useState<string | null>(null);
   const [title, setTitle] = useState<string | null>(null);
@@ -30,6 +34,7 @@ export function FlairSheet({ visible, onClose }: { visible: boolean; onClose: ()
     if (visible && data) {
       setFrame(data.frame);
       setTitle(data.title);
+      setColor(data.color ?? null);
     }
   }, [visible, data]);
   const avatar = me?.profile.avatar_id ?? 'avatar_01';
@@ -41,7 +46,7 @@ export function FlairSheet({ visible, onClose }: { visible: boolean; onClose: ()
         <ScrollView style={styles.scroll} contentContainerStyle={styles.body}>
           <View style={styles.preview}>
             <AvatarBadge avatarId={avatar} photo={me?.profile.photo_url} frame={frame} size={84} />
-            <AppText variant="label">{me?.profile.username}</AppText>
+            <PlayerName name={me?.profile.username ?? ''} color={color} />
             {title ? (
               <AppText variant="caption" color={colors.led}>
                 {title}
@@ -83,6 +88,42 @@ export function FlairSheet({ visible, onClose }: { visible: boolean; onClose: ()
               </Pressable>
             ))}
           </View>
+          {data.colors.length > 0 ? (
+            <>
+              <AppText variant="heading">{t.flairColors}</AppText>
+              <View style={styles.titles}>
+                <Pressable
+                  onPress={() => setColor(null)}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: color === null }}
+                  style={[styles.title, color === null && styles.sel]}
+                >
+                  <AppText variant="label">{t.flairNone}</AppText>
+                </Pressable>
+                {data.colors.map((c) => (
+                  <Pressable
+                    key={c.key}
+                    disabled={!c.unlocked}
+                    onPress={() => setColor(c.key)}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: color === c.key, disabled: !c.unlocked }}
+                    accessibilityLabel={c.unlocked ? COLOR_NAMES[c.key] : `${COLOR_NAMES[c.key]}, ${c.hint ?? ''}`}
+                    style={[styles.title, color === c.key && styles.sel, !c.unlocked && styles.locked]}
+                  >
+                    {!c.unlocked ? <Ionicons name="lock-closed" size={14} color={colors.textDim} /> : null}
+                    <View style={styles.lockedTitle}>
+                      <PlayerName name={COLOR_NAMES[c.key] ?? c.key} color={NAME_COLORS[c.key] ? c.key : null} />
+                      {!c.unlocked && c.hint ? (
+                        <AppText variant="caption" color={colors.textDim}>
+                          {c.hint}
+                        </AppText>
+                      ) : null}
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
+            </>
+          ) : null}
           <AppText variant="heading">{t.flairTitles}</AppText>
           <View style={styles.titles}>
             <Pressable
@@ -128,15 +169,19 @@ export function FlairSheet({ visible, onClose }: { visible: boolean; onClose: ()
       <StickerButton
         label={strings.common.save}
         fullWidth
-        loading={save.isPending}
         disabled={!data}
+        loading={save.isPending || saveColor.isPending}
         onPress={() =>
           save.mutate(
             { frame, title },
             {
               onSuccess: () => {
-                toast(t.flairSaved, 'success');
-                onClose();
+                const done = () => {
+                  toast(t.flairSaved, 'success');
+                  onClose();
+                };
+                if ((data?.color ?? null) === color) done();
+                else saveColor.mutate(color, { onSuccess: done, onError: () => toast(strings.errors.generic, 'error') });
               },
               onError: () => toast(strings.errors.generic, 'error'),
             },

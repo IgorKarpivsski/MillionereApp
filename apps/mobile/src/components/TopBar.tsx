@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { AppText, AvatarBadge, CoinIcon, GemIcon, GLASS_EDGE, GlassFill, Led, Skeleton, TicketIcon, TitleTag } from '@/design-system/components';
+import { AppText, AvatarBadge, CoinIcon, GemIcon, GLASS_EDGE, GlassFill, Led, PlayerName, Skeleton, TicketIcon, TitleTag } from '@/design-system/components';
 import { colors, radius, space } from '@/design-system/tokens';
 import { useEnergySheet } from '@/features/engage/EnergySheet';
 import { FlyTarget } from '@/features/home/RewardFly';
@@ -95,9 +95,7 @@ export function TopBar() {
         >
           <AvatarBadge avatarId={data.profile.avatar_id} photo={data.profile.photo_url} frame={data.profile.frame} level={data.profile.level} size={40} />
           <View style={styles.whoText}>
-            <AppText variant="label" numberOfLines={1}>
-              {data.profile.username}
-            </AppText>
+            <PlayerName name={data.profile.username} color={data.profile.name_color} />
             {data.profile.title ? (
               <TitleTag title={data.profile.title} size="sm" />
             ) : (

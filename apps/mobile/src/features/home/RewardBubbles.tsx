@@ -262,6 +262,27 @@ export function useRewardBubbles(): BubbleDef[] {
   return out;
 }
 
+/** Every prize waiting on home, in tidy rows (prizes ready to collect first). */
+export function RewardGrid({ bubbles, empty }: { bubbles: BubbleDef[]; empty: string }) {
+  const sorted = [...bubbles].sort((a, b) => Number(b.ready) - Number(a.ready));
+  if (sorted.length === 0) {
+    return (
+      <AppText variant="caption" color={colors.textMuted} align="center">
+        {empty}
+      </AppText>
+    );
+  }
+  return (
+    <TourTarget id="bubbles">
+      <View style={styles.grid}>
+        {sorted.map((b, i) => (
+          <Bubble key={b.key} b={b} index={i} />
+        ))}
+      </View>
+    </TourTarget>
+  );
+}
+
 /** Two columns of bubbles around a centre piece (the sloth). */
 export function BubbleColumns({ bubbles, center }: { bubbles: BubbleDef[]; center: ReactNode }) {
   const start = bubbles.filter((_, i) => i % 2 === 0);
@@ -290,6 +311,7 @@ export function BubbleColumns({ bubbles, center }: { bubbles: BubbleDef[]; cente
 const SIZE = 60;
 const styles = StyleSheet.create({
   columns: { flexDirection: 'row', alignItems: 'center' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', rowGap: 10, columnGap: 6, paddingTop: 6 },
   col: { width: 74, gap: 6, alignItems: 'center', justifyContent: 'center' },
   center: { flex: 1, alignItems: 'center' },
   slot: { alignItems: 'center', width: 74 },

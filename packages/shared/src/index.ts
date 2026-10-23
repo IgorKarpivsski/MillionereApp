@@ -33,6 +33,7 @@ export const ProfileSchema = z.object({
   frame: z.string().nullable().optional(),
   /** a title unlocked by badges, shown under the name */
   title: z.string().nullable().optional(),
+  name_color: z.string().nullable().optional(),
 });
 export type Profile = z.infer<typeof ProfileSchema>;
 
@@ -465,6 +466,7 @@ const PlayerMiniSchema = z.object({
   level: z.number().int(),
   frame: z.string().nullable().optional(),
   title: z.string().nullable().optional(),
+  name_color: z.string().nullable().optional(),
 });
 export const ModeQuestionSchema = z.object({
   id: z.string(),
@@ -772,6 +774,7 @@ export const LeagueResultSchema = z.object({
   points: z.number(),
   coins: z.number().int(),
   gems: z.number().int(),
+  pack: PackSlugSchema.nullable().optional(),
 });
 export type LeagueResult = z.infer<typeof LeagueResultSchema>;
 
@@ -783,13 +786,14 @@ export const LeagueStateSchema = z.object({
   tiers: z.array(z.string()),
   promote: z.number().int(),
   demote: z.number().int(),
-  rewards: z.array(z.object({ upto: z.number().int(), coins: z.number().int(), gems: z.number().int() })),
+  rewards: z.array(z.object({ upto: z.number().int(), coins: z.number().int(), gems: z.number().int(), pack: PackSlugSchema.nullable().optional() })),
   tier_bonus: z.number(),
   rows: z.array(
     z.object({
       rank: z.number().int(),
       username: z.string(),
       title: z.string().nullable().optional(),
+      name_color: z.string().nullable().optional(),
       avatar_id: z.string(),
       photo: z.string().nullable().optional(),
       level: z.number().int(),
@@ -810,6 +814,7 @@ export const MissionSchema = z.object({
   title: z.string(),
   target: z.number().int(),
   coins: z.number().int(),
+  gems: z.number().int().default(0),
   icon: z.string(),
   progress: z.number().int(),
   claimed: z.boolean(),
@@ -823,6 +828,17 @@ export const MissionsStateSchema = z.object({
   seconds_to_reset: z.number().int(),
   coins: z.number().int().optional(),
   bonus: z.boolean().optional(),
+  weekly: z.boolean().optional(),
+  week: z
+    .object({
+      start: z.string(),
+      missions: z.array(MissionSchema),
+      bonus_gems: z.number().int(),
+      bonus_pack: PackSlugSchema.nullable().optional(),
+      bonus_claimed: z.boolean(),
+      seconds_to_reset: z.number().int(),
+    })
+    .optional(),
 });
 export type MissionsState = z.infer<typeof MissionsStateSchema>;
 
@@ -857,6 +873,8 @@ export const FlairSchema = z.object({
   tiers: z.record(z.number().int()),
   frame: z.string().nullable(),
   title: z.string().nullable(),
+  colors: z.array(z.object({ key: z.string(), unlocked: z.boolean(), hint: z.string().optional() })).default([]),
+  color: z.string().nullable().optional(),
 });
 export type Flair = z.infer<typeof FlairSchema>;
 
@@ -869,6 +887,7 @@ export const FriendProfileSchema = z.object({
     level: z.number().int(),
     frame: z.string().nullable().optional(),
     title: z.string().nullable().optional(),
+  name_color: z.string().nullable().optional(),
     gender: z.enum(['male', 'female', 'other']).nullable().optional(),
   }),
   stats: StatsSchema.omit({ xp: true }),
@@ -885,6 +904,7 @@ export const RankRowSchema = z.object({
   level: z.number().int().optional(),
   frame: z.string().nullable().optional(),
   title: z.string().nullable().optional(),
+  name_color: z.string().nullable().optional(),
   points: z.number(),
   me: z.boolean(),
 });
@@ -933,7 +953,21 @@ export const BoardSchema = z.object({
   rows: z.array(RankRowSchema),
   me: z.object({ rank: z.number().int(), points: z.number() }).nullable(),
   ends_at: z.string().nullable().optional(),
-  prizes: z.array(z.object({ coins: z.number().int(), gems: z.number().int() })).nullable().optional(),
+  prizes: z
+    .array(
+      z.object({
+        upto: z.number().int().optional(),
+        coins: z.number().int(),
+        gems: z.number().int(),
+        pack: PackSlugSchema.nullable().optional(),
+        title: z.string().nullable().optional(),
+        frame: z.boolean().nullable().optional(),
+        color: z.string().nullable().optional(),
+      }),
+    )
+    .nullable()
+    .optional(),
+  month_name: z.string().nullable().optional(),
   last_winners: z.array(RankRowSchema.partial({ level: true })).default([]),
 });
 export type Board = z.infer<typeof BoardSchema>;

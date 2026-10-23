@@ -18,3 +18,4 @@ export * from './ChampionBadge';
 export * from './Backdrop';
 export * from './Sloth';
 export * from './TitleTag';
+export * from './PlayerName';

@@ -4,13 +4,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { ZoomIn } from 'react-native-reanimated';
-import { AppText, AvatarBadge, CoinIcon, GemIcon, Icon, Led, StickerButton, TitleTag } from '@/design-system/components';
+import { AppText, AvatarBadge, CoinIcon, GemIcon, Icon, Led, PlayerName, StickerButton, TitleTag } from '@/design-system/components';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound } from '@/design-system/feedback/sound';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { useSettingsStore } from '@/features/settings/store';
 import { formatNumber } from '@/lib/format';
 import { fmt, strings } from '@/lib/i18n';
+import { GlowingPack, PACK_NAMES } from '@/features/collection/PackArt';
 import { leagueReward } from './api';
 import { LeagueBadge, TIER_COLORS } from './LeagueBadge';
 
@@ -76,6 +77,14 @@ function ResultModal({ s }: { s: LeagueState }) {
               </AppText>
             </View>
           ) : null}
+          {r.pack ? (
+            <View style={styles.prizeLine}>
+              <GlowingPack slug={r.pack} width={34} />
+              <AppText variant="bodyStrong" color={colors.led}>
+                {`+ ${PACK_NAMES[r.pack]}`}
+              </AppText>
+            </View>
+          ) : null}
           <StickerButton label={strings.common.close} fullWidth onPress={close} />
         </Animated.View>
       </View>
@@ -134,6 +143,7 @@ export function LeagueView({ s }: { s: LeagueState }) {
                   </AppText>
                 </View>
               ) : null}
+              {r.pack ? <GlowingPack slug={r.pack} width={26} /> : null}
             </View>
           ) : null,
         )}
@@ -161,9 +171,7 @@ export function LeagueView({ s }: { s: LeagueState }) {
               </Led>
               <AvatarBadge avatarId={r.avatar_id} photo={r.photo} size={38} />
               <View style={styles.nameCol}>
-                <AppText variant="label" numberOfLines={1}>
-                  {r.username}
-                </AppText>
+                <PlayerName name={r.username} color={r.name_color} />
                 {r.title ? <TitleTag title={r.title} size="sm" /> : null}
               </View>
               {up ? <Ionicons name="arrow-up-circle" size={20} color={colors.correct} /> : null}

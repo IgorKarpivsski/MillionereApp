@@ -17,5 +17,5 @@ export function useLeague() {
 export function leagueReward(s: Pick<LeagueState, 'rewards' | 'tier_bonus' | 'tier'>, rank: number) {
   const r = [...s.rewards].sort((a, b) => a.upto - b.upto).find((x) => x.upto >= rank);
   if (!r) return null;
-  return { coins: Math.round(r.coins * (1 + s.tier * s.tier_bonus)), gems: r.gems };
+  return { coins: Math.round(r.coins * (1 + s.tier * s.tier_bonus)), gems: r.gems, pack: r.pack ?? null };
 }

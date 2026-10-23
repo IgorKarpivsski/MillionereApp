@@ -41,6 +41,7 @@ export const teenApi = {
     rpc('room_reactions', { p_kind: kind, p_room: room, p_after: after }, (x) => ReactionsSchema.parse(x)),
   flair: () => rpc('my_flair', undefined, (x) => FlairSchema.parse(x)),
   setFlair: (frame: string | null, title: string | null) => rpc('set_flair', { p_frame: frame, p_title: title }, () => undefined),
+  setNameColor: (color: string | null) => rpc('set_name_color', { p_color: color }, () => undefined),
   friend: (id: string) => rpc('friend_profile', { p_user: id }, (x) => FriendProfileSchema.parse(x)),
   friendsBoard: () => rpc('leaderboard_friends', undefined, (x) => FriendsBoardSchema.parse(x)),
   challenge: (user: string) => rpc('match_challenge', { p_user: user }, (x) => MatchRoomSchema.parse(x)),
@@ -90,6 +91,17 @@ export function useBuyFreeze() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: queryKeys.daily });
       refresh();
+    },
+  });
+}
+
+export function useSetNameColor() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (color: string | null) => teenApi.setNameColor(color),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: teenKeys.flair });
+      void qc.invalidateQueries({ queryKey: queryKeys.myState });
     },
   });
 }

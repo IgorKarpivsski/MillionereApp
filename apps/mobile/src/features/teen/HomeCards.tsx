@@ -2,13 +2,16 @@ import { Ionicons } from '@expo/vector-icons';
 import type { Mission } from '@fm/shared';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, StyleSheet, View, type GestureResponderEvent } from 'react-native';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { AppText, Card, CoinIcon, GemIcon, Icon, ProgressBar, Sheen, useToast, type IconName } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
+import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound } from '@/design-system/feedback/sound';
 import { colors, space } from '@/design-system/tokens';
 import { useCountdownTo, useEnergy } from '@/features/engage/hooks';
+import { PACK_NAMES } from '@/features/collection/PackArt';
 import { useFly } from '@/features/home/RewardFly';
 import { useMyState } from '@/features/profile/hooks';
 import { useWorldsConfig, useWorldsState, worldBySlug } from '@/features/worlds/api';
@@ -25,15 +28,25 @@ const ICONS: Record<string, IconName> = {
   dice: 'dice',
   globe: 'globe',
   daily: 'daily',
+  gift: 'gift',
+  family: 'family',
 };
 
 function MissionRow({ m, onClaim, busy }: { m: Mission; onClaim: (e: GestureResponderEvent) => void; busy: boolean }) {
   const done = m.progress >= m.target;
+  const reduced = useReducedMotion();
   return (
-    <View style={styles.mission}>
-      <Icon name={ICONS[m.icon] ?? 'trophy'} size={34} />
+    <Animated.View
+      entering={reduced ? undefined : FadeIn.duration(220)}
+      exiting={reduced ? undefined : FadeOut.duration(260)}
+      layout={reduced ? undefined : LinearTransition.duration(240)}
+      style={[styles.mission, done && styles.missionDone]}
+    >
+      <View style={[styles.missionIcon, done && styles.missionIconDone]}>
+        <Icon name={ICONS[m.icon] ?? 'trophy'} size={30} />
+      </View>
       <View style={styles.flex}>
-        <AppText variant="label" numberOfLines={1}>
+        <AppText variant="label" numberOfLines={2}>
           {m.title}
         </AppText>
         <View style={styles.missionBar}>
@@ -42,36 +55,44 @@ function MissionRow({ m, onClaim, busy }: { m: Mission; onClaim: (e: GestureResp
           </View>
           <AppText variant="caption" color={colors.textMuted}>{`${m.progress}/${m.target}`}</AppText>
         </View>
-      </View>
-      {m.claimed ? (
-        <AppText variant="caption" color={colors.correct} style={styles.bold}>
-          {t.missionDone}
-        </AppText>
-      ) : (
-        <Pressable
-          disabled={!done || busy}
-          onPress={onClaim}
-          accessibilityRole="button"
-          accessibilityLabel={`${t.missionClaim} ${m.coins}`}
-          style={({ pressed }) => [styles.claim, !done && styles.claimOff, pressed && styles.pressed]}
-        >
-          {busy ? (
-            <ActivityIndicator size="small" color={colors.textOnBright} />
-          ) : (
+        <View style={styles.prizeRow}>
+          <CoinIcon size={14} />
+          <AppText variant="caption" style={styles.bold}>
+            {String(m.coins)}
+          </AppText>
+          {m.gems > 0 ? (
             <>
-              <CoinIcon size={18} />
-              <AppText variant="caption" color={done ? colors.textOnBright : colors.text} style={styles.bold}>
-                {done ? t.missionClaim : String(m.coins)}
+              <GemIcon size={13} />
+              <AppText variant="caption" style={styles.bold}>
+                {String(m.gems)}
               </AppText>
             </>
-          )}
-        </Pressable>
-      )}
-    </View>
+          ) : null}
+        </View>
+      </View>
+      <Pressable
+        disabled={!done || busy}
+        onPress={onClaim}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !done || busy }}
+        accessibilityLabel={done ? `${t.missionClaim} ${m.title}` : `${m.title}, ${m.progress}/${m.target}`}
+        style={({ pressed }) => [styles.claim, !done && styles.claimOff, pressed && styles.pressed]}
+      >
+        {busy ? (
+          <ActivityIndicator size="small" color={colors.textOnBright} />
+        ) : done ? (
+          <AppText variant="label" color={colors.textOnBright} style={styles.bold}>
+            {t.missionClaim}
+          </AppText>
+        ) : (
+          <Ionicons name="lock-closed" size={16} color={colors.textDim} />
+        )}
+      </Pressable>
+    </Animated.View>
   );
 }
 
-/** Three small goals a day, with coins for each and gems for all three. */
+/** Daily and weekly missions, front and centre on home. Claimed missions drop off the list. */
 export function MissionsCard() {
   const { data, refetch } = useMissions();
   // progress moves while playing: refresh whenever home comes back into view
@@ -83,57 +104,128 @@ export function MissionsCard() {
   const claim = useClaimMission();
   const launch = useFly((s) => s.launch);
   const toast = useToast();
+  const [tab, setTab] = useState<'day' | 'week'>('day');
+  const week = data?.week;
+  const list = tab === 'day' ? data?.missions ?? [] : week?.missions ?? [];
+  const resetSecs = tab === 'day' ? data?.seconds_to_reset : week?.seconds_to_reset;
   const ends = useMemo(
-    () => (data ? new Date(Date.now() + data.seconds_to_reset * 1000).toISOString() : null),
+    () => (resetSecs != null ? new Date(Date.now() + resetSecs * 1000).toISOString() : null),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data?.day],
+    [data?.day, tab],
   );
   const left = useCountdownTo(ends);
-  if (!data || data.missions.length === 0) return null;
-  const allClaimed = data.missions.every((m) => m.claimed);
+  if (!data) return null;
+  const ready = (ms: Mission[]) => ms.filter((m) => !m.claimed && m.progress >= m.target).length;
+  const open = list
+    .filter((m) => !m.claimed)
+    .sort((a, b) => Number(b.progress >= b.target) - Number(a.progress >= a.target) || b.progress / b.target - a.progress / a.target);
+  const claimedN = list.length - open.length;
+  const bonusDone = tab === 'day' ? data.bonus_claimed : !!week?.bonus_claimed;
+  const bonusText =
+    tab === 'day'
+      ? fmt(t.missionsBonus, { n: data.bonus_gems })
+      : week?.bonus_pack
+        ? fmt(t.weekBonusPack, { n: week.bonus_gems, pack: PACK_NAMES[week.bonus_pack] })
+        : fmt(t.missionsBonus, { n: week?.bonus_gems ?? 0 });
+
+  const tabs: { key: 'day' | 'week'; label: string; n: number }[] = [
+    { key: 'day', label: t.tabDaily, n: ready(data.missions) },
+    ...(week ? [{ key: 'week' as const, label: t.tabWeekly, n: ready(week.missions) }] : []),
+  ];
+
   return (
-    <Card padding={space.md}>
+    <View style={styles.missionsCard}>
+      <LinearGradient colors={['#3B2A8F', '#22155E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
       <View style={styles.head}>
-        <AppText variant="heading" style={styles.flex}>
-          {t.missionsTitle}
+        <AppText variant="title" style={styles.flex}>
+          {`🎯 ${t.missionsTitle}`}
         </AppText>
         {left ? (
-          <AppText variant="caption" color={colors.textMuted}>
-            {fmt(t.missionsReset, { t: left })}
-          </AppText>
+          <View style={styles.resetChip}>
+            <Ionicons name="time-outline" size={14} color={colors.text} />
+            <AppText variant="caption">{left}</AppText>
+          </View>
         ) : null}
       </View>
+      <View style={styles.tabs} accessibilityRole="tablist">
+        {tabs.map((x) => {
+          const on = x.key === tab;
+          return (
+            <Pressable
+              key={x.key}
+              onPress={() => {
+                haptic('select');
+                setTab(x.key);
+              }}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: on }}
+              accessibilityLabel={x.n > 0 ? `${x.label}, ${x.n}` : x.label}
+              style={[styles.tab, on && styles.tabOn]}
+            >
+              <AppText variant="label" color={on ? colors.textOnBright : colors.text}>
+                {x.label}
+              </AppText>
+              {x.n > 0 ? (
+                <View style={styles.tabBadge}>
+                  <AppText variant="caption" color={colors.text} style={styles.bold}>
+                    {String(x.n)}
+                  </AppText>
+                </View>
+              ) : null}
+            </Pressable>
+          );
+        })}
+      </View>
       <View style={styles.list}>
-        {data.missions.map((m) => (
-          <MissionRow
-            key={m.key}
-            m={m}
-            busy={claim.isPending && claim.variables === m.key}
-            onClaim={(e) => {
-              const from = { x: e.nativeEvent.pageX, y: e.nativeEvent.pageY };
-              claim.mutate(m.key, {
-                onSuccess: (s) => {
-                  haptic('success');
-                  playSound('coins');
-                  launch({ from, kind: 'coins', label: `+${m.coins}` });
-                  if (s.bonus) {
-                    setTimeout(() => launch({ from, kind: 'gems', label: `+${s.bonus_gems}` }), 600);
-                    toast(fmt(t.missionBonusGot, { n: s.bonus_gems }), 'success');
-                  }
-                },
-                onError: () => toast(strings.errors.generic, 'error'),
-              });
-            }}
-          />
-        ))}
+        {open.length === 0 ? (
+          <View style={styles.allDone}>
+            <AppText style={styles.allDoneIcon}>🏆</AppText>
+            <AppText variant="bodyStrong" align="center">
+              {tab === 'day' ? t.missionsAllDone : t.weekAllDone}
+            </AppText>
+            {left ? (
+              <AppText variant="caption" color={colors.textMuted} align="center">
+                {fmt(t.missionsNew, { t: left })}
+              </AppText>
+            ) : null}
+          </View>
+        ) : (
+          open.map((m) => (
+            <MissionRow
+              key={m.key}
+              m={m}
+              busy={claim.isPending && claim.variables === m.key}
+              onClaim={(e) => {
+                const from = { x: e.nativeEvent.pageX, y: e.nativeEvent.pageY };
+                claim.mutate(m.key, {
+                  onSuccess: (s) => {
+                    haptic('success');
+                    playSound('coins');
+                    launch({ from, kind: 'coins', label: `+${m.coins}` });
+                    if (m.gems > 0) setTimeout(() => launch({ from, kind: 'gems', label: `+${m.gems}` }), 350);
+                    if (s.bonus) {
+                      const g = s.weekly ? s.week?.bonus_gems ?? 0 : s.bonus_gems;
+                      setTimeout(() => launch({ from, kind: 'gems', label: `+${g}` }), 700);
+                      toast(s.weekly ? t.weekBonusGot : fmt(t.missionBonusGot, { n: g }), 'success');
+                    }
+                  },
+                  onError: () => toast(strings.errors.generic, 'error'),
+                });
+              }}
+            />
+          ))
+        )}
       </View>
       <View style={styles.bonus}>
         <GemIcon size={18} />
-        <AppText variant="caption" color={allClaimed || data.bonus_claimed ? colors.correct : colors.textMuted}>
-          {data.bonus_claimed ? t.missionsBonusDone : fmt(t.missionsBonus, { n: data.bonus_gems })}
+        <AppText variant="caption" color={bonusDone ? colors.correct : colors.text} style={styles.flex}>
+          {bonusDone ? t.missionsBonusDone : bonusText}
+        </AppText>
+        <AppText variant="caption" color={colors.textMuted} style={styles.bold}>
+          {`${claimedN}/${list.length}`}
         </AppText>
       </View>
-    </Card>
+    </View>
   );
 }
 
@@ -248,22 +340,60 @@ const styles = StyleSheet.create({
   bold: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
   pressed: { transform: [{ scale: 0.97 }] },
   head: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  list: { gap: space.sm, marginTop: space.sm },
-  mission: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  missionBar: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: 2 },
+  missionsCard: {
+    padding: space.md,
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: colors.led,
+    overflow: 'hidden',
+    gap: space.sm,
+  },
+  resetChip: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: space.sm, paddingVertical: 3, borderRadius: 999, backgroundColor: 'rgba(0,0,0,0.3)' },
+  tabs: { flexDirection: 'row', gap: space.xs, padding: 4, borderRadius: 16, backgroundColor: 'rgba(0,0,0,0.28)' },
+  tab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, height: 40, borderRadius: 12 },
+  tabOn: { backgroundColor: colors.led },
+  tabBadge: { minWidth: 20, height: 20, borderRadius: 10, paddingHorizontal: 5, backgroundColor: colors.danger, alignItems: 'center', justifyContent: 'center' },
+  list: { gap: space.sm },
+  mission: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    padding: space.sm,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  missionDone: { borderColor: colors.correct, backgroundColor: 'rgba(61,220,132,0.12)' },
+  missionIcon: { width: 46, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.25)' },
+  missionIconDone: { backgroundColor: 'rgba(61,220,132,0.25)' },
+  missionBar: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: 4 },
+  prizeRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
+  allDone: { alignItems: 'center', gap: 4, paddingVertical: space.md },
+  allDoneIcon: { fontSize: 40, lineHeight: 48 },
   claim: {
-    minWidth: 66,
-    height: 34,
+    minWidth: 70,
+    height: 40,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
     paddingHorizontal: space.sm,
-    borderRadius: 17,
+    borderRadius: 20,
     backgroundColor: colors.prize,
+    borderWidth: 2,
+    borderColor: '#FFF3C4',
   },
-  claimOff: { backgroundColor: 'rgba(255,255,255,0.12)' },
-  bonus: { flexDirection: 'row', alignItems: 'center', gap: space.xs, marginTop: space.sm },
+  claimOff: { backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'transparent' },
+  bonus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.xs,
+    paddingHorizontal: space.sm,
+    paddingVertical: 6,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+  },
   goal: {
     flexDirection: 'row',
     alignItems: 'center',
