@@ -5,15 +5,15 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   AccessibilityInfo,
-  FlatList,
   I18nManager,
   Image,
+  PanResponder,
   Pressable,
   StyleSheet,
   useWindowDimensions,
   View,
-  type ViewToken,
 } from 'react-native';
+import Animated, { SlideInLeft, SlideInRight } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   AppText,
@@ -54,7 +54,6 @@ export default function AlbumScreen() {
   const [listH, setListH] = useState(0);
   const [page, setPage] = useState(0);
   const [openId, setOpenId] = useState<string | null>(null);
-  const listRef = useRef<FlatList<PageSpec>>(null);
 
   const album = data?.albums.find((a) => a.slug === slug);
   const items = useMemo(
@@ -81,24 +80,29 @@ export default function AlbumScreen() {
   const pagesCount = useRef(total);
   pagesCount.current = total;
   const pageRef = useRef(0);
-  // Page tracking via viewability works the same in LTR and RTL scroll views.
-  const onViewable = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
-    const first = viewableItems.find((v) => v.isViewable && v.index != null);
-    const idx = first?.index;
-    if (idx == null || idx === pageRef.current) return;
-    pageRef.current = idx;
-    setPage(idx);
-    haptic('select');
-    AccessibilityInfo.announceForAccessibility(
-      `${idx === 0 ? t.coverPage : fmt(t.pageName, { n: idx })}, ${fmt(t.pageOf, { n: idx + 1, total: pagesCount.current })}`,
-    );
-  }).current;
-  const viewability = useRef({ itemVisiblePercentThreshold: 60 }).current;
 
+  const dir = useRef(1);
   const goTo = (i: number) => {
-    if (i < 0 || i >= total) return;
-    listRef.current?.scrollToIndex({ index: i, animated: !reduced });
+    if (i < 0 || i >= total || i === pageRef.current) return;
+    dir.current = i > pageRef.current ? 1 : -1;
+    pageRef.current = i;
+    setPage(i);
+    haptic('select');
+    AccessibilityInfo.announceForAccessibility(`${pageName(i)}, ${fmt(t.pageOf, { n: i + 1, total })}`);
   };
+  const goToRef = useRef(goTo);
+  goToRef.current = goTo;
+  // a book in Hebrew: swiping toward the right turns to the next page (mirrored in LTR)
+  const swipe = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 18 && Math.abs(g.dx) > Math.abs(g.dy) * 1.5,
+      onPanResponderRelease: (_, g) => {
+        if (Math.abs(g.dx) < 50) return;
+        const forward = I18nManager.isRTL ? g.dx > 0 : g.dx < 0;
+        goToRef.current(pageRef.current + (forward ? 1 : -1));
+      },
+    }),
+  ).current;
 
   const claimReward = (a: AlbumSummary) =>
     claim.mutate(a.slug, {
@@ -180,24 +184,21 @@ export default function AlbumScreen() {
 
       {data && album ? (
         <>
-          <View style={styles.flex} onLayout={(e) => setListH(Math.floor(e.nativeEvent.layout.height))}>
-            {listH > 0 ? (
-              <FlatList
-                ref={listRef}
-                data={pages}
-                keyExtractor={(p) => p.key}
-                renderItem={renderPage}
-                extraData={`${stickerW}-${pageH}-${claim.isPending}`}
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
-                onViewableItemsChanged={onViewable}
-                viewabilityConfig={viewability}
-                initialNumToRender={3}
-                windowSize={3}
-                accessibilityLabel={fmt(t.pageOf, { n: page + 1, total })}
-              />
+          {/* One page at a time, turned by a swipe or the arrows. (A horizontal paged list
+              jumps to the wrong page on Android in right-to-left mode.) */}
+          <View
+            style={styles.flex}
+            onLayout={(e) => setListH(Math.floor(e.nativeEvent.layout.height))}
+            {...swipe.panHandlers}
+            accessibilityLabel={fmt(t.pageOf, { n: page + 1, total })}
+          >
+            {listH > 0 && pages[page] ? (
+              <Animated.View
+                key={pages[page]!.key}
+                entering={reduced ? undefined : (dir.current > 0) === I18nManager.isRTL ? SlideInLeft.duration(260) : SlideInRight.duration(260)}
+              >
+                {renderPage({ item: pages[page]! })}
+              </Animated.View>
             ) : null}
           </View>
 
