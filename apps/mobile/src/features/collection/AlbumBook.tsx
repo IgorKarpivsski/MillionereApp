@@ -87,7 +87,12 @@ export const AlbumBook = memo(function AlbumBook({
           </View>
           <View style={styles.progressRow}>
             <View style={styles.flex}>
-              <ProgressBar value={album.owned / Math.max(1, album.total)} height={7} color={full ? palette.pitch : colors.led} />
+              <ProgressBar
+                value={album.owned / Math.max(1, album.total)}
+                height={7}
+                color={full ? palette.pitch : colors.led}
+                accessibilityLabel={fmt(t.albumProgress, { n: album.owned, total: album.total })}
+              />
             </View>
             <AppText variant="caption" color={palette.white} style={styles.count}>
               {`${album.owned}/${album.total}`}
