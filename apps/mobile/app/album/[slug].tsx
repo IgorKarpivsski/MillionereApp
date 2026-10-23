@@ -92,13 +92,13 @@ export default function AlbumScreen() {
   };
   const goToRef = useRef(goTo);
   goToRef.current = goTo;
-  // a book in Hebrew: swiping toward the right turns to the next page (mirrored in LTR)
+  // swipe toward the left for the next page (as the hint on the cover says), right to go back
   const swipe = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 18 && Math.abs(g.dx) > Math.abs(g.dy) * 1.5,
       onPanResponderRelease: (_, g) => {
         if (Math.abs(g.dx) < 50) return;
-        const forward = I18nManager.isRTL ? g.dx > 0 : g.dx < 0;
+        const forward = g.dx < 0;
         goToRef.current(pageRef.current + (forward ? 1 : -1));
       },
     }),
@@ -195,7 +195,7 @@ export default function AlbumScreen() {
             {listH > 0 && pages[page] ? (
               <Animated.View
                 key={pages[page]!.key}
-                entering={reduced ? undefined : (dir.current > 0) === I18nManager.isRTL ? SlideInLeft.duration(260) : SlideInRight.duration(260)}
+                entering={reduced ? undefined : dir.current > 0 ? SlideInRight.duration(260) : SlideInLeft.duration(260)}
               >
                 {renderPage({ item: pages[page]! })}
               </Animated.View>
