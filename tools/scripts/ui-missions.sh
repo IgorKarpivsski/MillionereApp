@@ -34,19 +34,17 @@ tapText() {
 }
 swipe 540 1800 540 1100; sleep 2
 shot 10_missions
-for i in 1 2 3 4; do
-  # the i-th open mission's "go" button (they are listed top to bottom)
-  adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
-  b=$(adb shell cat /sdcard/ui.xml | tr '>' '\n' | grep -E '(text|content-desc)="[^"]*קדימה' | sed -n "${i}p" | sed -E 's/.*bounds="\[([0-9]+),([0-9]+)\]\[([0-9]+),([0-9]+)\]".*/\1 \2 \3 \4/')
-  [ -z "$b" ] && { echo "no go button $i"; adb shell cat /sdcard/ui.xml | tr '>' '\n' | grep -c . ; break; }
-  set -- $b
-  adb shell input tap $(( ($1 + $3) / 2 )) $(( ($2 + $4) / 2 )); sleep 7
+# uiautomator can't read the animated home screen, so tap by position: after the
+# scroll the first mission's button sits at (210, 2034); each extra slow scroll of
+# 240 px brings the next mission's button there.
+slow() { adb shell input swipe $(( 540 * W / 1080 )) $(( $1 * H / 2400 )) $(( 540 * W / 1080 )) $(( $2 * H / 2400 )) 1800; }
+for i in 0 1 2 3; do
+  slow 1800 1100; sleep 1
+  [ $i -gt 0 ] && { slow $(( 1500 + 240 * i )) 1500; sleep 1; }
+  shot "2${i}_before"
+  tap 210 2034; sleep 7
   shot "2${i}_went"
   adb shell input keyevent KEYCODE_BACK; sleep 3
   adb shell "am start -W -a android.intent.action.VIEW -d 'footballmillionaire://' $PKG" >/dev/null; sleep 6
-  swipe 540 1800 540 1100; sleep 2
-  shot "2${i}_back"
 done
-tapText "שבועיות" && sleep 2 && shot 30_weekly
-tapText "קדימה" && sleep 7 && shot 31_weekly_went
 true
