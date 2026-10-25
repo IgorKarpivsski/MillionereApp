@@ -42,6 +42,8 @@ create temp table ids as select test.new_user() as a;
 grant select on ids to authenticated;
 select test.refill((select a from ids));
 
+-- The weekly event world (it rotates by week) pays extra coins; keep it out of these sums.
+update public.app_config set value = value || '{"enabled": false}'::jsonb where key = 'event';
 set local role authenticated;
 do $$
 declare

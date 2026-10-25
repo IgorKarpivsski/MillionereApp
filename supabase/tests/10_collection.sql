@@ -19,7 +19,7 @@ declare
 begin
   perform test.login(a);
   st := public.collection_state();
-  perform test.assert(jsonb_array_length(st -> 'albums') = 15 and jsonb_array_length(st -> 'items') = 180, 'catalogue');
+  perform test.assert(jsonb_array_length(st -> 'albums') = 25 and jsonb_array_length(st -> 'items') = 300, 'catalogue');
   perform test.assert((st -> 'tokens' ->> 'silver')::int = 1, 'starter silver pack');
 
   r := public.open_pack('silver', 'token', req);
