@@ -10,6 +10,7 @@ import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound } from '@/design-system/feedback/sound';
 import { colors, space } from '@/design-system/tokens';
+import { useEnergySheet, usePlaySession } from '@/features/engage/EnergySheet';
 import { useCountdownTo, useEnergy } from '@/features/engage/hooks';
 import { PACK_NAMES } from '@/features/collection/PackArt';
 import { useFly } from '@/features/home/RewardFly';
@@ -32,7 +33,51 @@ const ICONS: Record<string, IconName> = {
   family: 'family',
 };
 
-function MissionRow({ m, onClaim, busy }: { m: Mission; onClaim: (e: GestureResponderEvent) => void; busy: boolean }) {
+/** What a mission counts, from its key ("w_correct", "correct30" → "correct"). */
+function missionMetric(key: string): string {
+  return key.replace(/^w_/, '').replace(/\d+$/, '');
+}
+
+/** Takes the player straight to where a mission is done. */
+function useMissionGo() {
+  const play = usePlaySession();
+  const { data: energy } = useEnergy();
+  const showEnergy = useEnergySheet((s) => s.show);
+  const ticket = (go: () => void) => {
+    if (energy && !energy.unlimited && energy.tickets < 1) showEnergy();
+    else go();
+  };
+  return (key: string) => {
+    switch (missionMetric(key)) {
+      case 'stars':
+      case 'perfect':
+      case 'worlds':
+        return router.push('/worlds');
+      case 'blitz':
+        return ticket(() => router.push('/blitz'));
+      case 'survival':
+      case 'survival_best':
+        return ticket(() => router.push('/survival'));
+      case 'tf':
+        return ticket(() => router.push('/truefalse'));
+      case 'duel':
+        return router.push({ pathname: '/match', params: { mode: 'random' } });
+      case 'daily':
+        return router.push({ pathname: '/quiz', params: { mode: 'daily' } });
+      case 'packs':
+        return router.push('/(tabs)/packs');
+      case 'family':
+        return router.push('/family');
+      case 'correct':
+      case 'games':
+        return play('mix');
+      default:
+        return router.push('/(tabs)/play');
+    }
+  };
+}
+
+function MissionRow({ m, onClaim, onGo, busy }: { m: Mission; onClaim: (e: GestureResponderEvent) => void; onGo: () => void; busy: boolean }) {
   const done = m.progress >= m.target;
   const reduced = useReducedMotion();
   return (
@@ -71,12 +116,12 @@ function MissionRow({ m, onClaim, busy }: { m: Mission; onClaim: (e: GestureResp
         </View>
       </View>
       <Pressable
-        disabled={!done || busy}
-        onPress={onClaim}
+        disabled={busy}
+        onPress={done ? onClaim : onGo}
         accessibilityRole="button"
-        accessibilityState={{ disabled: !done || busy }}
-        accessibilityLabel={done ? `${t.missionClaim} ${m.title}` : `${m.title}, ${m.progress}/${m.target}`}
-        style={({ pressed }) => [styles.claim, !done && styles.claimOff, pressed && styles.pressed]}
+        accessibilityState={{ disabled: busy }}
+        accessibilityLabel={done ? `${t.missionClaim} ${m.title}` : `${t.missionGo}: ${m.title}, ${m.progress}/${m.target}`}
+        style={({ pressed }) => [styles.claim, !done && styles.go, pressed && styles.pressed]}
       >
         {busy ? (
           <ActivityIndicator size="small" color={colors.textOnBright} />
@@ -85,7 +130,12 @@ function MissionRow({ m, onClaim, busy }: { m: Mission; onClaim: (e: GestureResp
             {t.missionClaim}
           </AppText>
         ) : (
-          <Ionicons name="lock-closed" size={16} color={colors.textDim} />
+          <>
+            <AppText variant="label" color={colors.textOnBright} style={styles.bold}>
+              {t.missionGo}
+            </AppText>
+            <Ionicons name="chevron-back" size={16} color={colors.textOnBright} />
+          </>
         )}
       </Pressable>
     </Animated.View>
@@ -102,6 +152,7 @@ export function MissionsCard() {
     }, [refetch]),
   );
   const claim = useClaimMission();
+  const go = useMissionGo();
   const launch = useFly((s) => s.launch);
   const toast = useToast();
   const [tab, setTab] = useState<'day' | 'week'>('day');
@@ -195,6 +246,10 @@ export function MissionsCard() {
               key={m.key}
               m={m}
               busy={claim.isPending && claim.variables === m.key}
+              onGo={() => {
+                haptic('tap');
+                go(m.key);
+              }}
               onClaim={(e) => {
                 const from = { x: e.nativeEvent.pageX, y: e.nativeEvent.pageY };
                 claim.mutate(m.key, {
@@ -384,7 +439,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#FFF3C4',
   },
-  claimOff: { backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'transparent' },
+  go: { backgroundColor: '#3E8EF7', borderColor: 'rgba(255,255,255,0.45)' },
   bonus: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -1211,6 +1211,7 @@ export const he = {
     missionsTitle: 'משימות',
     missionsReset: 'מתחדשות בעוד {t}',
     missionClaim: 'אסוף',
+    missionGo: 'קדימה',
     missionDone: 'נאסף ✓',
     missionsBonus: 'השלימו את כולן וקבלו עוד {n} יהלומים',
     missionsBonusDone: 'הבונוס נאסף ✓',
