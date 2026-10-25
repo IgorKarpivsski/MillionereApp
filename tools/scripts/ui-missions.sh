@@ -34,15 +34,14 @@ tapText() {
 }
 swipe 540 1800 540 1100; sleep 2
 shot 10_missions
-# uiautomator can't read the animated home screen, so tap by position: after the
-# scroll the first mission's button sits at (210, 2034); each extra slow scroll of
-# 240 px brings the next mission's button there.
-slow() { adb shell input swipe $(( 540 * W / 1080 )) $(( $1 * H / 2400 )) $(( 540 * W / 1080 )) $(( $2 * H / 2400 )) 1800; }
-for i in 0 1 2 3; do
-  slow 1800 1100; sleep 1
-  [ $i -gt 0 ] && { slow $(( 1500 + 240 * i )) 1500; sleep 1; }
+# uiautomator can't read the animated home screen, so find the blue "go" buttons in a screenshot.
+pip3 install -q pillow >/dev/null 2>&1 || true
+for i in 1 2 3; do
+  swipe 540 1800 540 1100; sleep 2
   shot "2${i}_before"
-  tap 210 2034; sleep 7
+  xy=$(python3 tools/scripts/find_go.py "shots/2${i}_before.png" $i) || { echo "no go button $i"; break; }
+  echo "go button $i at $xy"
+  adb shell input tap $xy; sleep 7
   shot "2${i}_went"
   adb shell input keyevent KEYCODE_BACK; sleep 3
   adb shell "am start -W -a android.intent.action.VIEW -d 'footballmillionaire://' $PKG" >/dev/null; sleep 6
