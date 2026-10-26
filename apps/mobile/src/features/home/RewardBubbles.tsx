@@ -264,8 +264,12 @@ export function useRewardBubbles(): BubbleDef[] {
 
 /** Every prize waiting on home, in tidy rows (prizes ready to collect first). */
 export function RewardGrid({ bubbles, empty }: { bubbles: BubbleDef[]; empty: string }) {
-  const sorted = [...bubbles].sort((a, b) => Number(b.ready) - Number(a.ready));
-  if (sorted.length === 0) {
+  // Only what can be collected right now is out front; the rest waits behind "more".
+  const [all, setAll] = useState(false);
+  const ready = bubbles.filter((b) => b.ready);
+  const later = bubbles.filter((b) => !b.ready);
+  const shown = all ? [...ready, ...later] : ready;
+  if (bubbles.length === 0) {
     return (
       <AppText variant="caption" color={colors.textMuted} align="center">
         {empty}
@@ -274,11 +278,28 @@ export function RewardGrid({ bubbles, empty }: { bubbles: BubbleDef[]; empty: st
   }
   return (
     <TourTarget id="bubbles">
-      <View style={styles.grid}>
-        {sorted.map((b, i) => (
-          <Bubble key={b.key} b={b} index={i} />
-        ))}
-      </View>
+      {shown.length ? (
+        <View style={styles.grid}>
+          {shown.map((b, i) => (
+            <Bubble key={b.key} b={b} index={i} />
+          ))}
+        </View>
+      ) : (
+        <AppText variant="caption" color={colors.textMuted} align="center">
+          {empty}
+        </AppText>
+      )}
+      {later.length ? (
+        <Pressable
+          onPress={() => setAll((v) => !v)}
+          accessibilityRole="button"
+          style={({ pressed }) => [styles.more, pressed && { opacity: 0.7 }]}
+        >
+          <AppText variant="label" color={colors.led}>
+            {all ? strings.home.rewardsLess : fmt(strings.home.rewardsMore, { n: later.length })}
+          </AppText>
+        </Pressable>
+      ) : null}
     </TourTarget>
   );
 }
@@ -311,6 +332,7 @@ export function BubbleColumns({ bubbles, center }: { bubbles: BubbleDef[]; cente
 const SIZE = 60;
 const styles = StyleSheet.create({
   columns: { flexDirection: 'row', alignItems: 'center' },
+  more: { alignSelf: 'center', paddingHorizontal: 16, paddingVertical: 8, marginTop: 4 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', rowGap: 10, columnGap: 6, paddingTop: 6 },
   col: { width: 74, gap: 6, alignItems: 'center', justifyContent: 'center' },
   center: { flex: 1, alignItems: 'center' },

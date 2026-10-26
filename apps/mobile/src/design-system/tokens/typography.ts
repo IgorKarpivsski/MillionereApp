@@ -1,8 +1,9 @@
 /**
  * Type scale. Two families, clearly distinct:
  *   ui  — IBM Plex Sans Hebrew: headlines and everything you read or tap.
- *   led — DotGothic16: scoreboard digits (scores, coins, clocks). Digits and
- *         Latin only — never set Hebrew in it.
+ *   led — scoreboard digits (scores, coins, clocks): the same bold Plex, so numbers
+ *         are round and thick like the Hebrew around them. (The old dot font set a
+ *         full-width comma: "1, 444".)
  * Both are SIL Open Font License (free for commercial apps). See LICENSES/ASSETS.md.
  *
  * Sizes are base sizes; AppText scales them with the OS Dynamic Type setting
@@ -14,7 +15,7 @@ export const fontFamily = {
   uiMedium: 'IBMPlexSansHebrew_600SemiBold',
   uiBold: 'IBMPlexSansHebrew_700Bold',
   uiBlack: 'IBMPlexSansHebrew_700Bold',
-  led: 'DotGothic16_400Regular',
+  led: 'IBMPlexSansHebrew_700Bold',
 } as const;
 
 export const textStyles = {

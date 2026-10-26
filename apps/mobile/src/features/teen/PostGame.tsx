@@ -18,7 +18,8 @@ const t = strings.postGame;
  * After a game: where the player stands this week, and a rewarded ad that
  * doubles this game's points (once per game).
  */
-export function PostGameRank({ runId, points }: { runId?: string | null; points: number }) {
+/** `double` = offer "double my points" (off on screens that already offer an ad, so there is one ad offer at most). */
+export function PostGameRank({ runId, points, double: canDouble = true }: { runId?: string | null; points: number; double?: boolean }) {
   const qc = useQueryClient();
   const { data } = useLeaderboard();
   const ad = useAdReward();
@@ -58,7 +59,7 @@ export function PostGameRank({ runId, points }: { runId?: string | null; points:
           </Led>
         </View>
       </View>
-      {runId && points > 0 && !doubled ? (
+      {canDouble && runId && points > 0 && !doubled ? (
         <StickerButton
           label={fmt(ad.adFree ? t.doubleFree : t.double, { n: formatNumber(points) })}
           icon={ad.adFree ? 'gift' : 'play-circle'}

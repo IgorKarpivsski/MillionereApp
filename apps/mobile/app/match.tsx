@@ -3,10 +3,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { markModeSeen } from '@/features/settings/store';
-import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, BackHandler, Pressable, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, AvatarBadge, Card, Led, Sloth, StickerButton, TrophyLogo, useToast, Backdrop } from '@/design-system/components';
+import { appAlert, AppText, AvatarBadge, Card, Led, Sloth, StickerButton, TrophyLogo, useToast, Backdrop } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound, preloadSounds } from '@/design-system/feedback/sound';
@@ -288,7 +288,7 @@ export default function MatchScreen() {
   useEffect(() => {
     if (!live) return;
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      Alert.alert(t.exitTitle, t.exitBody, [
+      appAlert(t.exitTitle, t.exitBody, [
         { text: strings.common.cancel, style: 'cancel' },
         { text: t.exit, style: 'destructive', onPress: () => router.back() },
       ]);

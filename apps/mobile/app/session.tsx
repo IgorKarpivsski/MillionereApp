@@ -4,10 +4,10 @@ import { router, useLocalSearchParams } from 'expo-router';
 import * as StoreReview from 'expo-store-review';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, BackHandler, Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeInUp, ZoomIn, useAnimatedStyle, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, BottomSheet, Card, EmptyState, Led, StickerButton, useToast, Backdrop } from '@/design-system/components';
+import { appAlert, AppText, BottomSheet, Card, EmptyState, Led, StickerButton, useToast, Backdrop } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound, preloadSounds } from '@/design-system/feedback/sound';
@@ -199,8 +199,13 @@ function ResultView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
-    void askForRemindersOnce();
-    if (sum.correct < 7 || useSettingsStore.getState().reviewAsked) return;
+    // The notifications question comes after the first win (once), not on the first screen.
+    const st = useSettingsStore.getState();
+    if (sum.stars >= 1 && !st.remindersAsked && st.reminders) {
+      const id = setTimeout(() => void askForRemindersOnce(), 1800);
+      return () => clearTimeout(id);
+    }
+    if (sum.correct < 7 || st.reviewAsked) return;
     const id = setTimeout(async () => {
       try {
         if (await StoreReview.isAvailableAsync()) {
@@ -302,7 +307,7 @@ function ResultView({
         onPress={onAgain}
       />
       <DoubleCoins runId={s.payload?.run_id} coins={sum.coins} />
-      <PostGameRank runId={s.payload?.run_id} points={sum.prize_points} />
+      <PostGameRank runId={s.payload?.run_id} points={sum.prize_points} double={false} />
       <ShareResultButton
         big={quick ? `${sum.correct}/${sum.total}` : '⭐'.repeat(Math.max(1, sum.stars))}
         line={quick ? fmt(t.share, { n: sum.correct, w: t.quickDone }) : fmt(strings.teen.shareSession, { stars: sum.stars, level: sum.level, world })}
@@ -394,7 +399,7 @@ export default function SessionScreen() {
       void next();
       return true;
     }
-    Alert.alert(t.exitTitle, t.exitBody, [
+    appAlert(t.exitTitle, t.exitBody, [
       { text: t.keep, style: 'cancel' },
       { text: t.exit, style: 'destructive', onPress: () => router.back() },
     ]);

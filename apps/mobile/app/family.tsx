@@ -6,10 +6,10 @@ import { markModeSeen } from '@/features/settings/store';
 import { ReactionLayer } from '@/features/teen/Reactions';
 import { ShareResultButton } from '@/features/teen/ShareResult';
 import { PostGameRank } from '@/features/teen/PostGame';
-import { ActivityIndicator, Alert, BackHandler, Dimensions, Image, Pressable, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, BackHandler, Dimensions, Image, Pressable, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, Layout, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, AvatarBadge, Backdrop, BottomSheet, Card, Icon, Led, Sloth, StickerButton, useToast } from '@/design-system/components';
+import { appAlert, AppText, AvatarBadge, Backdrop, BottomSheet, Card, Icon, Led, Sloth, StickerButton, useToast } from '@/design-system/components';
 import { boostsApi } from '@/features/boosts/api';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
@@ -588,7 +588,7 @@ export default function FamilyScreen() {
   useEffect(() => {
     if (!live) return;
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      Alert.alert(t.leaveTitle, t.leaveBody, [
+      appAlert(t.leaveTitle, t.leaveBody, [
         { text: strings.common.cancel, style: 'cancel' },
         { text: t.leave, style: 'destructive', onPress: leave },
       ]);

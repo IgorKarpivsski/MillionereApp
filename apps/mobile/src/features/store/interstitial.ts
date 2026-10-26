@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useSettingsStore } from '@/features/settings/store';
 import { showInterstitialAd } from './ads';
 
 /** A full-screen ad after every Nth finished game, for players without "no ads". */
@@ -23,6 +24,9 @@ export const useInterstitial = create<State>((set) => ({
 /** Call once when a game's results appear. Shows an ad when it's due. */
 export async function gameFinished(adFree: boolean): Promise<void> {
   if (adFree) return;
+  // No full-screen ads for children under 13 (or before the age question): only ads they choose to watch.
+  const band = useSettingsStore.getState().ageBand;
+  if (band === null || band === 'under13') return;
   const st = useInterstitial.getState();
   const games = st.games + 1;
   useInterstitial.setState({ games });

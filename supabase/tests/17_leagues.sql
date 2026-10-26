@@ -13,6 +13,9 @@ insert into public.user_leagues (user_id, tier) select id, 2 from u where i = 7;
 insert into public.quiz_runs (user_id, status, prize_points, ended_at, started_at)
 select id, 'won', (7 - i) * 100, public.israel_week_start() - interval '2 days', public.israel_week_start() - interval '2 days'
   from u where i <= 6;
+-- This week: everyone but user 2 has finished a game (only active players join a group).
+insert into public.quiz_runs (user_id, status, prize_points, ended_at, started_at)
+select id, 'won', 0, now(), now() from u where i <> 2;
 
 set local role authenticated;
 do $$
@@ -52,5 +55,10 @@ begin
   perform test.assert(jsonb_array_length(s -> 'rows') = 1, 'fifth Bronze player opens a new group');
   perform test.assert((s ->> 'seconds_left')::int between 1 and 7 * 86400, 'countdown to week end');
   perform test.assert(s -> 'rows' -> 0 ->> 'me' = 'true', 'me flag');
+
+  -- No game this week yet: not in a group, nothing listed.
+  perform test.login((select id from u where i = 2));
+  s := public.league_state();
+  perform test.assert(s ->> 'joined' = 'false' and jsonb_array_length(s -> 'rows') = 0, 'not joined before playing');
 end $$;
 rollback;

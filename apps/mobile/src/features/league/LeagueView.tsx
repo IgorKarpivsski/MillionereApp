@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { LeagueState } from '@fm/shared';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { ZoomIn } from 'react-native-reanimated';
@@ -149,7 +150,17 @@ export function LeagueView({ s }: { s: LeagueState }) {
         )}
       </View>
 
-      {n <= 1 ? (
+      {!s.joined ? (
+        <View style={styles.join}>
+          <AppText variant="heading" align="center">
+            {t.joinTitle}
+          </AppText>
+          <AppText color={colors.textMuted} align="center">
+            {t.joinBody}
+          </AppText>
+          <StickerButton label={t.joinCta} icon="play" tone="prize" fullWidth onPress={() => router.push('/(tabs)/play')} />
+        </View>
+      ) : n <= 1 ? (
         <AppText color={colors.textMuted} align="center">
           {t.alone}
         </AppText>
@@ -211,6 +222,7 @@ export function SegmentTabs<T extends string>({ value, options, onChange }: { va
 }
 
 const styles = StyleSheet.create({
+  join: { gap: space.sm, padding: space.md, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1, borderColor: 'rgba(255,214,140,0.4)' },
   wrap: { gap: space.md },
   flex: { flex: 1 },
   hero: {

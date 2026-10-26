@@ -3,10 +3,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { markModeSeen } from '@/features/settings/store';
-import { ActivityIndicator, Alert, BackHandler, Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, BackHandler, Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, Backdrop, EmptyState, Led, Sloth, StickerButton, TrophyLogo } from '@/design-system/components';
+import { appAlert, AppText, Backdrop, EmptyState, Led, Sloth, StickerButton, TrophyLogo } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound, preloadSounds } from '@/design-system/feedback/sound';
@@ -132,7 +132,7 @@ export default function BlitzScreen() {
   useEffect(() => {
     if (phase !== 'playing' && phase !== 'countdown') return;
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      Alert.alert(strings.match.exitTitle, '', [
+      appAlert(strings.match.exitTitle, '', [
         { text: strings.common.cancel, style: 'cancel' },
         { text: strings.match.exit, style: 'destructive', onPress: () => router.back() },
       ]);

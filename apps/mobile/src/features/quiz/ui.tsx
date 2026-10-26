@@ -175,7 +175,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.control + 2,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: space.sm,
+    // room for the number badge on the reading side, so long answers never run under it
+    paddingHorizontal: 32,
     paddingVertical: space.sm,
     gap: 4,
   },
@@ -185,7 +186,7 @@ const styles = StyleSheet.create({
   numBadge: {
     position: 'absolute',
     top: 6,
-    end: 6,
+    start: 6,
     width: 22,
     height: 22,
     borderRadius: 11,
@@ -198,7 +199,7 @@ const styles = StyleSheet.create({
   expertBadge: {
     position: 'absolute',
     top: 6,
-    start: 6,
+    end: 6,
     width: 20,
     height: 20,
     borderRadius: 10,

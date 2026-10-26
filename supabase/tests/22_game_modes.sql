@@ -64,10 +64,10 @@ begin
   r := public.blitz_answer(run, test.bslot(run));
   perform test.assert(r ->> 'status' = 'done' and r ->> 'was_correct' is null, 'late answer closes the run');
   r := public.blitz_finish(run);
-  perform test.assert((r ->> 'correct')::int = 2 and (r ->> 'coins')::int = 6 and (r ->> 'new_best')::boolean, 'pays 3/correct, new best');
-  perform test.assert(test.coins(a) = c0 + 6, 'coins paid once');
+  perform test.assert((r ->> 'correct')::int = 2 and (r ->> 'coins')::int = 18 and (r ->> 'new_best')::boolean, 'pays 9/correct, new best');
+  perform test.assert(test.coins(a) = c0 + 18, 'coins paid once');
   r := public.blitz_finish(run);
-  perform test.assert(test.coins(a) = c0 + 6, 'finish is idempotent');
+  perform test.assert(test.coins(a) = c0 + 18, 'finish is idempotent');
   perform test.assert((public.blitz_info() ->> 'best')::int = 2, 'best score');
 end $$;
 

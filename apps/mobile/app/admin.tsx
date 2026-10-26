@@ -3,8 +3,8 @@ import type { PackSlug } from '@fm/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, Share, StyleSheet, TextInput, View } from 'react-native';
-import { AppText, AvatarBadge, Card, EmptyState, Screen, StickerButton, useToast } from '@/design-system/components';
+import { Pressable, Share, StyleSheet, TextInput, View } from 'react-native';
+import { appAlert, AppText, AvatarBadge, Card, EmptyState, Screen, StickerButton, useToast } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { adminApi, useAdminStatus, type AdminPlayer, type GrantReward } from '@/features/admin/api';
@@ -116,7 +116,7 @@ function GiveTab() {
   const give = () => {
     if (!player) return;
     const label = rewardLabel(reward);
-    Alert.alert(t.confirmTitle, fmt(t.confirmBody, { label, name: player.username }), [
+    appAlert(t.confirmTitle, fmt(t.confirmBody, { label, name: player.username }), [
       { text: strings.common.cancel, style: 'cancel' },
       {
         text: fmt(t.give, { label }),

@@ -782,6 +782,8 @@ export type LeagueResult = z.infer<typeof LeagueResultSchema>;
 
 export const LeagueStateSchema = z.object({
   week_start: z.string(),
+  /** false = no game this week yet, so not in a group (rows is empty) */
+  joined: z.boolean().default(true),
   seconds_left: z.number().int(),
   tier: z.number().int().min(0).max(4),
   tier_name: z.string(),

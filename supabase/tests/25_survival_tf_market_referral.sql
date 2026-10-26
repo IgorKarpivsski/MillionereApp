@@ -91,8 +91,8 @@ begin
   perform test.assert(r ->> 'status' = 'down' and not (r ->> 'can_revive')::boolean, 'only one second chance');
   c0 := test.coins(a);
   r := public.survival_finish(run);
-  perform test.assert(r ->> 'status' = 'done' and (r ->> 'new_best')::boolean and (r ->> 'coins')::int = 10, 'survival paid');
-  perform test.assert(test.coins(a) = c0 + 10, 'coins in the wallet');
+  perform test.assert(r ->> 'status' = 'done' and (r ->> 'new_best')::boolean and (r ->> 'coins')::int = 30, 'survival paid');
+  perform test.assert(test.coins(a) = c0 + 30, 'coins in the wallet');
   -- weekly table and last week's prizes
   perform test.unsettle_week();
   perform test.last_week_survival(b, 30);
@@ -115,7 +115,7 @@ begin
   perform test.assert_raises(format('select public.tf_finish(%L)', run), 'still running', 'cannot finish early');
   perform test.tf_end_now(run);
   r := public.tf_finish(run);
-  perform test.assert(r ->> 'status' = 'done' and (r ->> 'coins')::int = 2 and (r ->> 'best')::int = 1, 'tf paid');
+  perform test.assert(r ->> 'status' = 'done' and (r ->> 'coins')::int = 6 and (r ->> 'best')::int = 1, 'tf paid');
 
   -- ---------------- market ----------------
   perform test.give2(a, c1, 3);

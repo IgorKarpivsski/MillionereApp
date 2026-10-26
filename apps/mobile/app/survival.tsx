@@ -2,10 +2,10 @@ import type { SurvivalInfo, SurvivalPayload } from '@fm/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, BackHandler, Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, BackHandler, Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, Backdrop, CoinIcon, EmptyState, GemIcon, Led, Sloth, StickerButton, TrophyLogo } from '@/design-system/components';
+import { appAlert, AppText, Backdrop, CoinIcon, EmptyState, GemIcon, Led, Sloth, StickerButton, TrophyLogo } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound, preloadSounds } from '@/design-system/feedback/sound';
@@ -217,7 +217,7 @@ export default function SurvivalScreen() {
   useEffect(() => {
     if (phase !== 'playing' && phase !== 'countdown' && phase !== 'down') return;
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      Alert.alert(strings.match.exitTitle, '', [
+      appAlert(strings.match.exitTitle, '', [
         { text: strings.common.cancel, style: 'cancel' },
         { text: strings.match.exit, style: 'destructive', onPress: () => router.back() },
       ]);
@@ -237,7 +237,7 @@ export default function SurvivalScreen() {
       refresh();
       playSound('whistle');
     } catch (e) {
-      Alert.alert(e instanceof RpcError && e.code === 'insufficient_funds' ? t.noGems : strings.errors.generic);
+      appAlert(e instanceof RpcError && e.code === 'insufficient_funds' ? t.noGems : strings.errors.generic);
     } finally {
       setReviving(false);
     }

@@ -3,9 +3,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, ProgressBar, StickerButton, useToast, Backdrop } from '@/design-system/components';
+import { appAlert, AppText, ProgressBar, StickerButton, useToast, Backdrop } from '@/design-system/components';
 import { playSound } from '@/design-system/feedback/sound';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { useBuyPremium, useClaimTier, usePass } from '@/features/engage/hooks';
@@ -111,7 +111,7 @@ export default function PassScreen() {
   const maxed = s.tier >= s.tiers.length;
 
   const buyPremium = () =>
-    Alert.alert(t.buyPremiumTitle, fmt(t.buyPremiumBody, { n: s.premium_gems }), [
+    appAlert(t.buyPremiumTitle, fmt(t.buyPremiumBody, { n: s.premium_gems }), [
       { text: strings.common.cancel, style: 'cancel' },
       {
         text: fmt(t.buyPremium, { n: s.premium_gems }),

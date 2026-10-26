@@ -33,7 +33,8 @@ import { fmt, strings } from '@/lib/i18n';
 
 const t = strings.onboarding;
 type Step = 'notif' | 'age' | 'about' | 'nick';
-const STEPS: Step[] = ['notif', 'age', 'about', 'nick'];
+// Notifications are asked after the first win, not here (the first screen is the age question).
+const STEPS: Step[] = ['age', 'about', 'nick'];
 
 /* ------------------------------------------------------------------ */
 /* Frame                                                               */
@@ -161,7 +162,7 @@ export default function OnboardingScreen() {
   const toast = useToast();
   const worlds = useWorldsConfig();
   const update = useUpdateProfile();
-  const [step, setStep] = useState<Step>('notif');
+  const [step, setStep] = useState<Step>('age');
   const [busy, setBusy] = useState(false);
   const [age, setAge] = useState<number | null>(null);
   const [gender, setGender] = useState<'male' | 'female' | 'other' | null>(null);

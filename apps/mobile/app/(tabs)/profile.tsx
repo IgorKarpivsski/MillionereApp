@@ -3,9 +3,8 @@ import { USERNAME_REGEX } from '@fm/shared';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
-import {
-  AppText,
+import { Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { appAlert, AppText,
   AvatarBadge,
   BottomSheet,
   Card,
@@ -15,8 +14,7 @@ import {
   Skeleton,
   StickerButton,
   TitleTag,
-  useToast,
-} from '@/design-system/components';
+  useToast, } from '@/design-system/components';
 import { colors, fontFamily, palette, radius, space } from '@/design-system/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import type { Provider } from '@/features/auth/oauth';
@@ -162,7 +160,7 @@ function LinkAccountCard() {
     else if (res.reason !== 'cancelled') toast(strings.errors.generic, 'error');
   };
   const askSwitch = (p: Provider) =>
-    Alert.alert(t.switchTitle, t.switchBody, [
+    appAlert(t.switchTitle, t.switchBody, [
       { text: strings.common.cancel, style: 'cancel' },
       { text: t.switchConfirm, onPress: () => void switchTo(p) },
     ]);
@@ -227,7 +225,7 @@ export default function ProfileScreen() {
 
   const confirmSignOut = () => {
     if (!isGuest) return void signOut();
-    Alert.alert(t.signOut, t.signOutGuestWarning, [
+    appAlert(t.signOut, t.signOutGuestWarning, [
       { text: strings.common.cancel, style: 'cancel' },
       { text: t.signOut, style: 'destructive', onPress: () => void signOut() },
     ]);

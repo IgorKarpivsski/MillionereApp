@@ -19,3 +19,4 @@ export * from './Backdrop';
 export * from './Sloth';
 export * from './TitleTag';
 export * from './PlayerName';
+export * from './AppAlert';

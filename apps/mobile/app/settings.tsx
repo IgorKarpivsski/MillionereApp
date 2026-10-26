@@ -3,8 +3,8 @@ import * as Application from 'expo-application';
 import { router } from 'expo-router';
 import type React from 'react';
 import { useState } from 'react';
-import { Alert, Linking, Pressable, StyleSheet, Switch, View } from 'react-native';
-import { AppText, Card, Screen, StickerButton, useToast } from '@/design-system/components';
+import { Linking, Pressable, StyleSheet, Switch, View } from 'react-native';
+import { appAlert, AppText, Card, Screen, StickerButton, useToast } from '@/design-system/components';
 import { colors, palette, space } from '@/design-system/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useToggleSetting } from '@/features/settings/hooks';
@@ -120,7 +120,7 @@ export default function SettingsScreen() {
   const admin = useAdminStatus();
 
   const confirmDelete = () =>
-    Alert.alert(t.deleteTitle, t.deleteBody, [
+    appAlert(t.deleteTitle, t.deleteBody, [
       { text: strings.common.cancel, style: 'cancel' },
       {
         text: t.deleteConfirm,

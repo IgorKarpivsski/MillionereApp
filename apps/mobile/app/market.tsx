@@ -3,9 +3,9 @@ import type { Collectible, MarketListing } from '@fm/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, AvatarBadge, Backdrop, StickerButton, useToast } from '@/design-system/components';
+import { appAlert, AppText, AvatarBadge, Backdrop, StickerButton, useToast } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { playSound } from '@/design-system/feedback/sound';
 import { colors, radius, space } from '@/design-system/tokens';
@@ -164,7 +164,7 @@ export default function MarketScreen() {
   };
 
   const take = (l: MarketListing) =>
-    Alert.alert(t.takeTitle, fmt(t.takeBody, { want: l.want.name, give: l.give.name }), [
+    appAlert(t.takeTitle, fmt(t.takeBody, { want: l.want.name, give: l.give.name }), [
       { text: strings.common.cancel, style: 'cancel' },
       {
         text: t.take,

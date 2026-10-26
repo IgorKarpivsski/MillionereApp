@@ -6,15 +6,14 @@ import { LADDER } from '@fm/economy-config';
 import type { DailyStatus, LifelineKind, ReportReason } from '@fm/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, BackHandler, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, BackHandler, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 import * as StoreReview from 'expo-store-review';
 import { askForRemindersOnce } from '@/features/reminders/useReminders';
 import { gameFinished } from '@/features/store/interstitial';
 import { markModeSeen, useSettingsStore } from '@/features/settings/store';
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  AppText,
+import { appAlert, AppText,
   BottomSheet,
   Card,
   EmptyState,
@@ -195,7 +194,7 @@ function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => voi
           <Led size="ledXL" color={colors.text}>
             :
           </Led>
-          <Led size="ledXL" color={rival ? colors.danger : colors.text}>
+          <Led size="ledXL" color={colors.text}>
             {rival}
           </Led>
           <AppText variant="label">{t.rival}</AppText>
@@ -238,7 +237,7 @@ function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => voi
         <StickerButton label={t.again} icon="refresh" size="lg" fullWidth onPress={onAgain} />
       )}
       <DoubleCoins runId={s.payload?.run_id} coins={sum.coins} />
-      <PostGameRank runId={s.payload?.run_id} points={sum.prize_points} />
+      <PostGameRank runId={s.payload?.run_id} points={sum.prize_points} double={false} />
       <StickerButton label={t.home} icon="home" tone="ghost" fullWidth onPress={goHome} />
     </ScrollView>
   );
@@ -344,7 +343,7 @@ export default function QuizScreen() {
       return true;
     }
     if (daily) {
-      Alert.alert(t.exitTitle, t.dailyExitBody, [
+      appAlert(t.exitTitle, t.dailyExitBody, [
         { text: t.keepPlaying, style: 'cancel' },
         { text: t.exit, onPress: () => router.back() },
       ]);
@@ -352,12 +351,12 @@ export default function QuizScreen() {
     }
     const coins = coinsAt(s.score);
     if (coins > 0) {
-      Alert.alert(t.cashOutTitle, fmt(t.cashOutBody, { n: formatNumber(coins) }), [
+      appAlert(t.cashOutTitle, fmt(t.cashOutBody, { n: formatNumber(coins) }), [
         { text: t.keepPlaying, style: 'cancel' },
         { text: t.cashOutConfirm, onPress: () => void cashOut() },
       ]);
     } else {
-      Alert.alert(t.exitTitle, t.exitBodyNothing, [
+      appAlert(t.exitTitle, t.exitBodyNothing, [
         { text: t.keepPlaying, style: 'cancel' },
         {
           text: t.exit,

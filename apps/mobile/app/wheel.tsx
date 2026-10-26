@@ -1,11 +1,11 @@
 import type { WheelSpin } from '@fm/shared';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, { Easing, ZoomIn, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, G, Path, Polygon } from 'react-native-svg';
-import { AppText, Card, StickerButton, useToast, Backdrop } from '@/design-system/components';
+import { appAlert, AppText, Card, StickerButton, useToast, Backdrop } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound } from '@/design-system/feedback/sound';
@@ -85,7 +85,7 @@ export default function WheelScreen() {
   };
 
   const confirmPaid = () =>
-    Alert.alert(t.buySpinTitle, fmt(t.buySpinBody, { n: data.spin_gems }), [
+    appAlert(t.buySpinTitle, fmt(t.buySpinBody, { n: data.spin_gems }), [
       { text: strings.common.cancel, style: 'cancel' },
       { text: fmt(t.spinGems, { n: data.spin_gems }), onPress: () => void spin('gems') },
     ]);

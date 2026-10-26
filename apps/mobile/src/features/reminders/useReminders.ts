@@ -1,7 +1,8 @@
+import { appAlert } from '@/design-system/components';
 import type { DailyStatus, EnergyState, Reward, WheelState } from '@fm/shared';
 import * as Notifications from 'expo-notifications';
 import { useEffect } from 'react';
-import { Alert, AppState, Platform } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import { useSettingsStore } from '@/features/settings/store';
 import { strings } from '@/lib/i18n';
 import { queryClient, queryKeys } from '@/lib/queryClient';
@@ -88,10 +89,10 @@ export async function askForRemindersOnce(): Promise<void> {
     if (!p.granted && p.canAskAgain) {
       // Explain why before the system dialog, so the first answer is an informed one.
       const yes = await new Promise<boolean>((resolve) =>
-        Alert.alert(strings.reminders.askTitle, strings.reminders.askBody, [
+        appAlert(strings.reminders.askTitle, strings.reminders.askBody, [
           { text: strings.reminders.askNo, style: 'cancel', onPress: () => resolve(false) },
           { text: strings.reminders.askYes, onPress: () => resolve(true) },
-        ], { cancelable: true, onDismiss: () => resolve(false) }),
+        ]),
       );
       if (!yes) return;
       await ensureChannel();
@@ -104,14 +105,7 @@ export async function askForRemindersOnce(): Promise<void> {
 
 /** Mount once at the root: re-plans reminders whenever the app goes to the background. */
 export function useReminders(): void {
-  // Ask for notification permission when the app opens, once the age question is answered
-  // (one prompt at a time). askForRemindersOnce() itself only ever asks once per device.
-  const ageAsked = useSettingsStore((st) => st.ageBand !== null);
-  useEffect(() => {
-    if (!ageAsked) return;
-    const id = setTimeout(() => void askForRemindersOnce(), 1500);
-    return () => clearTimeout(id);
-  }, [ageAsked]);
+  // The permission question itself comes after the player's first win (see the session result screen).
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
       if (state === 'background') void rescheduleReminders();

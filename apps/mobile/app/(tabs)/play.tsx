@@ -83,7 +83,8 @@ export default function PlayScreen() {
   const showEnergy = useEnergySheet((s) => s.show);
   const dailyDone = daily?.state === 'done';
   const seen = useSettingsStore((s) => s.seenModes);
-  const isNew = (m: string) => !seen.includes(m);
+  // "new!" marks a mode a returning player hasn't tried; for a brand-new player everything is new, so no chips
+  const isNew = (m: string) => seen.length >= 2 && !seen.includes(m);
   const needTicket = (go: () => void) => () => {
     if (energy && !energy.unlimited && energy.tickets < 1) showEnergy();
     else go();

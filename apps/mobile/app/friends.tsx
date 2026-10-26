@@ -2,9 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import type { Friend, Trade } from '@fm/shared';
 import { router } from 'expo-router';
 import { memo, useState } from 'react';
-import { Alert, Pressable, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, AvatarBadge, Card, EmptyState, Led, StickerButton, useToast, Backdrop } from '@/design-system/components';
+import { inviteLink } from '@/features/referral/api';
+import { appAlert, AppText, AvatarBadge, Card, EmptyState, Led, StickerButton, useToast, Backdrop } from '@/design-system/components';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { useCollection } from '@/features/collection/hooks';
 import { LegendCard } from '@/features/collection/LegendCard';
@@ -92,11 +93,11 @@ const FriendRow = memo(function FriendRow({ f }: { f: Friend }) {
   const block = useSocialAction(() => socialApi.block(f.id));
 
   const menu = () =>
-    Alert.alert(f.username, undefined, [
+    appAlert(f.username, undefined, [
       {
         text: t.remove,
         onPress: () =>
-          Alert.alert(fmt(t.removeTitle, { name: f.username }), undefined, [
+          appAlert(fmt(t.removeTitle, { name: f.username }), undefined, [
             { text: strings.common.cancel, style: 'cancel' },
             { text: t.remove, style: 'destructive', onPress: () => remove.mutate(undefined) },
           ]),
@@ -105,7 +106,7 @@ const FriendRow = memo(function FriendRow({ f }: { f: Friend }) {
         text: t.block,
         style: 'destructive',
         onPress: () =>
-          Alert.alert(fmt(t.blockTitle, { name: f.username }), t.blockBody, [
+          appAlert(fmt(t.blockTitle, { name: f.username }), t.blockBody, [
             { text: strings.common.cancel, style: 'cancel' },
             { text: t.block, style: 'destructive', onPress: () => block.mutate(undefined) },
           ]),
@@ -225,10 +226,11 @@ export default function FriendsScreen() {
           </View>
           <StickerButton
             label={t.share}
-            icon="share-social"
+            icon="logo-whatsapp"
+            tone="prize"
             fullWidth
             disabled={!data}
-            onPress={() => data && void Share.share({ message: fmt(t.shareText, { code: data.code }) })}
+            onPress={() => data && void Share.share({ message: fmt(t.shareText, { code: data.code, link: inviteLink(data.code) }) })}
           />
         </Card>
 

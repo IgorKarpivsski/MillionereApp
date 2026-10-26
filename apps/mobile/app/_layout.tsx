@@ -14,7 +14,7 @@ import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { OfflineBanner } from '@/components/OfflineBanner';
-import { EmptyState, ToastProvider } from '@/design-system/components';
+import { AppAlertHost, EmptyState, ToastProvider } from '@/design-system/components';
 import { colors } from '@/design-system/tokens';
 import { AuthProvider, useAuth } from '@/features/auth/AuthProvider';
 import { initAnalytics, track } from '@/lib/analytics';
@@ -23,6 +23,7 @@ import { initMonitoring, wrapRoot } from '@/lib/monitoring';
 import { bindOnlineManager } from '@/lib/network';
 import { queryClient } from '@/lib/queryClient';
 import { ensureRTL } from '@/lib/rtl';
+import { AgeBandSync } from '@/features/settings/AgeBandSync';
 import { AgeGate } from '@/features/settings/AgeGate';
 import { useSettingsStore } from '@/features/settings/store';
 import { IncomingCallHost } from '@/features/boosts/IncomingCall';
@@ -123,8 +124,10 @@ function Gate() {
       </Stack>
       <OnboardingRedirect />
       <EnergySheet />
+      <AppAlertHost />
       <OfflineBanner />
       <AgeGate />
+      <AgeBandSync />
       <IncomingCallHost />
       <AutoRedeem />
       <PurchaseRecovery />

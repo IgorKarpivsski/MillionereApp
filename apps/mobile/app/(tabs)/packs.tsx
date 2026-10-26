@@ -3,10 +3,9 @@ import { getLocales } from 'expo-localization';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { TopBar } from '@/components/TopBar';
-import {
-  AppText,
+import { appAlert, AppText,
   BottomSheet,
   Card,
   CoinIcon,
@@ -15,8 +14,7 @@ import {
   Screen,
   Skeleton,
   StickerButton,
-  useToast,
-} from '@/design-system/components';
+  useToast, } from '@/design-system/components';
 import { colors, rarityColors, space, type RarityKey } from '@/design-system/tokens';
 import { GlowingPack, PACK_GLOW, PACK_NAMES } from '@/features/collection/PackArt';
 import { useCollection } from '@/features/collection/hooks';
@@ -72,7 +70,7 @@ export default function PacksScreen() {
       toast(cur === 'coins' ? t.noCoins : t.noGems, 'error');
       return;
     }
-    Alert.alert(fmt(t.buyTitle, { name: PACK_NAMES[p.slug] }), fmt(cur === 'coins' ? t.buyCoins : t.buyGems, { n: formatNumber(price) }), [
+    appAlert(fmt(t.buyTitle, { name: PACK_NAMES[p.slug] }), fmt(cur === 'coins' ? t.buyCoins : t.buyGems, { n: formatNumber(price) }), [
       { text: strings.common.cancel, style: 'cancel' },
       { text: t.buyConfirm, onPress: () => open(p.slug, cur) },
     ]);
