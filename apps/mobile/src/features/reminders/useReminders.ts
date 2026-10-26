@@ -1,10 +1,11 @@
-import type { DailyStatus, EnergyState, WheelState } from '@fm/shared';
+import type { DailyStatus, EnergyState, Reward, WheelState } from '@fm/shared';
 import * as Notifications from 'expo-notifications';
 import { useEffect } from 'react';
 import { Alert, AppState, Platform } from 'react-native';
 import { useSettingsStore } from '@/features/settings/store';
 import { strings } from '@/lib/i18n';
 import { queryClient, queryKeys } from '@/lib/queryClient';
+import { rewardLabel } from '@/features/engage/rewards';
 import { planReminders } from './plan';
 
 const CHANNEL = 'reminders';
@@ -41,6 +42,8 @@ export async function rescheduleReminders(): Promise<void> {
     const wheel = queryClient.getQueryData<WheelState>(queryKeys.wheel);
     const daily = queryClient.getQueryData<DailyStatus>(queryKeys.daily);
     const energy = queryClient.getQueryData<EnergyState>(queryKeys.energy);
+    const login = queryClient.getQueryData<{ days: Reward[]; day: number }>(['login-calendar']);
+    const next = login?.days?.length ? login.days[(login.day + 1) % login.days.length] : undefined;
     const plan = planReminders({
       now: new Date(),
       wheelFree: wheel?.free_available,
@@ -49,6 +52,7 @@ export async function rescheduleReminders(): Promise<void> {
       streak: daily?.streak ?? 0,
       secondsToReset: daily?.seconds_to_reset,
       energy,
+      tomorrowGift: next ? rewardLabel(next) : undefined,
     });
     for (const r of plan) {
       await Notifications.scheduleNotificationAsync({

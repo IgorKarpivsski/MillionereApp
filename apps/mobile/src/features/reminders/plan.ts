@@ -12,31 +12,59 @@ export interface ReminderInput {
   streak: number;
   secondsToReset: number | undefined;
   energy: { tickets: number; max: number; next_at: string | null; refill_minutes: number; unlimited: boolean } | undefined;
+  /** Tomorrow's daily gift, already worded ("חבילת כסף"), when known. */
+  tomorrowGift?: string;
 }
 
 export interface Reminder {
-  id: 'wheel' | 'streak' | 'daily' | 'energy' | 'comeback2' | 'comeback5';
+  id: 'wheel' | 'streak' | 'daily' | 'gift' | 'energy' | 'comeback2' | 'comeback5';
   at: Date;
   title: string;
   body: string;
 }
 
 const MIN_LEAD_MS = 5 * 60_000;
-const IL_OFFSET_MIN = 180; // Israel summer time; winter is 120. Quiet hours tolerate the hour of drift.
+/** Last Sunday of a month (UTC date), month 0-based. */
+function lastSunday(year: number, month: number): Date {
+  const d = new Date(Date.UTC(year, month + 1, 0));
+  d.setUTCDate(d.getUTCDate() - d.getUTCDay());
+  return d;
+}
+
+/**
+ * Israel's UTC offset in minutes: summer time (UTC+3) from the Friday before the last
+ * Sunday of March, 02:00, until the last Sunday of October, 02:00; otherwise UTC+2.
+ */
+export function ilOffsetMin(d: Date): number {
+  const y = d.getUTCFullYear();
+  const start = lastSunday(y, 2);
+  start.setUTCDate(start.getUTCDate() - 2); // Friday
+  const startAt = start.getTime(); // 02:00 local winter = 00:00 UTC
+  const endAt = lastSunday(y, 9).getTime() - 3600_000; // 02:00 local summer = 23:00 UTC the day before
+  const t = d.getTime();
+  return t >= startAt && t < endAt ? 180 : 120;
+}
 
 function ilHour(d: Date): number {
-  return (d.getUTCHours() + IL_OFFSET_MIN / 60) % 24;
+  return (d.getUTCHours() + d.getUTCMinutes() / 60 + ilOffsetMin(d) / 60) % 24;
+}
+
+/** Tomorrow at hh:mm Israel time. */
+function ilTomorrowAt(now: Date, hh: number, mm: number): Date {
+  const off = ilOffsetMin(now);
+  const local = new Date(now.getTime() + off * 60_000);
+  const at = Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate() + 1, hh, mm) - off * 60_000;
+  return new Date(at);
 }
 
 /** Moves a time out of quiet hours (22:00–09:00) to the next 09:00. */
 export function outOfQuietHours(d: Date): Date {
   const h = ilHour(d);
   if (h >= 9 && h < 22) return d;
-  const out = new Date(d);
+  const off = ilOffsetMin(d);
+  const local = new Date(d.getTime() + off * 60_000);
   const addDays = h >= 22 ? 1 : 0;
-  out.setUTCDate(out.getUTCDate() + addDays);
-  out.setUTCHours(9 - IL_OFFSET_MIN / 60, 0, 0, 0);
-  return out;
+  return new Date(Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate() + addDays, 9, 0) - off * 60_000);
 }
 
 export function planReminders(i: ReminderInput): Reminder[] {
@@ -62,10 +90,18 @@ export function planReminders(i: ReminderInput): Reminder[] {
       } else {
         push({ id: 'daily', at, title: 'האתגר היומי עוד פתוח', body: '10 שאלות נגד האלוף. מצליח לנצח היום?' });
       }
-    } else {
-      push({ id: 'daily', at: new Date(reset + 9 * 3600_000), title: 'אתגר יומי חדש!', body: `שמור על הרצף${i.streak > 0 ? ` של ${i.streak} ימים` : ''} — האלוף כבר מחכה.` });
     }
   }
+
+  // Tomorrow after school: the daily gift (and a new daily challenge) is waiting.
+  // Re-planned every time the app goes to the background, so it always means "the day after the last visit".
+  const gift = i.tomorrowGift ? `מחכה לך ${i.tomorrowGift}` : 'המתנה היומית שלך מחכה';
+  push({
+    id: 'gift',
+    at: ilTomorrowAt(i.now, 16, 30),
+    title: 'המתנה של היום מוכנה 🎁',
+    body: i.dailyState === 'done' ? `${gift}, ואתגר יומי חדש כבר פתוח.` : `${gift}. בוא לאסוף!`,
+  });
 
   // Haven't opened the app in a while: a nudge after 2 days, another after 5.
   // Every time the app goes to the background these move forward, so active players never see them.

@@ -14,6 +14,7 @@ import { playSound, preloadSounds } from '@/design-system/feedback/sound';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { useEnergySheet } from '@/features/engage/EnergySheet';
 import { useEnergy } from '@/features/engage/hooks';
+import { TomorrowCard } from '@/features/engage/TomorrowCard';
 import { quizApi } from '@/features/quiz/api';
 import { QuestionImageView } from '@/features/quiz/QuestionImage';
 import { AnswerTile, type AnswerState } from '@/features/quiz/ui';
@@ -254,11 +255,18 @@ function ResultView({
           </Animated.View>
         </View>
         {sum.chest ? (
-          <Animated.View entering={reduced ? undefined : ZoomIn.delay(900)} style={styles.chest}>
-            <Ionicons name="gift" size={22} color={colors.textOnBright} />
-            <AppText variant="label" color={colors.textOnBright} style={styles.flex}>
-              {sum.chest === 'gold' ? fmt(t.chestGold, { n: sum.level }) : t.chestSilver}
-            </AppText>
+          <Animated.View entering={reduced ? undefined : ZoomIn.delay(900)}>
+            <Pressable
+              onPress={() => router.push('/(tabs)/packs')}
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.chest, pressed && { opacity: 0.85 }]}
+            >
+              <Ionicons name="gift" size={22} color={colors.textOnBright} />
+              <AppText variant="label" color={colors.textOnBright} style={styles.flex}>
+                {sum.first_win ? t.chestFirst : sum.chest === 'gold' ? fmt(t.chestGold, { n: sum.level }) : t.chestSilver}
+              </AppText>
+              <Ionicons name="chevron-back" size={18} color={colors.textOnBright} />
+            </Pressable>
           </Animated.View>
         ) : null}
         {sum.leveled_up ? (
@@ -269,6 +277,8 @@ function ResultView({
           </Animated.View>
         ) : null}
       </Card>
+
+      <TomorrowCard />
 
       {sum.perfect ? <PerfectPrize prize={sum.perfect} /> : null}
       {sum.champion_opened ? (

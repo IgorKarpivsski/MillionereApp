@@ -499,6 +499,8 @@ export const he = {
     cardBody: 'המתנה היומית שלך מחכה',
     cardBody2: 'יום {n}: {label}',
     cardCta: 'אסוף',
+    tomorrowTitle: 'מחר מחכה לך מתנה!',
+    tomorrowGold: 'ביום 7: חבילת זהב',
   },
   share: {
     cta: 'שתף',
@@ -850,6 +852,7 @@ export const he = {
     home: 'לבית',
     chestGold: 'קיבלת חבילת זהב על סיום שלב {n}!',
     chestSilver: 'שלושה כוכבים ראשונים: קיבלת חבילת כסף!',
+    chestFirst: 'הניצחון הראשון שלך! קיבלת חבילת כסף. לחצו כדי לפתוח',
     unlocked: 'נפתח שלב {n}',
     lockedErr: 'השלב עוד נעול',
     lockedBody: 'סיימו את השלבים הקודמים כדי לפתוח אותו.',

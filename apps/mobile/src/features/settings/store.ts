@@ -33,6 +33,8 @@ interface SettingsState {
   seenModes: string[];
   /** The four-currencies explainer was shown. Device-only. */
   currencyHelpSeen: boolean;
+  /** Israel day on which the "tomorrow's gift" card was last shown (at most once a day). Device-only. */
+  tomorrowDay: string | null;
   set: (patch: Partial<Omit<SettingsState, 'set' | 'hydrateFromServer'>>) => void;
   hydrateFromServer: (s: Settings) => void;
 }
@@ -55,6 +57,7 @@ export const useSettingsStore = create<SettingsState>()(
       tourDone: false,
       seenModes: [],
       currencyHelpSeen: false,
+      tomorrowDay: null,
       set: (patch) => set(patch),
       hydrateFromServer: (s) =>
         set({ sound: s.sound, music: s.music, haptics: s.haptics, reducedMotion: s.reduced_motion, extendedTime: s.extended_time }),
@@ -72,7 +75,7 @@ export const useSettingsStore = create<SettingsState>()(
         }
         return p as unknown as SettingsState;
       },
-      partialize: ({ sound, music, haptics, reducedMotion, largeText, extendedTime, reminders, remindersAsked, leagueSeenWeek, reviewAsked, ageBand, onboarded, tourDone, seenModes, currencyHelpSeen }) => ({
+      partialize: ({ sound, music, haptics, reducedMotion, largeText, extendedTime, reminders, remindersAsked, leagueSeenWeek, reviewAsked, ageBand, onboarded, tourDone, seenModes, currencyHelpSeen, tomorrowDay }) => ({
         sound,
         music,
         haptics,
@@ -88,6 +91,7 @@ export const useSettingsStore = create<SettingsState>()(
         tourDone,
         seenModes,
         currencyHelpSeen,
+        tomorrowDay,
       }),
     },
   ),

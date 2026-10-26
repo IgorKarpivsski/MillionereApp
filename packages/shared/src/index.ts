@@ -322,6 +322,8 @@ export const SessionSummarySchema = z.object({
   champion_opened: z.boolean().default(false),
   can_continue: z.boolean().default(false),
   hearts: z.number().int().default(0),
+  /** the player's first win ever (it came with a silver pack) */
+  first_win: z.boolean().default(false),
   /** every question right: a champion's prize */
   perfect: z.object({ coins: z.number().int(), gems: z.number().int() }).optional(),
 });

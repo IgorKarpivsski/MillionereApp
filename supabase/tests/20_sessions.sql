@@ -84,6 +84,9 @@ begin
   perform test.assert((r -> 'summary' ->> 'coins')::int = 7 * 4 + 20, 'coins');
   perform test.assert(test.coins(a) = c0 + 48, 'coins paid');
   perform test.assert((r -> 'summary' ->> 'unlocked')::int = 2, 'level 2 unlocked');
+  -- first games: an easy run, and the first win ever comes with a silver pack
+  perform test.assert((select newbie from public.quiz_runs where id = run), 'first run is a newbie run');
+  perform test.assert((r -> 'summary' ->> 'first_win')::boolean and r -> 'summary' ->> 'chest' = 'silver', 'first win gives a silver pack');
   perform test.assert((r -> 'summary' ->> 'first_clear')::boolean, 'first clear');
   perform test.assert((select prize_points from public.quiz_runs where id = run) = (r -> 'summary' ->> 'prize_points')::int
                       and (r -> 'summary' ->> 'prize_points')::int >= 700, 'score kept for leagues');
