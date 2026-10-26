@@ -1,225 +1,48 @@
 import { Ionicons } from '@expo/vector-icons';
-import {
-  AVATAR_SLOTS,
-  cosmeticFor,
-  avatarSvg,
-  encodeAvatar,
-  randomAvatar,
-  specFromAvatarId,
-  type AvatarSlot,
-  type AvatarSpec,
-} from '@fm/shared';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { memo, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
-import { AVATAR_3D_IDS, AVATARS_3D } from '@/lib/avatars3d';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { SvgXml } from 'react-native-svg';
-import { AppText, StickerButton, useToast, Backdrop, Glow } from '@/design-system/components';
+import { AppText, Backdrop, Glow, StickerButton, useToast } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { playSound } from '@/design-system/feedback/sound';
-import { colors, palette, radius, space } from '@/design-system/tokens';
+import { colors, space } from '@/design-system/tokens';
 import { useMyState, useUpdateProfile } from '@/features/profile/hooks';
-import { fmt, strings } from '@/lib/i18n';
-import { queryKeys } from '@/lib/queryClient';
-import { supabase } from '@/lib/supabase';
+import { AVATAR_3D_IDS, AVATARS_3D, avatar3dFor } from '@/lib/avatars3d';
+import { strings } from '@/lib/i18n';
 
 const t = strings.avatar;
 
-const TAB_ICON: Record<AvatarSlot, React.ComponentProps<typeof Ionicons>['name']> = {
-  species: 'paw',
-  skin: 'color-fill',
-  face: 'happy',
-  eyes: 'eye',
-  brows: 'remove',
-  mouth: 'chatbubble-ellipses',
-  hair: 'cut',
-  hairColor: 'color-palette',
-  outfit: 'shirt',
-  outfitColor: 'brush',
-  bg: 'image',
-  accessory: 'glasses',
-};
-
-function useOwnedCosmetics() {
-  return useQuery({
-    queryKey: ['my-cosmetics'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('user_cosmetics').select('item');
-      if (error) throw error;
-      return new Set((data ?? []).map((r: { item: string }) => r.item));
-    },
-  });
-}
-
-interface ShopItem {
-  item: string;
-  currency: 'coins' | 'gems';
-  price: number;
-}
-
-function useShopCatalog() {
-  return useQuery({
-    queryKey: ['avatar-shop'],
-    staleTime: 10 * 60_000,
-    queryFn: async () => {
-      const { data, error } = await supabase.from('app_config').select('value').eq('key', 'avatar.shop').single();
-      if (error) throw error;
-      return new Map(((data?.value ?? []) as ShopItem[]).map((r) => [r.item, r]));
-    },
-  });
-}
-
-function priceLabel(p: ShopItem) {
-  return `${p.price.toLocaleString('he-IL')} ${p.currency === 'coins' ? strings.common.coins : strings.common.gems}`;
-}
-
-function optionLabel(slot: AvatarSlot, v: number): string {
-  if (slot === 'species') return t.species[v] ?? fmt(t.option, { n: v + 1 });
-  if (slot === 'accessory') return t.accessories[v] ?? fmt(t.option, { n: v + 1 });
-  if (slot === 'bg') return t.backgrounds[v] ?? fmt(t.option, { n: v + 1 });
-  return fmt(t.option, { n: v + 1 });
-}
-
-const Thumb = memo(function Thumb({
-  spec,
-  size,
-  selected,
-  locked,
-  price,
-  label,
-  onPress,
-}: {
-  spec: AvatarSpec;
-  size: number;
-  selected: boolean;
-  locked: boolean;
-  price?: ShopItem;
-  label: string;
-  onPress: () => void;
-}) {
-  const xml = useMemo(() => avatarSvg(spec, { size, uid: 't' + encodeAvatar(spec).slice(4) }), [spec, size]);
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={price ? `${label}, ${priceLabel(price)}` : locked ? `${label}, ${t.locked}` : label}
-      accessibilityState={{ selected, disabled: locked && !price }}
-      style={({ pressed }) => [
-        styles.thumb,
-        { width: size + 8, height: size + 8 },
-        selected ? styles.thumbOn : null,
-        pressed ? { transform: [{ scale: 0.95 }] } : null,
-      ]}
-    >
-      <View style={[styles.thumbArt, locked && !price ? styles.dim : null]}>
-        <SvgXml xml={xml} width={size} height={size} />
-      </View>
-      {price ? (
-        <View style={[styles.priceTag, price.currency === 'gems' ? styles.priceGem : null]}>
-          <Ionicons name={price.currency === 'gems' ? 'diamond' : 'logo-bitcoin'} size={11} color={colors.textOnBright} />
-          <AppText variant="caption" color={colors.textOnBright} style={styles.priceText}>
-            {price.price.toLocaleString('he-IL')}
-          </AppText>
-        </View>
-      ) : locked ? (
-        <View style={styles.lock}>
-          <Ionicons name="lock-closed" size={16} color={colors.textOnBright} />
-        </View>
-      ) : null}
-      {selected ? (
-        <View style={styles.check}>
-          <Ionicons name="checkmark" size={14} color={colors.textOnBright} />
-        </View>
-      ) : null}
-    </Pressable>
-  );
-});
-
+/** Pick a profile character: one gallery of 3D characters, all in the same art style. */
 export default function AvatarScreen() {
   const { data } = useMyState();
-  const owned = useOwnedCosmetics();
-  const shop = useShopCatalog();
-  const qc = useQueryClient();
-  const [buying, setBuying] = useState(false);
   const save = useUpdateProfile();
   const toast = useToast();
   const { width } = useWindowDimensions();
-  const [spec, setSpec] = useState<AvatarSpec | null>(null);
-  const [tab, setTab] = useState<AvatarSlot>('species');
-  const [pick3d, setPick3d] = useState<string | null>(null);
+  const [pick, setPick] = useState<string | null>(null);
 
   useEffect(() => {
-    if (data && !spec) {
-      setSpec(specFromAvatarId(data.profile.avatar_id));
-      if (AVATARS_3D[data.profile.avatar_id]) setPick3d(data.profile.avatar_id);
-    }
-  }, [data, spec]);
+    if (data && !pick) setPick(avatar3dFor(data.profile.avatar_id));
+  }, [data, pick]);
 
-  const code = pick3d ?? (spec ? encodeAvatar(spec) : '');
-  const bigXml = useMemo(() => (spec ? avatarSvg(spec, { size: 200, round: true, uid: 'big' }) : ''), [spec]);
-  if (!spec || !data) return <SafeAreaView style={styles.root} />;
+  if (!data || !pick) return <SafeAreaView style={styles.root} />;
 
-  const count = AVATAR_SLOTS.find((s) => s.key === tab)!.count;
   const cols = width >= 400 ? 4 : 3;
-  const thumb = Math.floor((width - space.lg * 2 - space.sm * (cols - 1)) / cols) - 8;
-  const itemFor = (slot: AvatarSlot, v: number) => (slot === 'accessory' || slot === 'bg' ? cosmeticFor(slot, v) : null);
-  const isLocked = (slot: AvatarSlot, v: number) => {
-    const item = itemFor(slot, v);
-    return !!item && !owned.data?.has(item);
-  };
-  const shopPrice = (slot: AvatarSlot, v: number) => {
-    const item = itemFor(slot, v);
-    return item && !owned.data?.has(item) ? shop.data?.get(item) : undefined;
-  };
-  // Shop items can be tried on; anything still unowned must be bought before saving.
-  const unpaid = (['accessory', 'bg'] as const)
-    .map((slot) => ({ slot, item: itemFor(slot, spec[slot]) }))
-    .filter((x): x is { slot: 'accessory' | 'bg'; item: string } => !!x.item && !owned.data?.has(x.item));
-  const toBuy = unpaid.map((u) => shop.data?.get(u.item)).find((p) => !!p);
-  const changed = code !== data.profile.avatar_id;
+  const thumb = Math.floor((width - space.lg * 2 - space.sm * (cols - 1)) / cols);
+  const changed = pick !== data.profile.avatar_id;
 
-  const buy = async (p: ShopItem) => {
-    setBuying(true);
-    try {
-      const { error } = await supabase.rpc('avatar_shop_buy', { p_item: p.item });
-      if (error) throw error;
-      haptic('success');
-      playSound('coins');
-      toast(t.bought, 'success');
-      await qc.invalidateQueries({ queryKey: ['my-cosmetics'] });
-      void qc.invalidateQueries({ queryKey: queryKeys.myState });
-    } catch (e) {
-      const msg = (e as { message?: string })?.message ?? '';
-      toast(msg.includes('insufficient_funds') ? fmt(t.notEnough, { cur: p.currency === 'coins' ? strings.common.coins : strings.common.gems }) : strings.errors.generic, 'error');
-    } finally {
-      setBuying(false);
-    }
-  };
-
-  const pick = (v: number) => {
-    if (isLocked(tab, v) && !shopPrice(tab, v)) {
-      haptic('error');
-      toast(t.passOnly, 'info');
-      return;
-    }
+  const choose = (id: string) => {
     haptic('select');
     playSound('tap');
-    setPick3d(null);
-    setSpec({ ...spec, [tab]: v });
+    setPick(id);
   };
-
   const shuffle = () => {
-    haptic('tap');
-    playSound('tap');
-    setPick3d(null);
-    setSpec(randomAvatar());
+    const others = AVATAR_3D_IDS.filter((id) => id !== pick);
+    choose(others[Math.floor(Math.random() * others.length)]!);
   };
-
   const onSave = () => {
     save.mutate(
-      { avatar_id: code },
+      { avatar_id: pick },
       {
         onSuccess: () => {
           haptic('success');
@@ -236,13 +59,7 @@ export default function AvatarScreen() {
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
       <Backdrop />
       <View style={styles.header}>
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={12}
-          accessibilityRole="button"
-          accessibilityLabel={strings.common.back}
-          style={styles.iconBtn}
-        >
+        <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button" accessibilityLabel={strings.common.back} style={styles.iconBtn}>
           <Ionicons name="chevron-forward" size={26} color={colors.text} />
         </Pressable>
         <AppText variant="heading" accessibilityRole="header">
@@ -256,97 +73,37 @@ export default function AvatarScreen() {
       <View style={styles.stage}>
         <Glow size={300} strength={0.45} />
         <View style={styles.spot} />
-        <View>
-          <View accessible accessibilityRole="image" accessibilityLabel={`${t.preview}: ${optionLabel('species', spec.species)}`}>
-            {pick3d ? (
-              <Image source={AVATARS_3D[pick3d]!} style={styles.big3d} />
-            ) : (
-              <SvgXml xml={bigXml} width={170} height={170} />
-            )}
-          </View>
-        </View>
+        <Image source={AVATARS_3D[pick]!} style={styles.big} accessibilityLabel={t.preview} />
       </View>
-
-      <AppText variant="label" color={colors.led} style={styles.label3d}>
-        ✨ {t.ready3d}
+      <AppText variant="label" color={colors.led} align="center" style={styles.hint}>
+        {t.pickHint}
       </AppText>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.strip3d}>
-        {AVATAR_3D_IDS.map((id) => (
-          <Pressable
-            key={id}
-            onPress={() => {
-              haptic('select');
-              playSound('tap');
-              setPick3d(id);
-            }}
-            accessibilityRole="button"
-            accessibilityState={{ selected: pick3d === id }}
-            accessibilityLabel={t.ready3d}
-            style={[styles.thumb3d, pick3d === id ? styles.thumb3dOn : null]}
-          >
-            <Image source={AVATARS_3D[id]!} style={styles.thumb3dImg} />
-          </Pressable>
-        ))}
-      </ScrollView>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabs} style={styles.tabsBar}>
-        {AVATAR_SLOTS.map(({ key }) => {
-          const on = key === tab;
+      <ScrollView contentContainerStyle={styles.grid}>
+        {AVATAR_3D_IDS.map((id, i) => {
+          const on = id === pick;
           return (
             <Pressable
-              key={key}
-              onPress={() => setTab(key)}
-              accessibilityRole="tab"
+              key={id}
+              onPress={() => choose(id)}
+              accessibilityRole="button"
               accessibilityState={{ selected: on }}
-              accessibilityLabel={t.tabs[key]}
-              style={[styles.tab, on ? styles.tabOn : null]}
+              accessibilityLabel={`${t.preview} ${i + 1}`}
+              style={({ pressed }) => [styles.thumb, { width: thumb, height: thumb, borderRadius: thumb / 2 }, on && styles.thumbOn, pressed && styles.pressed]}
             >
-              <Ionicons name={TAB_ICON[key]} size={18} color={on ? colors.textOnBright : colors.textMuted} />
-              <AppText variant="caption" color={on ? colors.textOnBright : colors.textMuted} style={styles.tabText}>
-                {t.tabs[key]}
-              </AppText>
+              <Image source={AVATARS_3D[id]!} style={styles.thumbImg} />
+              {on ? (
+                <View style={styles.check}>
+                  <Ionicons name="checkmark" size={16} color={colors.textOnBright} />
+                </View>
+              ) : null}
             </Pressable>
           );
         })}
       </ScrollView>
 
-      <ScrollView contentContainerStyle={styles.grid}>
-        {Array.from({ length: count }, (_, v) => (
-          <Thumb
-            key={`${tab}-${v}`}
-            spec={{ ...spec, [tab]: v }}
-            size={thumb}
-            selected={spec[tab] === v}
-            locked={isLocked(tab, v)}
-            price={shopPrice(tab, v)}
-            label={optionLabel(tab, v)}
-            onPress={() => pick(v)}
-          />
-        ))}
-      </ScrollView>
-
       <View style={styles.footer}>
-        {toBuy ? (
-          <StickerButton
-            label={fmt(t.buy, { price: priceLabel(toBuy) })}
-            icon={toBuy.currency === 'gems' ? 'diamond' : 'cart'}
-            tone={toBuy.currency === 'gems' ? 'gem' : 'prize'}
-            size="lg"
-            fullWidth
-            loading={buying}
-            onPress={() => void buy(toBuy)}
-          />
-        ) : (
-          <StickerButton
-            label={t.save}
-            icon="checkmark-circle"
-            size="lg"
-            fullWidth
-            disabled={!changed || unpaid.length > 0}
-            loading={save.isPending}
-            onPress={onSave}
-          />
-        )}
+        <StickerButton label={t.save} icon="checkmark-circle" size="lg" fullWidth disabled={!changed} loading={save.isPending} onPress={onSave} />
       </View>
     </SafeAreaView>
   );
@@ -354,88 +111,32 @@ export default function AvatarScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bgDeep },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: space.md,
-    paddingVertical: space.sm,
-  },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: space.md, paddingVertical: space.sm },
   iconBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
-  stage: { alignItems: 'center', justifyContent: 'center', height: 224, marginBottom: space.xs },
-  big3d: { width: 170, height: 170, borderRadius: 85, borderWidth: 4, borderColor: '#FFFFFF' },
-  label3d: { paddingHorizontal: space.md, marginBottom: space.xs },
-  strip3d: { gap: space.sm, paddingHorizontal: space.md, paddingBottom: space.sm },
-  thumb3d: { width: 64, height: 64, borderRadius: 32, borderWidth: 3, borderColor: 'transparent', overflow: 'hidden' },
-  thumb3dOn: { borderColor: colors.led },
-  thumb3dImg: { width: '100%', height: '100%' },
+  stage: { alignItems: 'center', justifyContent: 'center', height: 210 },
+  big: { width: 170, height: 170, borderRadius: 85, borderWidth: 4, borderColor: '#FFFFFF' },
   spot: {
     position: 'absolute',
-    width: 204,
-    height: 204,
-    borderRadius: 102,
+    width: 196,
+    height: 196,
+    borderRadius: 98,
     backgroundColor: 'rgba(255,176,0,0.10)',
     borderWidth: 1.5,
     borderColor: 'rgba(255,176,0,0.55)',
   },
-  tabsBar: { flexGrow: 0 },
-  tabs: { gap: space.sm, paddingHorizontal: space.lg, paddingVertical: space.sm },
-  tab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.xs,
-    minHeight: 40,
-    paddingHorizontal: space.md,
-    borderRadius: radius.chip,
-    backgroundColor: palette.night950,
-    borderWidth: 2,
-    borderColor: colors.border,
-  },
-  tabOn: { backgroundColor: colors.led, borderColor: colors.led },
-  tabText: { fontWeight: '700' },
+  hint: { marginBottom: space.sm, paddingHorizontal: space.lg },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, paddingHorizontal: space.lg, paddingBottom: space.xl },
-  thumb: {
-    borderRadius: radius.card,
-    borderWidth: 3,
-    borderColor: colors.border,
-    backgroundColor: palette.night950,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  thumb: { overflow: 'hidden', borderWidth: 3, borderColor: 'transparent' },
   thumbOn: { borderColor: colors.led },
-  thumbArt: { borderRadius: radius.control, overflow: 'hidden' },
-  dim: { opacity: 0.4 },
-  lock: {
-    position: 'absolute',
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: palette.violet,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  priceTag: {
-    position: 'absolute',
-    bottom: -6,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    paddingHorizontal: 6,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: colors.led,
-    borderWidth: 2,
-    borderColor: palette.night950,
-  },
-  priceGem: { backgroundColor: colors.gem },
-  priceText: { fontWeight: '700' },
+  thumbImg: { width: '100%', height: '100%' },
+  pressed: { transform: [{ scale: 0.95 }] },
   check: {
     position: 'absolute',
-    top: -6,
-    end: -6,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    top: 4,
+    end: 4,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: colors.led,
     alignItems: 'center',
     justifyContent: 'center',

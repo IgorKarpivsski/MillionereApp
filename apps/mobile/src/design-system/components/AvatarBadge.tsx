@@ -2,7 +2,7 @@ import { avatarSvg, specFromAvatarId } from '@fm/shared';
 import { LinearGradient } from 'expo-linear-gradient';
 import { memo, useMemo } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
-import { AVATARS_3D } from '@/lib/avatars3d';
+import { AVATARS_3D, avatar3dFor } from '@/lib/avatars3d';
 import { SvgXml } from 'react-native-svg';
 import { colors, palette } from '../tokens';
 import { AppText } from './AppText';
@@ -59,7 +59,7 @@ export const AvatarBadge = memo(function AvatarBadge({
 }) {
   const ringColors = frame ? FRAME_COLORS[frame] : undefined;
   const inner = ringColors ? size - Math.max(6, Math.round(size * 0.1)) : size;
-  const img = AVATARS_3D[avatarId];
+  const img = AVATARS_3D[avatar3dFor(avatarId)];
   const xml = useMemo(
     () => img || photo ? '' : avatarSvg(specFromAvatarId(avatarId), { size, round: true, uid: avatarId.replace(/[^a-z0-9]/gi, '') + size }),
     [img, photo, avatarId, size],
