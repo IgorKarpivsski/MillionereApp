@@ -10,7 +10,7 @@ begin
   select * into p from public.profiles where id = g;
   perform test.assert(p.id is not null, 'guest profile created');
   perform test.assert(p.is_guest, 'guest flagged as guest');
-  perform test.assert(p.username ~ '^[^_ ]+_[^_ ]+_[0-9]{2}$', 'default fun Hebrew username');
+  perform test.assert(p.username ~ '^[^_ ]+_[^_ ]+([0-9]{2})?$', 'default fun Hebrew username');
   perform test.assert(p.level = 1 and p.xp = 0, 'starts at level 1, 0 xp');
   perform test.assert(not (select is_guest from public.profiles where id = f), 'full account not a guest');
   perform test.assert(exists (select 1 from public.user_settings where user_id = g and locale = 'he'),

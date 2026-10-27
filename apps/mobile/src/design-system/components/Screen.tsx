@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, space } from '../tokens';
 import { Backdrop } from './Backdrop';
 
@@ -20,6 +20,10 @@ export function Screen({
   /** Optional color wash at the top of the backdrop (e.g. a world's color). */
   accent?: string;
 }) {
+  // the tab bar floats over the bottom of the screen (its height + the system bar), so the
+  // last card always ends well above it
+  const insets = useSafeAreaInsets();
+  const bottom = { paddingBottom: TAB_BAR + Math.max(insets.bottom, space.sm) + space.xl };
   return (
     <View style={styles.root}>
       <Backdrop accent={accent} />
@@ -27,7 +31,7 @@ export function Screen({
         {header}
         {scroll ? (
           <ScrollView
-            contentContainerStyle={styles.content}
+            contentContainerStyle={[styles.content, bottom]}
             showsVerticalScrollIndicator={false}
             refreshControl={
               onRefresh ? (
@@ -38,12 +42,15 @@ export function Screen({
             {children}
           </ScrollView>
         ) : (
-          <View style={[styles.content, styles.fill]}>{children}</View>
+          <View style={[styles.content, styles.fill, bottom]}>{children}</View>
         )}
       </SafeAreaView>
     </View>
   );
 }
+
+/** The floating tab bar's own height (52 tab + padding + border). */
+const TAB_BAR = 72;
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bgDeep },

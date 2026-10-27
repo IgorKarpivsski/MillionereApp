@@ -259,6 +259,14 @@ function ResultView({
             </AppText>
           </Animated.View>
         </View>
+        {sum.coins_breakdown && sum.coins > 0 ? (
+          <AppText variant="caption" color={colors.textMuted} align="center" style={styles.breakdown}>
+            {coinsBreakdown(sum.coins_breakdown, sum.coins)}
+          </AppText>
+        ) : null}
+        <AppText variant="caption" color={colors.textDim} align="center">
+          {t.scoreNote}
+        </AppText>
         {sum.chest ? (
           <Animated.View entering={reduced ? undefined : ZoomIn.delay(900)}>
             <Pressable
@@ -318,6 +326,14 @@ function ResultView({
       </View>
     </ScrollView>
   );
+}
+
+/** "7 נכונות × 12 = 84 · בונוס כוכבים +120 · ×2 = 408": where the coins came from. */
+function coinsBreakdown(b: { correct: number; per: number; stars: number; mult: number }, total: number): string {
+  const parts = [fmt(t.coinsCorrect, { n: b.correct, per: b.per, sum: formatNumber(b.correct * b.per) })];
+  if (b.stars > 0) parts.push(fmt(t.coinsStars, { n: formatNumber(b.stars) }));
+  if (b.mult > 1) parts.push(`×${b.mult}`);
+  return `${parts.join(' · ')} = ${formatNumber(total)}`;
 }
 
 function DoubleCoins({ runId, coins }: { runId?: string; coins: number }) {
@@ -791,6 +807,7 @@ const styles = StyleSheet.create({
   finalCard: { alignSelf: 'stretch', gap: space.lg },
   earned: { flexDirection: 'row', gap: space.sm },
   earnedTile: { flex: 1, alignItems: 'center', paddingVertical: space.md, borderRadius: radius.board, backgroundColor: colors.surfaceRaised },
+  breakdown: { marginTop: space.xs },
   chest: { flexDirection: 'row', alignItems: 'center', gap: space.sm, padding: space.md, borderRadius: radius.board, backgroundColor: colors.led },
   levelUp: { alignSelf: 'center', paddingHorizontal: space.lg, paddingVertical: space.xs, borderRadius: radius.chip, backgroundColor: colors.correct },
 });

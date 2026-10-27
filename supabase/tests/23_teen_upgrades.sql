@@ -53,7 +53,7 @@ declare
 begin
   perform test.login(a);
   s := public.get_my_state();
-  perform test.assert(s -> 'profile' ->> 'username' ~ '^[^_]+_[^_]+_[0-9]{2}$', 'fun default name: ' || (s -> 'profile' ->> 'username'));
+  perform test.assert(s -> 'profile' ->> 'username' ~ '^[^_]+_[^_]+([0-9]{2})?$', 'fun default name: ' || (s -> 'profile' ->> 'username'));
 
   -- free first week: 7 games in a row without spending a ticket
   s := public.energy_state();

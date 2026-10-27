@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { TopBar } from '@/components/TopBar';
+import { PODIUM, PodiumFrame, RankMark } from '@/features/league/podium';
 import { AppText, AvatarBadge, Card, EmptyState, Led, Screen, Skeleton, StickerButton } from '@/design-system/components';
 import { colors, radius, space } from '@/design-system/tokens';
 import { useLeague } from '@/features/league/api';
@@ -94,11 +95,11 @@ function AllTable({ data, isLoading }: { data: ReturnType<typeof useLeaderboard>
 
       <View style={styles.list}>
         {data?.rows.map((r) => (
-          <View key={`${r.rank}-${r.username}`} style={[styles.row, r.me && styles.rowMe, r.rank <= 3 && styles.rowTop]}>
-            <Led size="number" color={r.rank === 1 ? colors.led : r.rank <= 3 ? colors.text : colors.textDim} style={styles.rank}>
-              {r.rank}
-            </Led>
-            <AvatarBadge avatarId={r.avatar_id} photo={r.photo} level={r.level} frame={r.frame} size={36} />
+          <View key={`${r.rank}-${r.username}`} style={[styles.row, PODIUM[r.rank] && { backgroundColor: PODIUM[r.rank]!.tint, borderWidth: 1, borderColor: PODIUM[r.rank]!.color }, r.me && styles.rowMe]}>
+            <RankMark rank={r.rank} dim style={styles.rank} />
+            <PodiumFrame rank={r.rank} size={36}>
+              <AvatarBadge avatarId={r.avatar_id} photo={r.photo} level={r.level} frame={r.frame} size={36} />
+            </PodiumFrame>
             <AppText variant="label" numberOfLines={1} style={styles.flex}>
               {r.username}
             </AppText>

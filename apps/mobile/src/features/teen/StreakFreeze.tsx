@@ -42,6 +42,7 @@ export function StreakFreezeCard() {
         size="sm"
         fullWidth
         disabled={full || (me?.wallet.coins ?? 0) < cost}
+        disabledReason={full ? undefined : strings.common.needCoins}
         loading={buy.isPending}
         onPress={() =>
           buy.mutate(undefined, {

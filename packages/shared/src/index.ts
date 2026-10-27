@@ -324,6 +324,8 @@ export const SessionSummarySchema = z.object({
   hearts: z.number().int().default(0),
   /** the player's first win ever (it came with a silver pack) */
   first_win: z.boolean().default(false),
+  /** how the coins were made: correct answers x coins each, the star bonus, then the multiplier */
+  coins_breakdown: z.object({ correct: z.number().int(), per: z.number().int(), stars: z.number().int(), mult: z.number() }).nullable().default(null),
   /** every question right: a champion's prize */
   perfect: z.object({ coins: z.number().int(), gems: z.number().int() }).optional(),
 });
@@ -669,6 +671,8 @@ export const EnergyStateSchema = z.object({
   ad_left: z.number().int(),
   /** set during a new player's first week: tickets are free until then */
   newbie_until: z.string().nullable().optional(),
+  /** end of the days with 10 tickets that follow the free week */
+  taper_until: z.string().nullable().optional(),
 });
 export type EnergyState = z.infer<typeof EnergyStateSchema>;
 

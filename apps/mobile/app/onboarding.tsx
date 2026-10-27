@@ -1,6 +1,6 @@
 import { USERNAME_REGEX } from '@fm/shared';
 import { router } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
@@ -168,6 +168,21 @@ export default function OnboardingScreen() {
   const [gender, setGender] = useState<'male' | 'female' | 'other' | null>(null);
   const [topics, setTopics] = useState<string[]>([]);
   const [nick, setNick] = useState('');
+  const [sugs, setSugs] = useState<string[]>([]);
+  /** Three free nicknames from the server (local ones if it can't be reached). */
+  const loadSugs = useCallback(async () => {
+    try {
+      const xs = await rpc('username_suggestions', undefined, (x) => (Array.isArray(x) ? x.map(String) : []));
+      if (xs.length) return setSugs(xs.slice(0, 3));
+    } catch {
+      // fall through to the local list
+    }
+    const pool = [...t.nickSuggestions].sort(() => Math.random() - 0.5);
+    setSugs(pool.slice(0, 3));
+  }, []);
+  useEffect(() => {
+    if (step === 'nick' && sugs.length === 0) void loadSugs();
+  }, [step, sugs.length, loadSugs]);
   const go = (s: Step) => {
     haptic('tap');
     setStep(s);
@@ -373,6 +388,7 @@ export default function OnboardingScreen() {
           size="lg"
           fullWidth
           disabled={!valid}
+          disabledReason={t.nickNeed}
           loading={update.isPending}
           onPress={() =>
             update.mutate(
@@ -403,16 +419,35 @@ export default function OnboardingScreen() {
         <AppText variant="caption" color={nick.length > 0 && !valid ? colors.danger : colors.textDim} align="center">
           {t.nickInvalid}
         </AppText>
+        <AppText variant="label" align="center" color={colors.textMuted}>
+          {t.nickPick}
+        </AppText>
+        <View style={styles.chips}>
+          {sugs.map((n) => (
+            <Pressable
+              key={n}
+              onPress={() => {
+                haptic('select');
+                setNick(n);
+              }}
+              accessibilityRole="button"
+              accessibilityState={{ selected: nick === n }}
+              style={[styles.chip, nick === n && styles.chipOn]}
+            >
+              <AppText variant="bodyStrong" color={nick === n ? colors.textOnBright : colors.text}>
+                {n.replace(/_/g, ' ')}
+              </AppText>
+            </Pressable>
+          ))}
+        </View>
         <StickerButton
           label={t.nickSuggest}
-          icon="sparkles"
+          icon="refresh"
           tone="outline"
           fullWidth
           onPress={() => {
             haptic('tap');
-            const pool = t.nickSuggestions;
-            const base = pool[Math.floor(Math.random() * pool.length)]!;
-            setNick(`${base}${Math.floor(10 + Math.random() * 89)}`);
+            void loadSugs();
           }}
         />
       </Animated.View>
@@ -429,6 +464,17 @@ const styles = StyleSheet.create({
   dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: 'rgba(255,255,255,0.2)' },
   dotOn: { backgroundColor: colors.led },
   dotNow: { width: 28 },
+  chips: { gap: space.sm },
+  chip: {
+    paddingVertical: space.sm + 2,
+    paddingHorizontal: space.md,
+    borderRadius: 999,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255,214,140,0.45)',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+  },
+  chipOn: { backgroundColor: colors.led, borderColor: colors.led },
   body: { padding: space.lg, gap: space.md, flexGrow: 1 },
   head: { alignItems: 'center', gap: space.sm },
   footer: { paddingHorizontal: space.lg, paddingBottom: space.md, gap: space.sm },

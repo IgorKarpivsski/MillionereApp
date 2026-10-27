@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, { cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import { TopBar } from '@/components/TopBar';
 import { AppText, Icon, Screen, Sheen, Sloth, StickerButton } from '@/design-system/components';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
@@ -24,6 +25,18 @@ const t = strings.modes;
 const h = strings.home;
 
 /** The sloth with a game tip (a new one every few seconds, or on tap) and the two ways in. */
+/** The one button that matters on the home screen breathes gently, so the eye finds it first. */
+function Breathe({ off, children }: { off: boolean; children: ReactNode }) {
+  const v = useSharedValue(0);
+  useEffect(() => {
+    if (off) return;
+    v.value = withRepeat(withTiming(1, { duration: 1100, easing: Easing.inOut(Easing.quad) }), -1, true);
+    return () => cancelAnimation(v);
+  }, [off, v]);
+  const style = useAnimatedStyle(() => ({ transform: [{ scale: 1 + v.value * 0.035 }] }));
+  return <Animated.View style={[styles.stretch, style]}>{children}</Animated.View>;
+}
+
 function Hero() {
   const { data } = useMyState();
   const play = usePlaySession();
@@ -54,10 +67,12 @@ function Hero() {
         <Sloth size={124} say={gx(lines[i % lines.length]!, gender)} />
       </Pressable>
       <TourTarget id="play" style={styles.stretch}>
-        <StickerButton label={strings.home.playCta} icon="play" size="lg" tone="prize" fullWidth onPress={() => play('mix')} />
+        <Breathe off={reduced}>
+          <StickerButton label={strings.home.playCta} icon="play" size="lg" tone="prize" fullWidth onPress={() => play('mix')} />
+        </Breathe>
       </TourTarget>
       <TourTarget id="modes" style={styles.stretch}>
-        <StickerButton label={h.allGames} icon="game-controller" tone="gem" fullWidth onPress={() => router.push('/(tabs)/play')} />
+        <StickerButton label={h.allGames} icon="game-controller" tone="outline" size="sm" fullWidth onPress={() => router.push('/(tabs)/play')} />
       </TourTarget>
     </View>
   );

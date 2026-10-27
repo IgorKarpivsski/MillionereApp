@@ -69,6 +69,8 @@ export default function AlbumScreen() {
     return out;
   }, [items]);
   const open = openId ? (items.find((i) => i.id === openId) ?? null) : null;
+  // one sticker short of a full album: offer to craft it at half the dust
+  const lastMissing = album && album.total > 1 && album.owned === album.total - 1 ? (items.find((i) => i.count === 0) ?? null) : null;
 
   const pageW = width - 2 * space.lg;
   const pageH = Math.max(0, listH - space.sm);
@@ -156,6 +158,26 @@ export default function AlbumScreen() {
         </View>
       </View>
 
+      {lastMissing ? (
+        <Pressable
+          onPress={() => setOpenId(lastMissing.id)}
+          accessibilityRole="button"
+          accessibilityLabel={`${t.lastOneTitle} ${t.lastOneBody}`}
+          style={({ pressed }) => [styles.lastOne, pressed && { opacity: 0.85 }]}
+        >
+          <AppText style={styles.lastOneIcon}>🧩</AppText>
+          <View style={styles.flex}>
+            <AppText variant="label" color={colors.textOnBright}>
+              {t.lastOneTitle}
+            </AppText>
+            <AppText variant="caption" color={colors.textOnBright}>
+              {t.lastOneBody}
+            </AppText>
+          </View>
+          <Ionicons name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'} size={20} color={colors.textOnBright} />
+        </Pressable>
+      ) : null}
+
       {isLoading ? (
         <View style={styles.pad}>
           <Skeleton height={480} rounded={12} />
@@ -242,7 +264,13 @@ export default function AlbumScreen() {
         </>
       ) : null}
 
-      <StickerSheet item={open} dust={data?.dust ?? 0} craftCost={data?.craft_cost} onClose={() => setOpenId(null)} />
+      <StickerSheet
+        item={open}
+        dust={data?.dust ?? 0}
+        craftCost={data?.craft_cost}
+        lastOne={!!open && open.id === lastMissing?.id}
+        onClose={() => setOpenId(null)}
+      />
     </SafeAreaView>
   );
 }
@@ -325,6 +353,17 @@ function AlbumCover({
 }
 
 const styles = StyleSheet.create({
+  lastOne: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    marginHorizontal: space.lg,
+    marginBottom: space.xs,
+    padding: space.sm + 2,
+    borderRadius: 18,
+    backgroundColor: colors.led,
+  },
+  lastOneIcon: { fontSize: 26 },
   root: { flex: 1, backgroundColor: colors.bgDeep },
   header: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingHorizontal: space.lg, paddingTop: space.sm, paddingBottom: space.sm },
   flex: { flex: 1 },

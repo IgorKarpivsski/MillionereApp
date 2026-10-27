@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { ZoomIn } from 'react-native-reanimated';
+import { PODIUM, PodiumFrame, RankMark } from './podium';
 import { AppText, AvatarBadge, CoinIcon, GemIcon, Icon, Led, PlayerName, StickerButton, TitleTag } from '@/design-system/components';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound } from '@/design-system/feedback/sound';
@@ -173,14 +174,20 @@ export function LeagueView({ s }: { s: LeagueState }) {
           return (
             <View
               key={`${r.rank}-${r.username}`}
-              style={[styles.row, up && styles.rowUp, down && styles.rowDown, r.me && styles.rowMe]}
+              style={[
+                styles.row,
+                up && styles.rowUp,
+                down && styles.rowDown,
+                PODIUM[r.rank] && r.points > 0 ? { backgroundColor: PODIUM[r.rank]!.tint, borderWidth: 1, borderColor: PODIUM[r.rank]!.color } : null,
+                r.me && styles.rowMe,
+              ]}
               accessible
               accessibilityLabel={`${r.rank}. ${r.username}, ${formatNumber(r.points)} ${strings.leaderboard.points}${up ? `, ${t.upZone}` : down ? `, ${t.downZone}` : ''}`}
             >
-              <Led size="number" color={r.rank === 1 ? colors.led : colors.text} style={styles.rank}>
-                {r.rank}
-              </Led>
-              <AvatarBadge avatarId={r.avatar_id} photo={r.photo} size={38} />
+              <RankMark rank={r.points > 0 ? r.rank : 99} style={styles.rank} />
+              <PodiumFrame rank={r.points > 0 ? r.rank : 99} size={38}>
+                <AvatarBadge avatarId={r.avatar_id} photo={r.photo} size={38} />
+              </PodiumFrame>
               <View style={styles.nameCol}>
                 <PlayerName name={r.username} color={r.name_color} />
                 {r.title ? <TitleTag title={r.title} size="sm" /> : null}

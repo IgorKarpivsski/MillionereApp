@@ -110,6 +110,14 @@ export const AlbumBook = memo(function AlbumBook({
         />
       </View>
 
+      {!full && album.total > 1 && album.owned === album.total - 1 ? (
+        <View style={[styles.ribbon, { backgroundColor: colors.led }]}>
+          <Ionicons name="extension-puzzle" size={14} color={colors.textOnBright} />
+          <AppText variant="caption" color={colors.textOnBright} style={styles.title}>
+            {t.lastOneTag}
+          </AppText>
+        </View>
+      ) : null}
       {full ? (
         <View style={[styles.ribbon, { backgroundColor: gift ? colors.led : palette.pitch }]}>
           {gift ? <Ionicons name="gift" size={14} color={colors.textOnBright} /> : <Ionicons name="checkmark" size={14} color={colors.textOnBright} />}

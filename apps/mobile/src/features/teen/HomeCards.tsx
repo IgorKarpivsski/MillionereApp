@@ -330,18 +330,31 @@ export function NextGoal() {
   );
 }
 
-/** First week: tickets are free, say so loudly. */
+/**
+ * First week: tickets are free, say so loudly. Two days before the end it warns what comes
+ * next, and in the 10-ticket days after it the banner says how long those last.
+ */
 export function NewbieBanner() {
   const { data } = useEnergy();
-  if (!data?.newbie_until) return null;
-  const days = Math.max(1, Math.ceil((new Date(data.newbie_until).getTime() - Date.now()) / 86_400_000));
+  const until = data?.newbie_until ?? data?.taper_until;
+  if (!data || !until) return null;
+  const days = Math.max(1, Math.ceil((new Date(until).getTime() - Date.now()) / 86_400_000));
+  const taper = !data.newbie_until;
+  const ending = !taper && days <= 2;
+  const title = taper ? fmt(t.taperTitle, { max: data.max }) : ending ? t.freeWeekEnding : t.freeWeek;
+  const body = taper ? fmt(t.taperLeft, { n: days }) : ending ? fmt(t.freeWeekEndingBody, { n: days }) : fmt(t.freeWeekLeft, { n: days });
   return (
-    <View style={styles.newbie} accessible accessibilityLabel={`${t.freeWeek} ${fmt(t.freeWeekLeft, { n: days })}`}>
-      <LinearGradient colors={['#3DDC84', '#119E8C']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
-      <AppText style={styles.newbieIcon}>🎟️</AppText>
+    <View style={styles.newbie} accessible accessibilityLabel={`${title} ${body}`}>
+      <LinearGradient
+        colors={ending || taper ? ['#FFB000', '#E8630A'] : ['#3DDC84', '#119E8C']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <AppText style={styles.newbieIcon}>{ending ? '⏳' : '🎟️'}</AppText>
       <View style={styles.flex}>
-        <AppText variant="label">{t.freeWeek}</AppText>
-        <AppText variant="caption">{fmt(t.freeWeekLeft, { n: days })}</AppText>
+        <AppText variant="label">{title}</AppText>
+        <AppText variant="caption">{body}</AppText>
       </View>
     </View>
   );

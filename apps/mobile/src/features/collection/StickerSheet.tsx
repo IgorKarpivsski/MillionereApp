@@ -16,16 +16,20 @@ export function StickerSheet({
   item,
   dust,
   craftCost,
+  lastOne = false,
   onClose,
 }: {
   item: Collectible | null;
   dust: number;
   craftCost: Record<string, number> | undefined;
+  /** the only sticker the album still misses: it is crafted at half the dust */
+  lastOne?: boolean;
   onClose: () => void;
 }) {
   const craft = useCraft();
   const toast = useToast();
-  const cost = item ? craftCost?.[item.rarity] : undefined;
+  const full = item ? craftCost?.[item.rarity] : undefined;
+  const cost = full && lastOne ? Math.ceil(full * 0.5) : full;
 
   return (
     <BottomSheet visible={!!item} onClose={onClose} title={item && item.count > 0 ? item.name : fmt(t.slot, { n: item?.number ?? 0 })}>
@@ -41,11 +45,17 @@ export function StickerSheet({
               <AppText color={colors.textMuted} align="center">
                 {fmt(t.missing, { rarity: rarityColors[item.rarity].label })}
               </AppText>
+              {cost && lastOne ? (
+                <AppText variant="label" color={colors.led} align="center">
+                  {fmt(t.lastOneDeal, { old: formatNumber(full ?? cost), n: formatNumber(cost) })}
+                </AppText>
+              ) : null}
               {cost ? (
                 <StickerButton
                   label={fmt(t.craft, { n: formatNumber(cost) })}
                   tone={dust >= cost ? 'primary' : 'ghost'}
                   disabled={dust < cost}
+                  disabledReason={t.needDust}
                   loading={craft.isPending}
                   fullWidth
                   onPress={() =>

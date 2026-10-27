@@ -1,6 +1,7 @@
 import type { RankRow } from '@fm/shared';
 import { StyleSheet, View } from 'react-native';
 import { AvatarBadge, Led, PlayerName, TitleTag } from '@/design-system/components';
+import { PODIUM, PodiumFrame, RankMark } from '@/features/league/podium';
 import { colors, radius, space } from '@/design-system/tokens';
 import { formatNumber } from '@/lib/format';
 
@@ -9,11 +10,14 @@ export function RankList({ rows }: { rows: RankRow[] }) {
   return (
     <View style={styles.list}>
       {rows.map((r) => (
-        <View key={`${r.rank}-${r.username}`} style={[styles.row, r.me && styles.rowMe, r.rank <= 3 && styles.rowTop]}>
-          <Led size="number" color={r.rank === 1 ? colors.led : r.rank <= 3 ? colors.text : colors.textDim} style={styles.rank}>
-            {r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1]! : String(r.rank)}
-          </Led>
-          <AvatarBadge avatarId={r.avatar_id} photo={r.photo} level={r.level} frame={r.frame} size={36} />
+        <View
+          key={`${r.rank}-${r.username}`}
+          style={[styles.row, PODIUM[r.rank] && { backgroundColor: PODIUM[r.rank]!.tint, borderWidth: 1, borderColor: PODIUM[r.rank]!.color }, r.me && styles.rowMe]}
+        >
+          <RankMark rank={r.rank} dim style={styles.rank} />
+          <PodiumFrame rank={r.rank} size={36}>
+            <AvatarBadge avatarId={r.avatar_id} photo={r.photo} level={r.level} frame={r.frame} size={36} />
+          </PodiumFrame>
           <View style={styles.flex}>
             <PlayerName name={r.username} color={r.name_color} />
             {r.title ? <TitleTag title={r.title} size="sm" /> : null}

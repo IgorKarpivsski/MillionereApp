@@ -259,6 +259,7 @@ export function SessionTools({
           tone="ghost"
           fullWidth
           disabled={(me?.wallet.coins ?? 0) < hintCoins}
+          disabledReason={strings.common.needCoins}
           onPress={() => {
             setHintOpen(false);
             onHint('coins');
@@ -279,6 +280,7 @@ export function SessionTools({
           fullWidth
           loading={buying}
           disabled={(me?.wallet.coins ?? 0) < price}
+          disabledReason={strings.common.needCoins}
           onPress={() => void buyAndUse()}
         />
         {(me?.wallet.coins ?? 0) < price ? (

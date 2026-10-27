@@ -7,15 +7,17 @@ import { haptic } from '../feedback/haptics';
 import { useReducedMotion } from '../feedback/reducedMotion';
 import { colors, hitTarget, lip as lipDepth, palette, radius, space, spring } from '../tokens';
 import { AppText } from './AppText';
+import { useToast } from './Toast';
 
 type Tone = 'primary' | 'prize' | 'danger' | 'gem' | 'ghost' | 'outline';
 type Size = 'lg' | 'md' | 'sm';
 
-const tones: Record<Tone, { face: string; lip: string; label: string; border?: string }> = {
+const tones: Record<Tone | 'locked', { face: string; lip: string; label: string; border?: string }> = {
   primary: { face: colors.primary, lip: colors.primaryLip, label: colors.textOnBright },
   prize: { face: colors.prize, lip: colors.prizeLip, label: colors.textOnBright },
   danger: { face: colors.danger, lip: colors.dangerLip, label: colors.textOnBright },
   gem: { face: colors.gem, lip: colors.gemLip, label: colors.textOnBright },
+  locked: { face: '#4B4766', lip: '#26233A', label: '#B9B5CC' },
   ghost: { face: '#2A1C66', lip: '#0E0826', label: colors.text, border: 'rgba(255,214,140,0.28)' },
   outline: { face: '#211552', lip: '#0E0826', label: colors.led, border: colors.led },
 };
@@ -32,6 +34,8 @@ export interface StickerButtonProps {
   loading?: boolean;
   fullWidth?: boolean;
   accessibilityHint?: string;
+  /** Why the button is off (no coins, no tickets): tapping the grey button says so. */
+  disabledReason?: string;
   style?: ViewStyle;
 }
 
@@ -49,15 +53,19 @@ export function StickerButton({
   loading = false,
   fullWidth = false,
   accessibilityHint,
+  disabledReason,
   style,
 }: StickerButtonProps) {
-  const t = tones[tone];
+  // a disabled button is grey with a lock, so it never looks like it can be pressed
+  const locked = disabled && !loading;
+  const t = tones[locked ? 'locked' : tone];
+  const toast = useToast();
   const h = heights[size];
   const depth = size === 'sm' ? lipDepth.small : lipDepth.button;
   const reduced = useReducedMotion();
   const pressed = useSharedValue(0);
   const inactive = disabled || loading;
-  const bright = tone !== 'ghost' && tone !== 'outline';
+  const bright = !locked && tone !== 'ghost' && tone !== 'outline';
   // Glow only where it's a pure shadow (iOS). Android elevation lifts the lip into its own
   // layer, and on some phones the face's label then disappears behind it.
   const glow = bright && !inactive && Platform.OS === 'ios';
@@ -72,17 +80,25 @@ export function StickerButton({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
-      accessibilityHint={accessibilityHint}
+      accessibilityHint={locked && disabledReason ? disabledReason : accessibilityHint}
       accessibilityState={{ disabled: inactive, busy: loading }}
-      disabled={inactive}
+      disabled={loading || (locked && !disabledReason)}
       onPressIn={() => {
+        if (locked) return;
         animateTo(1);
         haptic('tap');
       }}
       onPressOut={() => animateTo(0)}
-      onPress={onPress}
+      onPress={() => {
+        if (locked) {
+          haptic('error');
+          if (disabledReason) toast(disabledReason, 'info');
+          return;
+        }
+        onPress();
+      }}
       hitSlop={size === 'sm' ? 6 : 0}
-      style={[{ height: h + depth, opacity: inactive && !loading ? 0.45 : 1 }, fullWidth && styles.full, style]}
+      style={[{ height: h + depth, opacity: locked ? 0.85 : 1 }, fullWidth && styles.full, style]}
     >
       <View
         style={[
@@ -110,7 +126,11 @@ export function StickerButton({
             <ActivityIndicator color={t.label} />
           ) : (
             <>
-              {icon ? <Ionicons name={icon} size={size === 'lg' ? 24 : 20} color={t.label} /> : null}
+              {locked ? (
+                <Ionicons name="lock-closed" size={size === 'lg' ? 22 : 18} color={t.label} />
+              ) : icon ? (
+                <Ionicons name={icon} size={size === 'lg' ? 24 : 20} color={t.label} />
+              ) : null}
               <AppText variant={size === 'sm' ? 'label' : 'button'} color={t.label} numberOfLines={1} style={styles.label}>
                 {label}
               </AppText>

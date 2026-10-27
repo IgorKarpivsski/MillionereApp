@@ -62,6 +62,7 @@ export function BoostShop() {
                 fullWidth
                 loading={busy === b}
                 disabled={!!busy || coins < price}
+                disabledReason={coins < price ? strings.common.needCoins : undefined}
                 onPress={() => void buy(b)}
               />
             </Card>
