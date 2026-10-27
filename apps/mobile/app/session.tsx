@@ -333,7 +333,8 @@ function coinsBreakdown(b: { correct: number; per: number; stars: number; mult: 
   const parts = [fmt(t.coinsCorrect, { n: b.correct, per: b.per, sum: formatNumber(b.correct * b.per) })];
   if (b.stars > 0) parts.push(fmt(t.coinsStars, { n: formatNumber(b.stars) }));
   if (b.mult > 1) parts.push(`×${b.mult}`);
-  return `${parts.join(' · ')} = ${formatNumber(total)}`;
+  // with nothing but correct answers the first part already ends in the total
+  return parts.length === 1 ? parts[0]! : `${parts.join(' · ')} = ${formatNumber(total)}`;
 }
 
 function DoubleCoins({ runId, coins }: { runId?: string; coins: number }) {
