@@ -10,6 +10,7 @@ import { haptic } from '@/design-system/feedback/haptics';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { RpcError } from '@/features/profile/api';
 import { socialApi } from '@/features/social/api';
+import { useIsKid } from '@/features/settings/kids';
 import { useChat } from '@/features/social/hooks';
 import { queryKeys } from '@/lib/queryClient';
 import { fmt, strings } from '@/lib/i18n';
@@ -42,6 +43,7 @@ export default function ChatScreen() {
   const { id, name } = useLocalSearchParams<{ id: string; name?: string }>();
   const { data } = useChat(id);
   const qc = useQueryClient();
+  const kid = useIsKid();
   const toast = useToast();
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
@@ -64,7 +66,12 @@ export default function ChatScreen() {
       if (r.masked) toast(t.masked, 'info');
       void qc.invalidateQueries({ queryKey: queryKeys.chat(id) });
     } catch (e) {
-      toast(e instanceof RpcError && e.code === 'rate_limited' ? strings.errors.rateLimited : t.cantSend, 'error');
+      toast(
+        e instanceof RpcError && e.code === 'rate_limited' ? strings.errors.rateLimited
+        : e instanceof RpcError && e.message.includes('kids_quick_only') ? t.peerQuickOnly
+        : t.cantSend,
+        'error',
+      );
     } finally {
       setSending(false);
     }
@@ -114,6 +121,22 @@ export default function ChatScreen() {
           </AppText>
         ) : (
           <>
+            {kid ? (
+              // under 13: ready phrases only (no free text to or from children)
+              <View style={styles.kidBox}>
+                <AppText variant="caption" color={colors.textMuted} align="center">
+                  {t.kidQuickOnly}
+                </AppText>
+                <View style={styles.kidGrid}>
+                  {t.quick.map((q) => (
+                    <Pressable key={q} onPress={() => void send(q)} disabled={sending} style={styles.chip} accessibilityRole="button" accessibilityLabel={q}>
+                      <AppText variant="caption">{q}</AppText>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            ) : (
+            <>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickBar} contentContainerStyle={styles.quick} keyboardShouldPersistTaps="handled">
               {t.quick.map((q) => (
                 <Pressable key={q} onPress={() => void send(q)} style={styles.chip} accessibilityRole="button" accessibilityLabel={q}>
@@ -134,6 +157,8 @@ export default function ChatScreen() {
               />
               <StickerButton label={t.send} icon="send" size="sm" loading={sending} disabled={!text.trim()} onPress={() => void send(text)} />
             </View>
+            </>
+            )}
           </>
         )}
       </KeyboardAvoidingView>
@@ -156,6 +181,8 @@ const styles = StyleSheet.create({
   list: { padding: space.md, gap: space.sm, flexGrow: 1 },
   empty: { marginTop: space.xxl },
   pad: { padding: space.lg },
+  kidBox: { paddingHorizontal: space.md, paddingBottom: space.sm, gap: space.sm },
+  kidGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, justifyContent: 'center' },
   bubble: { maxWidth: '80%', paddingHorizontal: space.md, paddingVertical: space.sm, borderRadius: radius.card, gap: 2 },
   mine: { alignSelf: 'flex-start', backgroundColor: colors.led, borderBottomStartRadius: 4 },
   theirs: { alignSelf: 'flex-end', backgroundColor: colors.surfaceRaised, borderBottomEndRadius: 4 },

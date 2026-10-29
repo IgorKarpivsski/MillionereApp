@@ -48,8 +48,8 @@ create function test.age_profile(p_user uuid) returns void language sql security
 create function test.tokens(p_user uuid, p_pack text) returns int language sql security definer set search_path = '' as $$
   select coalesce((select count from public.user_pack_tokens where user_id = p_user and pack = p_pack), 0) $$;
 create function test.fake_games(p_user uuid, n int) returns void language sql security definer set search_path = '' as $$
-  insert into public.blitz_runs (user_id, ends_at, status, correct)
-  select p_user, now() - make_interval(days => g % 2), 'done', 6 from generate_series(1, n) g $$;
+  insert into public.quiz_runs (user_id, status, correct, started_at, ended_at)
+  select p_user, 'won', 6, now() - make_interval(days => g % 2), now() - make_interval(days => g % 2) from generate_series(1, n) g $$;
 create function test.vip(p_user uuid) returns boolean language sql security definer set search_path = '' as $$
   select public.is_vip(p_user) $$;
 grant execute on all functions in schema test to authenticated;

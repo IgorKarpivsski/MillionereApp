@@ -51,6 +51,14 @@ Deno.serve(async (req: Request) => {
   if (body.confirm !== 'DELETE') return json(400, { error: 'confirmation_required' });
 
   const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
+  // The profile photos live in storage, outside the database cascade: remove the player's folder.
+  try {
+    const bucket = admin.storage.from('avatars');
+    const { data: files } = await bucket.list(data.user.id, { limit: 1000 });
+    if (files?.length) await bucket.remove(files.map((f) => `${data.user.id}/${f.name}`));
+  } catch (e) {
+    console.error('delete-account photos', { user: data.user.id, message: (e as Error).message });
+  }
   const { error: delError } = await admin.auth.admin.deleteUser(data.user.id);
   if (delError) {
     console.error('delete-account failed', { user: data.user.id, message: delError.message });

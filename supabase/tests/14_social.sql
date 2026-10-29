@@ -8,6 +8,9 @@ select a, 'wild_01', 3 from ids union all
 select a, 'wild_12', 2 from ids union all
 select b, 'ocean_02', 2 from ids;
 
+-- teenagers: free chat (children are tested in 32_launch_qa)
+update public.profiles set age_band = '16plus' where id in (select a from ids union select b from ids union select c from ids);
+
 set local role authenticated;
 do $$
 declare a uuid := (select ids.a from ids); b uuid := (select ids.b from ids); c uuid := (select ids.c from ids);
@@ -59,7 +62,7 @@ begin
   -- trading
   perform test.login(a);
   perform test.assert_raises(format('select public.trade_offer(%L, %L, %L)', b, 'wild_12', 'ocean_02'), 'iconic', 'iconic not tradeable');
-  perform test.assert_raises(format('select public.trade_offer(%L, %L, null)', b, 'wild_02'), 'not a duplicate', 'only duplicates');
+  perform test.assert_raises(format('select public.trade_offer(%L, %L, %L)', b, 'wild_02', 'ocean_02'), 'not a duplicate', 'only duplicates');
   offer := (public.trade_offer(b, 'wild_01', 'ocean_02') ->> 'id')::uuid;
   perform test.assert(jsonb_array_length(public.friend_dupes(b)) = 1, 'b has one tradeable duplicate');
 
@@ -88,7 +91,7 @@ declare a uuid := (select ids.a from ids); b uuid := (select ids.b from ids); of
 begin
   -- stale offer: a no longer has a duplicate after trading it away elsewhere
   perform test.login(a);
-  offer := (public.trade_offer(b, 'wild_01', null) ->> 'id')::uuid;
+  offer := (public.trade_offer(b, 'wild_01', 'ocean_02') ->> 'id')::uuid;
   perform test.login(b);
   -- block ends everything
   perform public.block_user(a);

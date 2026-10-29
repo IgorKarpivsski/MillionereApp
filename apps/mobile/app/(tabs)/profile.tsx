@@ -20,6 +20,7 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import type { Provider } from '@/features/auth/oauth';
 import { RpcError } from '@/features/profile/api';
 import { useMyState, useUpdateProfile } from '@/features/profile/hooks';
+import { useIsKid } from '@/features/settings/kids';
 import { googlePhotoUrl, pickAndUploadPhoto, useSetPhoto } from '@/features/profile/photo';
 import { StatsSection } from '@/features/profile/Stats';
 import { useSettingsStore } from '@/features/settings/store';
@@ -211,6 +212,9 @@ export default function ProfileScreen() {
   const { isGuest, signOut } = useAuth();
   const [editing, setEditing] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
+  // under 13 there are no photos, only the 3D characters
+  const kid = useIsKid();
+  const openPhoto = () => (kid ? router.push('/avatar') : setPhotoOpen(true));
   const [flairOpen, setFlairOpen] = useState(false);
 
   if (!data) {
@@ -238,17 +242,23 @@ export default function ProfileScreen() {
           <Glow size={300} strength={0.5} />
         </View>
         <Pressable
-          onPress={() => setPhotoOpen(true)}
+          onPress={openPhoto}
           accessibilityRole="button"
-          accessibilityLabel={t.photoTitle}
+          accessibilityLabel={kid ? t.pickCharacter : t.photoTitle}
           style={({ pressed }) => (pressed ? { transform: [{ scale: 0.96 }] } : null)}
         >
           <AvatarBadge avatarId={data.profile.avatar_id} photo={data.profile.photo_url} frame={data.profile.frame} level={data.profile.level} size={120} ring={colors.led} />
           <View style={styles.editDot}>
-            <Ionicons name="camera" size={16} color={colors.textOnBright} />
+            <Ionicons name={kid ? 'happy' : 'camera'} size={16} color={colors.textOnBright} />
           </View>
         </Pressable>
-        <StickerButton label={t.photoTitle} size="sm" tone="outline" icon="camera" onPress={() => setPhotoOpen(true)} />
+        <StickerButton
+          label={kid ? t.pickCharacter : t.photoTitle}
+          size="sm"
+          tone="outline"
+          icon={kid ? 'happy' : 'camera'}
+          onPress={openPhoto}
+        />
         <View style={styles.nameRow}>
           <AppText variant="title" numberOfLines={1}>
             {data.profile.username}

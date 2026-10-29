@@ -11,6 +11,13 @@ grant execute on function test.give_all(uuid, text), test.pity(uuid, int) to aut
 select public.ledger_apply((select a from ids), 'coins', 20000, 'test_seed', null, null, 'seed');
 select public.ledger_apply((select a from ids), 'dust', 100, 'test_seed', null, null, 'seed_dust');
 
+create function test.own_commons(p_user uuid) returns void language sql security definer set search_path = '' as $$
+  insert into public.user_collectibles (user_id, item_id, count)
+  select p_user, id, 1 from public.collectibles where active and rarity in ('common', 'uncommon')
+     and id not in (select id from public.collectibles where active and rarity = 'common' order by id desc limit 25)  -- some left to craft
+  on conflict (user_id, item_id) do nothing $$;
+grant execute on function test.own_commons(uuid) to authenticated;
+
 set local role authenticated;
 do $$
 declare
@@ -38,7 +45,8 @@ begin
   r := public.open_pack('bronze', 'coins', gen_random_uuid());
   perform test.assert(exists (select 1 from jsonb_array_elements(r -> 'items') x where x ->> 'rarity' = 'legendary'), 'pity gives a legendary on the 30th open');
 
-  -- duplicates → dust
+  -- duplicates → dust (own every common first, so any common pulled is a duplicate)
+  perform test.own_commons(a);
   for i in 1 .. 8 loop r := public.open_pack('bronze', 'coins', gen_random_uuid()); end loop;
   perform test.assert((select dust from public.wallets) > 100, 'duplicates made dust');
 

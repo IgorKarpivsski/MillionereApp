@@ -1,14 +1,14 @@
 -- Weekly leagues: grouping, settlement (promote / stay / demote), rewards paid once.
 begin;
-update public.app_config set value = value || '{"group_size": 4, "promote": 2, "demote": 2}' where key = 'league';
+update public.app_config set value = value || '{"group_size": 4, "promote": 2, "demote": 2, "min_group": 1, "group_max": 4}' where key = 'league';
 create temp table u as select i, test.new_user() as id from generate_series(1, 10) i;
 grant select on u to authenticated;
 
 -- Last week: users 1..6 in Bronze group 1 with points 600,500,...,100 (user 6 = 100), users 7 in Gold with 0 points.
 insert into public.league_members (week, tier, group_no, user_id, joined_at)
-select (public.israel_week_start()::date - 7), 0, 1, id, now() - interval '8 days' + i * interval '1 minute' from u where i <= 6;
+select (public.israel_week_of(public.israel_today()) - 7), 0, 1, id, now() - interval '8 days' + i * interval '1 minute' from u where i <= 6;
 insert into public.league_members (week, tier, group_no, user_id)
-select (public.israel_week_start()::date - 7), 2, 1, id from u where i = 7;
+select (public.israel_week_of(public.israel_today()) - 7), 2, 1, id from u where i = 7;
 insert into public.user_leagues (user_id, tier) select id, 2 from u where i = 7;
 insert into public.quiz_runs (user_id, status, prize_points, ended_at, started_at)
 select id, 'won', (7 - i) * 100, public.israel_week_start() - interval '2 days', public.israel_week_start() - interval '2 days'

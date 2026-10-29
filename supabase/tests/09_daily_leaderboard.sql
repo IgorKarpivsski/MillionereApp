@@ -15,6 +15,9 @@ begin
   perform public.refresh_question_ranks();
 end $$;
 
+create function test.daily_ids() returns text[] language sql security definer set search_path = '' as $$
+  select question_ids from public.daily_challenges where day = (now() at time zone 'Asia/Jerusalem')::date $$;
+grant execute on function test.daily_ids() to authenticated;
 create function test.cslot(p_run uuid) returns int language sql security definer set search_path = '' as $$
   select (s.slot - 1)::int from public.quiz_runs r
     join public.quiz_run_questions rq on rq.run_id = r.id and rq.rung = r.rung
@@ -59,10 +62,12 @@ begin
   perform test.assert(public.daily_status() ->> 'state' = 'done', 'done for today');
   perform test.assert_raises('select public.daily_start()', 'already played', 'one daily per day');
 
-  -- B gets the same questions, and a classic run on top.
+  -- B gets one of the day's three sets (same climb from easy to hard), and a classic run on top.
   perform test.login(b);
   p := public.daily_start();
-  perform test.assert(p -> 'question' ->> 'id' = first_q, 'same daily questions for everyone');
+  perform test.assert(cardinality(test.daily_ids()) = 30, 'three sets a day');
+  perform test.assert(array_position(test.daily_ids(), p -> 'question' ->> 'id') in (1, 11, 21),
+                      'B starts from the first question of a set');
   run := (p ->> 'run_id')::uuid;
   r := public.daily_answer(run, 1, test.cslot(run));
   p := public.quiz_start();    -- closes the open daily as it stands

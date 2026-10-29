@@ -67,6 +67,8 @@ function Pick({
 }
 
 /** Trade several duplicates at once with a friend, or send one as a free gift. */
+const RARITY_RANK = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'iconic'];
+
 export default function TradeScreen() {
   const { id, name, mode: start } = useLocalSearchParams<{ id: string; name?: string; mode?: string }>();
   const peer = name ?? '';
@@ -95,6 +97,10 @@ export default function TradeScreen() {
         .sort((a, b) => (a.count === 0 ? 0 : 1) - (b.count === 0 ? 0 : 1)),
     [theirs, byId],
   );
+
+  // same rule as the server: ask for something back, of a similar value
+  const rank = (ids: string[]) => Math.max(0, ...ids.map((x) => RARITY_RANK.indexOf(byId.get(x)?.rarity ?? 'common')));
+  const unfair = give.length > 0 && want.length > 0 && (give.length > want.length + 1 || rank(give) > rank(want) + 1);
 
   const toggle = (list: string[], set: (v: string[]) => void) => (itemId: string) => {
     if (list.includes(itemId)) set(list.filter((x) => x !== itemId));
@@ -181,7 +187,8 @@ export default function TradeScreen() {
             icon="swap-horizontal"
             size="lg"
             fullWidth
-            disabled={!give.length || !want.length}
+            disabled={!give.length || !want.length || unfair}
+            disabledReason={unfair ? t.unfair : !give.length ? t.pickGive : t.pickWant}
             loading={offer.isPending}
             onPress={submit}
           />
