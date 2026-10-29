@@ -5,7 +5,12 @@ import { haptic } from '@/design-system/feedback/haptics';
 import { colors, radius, space } from '@/design-system/tokens';
 import { strings } from '@/lib/i18n';
 
-const WORDS = ['', '', '', '', '', '', 'שש', 'שבע', 'שמונה', 'תשע'];
+const ONES: Record<number, string> = { 3: 'שלוש', 4: 'ארבע', 5: 'חמש', 6: 'שש', 7: 'שבע', 8: 'שמונה', 9: 'תשע' };
+const TEENS: Record<number, string> = {
+  12: 'שתים עשרה', 13: 'שלוש עשרה', 14: 'ארבע עשרה', 15: 'חמש עשרה', 16: 'שש עשרה', 17: 'שבע עשרה', 18: 'שמונה עשרה', 19: 'תשע עשרה',
+};
+/** A two-digit number times a one-digit number, written in words: easy for an adult, hard for a child. */
+const ask = () => ({ a: 12 + Math.floor(Math.random() * 8), b: 3 + Math.floor(Math.random() * 7) });
 const t = strings.parentGate;
 
 /**
@@ -14,13 +19,13 @@ const t = strings.parentGate;
  * pause for a young child.
  */
 export function ParentalGate({ visible, onPass, onClose }: { visible: boolean; onPass: () => void; onClose: () => void }) {
-  const [q, setQ] = useState({ a: 7, b: 8 });
+  const [q, setQ] = useState(ask);
   const [value, setValue] = useState('');
   const [wrong, setWrong] = useState(false);
 
   useEffect(() => {
     if (!visible) return;
-    setQ({ a: 6 + Math.floor(Math.random() * 4), b: 6 + Math.floor(Math.random() * 4) });
+    setQ(ask());
     setValue('');
     setWrong(false);
   }, [visible]);
@@ -33,7 +38,7 @@ export function ParentalGate({ visible, onPass, onClose }: { visible: boolean; o
       haptic('error');
       setWrong(true);
       setValue('');
-      setQ({ a: 6 + Math.floor(Math.random() * 4), b: 6 + Math.floor(Math.random() * 4) });
+      setQ(ask());
     }
   };
 
@@ -44,7 +49,7 @@ export function ParentalGate({ visible, onPass, onClose }: { visible: boolean; o
           {t.body}
         </AppText>
         <AppText variant="heading" align="center">
-          {`${WORDS[q.a]} כפול ${WORDS[q.b]}?`}
+          {`${TEENS[q.a]} כפול ${ONES[q.b]}?`}
         </AppText>
         <TextInput
           value={value}

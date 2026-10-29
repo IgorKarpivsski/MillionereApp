@@ -8,7 +8,7 @@ import type { ExpoConfig, ConfigContext } from 'expo/config';
  */
 const APP_NAME = 'טריוויה - האלוף';
 const IS_PROD = process.env.APP_ENV === 'production';
-// AdMob: Google's public TEST app id until the real one is set in the build env.
+// AdMob app ids (Android: the real app; iOS: Google's public test id until there is an iOS app).
 const ADMOB_ANDROID_APP_ID = process.env.ADMOB_ANDROID_APP_ID || 'ca-app-pub-4196315436564582~1233587313';
 const ADMOB_IOS_APP_ID = process.env.ADMOB_IOS_APP_ID || 'ca-app-pub-3940256099942544~1458002511';
 
@@ -51,6 +51,18 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     // Every store upload needs a higher number; CI passes its run number.
     versionCode: Number(process.env.VERSION_CODE) || 1,
     adaptiveIcon: { foregroundImage: './assets/images/adaptive-icon.png', backgroundColor: '#5624A2' },
+    // Nothing in the app needs these; libraries add some by default. The profile photo uses the
+    // system photo picker, which needs no storage permission.
+    blockedPermissions: [
+      'android.permission.SYSTEM_ALERT_WINDOW',
+      'android.permission.READ_EXTERNAL_STORAGE',
+      'android.permission.WRITE_EXTERNAL_STORAGE',
+      'android.permission.READ_MEDIA_IMAGES',
+      'android.permission.READ_MEDIA_VIDEO',
+      'android.permission.READ_MEDIA_AUDIO',
+      'android.permission.RECORD_AUDIO',
+      'android.permission.CAMERA',
+    ],
   },
   plugins: [
     'expo-router',
