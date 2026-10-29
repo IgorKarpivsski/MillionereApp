@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { LoadingOrError } from '@/components/LoadingOrError';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { appAlert, AppText, ProgressBar, StickerButton, useToast, Backdrop } from '@/design-system/components';
 import { playSound } from '@/design-system/feedback/sound';
@@ -66,7 +67,7 @@ function Slot({
 }
 
 export default function PassScreen() {
-  const { data } = usePass();
+  const { data, isError, refetch } = usePass();
   const claim = useClaimTier();
   const buy = useBuyPremium();
   const toast = useToast();
@@ -94,7 +95,7 @@ export default function PassScreen() {
     return n;
   }, [data]);
 
-  if (!data) return <SafeAreaView style={styles.root} />;
+  if (!data) return <LoadingOrError error={isError} onRetry={() => void refetch()} />;
   if (!data.active) {
     return (
       <SafeAreaView style={styles.root}>

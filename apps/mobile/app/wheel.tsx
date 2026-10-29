@@ -2,6 +2,7 @@ import type { WheelSpin } from '@fm/shared';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { LoadingOrError } from '@/components/LoadingOrError';
 import Animated, { Easing, ZoomIn, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, G, Path, Polygon } from 'react-native-svg';
@@ -29,7 +30,7 @@ function slicePath(c: number, r: number, a0: number, a1: number) {
 }
 
 export default function WheelScreen() {
-  const { data } = useWheel();
+  const { data, isError, refetch } = useWheel();
   const { width } = useWindowDimensions();
   const size = Math.min(width - space.xl * 2, 340);
   const reduced = useReducedMotion();
@@ -42,7 +43,7 @@ export default function WheelScreen() {
   const nextFree = useCountdownTo(data?.next_free_at);
   const style = useAnimatedStyle(() => ({ transform: [{ rotate: `${rot.value}deg` }] }));
 
-  if (!data) return <SafeAreaView style={styles.root} />;
+  if (!data) return <LoadingOrError error={isError} onRetry={() => void refetch()} />;
   const n = data.segments.length;
   const step = 360 / n;
   const c = size / 2;

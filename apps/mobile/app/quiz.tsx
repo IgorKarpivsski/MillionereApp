@@ -306,7 +306,7 @@ export default function QuizScreen() {
   const params = useLocalSearchParams<{ mode?: string }>();
   const daily = params.mode === 'daily';
   const total = daily ? 10 : 12;
-  const { state: s, start, pick, next, lifeline, cashOut, whistle } = useQuizRun(daily ? 'daily' : 'classic');
+  const { state: s, start, pick, next, lifeline, cashOut, whistle, retry } = useQuizRun(daily ? 'daily' : 'classic');
   const { data: energy } = useEnergy();
   const showEnergy = useEnergySheet((x) => x.show);
   const toast = useToast();
@@ -314,9 +314,10 @@ export default function QuizScreen() {
   const [reportOpen, setReportOpen] = useState(false);
 
   // the daily challenge is once a day: if it's already played, show the countdown instead of starting
-  const { data: dailySt } = useDailyStatus();
+  const { data: dailySt, isError: dailyErr } = useDailyStatus();
   const dailyDone = daily && dailySt?.state === 'done';
-  const dailyKnown = !daily || !!dailySt;
+  // if the status can't load, start anyway: the server refuses a second daily run itself
+  const dailyKnown = !daily || !!dailySt || dailyErr;
   const started = useRef(false);
   useEffect(() => {
     preloadSounds(['whistle', 'tick', 'answer_lock', 'answer_correct', 'answer_wrong', 'var', 'coins']);
@@ -410,7 +411,7 @@ export default function QuizScreen() {
             title={t.error}
             body={strings.errors.network}
             actionLabel={strings.common.retry}
-            onAction={() => void start()}
+            onAction={() => void retry()}
           />
           <StickerButton label={t.home} tone="ghost" onPress={() => router.back()} />
         </View>

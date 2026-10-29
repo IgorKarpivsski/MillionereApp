@@ -1,6 +1,6 @@
 import type { Session } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { resetAnalytics, track } from '@/lib/analytics';
 import { setMonitoringUser } from '@/lib/monitoring';
 import { supabase } from '@/lib/supabase';
@@ -56,6 +56,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [booting, setBooting] = useState(true);
   const [bootError, setBootError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  // set while we sign out on purpose, so only an unexpected sign-out triggers a fresh boot
+  const leaving = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -82,10 +84,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     })();
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
       setSession(next);
       setMonitoringUser(next?.user.id ?? null);
       void qc.invalidateQueries();
+      // the session died on its own (refresh token revoked/expired): boot again instead of
+      // leaving every screen waiting for a session that never comes
+      if (event === 'SIGNED_OUT' && !next && !leaving.current && !cancelled) {
+        track('auth_session_lost', {});
+        setAttempt((n) => n + 1);
+      }
     });
     return () => {
       cancelled = true;
@@ -102,7 +110,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
+    leaving.current = true;
     await supabase.auth.signOut();
+    leaving.current = false;
     qc.clear();
     resetAnalytics();
     track('auth_signed_out', {});
@@ -113,7 +123,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.functions.invoke('delete-account', { body: { confirm: 'DELETE' } });
     if (error) throw error;
     track('account_deleted', {});
+    leaving.current = true;
     await supabase.auth.signOut({ scope: 'local' });
+    leaving.current = false;
     qc.clear();
     resetAnalytics();
     setAttempt((n) => n + 1);

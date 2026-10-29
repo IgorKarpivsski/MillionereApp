@@ -478,7 +478,10 @@ export default function PackOpenScreen() {
         void qc.invalidateQueries({ queryKey: queryKeys.myState });
       })
       .catch((e) => {
-        toast(e instanceof RpcError && e.code === 'insufficient_funds' ? t.noCoins : strings.errors.generic, 'error');
+        // the pack may have opened on the server even if the answer got lost: refresh the album
+        void qc.invalidateQueries({ queryKey: queryKeys.collection });
+        void qc.invalidateQueries({ queryKey: queryKeys.myState });
+        toast(e instanceof RpcError && e.code === 'insufficient_funds' ? t.noCoins : t.openLost, 'error');
         router.back();
       });
   }, [pack, qc, toast]);

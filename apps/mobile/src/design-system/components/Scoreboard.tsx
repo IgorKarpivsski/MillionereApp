@@ -163,7 +163,7 @@ export function LiveTicker({ items, style }: { items: readonly string[]; style?:
   return (
     <View style={[styles.ticker, style]} accessible accessibilityLabel={items.join('. ')}>
       <View style={styles.liveDot} />
-      <Led size="ledS" style={styles.live}>LIVE</Led>
+      <Led size="ledS" style={styles.live}>חי</Led>
       <Animated.View style={[styles.tickerLine, line]}>
         <AppText variant="label" numberOfLines={1}>
           {items[i] ?? ''}

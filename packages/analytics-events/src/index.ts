@@ -11,6 +11,7 @@ export interface AnalyticsEvents {
   session_started: Record<string, never>;
   session_ended: { duration_s: number };
   auth_guest_created: Record<string, never>;
+  auth_session_lost: Record<string, never>;
   auth_link_started: { provider: 'apple' | 'google' };
   auth_link_completed: { provider: 'apple' | 'google' };
   auth_link_failed: { provider: 'apple' | 'google'; reason: string };

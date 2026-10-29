@@ -372,7 +372,7 @@ export default function SessionScreen() {
   const [target, setTarget] = useState({ world: params.world ?? 'mix', level: params.level ? Number(params.level) : null });
   const worlds = useWorldsConfig();
   const w = worldBySlug(worlds, target.world);
-  const { state: s, start, answer, timeUp, next, fifty, boost, hint, callFriend, continueRun } = useSession(target.world, target.level, params.run);
+  const { state: s, start, answer, timeUp, next, fifty, boost, hint, callFriend, continueRun, retry } = useSession(target.world, target.level, params.run);
   const [friendPick, setFriendPick] = useState<FriendPick | null>(null);
   const { data: energy } = useEnergy();
   const showEnergy = useEnergySheet((x) => x.show);
@@ -453,7 +453,7 @@ export default function SessionScreen() {
             title={noEnergy ? strings.engage.outTitle : s.notice === 'locked' ? t.lockedErr : strings.quiz.error}
             body={noEnergy ? strings.engage.freeModes : locked ? t.lockedBody : strings.errors.network}
             actionLabel={noEnergy ? strings.engage.refillNow : locked ? t.toMap : strings.common.retry}
-            onAction={noEnergy ? showEnergy : locked ? () => router.back() : () => void start()}
+            onAction={noEnergy ? showEnergy : locked ? () => router.back() : () => void retry()}
           />
           {locked ? null : <StickerButton label={t.home} tone="ghost" onPress={() => router.back()} />}
         </View>

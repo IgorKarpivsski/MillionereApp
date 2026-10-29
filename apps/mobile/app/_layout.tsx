@@ -10,17 +10,17 @@ import { Stack, router, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { OfflineBanner } from '@/components/OfflineBanner';
-import { AppAlertHost, EmptyState, ToastProvider } from '@/design-system/components';
+import { AppAlertHost, AppText, EmptyState, ToastProvider } from '@/design-system/components';
 import { colors } from '@/design-system/tokens';
 import { AuthProvider, useAuth } from '@/features/auth/AuthProvider';
 import { initAnalytics, track } from '@/lib/analytics';
 import { strings } from '@/lib/i18n';
-import { initMonitoring, wrapRoot } from '@/lib/monitoring';
-import { bindOnlineManager } from '@/lib/network';
+import { initMonitoring, reportError, wrapRoot } from '@/lib/monitoring';
+import { bindFocusManager, bindOnlineManager } from '@/lib/network';
 import { queryClient } from '@/lib/queryClient';
 import { ensureRTL } from '@/lib/rtl';
 import { AgeBandSync } from '@/features/settings/AgeBandSync';
@@ -142,7 +142,12 @@ function RootLayout() {
   useEffect(() => {
     track('app_open', { cold_start: true });
     initAds();
-    return bindOnlineManager();
+    const offOnline = bindOnlineManager();
+    const offFocus = bindFocusManager();
+    return () => {
+      offOnline();
+      offFocus();
+    };
   }, []);
 
   return (
@@ -161,9 +166,39 @@ function RootLayout() {
   );
 }
 
+/**
+ * A screen that throws while drawing shows this instead of closing the app. Expo Router mounts
+ * it in place of the broken route (here: the root), so it uses nothing but plain components.
+ */
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => Promise<void> }) {
+  useEffect(() => {
+    reportError(error);
+  }, [error]);
+  return (
+    <View style={styles.crash}>
+      <EmptyState
+        icon="construct-outline"
+        title={strings.errors.crashTitle}
+        body={strings.errors.crashBody}
+        actionLabel={strings.common.retry}
+        onAction={() => {
+          void retry();
+        }}
+      />
+      <Pressable onPress={() => router.replace('/(tabs)')} accessibilityRole="button" hitSlop={12} style={styles.crashHome}>
+        <AppText variant="label" color={colors.textMuted}>
+          {strings.errors.crashHome}
+        </AppText>
+      </Pressable>
+    </View>
+  );
+}
+
 export default wrapRoot(RootLayout);
 
 const styles = StyleSheet.create({
+  crash: { flex: 1, backgroundColor: colors.bgDeep, justifyContent: 'center', padding: 24 },
+  crashHome: { alignSelf: 'center', marginTop: 16, padding: 8 },
   root: { flex: 1, backgroundColor: colors.bg },
   center: { flex: 1, justifyContent: 'center', backgroundColor: colors.bg },
 });

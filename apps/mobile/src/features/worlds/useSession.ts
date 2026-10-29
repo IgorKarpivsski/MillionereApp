@@ -296,5 +296,23 @@ export function useSession(world: string, level: number | null, resumeRun?: stri
     }
   }, [set, qc, fail]);
 
-  return { state: s, start, answer, timeUp, next, fifty, boost, hint, callFriend, continueRun };
+  /**
+   * "Try again" after a dropped connection: resume the same run where it stands rather than
+   * starting a new one (that would end this run and spend another ticket).
+   */
+  const retry = useCallback(async () => {
+    const cur = sRef.current;
+    const runId = cur.payload?.run_id;
+    if (!runId || cur.summary) return start();
+    set((x) => ({ ...x, phase: 'loading', notice: null }));
+    try {
+      const p = await sessionApi.resume(runId);
+      set((x) => ({ ...withQuestion(x, p), results: Array.from({ length: p.rung - 1 }, (_, i) => i < p.correct) }));
+    } catch (e) {
+      if (e instanceof RpcError && e.code === 'invalid_state') return start();
+      fail(e);
+    }
+  }, [fail, set, start]);
+
+  return { state: s, start, answer, timeUp, next, fifty, boost, hint, callFriend, continueRun, retry };
 }

@@ -16,3 +16,8 @@ export function setMonitoringUser(id: string | null): void {
 }
 
 export const wrapRoot = Sentry.wrap;
+
+/** Sends an error the app caught itself (e.g. the crash screen) to Sentry. */
+export function reportError(error: unknown): void {
+  Sentry.captureException(error);
+}

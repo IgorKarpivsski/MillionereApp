@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { FamilyInvite, IncomingCall, MatchInvite } from '@fm/shared';
-import { router } from 'expo-router';
+import { router, usePathname } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Modal, StyleSheet, View } from 'react-native';
 import Animated, { ZoomIn } from 'react-native-reanimated';
@@ -21,6 +21,9 @@ const PING_MS = 8000;
  * Keeps the player "online" while the app is open and shows a friend's
  * phone-a-friend call: the question, and one tap to send an answer back.
  */
+/** Screens with a running question clock. */
+const IN_GAME = /^\/(quiz|session|blitz|survival|truefalse|family|match)/;
+
 export function IncomingCallHost() {
   const { session } = useAuth();
   const toast = useToast();
@@ -33,6 +36,10 @@ export function IncomingCallHost() {
   const seenInvites = useRef(new Set<number>());
   const [famInvite, setFamInvite] = useState<FamilyInvite | null>(null);
   const seenFam = useRef(new Set<number>());
+  // game invites wait while a question clock is running; they show up once the game is over
+  const path = usePathname();
+  const pathRef = useRef(path);
+  pathRef.current = path;
 
   useEffect(() => {
     if (!session) return;
@@ -40,8 +47,9 @@ export function IncomingCallHost() {
     const ping = async () => {
       try {
         const { calls, invites, family_invites } = await boostsApi.ping();
-        const fam = family_invites.find((i) => !seenFam.current.has(i.id));
-        if (fam) {
+        const busy = IN_GAME.test(pathRef.current);
+        const fam = busy ? undefined : family_invites.find((i) => !seenFam.current.has(i.id));
+                if (fam) {
           seenFam.current.add(fam.id);
           setFamInvite((cur) => {
             if (cur) return cur;
@@ -50,7 +58,7 @@ export function IncomingCallHost() {
             return fam;
           });
         }
-        const inv = invites.find((i) => !seenInvites.current.has(i.id));
+        const inv = busy ? undefined : invites.find((i) => !seenInvites.current.has(i.id));
         if (inv) {
           seenInvites.current.add(inv.id);
           setInvite((cur) => {

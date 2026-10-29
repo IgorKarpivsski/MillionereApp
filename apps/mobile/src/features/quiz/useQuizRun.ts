@@ -270,5 +270,23 @@ export function useQuizRun(mode: QuizMode = 'classic') {
     }
   }, [fail, finish, set]);
 
-  return { state: s, start, pick, next, lifeline, cashOut, whistle };
+  /**
+   * "Try again" after a dropped connection: carry on with the same run (the server's `next`
+   * returns where the run stands) instead of starting a new one, which would end this run
+   * and spend another ticket.
+   */
+  const retry = useCallback(async () => {
+    const cur = sRef.current;
+    if (!cur.payload?.run_id || cur.summary) return start();
+    set((x) => ({ ...x, phase: 'loading', notice: null }));
+    try {
+      const p = await engine.next(cur.payload.run_id);
+      set((x) => withQuestion(x, p));
+    } catch (e) {
+      if (e instanceof RpcError && e.code === 'invalid_state') return start();
+      fail(e);
+    }
+  }, [fail, set, start]);
+
+  return { state: s, start, pick, next, lifeline, cashOut, whistle, retry };
 }
