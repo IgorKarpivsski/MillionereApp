@@ -1,3 +1,4 @@
+import { ilOffsetMin } from '@/features/reminders/plan';
 import { useEffect, useState, type ReactNode } from 'react';
 import { StyleSheet, View, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 import Animated, {
@@ -174,7 +175,7 @@ export function LiveTicker({ items, style }: { items: readonly string[]; style?:
 }
 
 /* ------------------------------------------------------------------ */
-/* Countdown to local midnight (daily reset)                           */
+/* Countdown to midnight in Israel (daily reset)                       */
 /* ------------------------------------------------------------------ */
 
 function pad(n: number) {
@@ -183,10 +184,12 @@ function pad(n: number) {
 
 export function useCountdownToMidnight(): string {
   const calc = () => {
+    // the server's day turns over at midnight in Israel, whatever the phone's own time zone
     const now = new Date();
-    const end = new Date(now);
-    end.setHours(24, 0, 0, 0);
-    const s = Math.max(0, Math.floor((end.getTime() - now.getTime()) / 1000));
+    const off = ilOffsetMin(now) * 60_000;
+    const il = new Date(now.getTime() + off);
+    const end = Date.UTC(il.getUTCFullYear(), il.getUTCMonth(), il.getUTCDate() + 1) - off;
+    const s = Math.max(0, Math.floor((end - now.getTime()) / 1000));
     return `${pad(Math.floor(s / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`;
   };
   const [v, setV] = useState(calc);

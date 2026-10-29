@@ -23,7 +23,7 @@ import { useStore } from '@/features/store/hooks';
 import { gameFinished } from '@/features/store/interstitial';
 import { RankList } from '@/features/teen/RankList';
 import { ShareResultButton } from '@/features/teen/ShareResult';
-import { formatNumber } from '@/lib/format';
+import { formatNumber, ltr } from '@/lib/format';
 import { goHome } from '@/lib/goHome';
 import { fmt, strings } from '@/lib/i18n';
 
@@ -70,7 +70,7 @@ function WeekBoard({ info }: { info: SurvivalInfo }) {
             </View>
             <View style={styles.amt}>
               <GemIcon size={14} />
-              <AppText variant="caption" color={colors.gem}>{`+${p.gems}`}</AppText>
+              <AppText variant="caption" color={colors.gem}>{ltr(`+${p.gems}`)}</AppText>
             </View>
           </View>
         ))}

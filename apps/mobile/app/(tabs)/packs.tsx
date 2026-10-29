@@ -22,7 +22,7 @@ import { useMarket } from '@/features/market/api';
 import { makePackTicket } from '@/features/collection/packIntent';
 import { useMyState } from '@/features/profile/hooks';
 import { TradeFriendSheet } from '@/features/social/FriendPicker';
-import { formatNumber } from '@/lib/format';
+import { formatNumber, ltr } from '@/lib/format';
 import { fmt, strings } from '@/lib/i18n';
 
 const t = strings.packs;
@@ -34,7 +34,7 @@ function OddsTable({ pack }: { pack: PackCatalogEntry }) {
         <View key={rarity} style={styles.oddsRow}>
           <View style={[styles.swatch, { backgroundColor: rarityColors[rarity].fill }]} />
           <AppText style={styles.flex}>{rarityColors[rarity].label}</AppText>
-          <Led size="number" color={colors.text}>{`${pct}%`}</Led>
+          <Led size="number" color={colors.text}>{ltr(`${pct}%`)}</Led>
         </View>
       ))}
       <AppText variant="caption" color={colors.textMuted}>

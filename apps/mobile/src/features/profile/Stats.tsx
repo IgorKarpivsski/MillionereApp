@@ -10,7 +10,7 @@ import { colors, palette, space } from '@/design-system/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useWorldsConfig } from '@/features/worlds/api';
 import { WORLD_IMAGES } from '@/features/worlds/worldImages';
-import { formatNumber } from '@/lib/format';
+import { formatNumber, ltr } from '@/lib/format';
 import { fmt, gx, strings } from '@/lib/i18n';
 import { rpc } from './api';
 
@@ -46,7 +46,7 @@ function Ring({ pct, size = 120 }: { pct: number; size?: number }) {
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
       </Svg>
-      <Led size="ledL">{`${pct}%`}</Led>
+      <Led size="ledL">{ltr(`${pct}%`)}</Led>
     </View>
   );
 }

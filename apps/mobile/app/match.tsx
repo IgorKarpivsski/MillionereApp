@@ -23,6 +23,7 @@ import { PostGameRank } from '@/features/teen/PostGame';
 import { fmt, strings } from '@/lib/i18n';
 import { QuestionImageView } from '@/features/quiz/QuestionImage';
 import { showName } from '@/lib/names';
+import { ltr } from '@/lib/format';
 
 const t = strings.match;
 
@@ -405,7 +406,7 @@ export default function MatchScreen() {
           <Players s={s} />
           {s.result?.coins ? (
             <Animated.View entering={FadeIn.delay(300)}>
-              <Led size="ledM">{`+${s.result.coins}`}</Led>
+              <Led size="ledM">{ltr(`+${s.result.coins}`)}</Led>
             </Animated.View>
           ) : null}
           <StickerButton

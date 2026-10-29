@@ -30,7 +30,7 @@ import { quizApi } from '@/features/quiz/api';
 import { useAdReward, useStore } from '@/features/store/hooks';
 import { AnswerTile, LifelineButton, type AnswerState } from '@/features/quiz/ui';
 import { useQuizRun, type QuizRunState } from '@/features/quiz/useQuizRun';
-import { formatNumber } from '@/lib/format';
+import { formatNumber, ltr } from '@/lib/format';
 import { goHome } from '@/lib/goHome';
 import { fmt, strings } from '@/lib/i18n';
 import { QuestionImageView } from '@/features/quiz/QuestionImage';
@@ -101,7 +101,6 @@ function Board({ s, onExit, daily }: { s: QuizRunState; onExit: () => void; dail
   const rung = s.payload?.rung ?? 1;
   // Classic: the champion scores once, when you miss. Daily: every miss is his goal.
   const rival = daily ? s.misses : s.reveal && s.reveal.result !== 'correct' ? 1 : 0;
-  const minute = Math.min(90, Math.round(rung * (daily ? 9 : 7.5)));
   return (
     <View style={styles.board}>
       <Pressable onPress={onExit} hitSlop={12} accessibilityRole="button" accessibilityLabel={t.exit}>
@@ -122,7 +121,7 @@ function Board({ s, onExit, daily }: { s: QuizRunState; onExit: () => void; dail
         </View>
         <AppText variant="label">{t.rival}</AppText>
       </View>
-      <Led size="number" color={colors.correct}>{`${minute}'`}</Led>
+      <Led size="number" color={colors.correct}>{ltr(`${Math.min(rung, 10)}/10`)}</Led>
     </View>
   );
 }
@@ -201,7 +200,7 @@ function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => voi
         </View>
         <View style={styles.earned}>
           <Animated.View entering={reduced ? undefined : FadeInDown.delay(200)} style={styles.earnedTile}>
-            <Led size="ledM">{`+${formatNumber(sum.coins)}`}</Led>
+            <Led size="ledM">{ltr(`+${formatNumber(sum.coins)}`)}</Led>
             <AppText variant="caption" color={colors.textDim}>
               {t.earnedCoins}
             </AppText>
@@ -215,7 +214,7 @@ function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => voi
             </AppText>
           </Animated.View>
           <Animated.View entering={reduced ? undefined : FadeInDown.delay(440)} style={styles.earnedTile}>
-            <Led size="ledM" color={colors.correct}>{`+${sum.xp}`}</Led>
+            <Led size="ledM" color={colors.correct}>{ltr(`+${sum.xp}`)}</Led>
             <AppText variant="caption" color={colors.textDim}>
               {t.earnedXp}
             </AppText>

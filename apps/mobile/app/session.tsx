@@ -32,7 +32,7 @@ import { championLevels, levelLabel, useWorldsConfig, worldBySlug } from '@/feat
 import { useSession, type SessionState } from '@/features/worlds/useSession';
 import { WorldBadge } from '@/features/worlds/WorldBadge';
 import { shade } from '@/features/worlds/worldArt';
-import { formatNumber } from '@/lib/format';
+import { formatNumber, ltr } from '@/lib/format';
 import { goHome } from '@/lib/goHome';
 import { ShareResultButton } from '@/features/teen/ShareResult';
 import { PerfectPrize, PostGameRank } from '@/features/teen/PostGame';
@@ -239,7 +239,7 @@ function ResultView({
       <Card kind="sticker" style={styles.finalCard}>
         <View style={styles.earned}>
           <Animated.View entering={reduced ? undefined : FadeInDown.delay(300)} style={styles.earnedTile}>
-            <Led size="ledM">{`+${formatNumber(sum.coins)}`}</Led>
+            <Led size="ledM">{ltr(`+${formatNumber(sum.coins)}`)}</Led>
             <AppText variant="caption" color={colors.textDim}>
               {strings.quiz.earnedCoins}
             </AppText>
@@ -253,7 +253,7 @@ function ResultView({
             </AppText>
           </Animated.View>
           <Animated.View entering={reduced ? undefined : FadeInDown.delay(540)} style={styles.earnedTile}>
-            <Led size="ledM" color={colors.correct}>{`+${sum.xp}`}</Led>
+            <Led size="ledM" color={colors.correct}>{ltr(`+${sum.xp}`)}</Led>
             <AppText variant="caption" color={colors.textDim}>
               {strings.quiz.earnedXp}
             </AppText>

@@ -26,6 +26,7 @@ import { goHome } from '@/lib/goHome';
 import { fmt, strings } from '@/lib/i18n';
 import { queryKeys } from '@/lib/queryClient';
 import { showName } from '@/lib/names';
+import { ltr } from '@/lib/format';
 
 /** small phones: answers in a 2x2 grid so all four fit */
 const SMALL = Dimensions.get('window').height < 760;
@@ -417,7 +418,7 @@ function Strip({ s }: { s: FamilyState }) {
           {s.phase === 'reveal' && p.points ? (
             <Animated.View entering={reduced ? undefined : FadeInDown} style={styles.gain}>
               <AppText variant="caption" color={palette.night950} style={styles.tiny}>
-                {`+${p.points}`}
+                {ltr(`+${p.points}`)}
               </AppText>
             </Animated.View>
           ) : null}

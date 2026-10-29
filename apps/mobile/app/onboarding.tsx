@@ -188,9 +188,11 @@ export default function OnboardingScreen() {
     setStep(s);
   };
 
+  // straight into a first (easy) game: the home tour waits until the player comes back
   const finish = useCallback(() => {
     set({ onboarded: true, tourDone: false });
     router.replace('/(tabs)');
+    setTimeout(() => router.push({ pathname: '/session', params: { world: 'mix' } }), 60);
   }, [set]);
 
   const savePrefs = async (g: typeof gender, w: string[] | null) => {
@@ -276,7 +278,8 @@ export default function OnboardingScreen() {
   }
 
   if (step === 'about') {
-    const ready = gender !== null && topics.length >= 3;
+    // both are optional: they only tune the texts and the first questions
+    const ready = true;
     const toggle = (slug: string) => {
       haptic('select');
       setTopics((xs) => (xs.includes(slug) ? xs.filter((x) => x !== slug) : [...xs, slug]));
@@ -299,7 +302,7 @@ export default function OnboardingScreen() {
             loading={busy}
             onPress={async () => {
               setBusy(true);
-              await savePrefs(gender, topics);
+              if (gender !== null || topics.length > 0) await savePrefs(gender, topics.length ? topics : null);
               setBusy(false);
               go('nick');
             }}
@@ -334,8 +337,8 @@ export default function OnboardingScreen() {
         <Card padding={space.md} style={styles.block}>
           <View style={styles.rowBetween}>
             <AppText variant="label">{t.topicsTitle}</AppText>
-            <AppText variant="caption" color={topics.length >= 3 ? colors.correct : colors.led} style={styles.bold}>
-              {topics.length >= 3 ? fmt(t.topicsDone, { n: topics.length }) : fmt(t.topicsCount, { n: topics.length })}
+            <AppText variant="caption" color={topics.length > 0 ? colors.correct : colors.textMuted} style={styles.bold}>
+              {topics.length > 0 ? fmt(t.topicsDone, { n: topics.length }) : t.topicsOptional}
             </AppText>
           </View>
           <View style={styles.topics}>
