@@ -21,6 +21,7 @@ import type { Provider } from '@/features/auth/oauth';
 import { RpcError } from '@/features/profile/api';
 import { useMyState, useUpdateProfile } from '@/features/profile/hooks';
 import { useIsKid } from '@/features/settings/kids';
+import { ParentalGate } from '@/components/ParentalGate';
 import { googlePhotoUrl, pickAndUploadPhoto, useSetPhoto } from '@/features/profile/photo';
 import { StatsSection } from '@/features/profile/Stats';
 import { useSettingsStore } from '@/features/settings/store';
@@ -143,6 +144,10 @@ function LinkAccountCard() {
   const toast = useToast();
   const online = useIsOnline();
   const [busy, setBusy] = useState<Provider | null>(null);
+  // under 13 a grown-up connects the account (it shares an email address with us)
+  const kid = useIsKid();
+  const [gate, setGate] = useState<null | (() => void)>(null);
+  const guard = (fn: () => void) => () => (kid ? setGate(() => fn) : fn());
 
   const go = async (p: Provider) => {
     setBusy(p);
@@ -186,7 +191,7 @@ function LinkAccountCard() {
             fullWidth
             disabled={!online || busy !== null}
             loading={busy === 'apple'}
-            onPress={() => void go('apple')}
+            onPress={guard(() => void go('apple'))}
           />
         ) : null}
         <StickerButton
@@ -196,14 +201,28 @@ function LinkAccountCard() {
           fullWidth
           disabled={!online || busy !== null}
           loading={busy === 'google'}
-          onPress={() => void go('google')}
+          onPress={guard(() => void go('google'))}
         />
-        <Pressable onPress={() => askSwitch('google')} disabled={!online || busy !== null} accessibilityRole="button" hitSlop={8}>
+        <Pressable onPress={guard(() => askSwitch('google'))} disabled={!online || busy !== null} accessibilityRole="button" hitSlop={8}>
           <AppText variant="label" color={colors.led} align="center" style={styles.haveAccount}>
             {t.haveAccount}
           </AppText>
         </Pressable>
+        {kid ? (
+          <AppText variant="caption" color={colors.textMuted} align="center">
+            {t.linkKid}
+          </AppText>
+        ) : null}
       </View>
+      <ParentalGate
+        visible={gate !== null}
+        onClose={() => setGate(null)}
+        onPass={() => {
+          const fn = gate;
+          setGate(null);
+          fn?.();
+        }}
+      />
     </Card>
   );
 }
