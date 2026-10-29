@@ -13,6 +13,7 @@ import { RpcError } from '@/features/profile/api';
 import { socialApi } from '@/features/social/api';
 import { useFriends, useSocialAction } from '@/features/social/hooks';
 import { fmt, strings } from '@/lib/i18n';
+import { showName } from '@/lib/names';
 
 const t = strings.social;
 
@@ -93,11 +94,11 @@ const FriendRow = memo(function FriendRow({ f }: { f: Friend }) {
   const block = useSocialAction(() => socialApi.block(f.id));
 
   const menu = () =>
-    appAlert(f.username, undefined, [
+    appAlert(showName(f.username), undefined, [
       {
         text: t.remove,
         onPress: () =>
-          appAlert(fmt(t.removeTitle, { name: f.username }), undefined, [
+          appAlert(fmt(t.removeTitle, { name: showName(f.username) }), undefined, [
             { text: strings.common.cancel, style: 'cancel' },
             { text: t.remove, style: 'destructive', onPress: () => remove.mutate(undefined) },
           ]),
@@ -106,7 +107,7 @@ const FriendRow = memo(function FriendRow({ f }: { f: Friend }) {
         text: t.block,
         style: 'destructive',
         onPress: () =>
-          appAlert(fmt(t.blockTitle, { name: f.username }), t.blockBody, [
+          appAlert(fmt(t.blockTitle, { name: showName(f.username) }), t.blockBody, [
             { text: strings.common.cancel, style: 'cancel' },
             { text: t.block, style: 'destructive', onPress: () => block.mutate(undefined) },
           ]),
@@ -120,7 +121,7 @@ const FriendRow = memo(function FriendRow({ f }: { f: Friend }) {
         disabled={f.status !== 'accepted'}
         onPress={() => router.push({ pathname: '/player/[id]', params: { id: f.id } })}
         accessibilityRole="button"
-        accessibilityLabel={`${strings.teen.viewProfile} ${f.username}`}
+        accessibilityLabel={`${strings.teen.viewProfile} ${showName(f.username)}`}
         style={styles.who}
       >
         <View>
@@ -129,7 +130,7 @@ const FriendRow = memo(function FriendRow({ f }: { f: Friend }) {
         </View>
         <View style={styles.flex}>
           <AppText variant="label" numberOfLines={1}>
-            {f.username}
+            {showName(f.username)}
           </AppText>
           <AppText variant="caption" color={f.unread > 0 ? colors.led : f.online ? colors.correct : colors.textDim} numberOfLines={1}>
             {f.status === 'pending' && !f.incoming
@@ -154,33 +155,33 @@ const FriendRow = memo(function FriendRow({ f }: { f: Friend }) {
       ) : (
         <>
           <Pressable
-            onPress={() => router.push({ pathname: '/chat/[id]', params: { id: f.id, name: f.username } })}
+            onPress={() => router.push({ pathname: '/chat/[id]', params: { id: f.id, name: showName(f.username) } })}
             style={styles.iconBtn}
             accessibilityRole="button"
-            accessibilityLabel={`${t.chat} ${f.username}`}
+            accessibilityLabel={`${t.chat} ${showName(f.username)}`}
           >
             <Ionicons name="chatbubble-ellipses" size={22} color={colors.text} />
             {f.unread > 0 ? <View style={styles.dot} /> : null}
           </Pressable>
           <Pressable
-            onPress={() => router.push({ pathname: '/trade/[id]', params: { id: f.id, name: f.username, mode: 'gift' } })}
+            onPress={() => router.push({ pathname: '/trade/[id]', params: { id: f.id, name: showName(f.username), mode: 'gift' } })}
             style={styles.iconBtn}
             accessibilityRole="button"
-            accessibilityLabel={`${t.giftBtn} ${f.username}`}
+            accessibilityLabel={`${t.giftBtn} ${showName(f.username)}`}
           >
             <Ionicons name="gift" size={21} color={colors.prize} />
           </Pressable>
           <Pressable
-            onPress={() => router.push({ pathname: '/trade/[id]', params: { id: f.id, name: f.username } })}
+            onPress={() => router.push({ pathname: '/trade/[id]', params: { id: f.id, name: showName(f.username) } })}
             style={styles.iconBtn}
             accessibilityRole="button"
-            accessibilityLabel={`${t.trade} ${f.username}`}
+            accessibilityLabel={`${t.trade} ${showName(f.username)}`}
           >
             <Ionicons name="swap-horizontal" size={22} color={colors.led} />
           </Pressable>
         </>
       )}
-      <Pressable onPress={menu} style={styles.iconBtn} accessibilityRole="button" accessibilityLabel={`${t.more} ${f.username}`}>
+      <Pressable onPress={menu} style={styles.iconBtn} accessibilityRole="button" accessibilityLabel={`${t.more} ${showName(f.username)}`}>
         <Ionicons name="ellipsis-vertical" size={20} color={colors.textDim} />
       </Pressable>
     </View>
@@ -292,7 +293,7 @@ export default function FriendsScreen() {
             </AppText>
             {data.blocked.map((b) => (
               <View key={b.id} style={styles.friend}>
-                <AppText style={styles.flex}>{b.username}</AppText>
+                <AppText style={styles.flex}>{showName(b.username)}</AppText>
                 <StickerButton label={t.unblock} tone="ghost" size="sm" onPress={() => unblock.mutate(b.id)} />
               </View>
             ))}

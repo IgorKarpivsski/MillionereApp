@@ -14,6 +14,7 @@ import { RewardIcon, rewardLabel } from '@/features/engage/rewards';
 import { RpcError } from '@/features/profile/api';
 import { inviteLink, referralApi, referralKey, useReferral } from '@/features/referral/api';
 import { fmt, strings } from '@/lib/i18n';
+import { showName } from '@/lib/names';
 
 const t = strings.referral;
 
@@ -182,10 +183,10 @@ export default function InviteScreen() {
             <AppText color={colors.textDim}>{t.noFriends}</AppText>
           ) : (
             data.friends.map((f, i) => (
-              <View key={`${f.username}-${i}`} style={styles.friend}>
+              <View key={`${showName(f.username)}-${i}`} style={styles.friend}>
                 <AvatarBadge avatarId={f.avatar_id} photo={f.photo} size={36} />
                 <AppText variant="label" numberOfLines={1} style={styles.flex}>
-                  {f.username}
+                  {showName(f.username)}
                 </AppText>
                 <AppText variant="caption" color={f.qualified ? colors.correct : colors.textMuted}>
                   {f.qualified
@@ -200,7 +201,7 @@ export default function InviteScreen() {
 
           {data.invited_by ? (
             <AppText color={colors.textMuted} align="center">
-              {fmt(t.invitedBy, { name: data.invited_by.username })}
+              {fmt(t.invitedBy, { name: showName(data.invited_by.username) })}
             </AppText>
           ) : data.can_redeem ? (
             <View style={styles.card}>

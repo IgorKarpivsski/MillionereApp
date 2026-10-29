@@ -22,6 +22,7 @@ import { ShareResultButton } from '@/features/teen/ShareResult';
 import { PostGameRank } from '@/features/teen/PostGame';
 import { fmt, strings } from '@/lib/i18n';
 import { QuestionImageView } from '@/features/quiz/QuestionImage';
+import { showName } from '@/lib/names';
 
 const t = strings.match;
 
@@ -193,7 +194,7 @@ function Players({ s }: { s: MatchState }) {
       <View style={styles.player}>
         <AvatarBadge avatarId={s.me.avatar_id} photo={s.me.photo} level={s.me.level} frame={s.me.frame} size={34} />
         <AppText variant="caption" numberOfLines={1} style={styles.pname}>
-          {s.me.username}
+          {showName(s.me.username)}
         </AppText>
       </View>
       <View style={styles.digits}>
@@ -210,7 +211,7 @@ function Players({ s }: { s: MatchState }) {
       <View style={styles.player}>
         <AvatarBadge avatarId={s.opponent?.avatar_id ?? 'avatar_01'} photo={s.opponent?.photo} level={s.opponent?.level ?? 1} frame={s.opponent?.frame} size={34} />
         <AppText variant="caption" numberOfLines={1} style={styles.pname}>
-          {s.opponent?.username ?? '…'}
+          {s.opponent ? showName(s.opponent.username) : '…'}
         </AppText>
         {s.is_bot ? (
           <AppText variant="caption" color={colors.textDim} numberOfLines={1} style={styles.botTag}>
@@ -381,7 +382,7 @@ export default function MatchScreen() {
         <Backdrop />
         {s.kind === 'random' ? <AppText variant="title">{r.found}</AppText> : null}
         <AvatarBadge avatarId={s.opponent?.avatar_id ?? 'avatar_01'} photo={s.opponent?.photo} level={s.opponent?.level ?? 1} size={88} ring={colors.led} />
-        <AppText variant="heading">{fmt(t.vs, { name: s.opponent?.username ?? '' })}</AppText>
+        <AppText variant="heading">{fmt(t.vs, { name: showName(s.opponent?.username) ?? '' })}</AppText>
         {s.is_bot ? <AppText color={colors.textDim}>{r.botTag}</AppText> : null}
         <Animated.View key={Math.ceil(left)} entering={ZoomIn}>
           <Led size="ledXL">{Math.max(1, Math.ceil(left))}</Led>
@@ -399,7 +400,7 @@ export default function MatchScreen() {
         <ScrollView contentContainerStyle={[styles.center, styles.pad]}>
           <TrophyLogo size={win ? 120 : 80} color={win ? colors.led : colors.border} />
           <AppText variant="title" align="center">
-            {draw ? t.draw : win ? t.win : fmt(t.lose, { name: s.opponent?.username ?? '' })}
+            {draw ? t.draw : win ? t.win : fmt(t.lose, { name: showName(s.opponent?.username) ?? '' })}
           </AppText>
           <Players s={s} />
           {s.result?.coins ? (
@@ -419,7 +420,7 @@ export default function MatchScreen() {
               setRematching(true);
               try {
                 const next = await teenApi.rematch(s.room_id);
-                toast(fmt(strings.teen.revengeSent, { name: s.opponent?.username ?? '' }), 'success');
+                toast(fmt(strings.teen.revengeSent, { name: showName(s.opponent?.username) ?? '' }), 'success');
                 setPicked(null);
                 setRoom(next.room_id);
               } catch {
@@ -491,7 +492,7 @@ export default function MatchScreen() {
           {s.phase === 'reveal'
             ? s.reveal?.explanation ?? ''
             : s.opp_answered
-              ? fmt(t.oppAnswered, { name: s.opponent?.username ?? '' })
+              ? fmt(t.oppAnswered, { name: showName(s.opponent?.username) ?? '' })
               : t.fastBonus}
         </AppText>
       </ScrollView>
@@ -516,7 +517,7 @@ export default function MatchScreen() {
                 {s.phase === 'reveal' && s.reveal?.opp_slot === a.slot ? (
                   <View style={styles.oppMark}>
                     <AppText variant="caption" color={colors.textOnBright} numberOfLines={1}>
-                      {s.opponent?.username ?? ''}
+                      {showName(s.opponent?.username) ?? ''}
                     </AppText>
                   </View>
                 ) : null}

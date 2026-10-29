@@ -13,6 +13,7 @@ import { RankList } from '@/features/teen/RankList';
 import { BoardView } from '@/features/teen/BoardView';
 import { formatNumber } from '@/lib/format';
 import { strings } from '@/lib/i18n';
+import { showName } from '@/lib/names';
 
 const t = strings.leaderboard;
 
@@ -95,13 +96,13 @@ function AllTable({ data, isLoading }: { data: ReturnType<typeof useLeaderboard>
 
       <View style={styles.list}>
         {data?.rows.map((r) => (
-          <View key={`${r.rank}-${r.username}`} style={[styles.row, PODIUM[r.rank] && { backgroundColor: PODIUM[r.rank]!.tint, borderWidth: 1, borderColor: PODIUM[r.rank]!.color }, r.me && styles.rowMe]}>
+          <View key={`${r.rank}-${showName(r.username)}`} style={[styles.row, PODIUM[r.rank] && { backgroundColor: PODIUM[r.rank]!.tint, borderWidth: 1, borderColor: PODIUM[r.rank]!.color }, r.me && styles.rowMe]}>
             <RankMark rank={r.rank} dim style={styles.rank} />
             <PodiumFrame rank={r.rank} size={36}>
               <AvatarBadge avatarId={r.avatar_id} photo={r.photo} level={r.level} frame={r.frame} size={36} />
             </PodiumFrame>
             <AppText variant="label" numberOfLines={1} style={styles.flex}>
-              {r.username}
+              {showName(r.username)}
             </AppText>
             <Led size="number" color={r.me ? colors.led : colors.text}>
               {formatNumber(r.points)}

@@ -25,6 +25,7 @@ import { WORLD_IMAGES } from '@/features/worlds/worldImages';
 import { goHome } from '@/lib/goHome';
 import { fmt, strings } from '@/lib/i18n';
 import { queryKeys } from '@/lib/queryClient';
+import { showName } from '@/lib/names';
 
 /** small phones: answers in a 2x2 grid so all four fit */
 const SMALL = Dimensions.get('window').height < 760;
@@ -192,7 +193,7 @@ function Seat({ p, size = 52, onInvite }: { p: FamilyPlayer | null; size?: numbe
         </View>
       ) : null}
       <AppText variant="caption" numberOfLines={1} style={styles.seatName}>
-        {p.me ? t.you : p.username}
+        {p.me ? t.you : showName(p.username)}
       </AppText>
     </Animated.View>
   );
@@ -355,7 +356,7 @@ function InviteFriendsSheet({ room, inRoom, visible, onClose }: { room: string; 
     try {
       await familyApi.invite(room, f.id);
       setSent((x) => [...x, f.id]);
-      toast(fmt(t.invited, { name: f.username }), 'success');
+      toast(fmt(t.invited, { name: showName(f.username) }), 'success');
     } catch {
       toast(strings.errors.generic, 'error');
     }
@@ -375,7 +376,7 @@ function InviteFriendsSheet({ room, inRoom, visible, onClose }: { room: string; 
             <AvatarBadge avatarId={f.avatar_id ?? 'avatar_01'} photo={f.photo} size={40} />
             <View style={styles.flex}>
               <AppText variant="label" numberOfLines={1}>
-                {f.username}
+                {showName(f.username)}
               </AppText>
               <AppText variant="caption" color={f.online ? colors.correct : colors.textDim}>
                 {f.online ? strings.call.online : strings.call.offline}
@@ -421,7 +422,7 @@ function Strip({ s }: { s: FamilyState }) {
             </Animated.View>
           ) : null}
           <AppText variant="caption" numberOfLines={1} style={styles.stripName}>
-            {p.me ? t.you : p.username}
+            {p.me ? t.you : showName(p.username)}
           </AppText>
           <Led size="ledS" color={p.me ? colors.led : colors.text}>
             {String(p.score)}
@@ -475,7 +476,7 @@ function Results({ s, onNewRoom, onRoom }: { s: FamilyState; onNewRoom: () => vo
           ))}
         </View>
         <AppText variant="title" align="center" color={colors.led}>
-          {meChamp ? t.youChampion : champs[0] ? fmt(t.championIs, { name: champs.map((c) => c.username).join(' + ') }) : t.champion}
+          {meChamp ? t.youChampion : champs[0] ? fmt(t.championIs, { name: champs.map((c) => showName(c.username)).join(' + ') }) : t.champion}
         </AppText>
       </Animated.View>
       <Card padding={space.md} style={styles.block}>
@@ -492,7 +493,7 @@ function Results({ s, onNewRoom, onRoom }: { s: FamilyState; onNewRoom: () => vo
             <AvatarBadge avatarId={p.avatar_id} photo={p.photo} size={36} />
             <View style={styles.flex}>
               <AppText variant="label" numberOfLines={1}>
-                {p.me ? `${p.username} (${t.you})` : p.username}
+                {p.me ? `${showName(p.username)} (${t.you})` : showName(p.username)}
               </AppText>
               <AppText variant="caption" color={colors.textDim}>
                 {fmt(t.correctN, { n: p.correct })}

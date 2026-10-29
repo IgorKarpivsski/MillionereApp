@@ -15,6 +15,7 @@ import { queryKeys } from '@/lib/queryClient';
 import { fmt, strings } from '@/lib/i18n';
 import { boostsApi, useBoosts } from './api';
 import { BoostIcon, boostDesc, boostName } from './meta';
+import { showName } from '@/lib/names';
 
 const IN_GAME: BoostKind[] = ['time', 'freeze', 'skip', 'shield', 'double'];
 
@@ -149,7 +150,7 @@ export function SessionTools({
       return;
     }
     haptic('heavy');
-    onFriendPick({ name: f.username, slot: null, waiting: 45 });
+    onFriendPick({ name: showName(f.username), slot: null, waiting: 45 });
     if (callTimer.current) clearInterval(callTimer.current);
     callTimer.current = setInterval(async () => {
       try {
@@ -157,13 +158,13 @@ export function SessionTools({
         if (st.answer_slot != null) {
           if (callTimer.current) clearInterval(callTimer.current);
           haptic('success');
-          onFriendPick({ name: f.username, slot: st.answer_slot, waiting: null });
+          onFriendPick({ name: showName(f.username), slot: st.answer_slot, waiting: null });
         } else if (st.expired) {
           if (callTimer.current) clearInterval(callTimer.current);
           onFriendPick(null);
-          toast(fmt(strings.call.noAnswer, { name: f.username }), 'info');
+          toast(fmt(strings.call.noAnswer, { name: showName(f.username) }), 'info');
         } else {
-          onFriendPick({ name: f.username, slot: null, waiting: st.seconds_left });
+          onFriendPick({ name: showName(f.username), slot: null, waiting: st.seconds_left });
         }
       } catch {
         // keep trying until it expires
@@ -314,12 +315,12 @@ export function SessionTools({
               disabled={!f.online}
               onPress={() => void call(f)}
               accessibilityRole="button"
-              accessibilityLabel={`${f.username}, ${f.online ? strings.call.online : strings.call.offline}`}
+              accessibilityLabel={`${showName(f.username)}, ${f.online ? strings.call.online : strings.call.offline}`}
               style={({ pressed }) => [styles.friend, !f.online && styles.friendOff, pressed && styles.pressed]}
             >
               <AvatarBadge avatarId={f.avatar_id ?? 'avatar_01'} photo={f.photo} size={40} />
               <AppText variant="label" style={styles.flex} numberOfLines={1}>
-                {f.username}
+                {showName(f.username)}
               </AppText>
               <View style={[styles.dot, { backgroundColor: f.online ? colors.correct : colors.textDim }]} />
               <AppText variant="caption" color={f.online ? colors.correct : colors.textDim}>

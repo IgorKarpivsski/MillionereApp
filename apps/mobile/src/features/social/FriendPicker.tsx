@@ -5,6 +5,7 @@ import { AppText, AvatarBadge, BottomSheet, StickerButton } from '@/design-syste
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { strings } from '@/lib/i18n';
 import { useFriends } from './hooks';
+import { showName } from '@/lib/names';
 
 const t = strings.social;
 
@@ -42,12 +43,12 @@ export function TradeFriendSheet({ visible, onClose }: { visible: boolean; onClo
                 <View style={[styles.dot, { backgroundColor: f.online ? colors.correct : palette.night600 }]} />
               </View>
               <AppText variant="label" style={styles.flex} numberOfLines={1}>
-                {f.username}
+                {showName(f.username)}
               </AppText>
-              <Pressable onPress={() => go(f.id, f.username, 'gift')} style={styles.btn} accessibilityRole="button" accessibilityLabel={`${t.giftBtn} ${f.username}`}>
+              <Pressable onPress={() => go(f.id, showName(f.username), 'gift')} style={styles.btn} accessibilityRole="button" accessibilityLabel={`${t.giftBtn} ${showName(f.username)}`}>
                 <Ionicons name="gift" size={20} color={colors.prize} />
               </Pressable>
-              <Pressable onPress={() => go(f.id, f.username)} style={styles.btn} accessibilityRole="button" accessibilityLabel={`${t.trade} ${f.username}`}>
+              <Pressable onPress={() => go(f.id, showName(f.username))} style={styles.btn} accessibilityRole="button" accessibilityLabel={`${t.trade} ${showName(f.username)}`}>
                 <Ionicons name="swap-horizontal" size={20} color={colors.led} />
               </Pressable>
             </View>

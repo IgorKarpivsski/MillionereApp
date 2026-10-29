@@ -13,6 +13,7 @@ import { useSettingsStore } from '@/features/settings/store';
 import { formatCompact, formatNumber } from '@/lib/format';
 import { fmt, strings } from '@/lib/i18n';
 import { rankTitle } from '@/lib/rank';
+import { showName } from '@/lib/names';
 
 function Meter({ kind, amount }: { kind: 'coins' | 'gems'; amount: number }) {
   const Icon = kind === 'coins' ? CoinIcon : GemIcon;
@@ -90,12 +91,12 @@ export function TopBar() {
         <Pressable
           onPress={() => router.push('/(tabs)/profile')}
           accessibilityRole="button"
-          accessibilityLabel={`הפרופיל של ${data.profile.username}`}
+          accessibilityLabel={`הפרופיל של ${showName(data.profile.username)}`}
           style={styles.who}
         >
           <AvatarBadge avatarId={data.profile.avatar_id} photo={data.profile.photo_url} frame={data.profile.frame} level={data.profile.level} size={40} />
           <View style={styles.whoText}>
-            <PlayerName name={data.profile.username} color={data.profile.name_color} />
+            <PlayerName name={showName(data.profile.username)} color={data.profile.name_color} />
             {data.profile.title ? (
               <TitleTag title={data.profile.title} size="sm" />
             ) : (

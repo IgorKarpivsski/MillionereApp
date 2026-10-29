@@ -8,6 +8,7 @@ import { colors, space } from '@/design-system/tokens';
 import { useMyState } from '@/features/profile/hooks';
 import { inviteLink, useReferral } from '@/features/referral/api';
 import { fmt, strings } from '@/lib/i18n';
+import { showName } from '@/lib/names';
 
 const t = strings.teen;
 
@@ -36,7 +37,7 @@ function ShareCard({ big, line, story }: { big: string; line: string; story: boo
           {/* never the real photo on a picture that leaves the app */}
           <AvatarBadge avatarId={data.profile.avatar_id} frame={data.profile.frame} size={story ? 72 : 52} />
           <AppText variant="bodyStrong" color={colors.text}>
-            {data.profile.username}
+            {showName(data.profile.username)}
           </AppText>
         </View>
       ) : null}

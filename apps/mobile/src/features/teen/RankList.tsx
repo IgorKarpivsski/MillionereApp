@@ -4,6 +4,7 @@ import { AvatarBadge, Led, PlayerName, TitleTag } from '@/design-system/componen
 import { PODIUM, PodiumFrame, RankMark } from '@/features/league/podium';
 import { colors, radius, space } from '@/design-system/tokens';
 import { formatNumber } from '@/lib/format';
+import { showName } from '@/lib/names';
 
 /** A ranked table of players (friends' table, the weekly event). */
 export function RankList({ rows }: { rows: RankRow[] }) {
@@ -11,7 +12,7 @@ export function RankList({ rows }: { rows: RankRow[] }) {
     <View style={styles.list}>
       {rows.map((r) => (
         <View
-          key={`${r.rank}-${r.username}`}
+          key={`${r.rank}-${showName(r.username)}`}
           style={[styles.row, PODIUM[r.rank] && { backgroundColor: PODIUM[r.rank]!.tint, borderWidth: 1, borderColor: PODIUM[r.rank]!.color }, r.me && styles.rowMe]}
         >
           <RankMark rank={r.rank} dim style={styles.rank} />
@@ -19,7 +20,7 @@ export function RankList({ rows }: { rows: RankRow[] }) {
             <AvatarBadge avatarId={r.avatar_id} photo={r.photo} level={r.level} frame={r.frame} size={36} />
           </PodiumFrame>
           <View style={styles.flex}>
-            <PlayerName name={r.username} color={r.name_color} />
+            <PlayerName name={showName(r.username)} color={r.name_color} />
             {r.title ? <TitleTag title={r.title} size="sm" /> : null}
           </View>
           <Led size="number" color={r.me ? colors.led : colors.text}>

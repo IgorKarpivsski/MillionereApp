@@ -16,6 +16,7 @@ import { fmt, strings } from '@/lib/i18n';
 import { GlowingPack, PACK_NAMES } from '@/features/collection/PackArt';
 import { leagueReward } from './api';
 import { LeagueBadge, TIER_COLORS } from './LeagueBadge';
+import { showName } from '@/lib/names';
 
 const t = strings.league;
 
@@ -173,7 +174,7 @@ export function LeagueView({ s }: { s: LeagueState }) {
           const down = s.demote > 0 && n > s.promote + s.demote && r.rank > n - s.demote;
           return (
             <View
-              key={`${r.rank}-${r.username}`}
+              key={`${r.rank}-${showName(r.username)}`}
               style={[
                 styles.row,
                 up && styles.rowUp,
@@ -182,14 +183,14 @@ export function LeagueView({ s }: { s: LeagueState }) {
                 r.me && styles.rowMe,
               ]}
               accessible
-              accessibilityLabel={`${r.rank}. ${r.username}, ${formatNumber(r.points)} ${strings.leaderboard.points}${up ? `, ${t.upZone}` : down ? `, ${t.downZone}` : ''}`}
+              accessibilityLabel={`${r.rank}. ${showName(r.username)}, ${formatNumber(r.points)} ${strings.leaderboard.points}${up ? `, ${t.upZone}` : down ? `, ${t.downZone}` : ''}`}
             >
               <RankMark rank={r.points > 0 ? r.rank : 99} style={styles.rank} />
               <PodiumFrame rank={r.points > 0 ? r.rank : 99} size={38}>
                 <AvatarBadge avatarId={r.avatar_id} photo={r.photo} size={38} />
               </PodiumFrame>
               <View style={styles.nameCol}>
-                <PlayerName name={r.username} color={r.name_color} />
+                <PlayerName name={showName(r.username)} color={r.name_color} />
                 {r.title ? <TitleTag title={r.title} size="sm" /> : null}
               </View>
               {up ? <Ionicons name="arrow-up-circle" size={20} color={colors.correct} /> : null}

@@ -20,6 +20,7 @@ import { useSettingsStore } from '@/features/settings/store';
 import { MissionsCard, NewbieBanner, NextGoal } from '@/features/teen/HomeCards';
 import { fmt, gx, strings } from '@/lib/i18n';
 import { GenderPrompt, useGenderPromptStore } from '@/features/profile/gender';
+import { showName } from '@/lib/names';
 
 const t = strings.modes;
 const h = strings.home;
@@ -40,7 +41,7 @@ function Breathe({ off, children }: { off: boolean; children: ReactNode }) {
 function Hero() {
   const { data } = useMyState();
   const play = usePlaySession();
-  const name = data?.profile.username ?? '';
+  const name = showName(data?.profile.username) ?? '';
   const gender = data?.profile.gender;
   const reduced = useReducedMotion();
   // first a hello, then tips; a different start each time the app opens
@@ -208,7 +209,7 @@ function FirstTour() {
       return () => setFocused(false);
     }, []),
   );
-  const name = data?.profile.username;
+  const name = showName(data?.profile.username);
   const gender = data?.profile.gender;
   const genderSkipped = useGenderPromptStore((s) => s.dismissed);
   const genderPending = gender == null && !genderSkipped;

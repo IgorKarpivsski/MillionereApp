@@ -9,6 +9,7 @@ import { formatNumber } from '@/lib/format';
 import { fmt, strings } from '@/lib/i18n';
 import { useBoard } from './api';
 import { RankList } from './RankList';
+import { showName } from '@/lib/names';
 
 const t = strings.boards;
 
@@ -104,7 +105,7 @@ export function BoardView({ kind }: { kind: 'month' | 'all' }) {
               <AppText style={styles.medal}>{['🥇', '🥈', '🥉'][w.rank - 1] ?? String(w.rank)}</AppText>
               <AvatarBadge avatarId={w.avatar_id} photo={w.photo} size={32} />
               <AppText variant="label" style={styles.flex} numberOfLines={1}>
-                {w.username}
+                {showName(w.username)}
               </AppText>
               <Led size="number" color={colors.text}>
                 {formatNumber(w.points)}

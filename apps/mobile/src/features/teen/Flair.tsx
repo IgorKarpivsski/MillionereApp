@@ -6,6 +6,7 @@ import { colors, space } from '@/design-system/tokens';
 import { useMyState } from '@/features/profile/hooks';
 import { fmt, strings } from '@/lib/i18n';
 import { useFlair, useSetFlair, useSetNameColor } from './api';
+import { showName } from '@/lib/names';
 
 const t = strings.teen;
 const TIER_ORDER = { basic: 0, rare: 1, epic: 2, legendary: 3 } as const;
@@ -46,7 +47,7 @@ export function FlairSheet({ visible, onClose }: { visible: boolean; onClose: ()
         <ScrollView style={styles.scroll} contentContainerStyle={styles.body}>
           <View style={styles.preview}>
             <AvatarBadge avatarId={avatar} photo={me?.profile.photo_url} frame={frame} size={84} />
-            <PlayerName name={me?.profile.username ?? ''} color={color} />
+            <PlayerName name={showName(me?.profile.username) ?? ''} color={color} />
             {title ? (
               <AppText variant="caption" color={colors.led}>
                 {title}

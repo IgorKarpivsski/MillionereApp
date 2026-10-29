@@ -16,6 +16,7 @@ import { marketApi, useMarket, useSetMarket } from '@/features/market/api';
 import { RpcError } from '@/features/profile/api';
 import { queryKeys } from '@/lib/queryClient';
 import { fmt, strings } from '@/lib/i18n';
+import { showName } from '@/lib/names';
 
 const t = strings.market;
 const CARD = 92;
@@ -87,7 +88,7 @@ function ListingCard({
         <View style={styles.owner}>
           <AvatarBadge avatarId={l.owner.avatar_id} photo={l.owner.photo} size={30} />
           <AppText variant="label" numberOfLines={1} style={styles.flex}>
-            {l.owner.username}
+            {showName(l.owner.username)}
           </AppText>
           {l.i_need ? (
             <View style={styles.needTag}>

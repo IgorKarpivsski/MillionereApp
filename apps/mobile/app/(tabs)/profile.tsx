@@ -29,6 +29,7 @@ import { StreakFreezeCard } from '@/features/teen/StreakFreeze';
 import { formatNumber, ltr } from '@/lib/format';
 import { strings } from '@/lib/i18n';
 import { useIsOnline } from '@/lib/network';
+import { showName } from '@/lib/names';
 
 const t = strings.profile;
 
@@ -261,7 +262,7 @@ export default function ProfileScreen() {
         />
         <View style={styles.nameRow}>
           <AppText variant="title" numberOfLines={1}>
-            {data.profile.username}
+            {showName(data.profile.username)}
           </AppText>
           {data.profile.title ? (
             <TitleTag title={data.profile.title} size="lg" center />

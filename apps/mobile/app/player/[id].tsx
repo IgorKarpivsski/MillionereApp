@@ -8,6 +8,7 @@ import { colors, space } from '@/design-system/tokens';
 import { StatsSection } from '@/features/profile/Stats';
 import { teenApi, useFriendProfile } from '@/features/teen/api';
 import { fmt, strings } from '@/lib/i18n';
+import { showName } from '@/lib/names';
 
 const t = strings.teen;
 
@@ -22,7 +23,7 @@ export default function PlayerScreen() {
     setBusy(true);
     try {
       const r = await teenApi.challenge(id);
-      toast(fmt(t.revengeSent, { name: data?.profile.username ?? '' }), 'success');
+      toast(fmt(t.revengeSent, { name: showName(data?.profile.username) ?? '' }), 'success');
       router.push({ pathname: '/match', params: { room: r.room_id } });
     } catch {
       toast(strings.errors.generic, 'error');
@@ -38,7 +39,7 @@ export default function PlayerScreen() {
           <Ionicons name="arrow-forward" size={26} color={colors.text} />
         </Pressable>
         <AppText variant="title" style={styles.flex} numberOfLines={1}>
-          {data ? fmt(t.friendProfile, { name: data.profile.username }) : ''}
+          {data ? fmt(t.friendProfile, { name: showName(data.profile.username) }) : ''}
         </AppText>
       </View>
       <ScrollView contentContainerStyle={styles.body}>
@@ -48,7 +49,7 @@ export default function PlayerScreen() {
           <>
             <View style={styles.header}>
               <AvatarBadge avatarId={data.profile.avatar_id} photo={data.profile.photo} level={data.profile.level} frame={data.profile.frame} size={110} ring={colors.led} />
-              <AppText variant="title">{data.profile.username}</AppText>
+              <AppText variant="title">{showName(data.profile.username)}</AppText>
               {data.profile.title ? (
                 <TitleTag title={data.profile.title} size="lg" center />
               ) : null}
@@ -58,14 +59,14 @@ export default function PlayerScreen() {
                   label={t.friendChat}
                   icon="chatbubble-ellipses"
                   tone="ghost"
-                  onPress={() => router.push({ pathname: '/chat/[id]', params: { id: data.id, name: data.profile.username } })}
+                  onPress={() => router.push({ pathname: '/chat/[id]', params: { id: data.id, name: showName(data.profile.username) } })}
                 />
               </View>
             </View>
             <StatsSection
               gender={data.profile.gender}
               stats={{ ...data.stats, xp: 0 }}
-              title={fmt(t.friendProfile, { name: data.profile.username })}
+              title={fmt(t.friendProfile, { name: showName(data.profile.username) })}
             />
           </>
         ) : null}
