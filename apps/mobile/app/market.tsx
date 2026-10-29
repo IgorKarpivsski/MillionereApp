@@ -3,7 +3,7 @@ import type { Collectible, MarketListing } from '@fm/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { appAlert, AppText, AvatarBadge, Backdrop, StickerButton, useToast } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
@@ -22,13 +22,21 @@ const CARD = 92;
 
 function Strip({ items, selected, onPick, badge }: { items: Collectible[]; selected: string | null; onPick: (id: string) => void; badge?: (c: Collectible) => string | null }) {
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.strip}>
-      {items.map((item) => {
+    // a virtualized row: the "missing" list can run to hundreds of stickers
+    <FlatList
+      horizontal
+      data={items}
+      keyExtractor={(item) => item.id}
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.strip}
+      initialNumToRender={6}
+      windowSize={5}
+      extraData={selected}
+      renderItem={({ item }) => {
         const on = selected === item.id;
         const b = badge?.(item);
         return (
           <Pressable
-            key={item.id}
             onPress={() => {
               haptic('select');
               onPick(item.id);
@@ -53,8 +61,8 @@ function Strip({ items, selected, onPick, badge }: { items: Collectible[]; selec
             ) : null}
           </Pressable>
         );
-      })}
-    </ScrollView>
+      }}
+    />
   );
 }
 
