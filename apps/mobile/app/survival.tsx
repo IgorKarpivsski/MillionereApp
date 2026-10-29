@@ -290,7 +290,7 @@ export default function SurvivalScreen() {
           </View>
           <StickerButton label={t.start} icon="trophy" tone="prize" size="lg" fullWidth loading={phase === 'starting'} onPress={() => void start()} />
           <AppText variant="caption" color={colors.textDim} align="center">
-            {t.cost}
+            {energy?.unlimited ? strings.engage.freeNow : t.cost}
           </AppText>
           {info ? <WeekBoard info={info} /> : <ActivityIndicator color={colors.led} />}
         </ScrollView>
@@ -324,7 +324,7 @@ export default function SurvivalScreen() {
           </AppText>
           <Led size="ledXL">{String(p.correct)}</Led>
           <AppText variant="heading" align="center">
-            {fmt(t.score, { n: p.correct })}
+            {fmt(p.correct === 1 ? t.scoreOne : t.score, { n: p.correct })}
           </AppText>
           {p.can_revive ? (
             <Animated.View entering={reduced ? undefined : FadeInDown} style={styles.reviveBox}>
@@ -379,7 +379,7 @@ export default function SurvivalScreen() {
             <Led size="ledXL">{String(p.correct)}</Led>
           </Animated.View>
           <AppText variant="heading" align="center">
-            {fmt(t.score, { n: p.correct })}
+            {fmt(p.correct === 1 ? t.scoreOne : t.score, { n: p.correct })}
           </AppText>
           {p.new_best ? (
             <AppText variant="heading" color={colors.led} align="center">
@@ -400,7 +400,7 @@ export default function SurvivalScreen() {
             </AppText>
           ) : null}
           <StickerButton label={t.again} icon="refresh" tone="prize" size="lg" fullWidth onPress={() => void start()} />
-          {p.correct > 0 ? <ShareResultButton big={String(p.correct)} line={fmt(t.score, { n: p.correct })} /> : null}
+          {p.correct > 0 ? <ShareResultButton big={String(p.correct)} line={fmt(p.correct === 1 ? t.scoreOne : t.score, { n: p.correct })} /> : null}
           <StickerButton label={strings.quiz.home} icon="home" tone="ghost" fullWidth onPress={goHome} />
           {info ? <WeekBoard info={info} /> : null}
         </ScrollView>

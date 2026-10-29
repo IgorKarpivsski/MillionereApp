@@ -222,7 +222,7 @@ export default function BlitzScreen() {
           </AppText>
           <StickerButton label={t.start} icon="timer" tone="prize" size="lg" fullWidth loading={phase === 'starting'} onPress={() => void start()} />
           <AppText variant="caption" color={colors.textDim} align="center">
-            {t.cost}
+            {energy?.unlimited ? strings.engage.freeNow : t.cost}
           </AppText>
         </ScrollView>
       </SafeAreaView>
@@ -265,7 +265,7 @@ export default function BlitzScreen() {
               <Led size="ledXL">{String(p.correct)}</Led>
             </Animated.View>
             <AppText variant="heading" align="center">
-              {fmt(t.score, { n: p.correct })}
+              {p.correct === 1 ? t.scoreOne : t.scoreMany}
             </AppText>
             <AppText color={colors.textMuted} align="center">
               {fmt(t.answered, { n: p.answered })}
@@ -292,7 +292,7 @@ export default function BlitzScreen() {
               {fmt(t.coins, { n: p.coins })}
             </AppText>
           ) : null}
-          <Sloth size={110} say={p.new_best ? t.newBest : t.slothCheer[2]} />
+          <Sloth size={110} say={p.new_best ? t.slothCheer[1] : t.slothCheer[2]} />
           <StickerButton
             label={t.again}
             icon="refresh"

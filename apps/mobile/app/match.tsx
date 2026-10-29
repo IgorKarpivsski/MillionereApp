@@ -122,7 +122,7 @@ function Searching({ room, onCancel }: { room: string; onCancel: () => void }) {
       <Sloth size={140} say={offer ? r.botTitle : r.searching} />
       <View style={styles.waitRow}>
         <ActivityIndicator color={colors.led} />
-        <Led size="ledM">{`00:${String(secs).padStart(2, '0')}`}</Led>
+        <Led size="ledM">{`${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`}</Led>
       </View>
       <AppText color={colors.textMuted} align="center">
         {offer ? r.botBody : r.searchingBody}

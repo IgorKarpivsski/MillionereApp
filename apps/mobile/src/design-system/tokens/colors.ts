@@ -75,13 +75,14 @@ export const colors = {
   overlay: 'rgba(14, 8, 38, 0.8)',
 } as const;
 
+/** label: as a tag; labelF: inside a sentence about a sticker (מדבקה is feminine). */
 export const rarityColors = {
-  common: { fill: '#B4ACD6', lip: '#7268A0', label: 'רגיל' },
-  uncommon: { fill: palette.pitch, lip: palette.pitchDeep, label: 'לא שכיח' },
-  rare: { fill: palette.sky, lip: palette.skyDeep, label: 'נדיר' },
-  epic: { fill: palette.violet, lip: palette.violetDeep, label: 'אפי' },
-  legendary: { fill: palette.gold, lip: palette.goldDeep, label: 'אגדי' },
-  iconic: { fill: palette.flare, lip: palette.flareDeep, label: 'מיתי' },
+  common: { fill: '#B4ACD6', lip: '#7268A0', label: 'רגיל', labelF: 'רגילה' },
+  uncommon: { fill: palette.pitch, lip: palette.pitchDeep, label: 'לא שכיח', labelF: 'לא שכיחה' },
+  rare: { fill: palette.sky, lip: palette.skyDeep, label: 'נדיר', labelF: 'נדירה' },
+  epic: { fill: palette.violet, lip: palette.violetDeep, label: 'אפי', labelF: 'אפית' },
+  legendary: { fill: palette.gold, lip: palette.goldDeep, label: 'אגדי', labelF: 'אגדית' },
+  iconic: { fill: palette.flare, lip: palette.flareDeep, label: 'מיתי', labelF: 'מיתית' },
 } as const;
 
 export type ColorToken = keyof typeof colors;

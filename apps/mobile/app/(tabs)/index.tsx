@@ -19,7 +19,7 @@ import { TourTarget, useTourStore } from '@/features/tour/Tour';
 import { useSettingsStore } from '@/features/settings/store';
 import { MissionsCard, NewbieBanner, NextGoal } from '@/features/teen/HomeCards';
 import { fmt, gx, strings } from '@/lib/i18n';
-import { GenderPrompt, useGenderPromptStore } from '@/features/profile/gender';
+import { GenderPrompt } from '@/features/profile/gender';
 import { showName } from '@/lib/names';
 
 const t = strings.modes;
@@ -211,17 +211,17 @@ function FirstTour() {
   );
   const name = showName(data?.profile.username);
   const gender = data?.profile.gender;
-  const genderSkipped = useGenderPromptStore((s) => s.dismissed);
-  const genderPending = gender == null && !genderSkipped;
+  // (no waiting for a gender answer: the gender prompt itself waits for the tour, so a player
+  // who skipped "about me" would never get either)
   useEffect(() => {
-    if (!name || !onboarded || tourDone || !focused || genderPending) return;
+    if (!name || !onboarded || tourDone || !focused) return;
     // let the screen lay out (and the targets measure) before dimming it
     const id = setTimeout(() => start(name, gender, () => set({ tourDone: true })), 1400);
     return () => {
       clearTimeout(id);
       stop();
     };
-  }, [name, gender, genderPending, onboarded, tourDone, focused, start, stop, set]);
+  }, [name, gender, onboarded, tourDone, focused, start, stop, set]);
   return null;
 }
 

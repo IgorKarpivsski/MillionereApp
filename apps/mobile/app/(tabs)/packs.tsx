@@ -42,7 +42,7 @@ function OddsTable({ pack }: { pack: PackCatalogEntry }) {
       </AppText>
       {pack.guaranteed ? (
         <AppText variant="caption" color={colors.correct}>
-          {fmt(t.guaranteed, { rarity: rarityColors[pack.guaranteed].label })}
+          {fmt(t.guaranteed, { rarity: rarityColors[pack.guaranteed].labelF })}
         </AppText>
       ) : null}
     </View>
@@ -128,7 +128,7 @@ export default function PacksScreen() {
                   {p.guaranteed ? (
                     <View style={[styles.countChip, { backgroundColor: rarityColors[p.guaranteed].fill }]}>
                       <AppText variant="caption" color={colors.textOnBright} style={styles.bold}>
-                        {fmt(t.guaranteedShort, { rarity: rarityColors[p.guaranteed].label })}
+                        {fmt(t.guaranteedShort, { rarity: rarityColors[p.guaranteed].labelF })}
                       </AppText>
                     </View>
                   ) : null}

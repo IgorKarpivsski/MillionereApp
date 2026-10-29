@@ -41,6 +41,15 @@ function RowIcon({ name }: { name: IconName }) {
   );
 }
 
+/** "פועל" / "כבוי" next to every switch, so its state never depends on the colour alone. */
+function OnOff({ on }: { on: boolean }) {
+  return (
+    <AppText variant="caption" color={on ? colors.correct : colors.textDim} style={styles.onOff}>
+      {on ? strings.settings.on : strings.settings.off}
+    </AppText>
+  );
+}
+
 function ToggleRow({ k, label, hint }: { k: ToggleKey; label: string; hint?: string }) {
   const value = useSettingsStore((s) => s[k]);
   const toggle = useToggleSetting();
@@ -55,12 +64,13 @@ function ToggleRow({ k, label, hint }: { k: ToggleKey; label: string; hint?: str
           </AppText>
         ) : null}
       </View>
+      <OnOff on={value} />
       <Switch
         value={value}
         onValueChange={(v) => toggle.mutate({ key: k, value: v })}
         accessibilityLabel={label}
-        trackColor={{ false: 'rgba(255,255,255,0.18)', true: colors.primary }}
-        thumbColor={colors.sticker}
+        trackColor={{ false: 'rgba(255,255,255,0.18)', true: colors.correct }}
+        thumbColor={value ? palette.white : '#9A93B8'}
         ios_backgroundColor={palette.night950}
       />
     </View>
@@ -80,6 +90,7 @@ function LocalToggleRow({ k, label, hint }: { k: 'largeText' | 'reminders'; labe
           {hint}
         </AppText>
       </View>
+      <OnOff on={value} />
       <Switch
         value={value}
         onValueChange={(v) => {
@@ -90,8 +101,8 @@ function LocalToggleRow({ k, label, hint }: { k: 'largeText' | 'reminders'; labe
           }
         }}
         accessibilityLabel={label}
-        trackColor={{ false: 'rgba(255,255,255,0.18)', true: colors.primary }}
-        thumbColor={colors.sticker}
+        trackColor={{ false: 'rgba(255,255,255,0.18)', true: colors.correct }}
+        thumbColor={value ? palette.white : '#9A93B8'}
         ios_backgroundColor={palette.night950}
       />
     </View>
@@ -234,6 +245,7 @@ function GenderCard() {
 }
 
 const styles = StyleSheet.create({
+  onOff: { minWidth: 36, textAlign: 'center' },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',

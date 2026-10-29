@@ -225,7 +225,7 @@ export default function TrueFalseScreen() {
           </AppText>
           <StickerButton label={t.start} icon="flash" tone="prize" size="lg" fullWidth loading={phase === 'starting'} onPress={() => void start()} />
           <AppText variant="caption" color={colors.textDim} align="center">
-            {t.cost}
+            {energy?.unlimited ? strings.engage.freeNow : t.cost}
           </AppText>
         </ScrollView>
       </SafeAreaView>
@@ -267,7 +267,7 @@ export default function TrueFalseScreen() {
             <Led size="ledXL">{String(p.correct)}</Led>
           </Animated.View>
           <AppText variant="heading" align="center">
-            {fmt(t.score, { n: p.correct })}
+            {fmt(p.correct === 1 ? t.scoreOne : t.score, { n: p.correct })}
           </AppText>
           <AppText color={colors.textMuted} align="center">
             {fmt(t.answered, { n: p.answered })}
@@ -287,7 +287,7 @@ export default function TrueFalseScreen() {
             </AppText>
           ) : null}
           <StickerButton label={t.again} icon="refresh" tone="prize" size="lg" fullWidth onPress={() => void start()} />
-          {p.correct > 0 ? <ShareResultButton big={String(p.correct)} line={fmt(t.score, { n: p.correct })} /> : null}
+          {p.correct > 0 ? <ShareResultButton big={String(p.correct)} line={fmt(p.correct === 1 ? t.scoreOne : t.score, { n: p.correct })} /> : null}
           <StickerButton label={strings.quiz.home} icon="home" tone="ghost" fullWidth onPress={goHome} />
         </ScrollView>
       </SafeAreaView>

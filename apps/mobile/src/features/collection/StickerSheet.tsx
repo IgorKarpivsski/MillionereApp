@@ -43,7 +43,7 @@ export function StickerSheet({
           ) : (
             <>
               <AppText color={colors.textMuted} align="center">
-                {fmt(t.missing, { rarity: rarityColors[item.rarity].label })}
+                {fmt(t.missing, { rarity: rarityColors[item.rarity].labelF })}
               </AppText>
               {cost && lastOne ? (
                 <AppText variant="label" color={colors.led} align="center">
