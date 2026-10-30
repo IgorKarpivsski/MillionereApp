@@ -4,7 +4,8 @@ Input: tools/question-gen/audit/photos.tsv (id, world, url, w, h, question, answ
 Output: data/photo-audit/sheets/sNNN.jpg, data/photo-audit/index.tsv, data/photo-audit/failed.tsv"""
 import concurrent.futures as cf, io, os, sys, time, urllib.request
 from PIL import Image, ImageDraw, ImageFont
-from bidi.algorithm import get_display
+def get_display(s):  # Pillow's raqm layout already orders Hebrew right to left
+    return s
 
 SRC = 'tools/question-gen/audit/photos.tsv'
 OUT = 'data/photo-audit'
