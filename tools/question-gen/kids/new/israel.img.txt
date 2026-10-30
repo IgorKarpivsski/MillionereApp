@@ -1,0 +1,3 @@
+# world: israel
+# format: question | correct | wrong1 | wrong2 | wrong3 | explanation | Hebrew Wikipedia article title whose lead photo shows the correct answer
+איזה אתר בישראל רואים בתמונה? | נמל התעופה בן-גוריון | נמל חיפה | מרכז עזריאלי | התחנה המרכזית החדשה | נמל התעופה בן-גוריון, ליד לוד, הוא שדה התעופה הגדול בישראל. | נמל התעופה בן-גוריון
