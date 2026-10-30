@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { Image, StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, {
   Easing,
   interpolate,
@@ -7,10 +7,14 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
+  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import { useReducedMotion } from '../feedback/reducedMotion';
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const TROPHY = require('../../../assets/images/trophy.webp');
 
 const STAR = 'M0 -1 Q0.12 -0.12 1 0 Q0.12 0.12 0 1 Q-0.12 0.12 -1 0 Q-0.12 -0.12 0 -1 Z';
 const PARTY = ['#FFC93C', '#FF6FB5', '#3DDC84', '#4FC3F7', '#B14CFF', '#FFFFFF'];
@@ -117,3 +121,19 @@ export function Confetti({ count = 60, delay = 300 }: { count?: number; delay?: 
 const styles = StyleSheet.create({
   origin: { position: 'absolute', top: '50%', left: '50%', width: 0, height: 0 },
 });
+
+/** The 3D golden cup (new records, wins). Pops in with a few sparks. */
+export function Trophy3D({ size = 110, burst = true }: { size?: number; burst?: boolean }) {
+  const reduced = useReducedMotion();
+  const s = useSharedValue(reduced ? 1 : 0.4);
+  useEffect(() => {
+    if (!reduced) s.value = withSpring(1, { damping: 7, stiffness: 140 });
+  }, [s, reduced]);
+  const style = useAnimatedStyle(() => ({ transform: [{ scale: s.value }] }));
+  return (
+    <Animated.View style={[{ width: size, height: size, alignSelf: 'center' }, style]}>
+      {burst ? <SparkBurst count={12} radius={size * 0.9} delay={150} colorsList={['#FFC93C', '#FFFFFF', '#FFE08A']} /> : null}
+      <Image source={TROPHY} style={{ width: size, height: size }} resizeMode="contain" accessibilityLabel="גביע" />
+    </Animated.View>
+  );
+}

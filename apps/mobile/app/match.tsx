@@ -6,7 +6,7 @@ import { markModeSeen } from '@/features/settings/store';
 import { ActivityIndicator, BackHandler, Pressable, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { appAlert, AppText, AvatarBadge, Card, Led, Sloth, StickerButton, TrophyLogo, useToast, Backdrop } from '@/design-system/components';
+import { appAlert, AppText, AvatarBadge, Card, Led, Sloth, StickerButton, TrophyLogo, Trophy3D, useToast, Backdrop } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound, preloadSounds } from '@/design-system/feedback/sound';
@@ -53,7 +53,7 @@ function Lobby({ onRoom, initialCode }: { onRoom: (id: string) => void; initialC
 
   return (
     <ScrollView contentContainerStyle={styles.lobby}>
-      <TrophyLogo size={90} />
+      <Trophy3D size={110} burst={false} />
       <AppText variant="title" align="center">
         {t.title}
       </AppText>
@@ -399,7 +399,7 @@ export default function MatchScreen() {
       <SafeAreaView style={styles.root}>
         <Backdrop />
         <ScrollView contentContainerStyle={[styles.center, styles.pad]}>
-          <TrophyLogo size={win ? 120 : 80} color={win ? colors.led : colors.border} />
+          {win ? <Trophy3D size={130} /> : <TrophyLogo size={80} color={colors.border} />}
           <AppText variant="title" align="center">
             {draw ? t.draw : win ? t.win : fmt(t.lose, { name: showName(s.opponent?.username) ?? '' })}
           </AppText>

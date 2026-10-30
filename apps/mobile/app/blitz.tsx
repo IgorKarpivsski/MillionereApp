@@ -6,7 +6,7 @@ import { markModeSeen } from '@/features/settings/store';
 import { ActivityIndicator, BackHandler, Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { appAlert, AppText, Backdrop, EmptyState, Led, Sloth, StickerButton, TrophyLogo } from '@/design-system/components';
+import { appAlert, AppText, Backdrop, EmptyState, Led, Sloth, StickerButton, Trophy3D, Confetti } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound, preloadSounds } from '@/design-system/feedback/sound';
@@ -255,11 +255,12 @@ export default function BlitzScreen() {
     return (
       <SafeAreaView style={styles.root}>
         <Backdrop accent={p.new_best ? '#FFB000' : undefined} />
+        {p.new_best ? <Confetti /> : null}
         <ScrollView contentContainerStyle={[styles.intro, styles.grow]}>
           <AppText variant="title" align="center">
             {t.timeUp}
           </AppText>
-          {p.new_best ? <TrophyLogo size={96} /> : null}
+          {p.new_best ? <Trophy3D size={120} /> : null}
           <View ref={scoreRef} collapsable={false} style={styles.scoreBox}>
             <Animated.View entering={reduced ? undefined : ZoomIn.delay(150).springify()}>
               <Led size="ledXL">{String(p.correct)}</Led>

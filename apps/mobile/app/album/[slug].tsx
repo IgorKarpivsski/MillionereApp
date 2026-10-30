@@ -24,8 +24,7 @@ import {
   ProgressBar,
   Skeleton,
   StickerButton,
-  useToast,
-} from '@/design-system/components';
+  useToast, Confetti } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound } from '@/design-system/feedback/sound';
@@ -54,6 +53,8 @@ export default function AlbumScreen() {
   const [listH, setListH] = useState(0);
   const [page, setPage] = useState(0);
   const [openId, setOpenId] = useState<string | null>(null);
+  // a completed album rains confetti
+  const [party, setParty] = useState(0);
 
   const album = data?.albums.find((a) => a.slug === slug);
   const items = useMemo(
@@ -110,6 +111,7 @@ export default function AlbumScreen() {
     claim.mutate(a.slug, {
       onSuccess: () => {
         playSound('level_up');
+        setParty((n) => n + 1);
         toast(t.claimed, 'success');
       },
       onError: () => toast(strings.errors.generic, 'error'),
@@ -264,6 +266,7 @@ export default function AlbumScreen() {
         </>
       ) : null}
 
+      {party ? <Confetti key={party} count={80} delay={0} /> : null}
       <StickerSheet
         item={open}
         dust={data?.dust ?? 0}
