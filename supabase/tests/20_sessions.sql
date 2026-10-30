@@ -1,5 +1,7 @@
 -- Knowledge worlds: sessions, stars, level path, 50:50, timeouts, quick play.
 begin;
+-- only the fixed picture slots here (the random picture share is tested in 33_pictures)
+update public.app_config set value = '0'::jsonb where key = 'questions.image_share';
 
 do $$
 declare i int; qid text; w text;
