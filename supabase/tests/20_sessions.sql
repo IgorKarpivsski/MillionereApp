@@ -72,6 +72,10 @@ begin
     if i > 1 then p := public.session_next(run); end if;
     perform test.assert(not (p -> 'question' ->> 'id' = any (seen)), 'no repeats in a session');
     seen := seen || (p -> 'question' ->> 'id');
+    if i in (3, 7) then
+      perform test.assert(p -> 'question' -> 'image' is not null and jsonb_typeof(p -> 'question' -> 'image') = 'object',
+                          'picture slot ' || i || ' serves a picture question');
+    end if;
     r := public.session_answer(run, i, case when i <= 7 then test.cslot(run) else (test.cslot(run) + 1) % 4 end);
     if i <= 7 then
       perform test.assert(r ->> 'result' = 'correct' and (r ->> 'points')::int >= 100, 'correct scores points');
