@@ -20,3 +20,4 @@ export * from './Sloth';
 export * from './TitleTag';
 export * from './PlayerName';
 export * from './AppAlert';
+export * from './Celebrate';

@@ -60,6 +60,17 @@ export const QuestionPhoto = memo(function QuestionPhoto({ image, height: fixed 
   );
 });
 
+/** The photographers of a picture-answer question, in one line (their licenses ask for credit). */
+export function PhotoCredits({ answers }: { answers: { image?: Extract<QImage, { kind: 'photo' }> | null }[] }) {
+  const names = [...new Set(answers.map((a) => a.image?.credit.split(' · ')[0]).filter((x): x is string => !!x))];
+  if (!names.length) return null;
+  return (
+    <AppText variant="caption" color={colors.textDim} numberOfLines={1} align="center" style={styles.credit}>
+      {`📷 ${names.join(' · ')} · ויקישיתוף`}
+    </AppText>
+  );
+}
+
 export function QuestionImageView({ image }: { image: QImage }) {
   return image.kind === 'map' ? <QuestionMap image={image} /> : <QuestionPhoto image={image} />;
 }

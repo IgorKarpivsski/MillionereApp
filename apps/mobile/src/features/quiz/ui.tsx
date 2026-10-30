@@ -1,14 +1,18 @@
 import { Ionicons } from '@expo/vector-icons';
-import type { ComponentProps } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
-import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
-import { AppText, Led } from '@/design-system/components';
+import { type ComponentProps, useEffect } from 'react';
+import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
+import type { QuestionPhoto } from '@fm/shared';
+import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming, ZoomIn } from 'react-native-reanimated';
+import { AppText, Led, SparkBurst } from '@/design-system/components';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { colors, radius, space } from '@/design-system/tokens';
 
 /* ------------------------------------------------------------------ */
 /* Answer tile                                                         */
 /* ------------------------------------------------------------------ */
+
+/** Wikimedia asks apps that load its files to identify themselves. */
+const PHOTO_UA = 'HaAlufTrivia/1.0 (Android; https://github.com/IgorKarpivsski/MillionereApp)';
 
 export type AnswerState =
   | 'idle'
@@ -41,8 +45,11 @@ export function AnswerTile({
   disabled,
   onPress,
   fill = false,
+  image,
 }: {
   fill?: boolean;
+  /** a picture answer: the photo is the answer; its name shows only once the answer is revealed */
+  image?: QuestionPhoto | null;
   index: number;
   text: string;
   state: AnswerState;
@@ -54,11 +61,29 @@ export function AnswerTile({
   const reduced = useReducedMotion();
   const l = look[state];
   const hidden = state === 'removed';
+  // the verdict moves: a right pick pops, a wrong pick shakes
+  const scale = useSharedValue(1);
+  const shake = useSharedValue(0);
+  useEffect(() => {
+    if (reduced) return;
+    if (state === 'correctPicked') scale.value = withSequence(withSpring(1.08, { damping: 6, stiffness: 300 }), withSpring(1));
+    if (state === 'wrongPicked') {
+      shake.value = withSequence(
+        withTiming(-10, { duration: 50 }),
+        withTiming(10, { duration: 70 }),
+        withTiming(-7, { duration: 60 }),
+        withTiming(5, { duration: 60 }),
+        withTiming(0, { duration: 50 }),
+      );
+    }
+  }, [state, reduced, scale, shake]);
+  const motion = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }, { translateX: shake.value }] }));
   return (
     <Animated.View
       entering={reduced ? undefined : FadeInDown.delay(80 + index * 70).springify().damping(16)}
-      style={fill ? styles.fill : styles.tileWrap}
+      style={[fill ? styles.fill : styles.tileWrap, motion]}
     >
+      {state === 'correctPicked' ? <SparkBurst count={12} radius={110} /> : null}
       <Pressable
         onPress={onPress}
         disabled={disabled || hidden || state === 'overturned'}
@@ -66,19 +91,41 @@ export function AnswerTile({
         accessibilityLabel={
           hidden
             ? 'תשובה שהוסרה'
-            : `תשובה ${index + 1}: ${text}${
+            : `תשובה ${index + 1}: ${image && state === 'idle' ? 'תמונה' : text}${
                 state === 'correctPicked' ? ', נכון!' : state === 'correctMissed' ? ', זו התשובה הנכונה' : state === 'wrongPicked' ? ', לא נכון' : state === 'overturned' ? ', נפסלה' : ''
               }`
         }
         accessibilityState={{ disabled: disabled || hidden, selected: state === 'picked' }}
         style={({ pressed }) => [
           styles.tile,
-          fill && styles.tileRow,
+          fill && !image && styles.tileRow,
+          image ? styles.picTile : null,
           { backgroundColor: l.bg, borderColor: l.border, borderWidth: l.bw, opacity: l.opacity },
           pressed && !disabled ? styles.pressed : null,
         ]}
       >
-        {hidden ? null : (
+        {hidden ? null : image ? (
+          <>
+            <View style={styles.picFrame}>
+              <Image source={{ uri: image.url, headers: { 'User-Agent': PHOTO_UA } }} style={StyleSheet.absoluteFill} resizeMode="cover" blurRadius={14} accessible={false} />
+              <Image source={{ uri: image.url, headers: { 'User-Agent': PHOTO_UA } }} style={StyleSheet.absoluteFill} resizeMode="contain" accessible={false} />
+            </View>
+            <View style={[styles.numBadge, styles.numOnPic, { borderColor: l.border }]}>
+              <AppText variant="caption" color={l.text} style={styles.numText}>
+                {index + 1}
+              </AppText>
+            </View>
+            {state === 'correctPicked' || state === 'correctMissed' || state === 'wrongPicked' || state === 'dim' ? (
+              <Animated.View entering={reduced ? undefined : FadeInDown} style={styles.picName}>
+                {state === 'wrongPicked' ? <Ionicons name="close-circle" size={18} color={colors.danger} /> : null}
+                {state === 'correctPicked' || state === 'correctMissed' ? <Ionicons name="checkmark-circle" size={18} color={colors.correct} /> : null}
+                <AppText variant="caption" color={colors.text} numberOfLines={1} style={styles.numText}>
+                  {text}
+                </AppText>
+              </Animated.View>
+            ) : null}
+          </>
+        ) : (
           <>
             <View style={[styles.numBadge, { borderColor: l.border }]}>
               <AppText variant="caption" color={l.text} style={styles.numText}>
@@ -169,6 +216,24 @@ export function LifelineButton({
 
 const styles = StyleSheet.create({
   tileWrap: { width: '48.5%' },
+  picTile: { padding: 3, minHeight: 0, aspectRatio: 1.25, overflow: 'hidden' },
+  picFrame: { ...StyleSheet.absoluteFillObject, margin: 3, borderRadius: radius.control - 3, overflow: 'hidden', backgroundColor: '#1B1240' },
+  numOnPic: { backgroundColor: 'rgba(14,8,38,0.75)' },
+  picName: {
+    position: 'absolute',
+    bottom: 3,
+    start: 3,
+    end: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 6,
+    borderBottomLeftRadius: radius.control - 3,
+    borderBottomRightRadius: radius.control - 3,
+    backgroundColor: 'rgba(14,8,38,0.82)',
+  },
   fill: { width: '100%' },
   tile: {
     minHeight: 88,

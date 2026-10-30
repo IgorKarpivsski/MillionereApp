@@ -564,6 +564,7 @@ export default function QuizScreen() {
                 key={`${q.id}-${a.slot}`}
                 index={i}
                 text={a.text}
+                image={a.image}
                 state={stateFor(a.slot)}
                 fansPct={fans ? fans[a.slot] : undefined}
                 expertPick={expert?.slot === a.slot && !reveal}

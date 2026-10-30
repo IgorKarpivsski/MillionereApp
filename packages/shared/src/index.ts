@@ -134,6 +134,7 @@ export const QuestionPhotoSchema = z.object({
 });
 export const QuestionImageSchema = z.discriminatedUnion('kind', [QuestionMapImageSchema, QuestionPhotoSchema]);
 export type QuestionImage = z.infer<typeof QuestionImageSchema>;
+export type QuestionPhoto = z.infer<typeof QuestionPhotoSchema>;
 
 export const QuizQuestionSchema = z.object({
   id: z.string(),
@@ -142,7 +143,8 @@ export const QuizQuestionSchema = z.object({
   category: z.string(),
   category_name: z.string().nullable(),
   difficulty: z.enum(['easy', 'medium', 'hard', 'expert', 'legendary']),
-  answers: z.array(z.object({ slot: SlotSchema, text: z.string() })).length(4),
+  /** a picture answer carries its photo ("find the right picture"); its text is shown after the answer */
+  answers: z.array(z.object({ slot: SlotSchema, text: z.string(), image: QuestionPhotoSchema.nullable().optional() })).length(4),
   removed: z.array(SlotSchema),
   wrong_slots: z.array(SlotSchema),
   var_armed: z.boolean(),

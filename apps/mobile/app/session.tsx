@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, BackHandler, Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeInUp, ZoomIn, useAnimatedStyle, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { appAlert, AppText, BottomSheet, Card, EmptyState, Led, StickerButton, useToast, Backdrop } from '@/design-system/components';
+import { appAlert, AppText, BottomSheet, Card, Confetti, EmptyState, Led, SparkBurst, StickerButton, useToast, Backdrop } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound, preloadSounds } from '@/design-system/feedback/sound';
@@ -16,7 +16,7 @@ import { useEnergySheet } from '@/features/engage/EnergySheet';
 import { useEnergy } from '@/features/engage/hooks';
 import { TomorrowCard } from '@/features/engage/TomorrowCard';
 import { quizApi } from '@/features/quiz/api';
-import { QuestionImageView } from '@/features/quiz/QuestionImage';
+import { PhotoCredits, QuestionImageView } from '@/features/quiz/QuestionImage';
 import { AnswerTile, type AnswerState } from '@/features/quiz/ui';
 import { askForRemindersOnce } from '@/features/reminders/useReminders';
 import { markModeSeen, useSettingsStore } from '@/features/settings/store';
@@ -127,6 +127,7 @@ function BigStar({ lit, delay, size }: { lit: boolean; delay: number; size: numb
   }, [lit, delay]);
   return (
     <Animated.View entering={reduced ? undefined : ZoomIn.delay(delay).springify().damping(8)}>
+      {lit ? <SparkBurst count={9} radius={size * 1.1} delay={delay + 120} colorsList={['#FFC93C', '#FFFFFF', '#FFE08A']} /> : null}
       <Ionicons name="star" size={size} color={lit ? colors.led : palette.night600} />
     </Animated.View>
   );
@@ -222,6 +223,7 @@ function ResultView({
   return (
     <ScrollView contentContainerStyle={styles.result}>
       <LinearGradient colors={[shade(color, -0.2) + 'CC', shade(color, -0.5) + '00']} style={styles.resultGlow} />
+      {sum.stars === 3 || sum.correct === sum.total || sum.leveled_up ? <Confetti /> : null}
       <View style={styles.starsRow}>
         <BigStar lit={sum.stars >= 1} delay={250} size={64} />
         <View style={styles.starMid}>
@@ -499,7 +501,8 @@ export default function SessionScreen() {
   const rung = s.payload.rung;
   const answering = s.phase === 'question';
   // photo questions and small phones: 2x2 answers take less height
-  const compact = !!q.image || screenH < 760;
+  const picAnswers = q.answers.some((a) => !!a.image);
+  const compact = !!q.image || picAnswers || screenH < 760;
   const reveal = s.reveal;
   const used5050 = s.payload.lifelines_used.filter((x) => x === '5050').length;
   const correctSoFar = s.results.filter(Boolean).length;
@@ -637,6 +640,7 @@ export default function SessionScreen() {
                 key={`${q.id}-${a.slot}`}
                 index={i}
                 text={a.text}
+                image={a.image}
                 state={stateFor(a.slot)}
                 disabled={!answering}
                 expertPick={friendPick?.slot === a.slot}
@@ -645,6 +649,7 @@ export default function SessionScreen() {
               />
             ))}
           </View>
+          {picAnswers ? <PhotoCredits answers={q.answers} /> : null}
       </View>
 
       <View style={styles.footer}>
