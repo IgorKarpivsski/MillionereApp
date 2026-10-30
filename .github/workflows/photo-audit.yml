@@ -1,0 +1,32 @@
+name: Photo audit sheets
+
+# Downloads every picture question's photo and renders review sheets for a manual check.
+# Commits data/photo-audit/* back to the photo-audit branch.
+on:
+  workflow_dispatch:
+  push:
+    branches: [photo-audit]
+    paths: ['tools/question-gen/audit/**', '.github/workflows/photo-audit.yml']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: photo-audit
+  cancel-in-progress: false
+
+jobs:
+  sheets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pillow python-bidi
+      - run: python3 tools/question-gen/audit/audit_sheets.py
+      - name: Commit sheets
+        run: |
+          git config user.name "football-data-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/photo-audit
+          git commit -m "photo audit $(date -u +%Y-%m-%dT%H:%MZ)" || echo "no changes"
+          git pull --rebase && git push
