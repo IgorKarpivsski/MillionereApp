@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-20T03:04:52.016Z",
+  "checked_at": "2026-11-01T19:53:33.488Z",
   "package": "com.haaluf.trivia",
   "tracks": [
     {
@@ -14,7 +14,7 @@
         {
           "name": "0.1.0",
           "versionCodes": [
-            "16"
+            "23"
           ],
           "status": "completed",
           "inAppUpdatePriority": 2
