@@ -35,21 +35,17 @@ adb logcat -c
 adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 >/dev/null
 sleep 50
 adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1
-# sign-up: age, skip "about", first suggested name, first game
-shot 00_age
+# sign-up (same steps as ui-session.sh): age, then leave the automatic first game
+shot 00_launch
 tap 540 2200; sleep 4
+swipe 540 1500 540 1180; sleep 3
 tap 540 2200; sleep 4
-tap 540 1250; sleep 2
-tap 540 2200; sleep 10; shot 01_first_game
-for q in 1 2 3 4 5 6 7 8 9 10; do
-  tap 540 1700; sleep 4
-  [ $q -eq 3 ] && shot 02_game_reveal
-  tap 540 2160; sleep 4
-done
-sleep 4; shot 03_game_result
-back; sleep 4
-for i in 1 2 3 4 5 6; do tap 540 2200; sleep 2; done
-shot 04_home
+shot 01_after_age
+tap 110 150; sleep 4
+tap 110 150; sleep 8
+shot 02_first_game_or_home
+tap_text 'צא' && sleep 4
+go ""; sleep 3; shot 04_home
 
 go "session?world=nature&level=1"; sleep 4; shot 10_session_q1
 tap 540 1700; sleep 4; shot 11_session_reveal
