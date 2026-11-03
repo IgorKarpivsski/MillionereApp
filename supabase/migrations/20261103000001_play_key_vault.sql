@@ -23,12 +23,14 @@ $$;
 
 create or replace function public.play_key_get()
 returns text
-language sql
+language plpgsql
 stable
 security definer
 set search_path = ''
 as $$
-  select decrypted_secret from vault.decrypted_secrets where name = 'google_play_service_account' limit 1;
+begin
+  return (select decrypted_secret from vault.decrypted_secrets where name = 'google_play_service_account' limit 1);
+end;
 $$;
 
 revoke all on function public.play_key_store(text) from public, anon, authenticated;
