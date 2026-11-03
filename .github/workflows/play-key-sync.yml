@@ -1,0 +1,43 @@
+name: Play key sync
+
+# Delivers the Google Play service-account key (encrypted in the repo) to Supabase Vault through
+# the play-key-ingest Edge Function, so purchase verification works. The key goes straight from
+# this runner to Supabase. The token input is single-use: the function disables it after the run,
+# and it only accepts the expected service account after checking that the key works for the app.
+on:
+  workflow_dispatch:
+    inputs:
+      token:
+        description: One-time ingest token
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unlock the Play key
+        env:
+          PW: ${{ secrets.UPLOAD_KEY_PASSWORD }}
+        run: |
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
+            -in apps/mobile/signing/play-service-account.json.enc -out "$RUNNER_TEMP/play.json" -pass env:PW
+      - name: Send to Supabase
+        env:
+          TOKEN: ${{ inputs.token }}
+        run: |
+          set -a; . apps/mobile/public-config.env; set +a
+          jq -n --arg token "$TOKEN" --rawfile key "$RUNNER_TEMP/play.json" '{token: $token, key: $key}' > "$RUNNER_TEMP/body.json"
+          code=$(curl -s -o "$RUNNER_TEMP/out.json" -w '%{http_code}' -X POST \
+            "$SUPABASE_URL/functions/v1/play-key-ingest" \
+            -H "apikey: $SUPABASE_ANON_KEY" -H 'Content-Type: application/json' \
+            --data-binary @"$RUNNER_TEMP/body.json")
+          echo "status $code"; cat "$RUNNER_TEMP/out.json"; echo
+          [ "$code" = "200" ]
+      - name: Remove the key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/play.json" "$RUNNER_TEMP/body.json"

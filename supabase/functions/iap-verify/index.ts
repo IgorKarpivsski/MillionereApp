@@ -8,6 +8,8 @@
 // Secrets (Supabase → Edge Functions → Secrets):
 //   GOOGLE_PLAY_SERVICE_ACCOUNT  JSON key of a Play Console service account
 //                                with "View financial data" + "Manage orders".
+//                                Optional: if unset, the key is read from Supabase Vault
+//                                (public.play_key_get, filled by the "Play key sync" workflow).
 //   ANDROID_PACKAGE_NAME         e.g. com.haaluf.trivia
 // Deploy with verify_jwt = true.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
@@ -26,6 +28,17 @@ const b64url = (data: ArrayBuffer | string) => {
   for (const b of bytes) s += String.fromCharCode(b);
   return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 };
+
+let cachedKey: string | null = null;
+// The service-account key: the GOOGLE_PLAY_SERVICE_ACCOUNT secret if set, else Supabase Vault.
+async function playKey(service: ReturnType<typeof createClient>): Promise<string | null> {
+  const env = Deno.env.get('GOOGLE_PLAY_SERVICE_ACCOUNT');
+  if (env) return env;
+  if (cachedKey) return cachedKey;
+  const { data } = await service.rpc('play_key_get');
+  cachedKey = typeof data === 'string' && data ? data : null;
+  return cachedKey;
+}
 
 let cachedToken: { token: string; exp: number } | null = null;
 
@@ -59,12 +72,11 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return json(405, { error: 'method_not_allowed' });
 
-  const saRaw = Deno.env.get('GOOGLE_PLAY_SERVICE_ACCOUNT');
   const pkg = Deno.env.get('ANDROID_PACKAGE_NAME') ?? 'com.haaluf.trivia';
-  if (!saRaw) return json(503, { error: 'store_not_configured' });
-
   const url = Deno.env.get('SUPABASE_URL')!;
   const service = createClient(url, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
+  const saRaw = await playKey(service);
+  if (!saRaw) return json(503, { error: 'store_not_configured' });
   const jwt = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
   const { data: userData, error: userErr } = await service.auth.getUser(jwt);
   if (userErr || !userData.user) return json(401, { error: 'not_authenticated' });

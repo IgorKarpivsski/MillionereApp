@@ -46,13 +46,13 @@ async function googleAccessToken(sa: { client_email: string; private_key: string
 }
 
 Deno.serve(async (req) => {
-  const saRaw = Deno.env.get('GOOGLE_PLAY_SERVICE_ACCOUNT');
   const pkg = Deno.env.get('ANDROID_PACKAGE_NAME') ?? 'com.haaluf.trivia';
   const service = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
 
   const { data: secretRow } = await service.from('app_config').select('value').eq('key', 'ops.cron_secret').maybeSingle();
   const secret = typeof secretRow?.value === 'string' ? secretRow.value : null;
   if (!secret || req.headers.get('x-cron-secret') !== secret) return new Response('forbidden', { status: 403 });
+  const saRaw = Deno.env.get('GOOGLE_PLAY_SERVICE_ACCOUNT') ?? ((await service.rpc('play_key_get')).data as string | null);
   if (!saRaw) return new Response('store not configured', { status: 200 });
 
   const { data: rows, error } = await service.rpc('subs_to_refresh');
