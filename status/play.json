@@ -1,9 +1,24 @@
 {
-  "checked_at": "2026-11-01T19:53:33.488Z",
+  "checked_at": "2026-11-03T03:52:36.463Z",
   "package": "com.haaluf.trivia",
   "tracks": [
     {
-      "track": "production"
+      "track": "production",
+      "releases": [
+        {
+          "name": "0.1.0",
+          "versionCodes": [
+            "23"
+          ],
+          "releaseNotes": [
+            {
+              "language": "iw-IL",
+              "text": "ההשקה הרשמית של טריוויה - האלוף! אלפי שאלות בעברית, מאות שאלות עם תמונות, אתגר יומי, אלבום מדבקות ומשחק מול חברים."
+            }
+          ],
+          "status": "completed"
+        }
+      ]
     },
     {
       "track": "beta"
@@ -35,10 +50,47 @@
     "contactWebsite": "https://igorkarpivsski.github.io",
     "contactEmail": "steamigor26@gmail.com"
   },
-  "subscriptions": {
-    "status": 204,
-    "body": null
-  },
+  "subscriptions": [
+    {
+      "productId": "vip_monthly",
+      "basePlans": [
+        {
+          "id": "monthly",
+          "state": "ACTIVE",
+          "period": "P1M",
+          "grace": "P7D",
+          "resubscribe": "RESUBSCRIBE_STATE_ACTIVE",
+          "prices": [
+            {
+              "currencyCode": "ILS",
+              "units": "14",
+              "nanos": 900000000
+            }
+          ]
+        }
+      ],
+      "listings": [
+        {
+          "lang": "iw-IL",
+          "title": "כרטיס VIP"
+        }
+      ],
+      "offers": [
+        {
+          "id": "free-trial-7d",
+          "basePlan": "monthly",
+          "state": "ACTIVE",
+          "phases": [
+            {
+              "duration": "P7D",
+              "recurrences": 1,
+              "free": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "inapp": {
     "status": 403,
     "body": {
@@ -49,8 +101,42 @@
       }
     }
   },
-  "oneTimeProducts": {
-    "status": 204,
-    "body": null
-  }
+  "oneTimeProducts": [
+    {
+      "id": "coins_16000",
+      "options": [
+        "ACTIVE"
+      ]
+    },
+    {
+      "id": "coins_2000",
+      "options": [
+        "ACTIVE"
+      ]
+    },
+    {
+      "id": "coins_6000",
+      "options": [
+        "ACTIVE"
+      ]
+    },
+    {
+      "id": "gems_300",
+      "options": [
+        "ACTIVE"
+      ]
+    },
+    {
+      "id": "gems_80",
+      "options": [
+        "ACTIVE"
+      ]
+    },
+    {
+      "id": "no_ads",
+      "options": [
+        "ACTIVE"
+      ]
+    }
+  ]
 }
