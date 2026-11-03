@@ -51,11 +51,13 @@ function Hero() {
     return [name ? fmt(hello, { name }) : t.slothHello[2]!, ...h.tips.slice(start), ...h.tips.slice(0, start)];
   }, [name]);
   const [i, setI] = useState(0);
+  // the tip stays put during the guided tour, so the buttons under it don't move while spotlit
+  const touring = useTourStore((st) => st.session !== null);
   useEffect(() => {
-    if (reduced) return;
+    if (reduced || touring) return;
     const id = setInterval(() => setI((x) => (x + 1) % lines.length), 7000);
     return () => clearInterval(id);
-  }, [lines.length, reduced]);
+  }, [lines.length, reduced, touring]);
   return (
     <View style={styles.hero}>
       <LinearGradient colors={['rgba(255,214,140,0.16)', 'rgba(255,255,255,0.02)']} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill} />

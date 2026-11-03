@@ -31,6 +31,7 @@ interface TourStore {
   /** bumps whenever targets should measure themselves again */
   tick: number;
   setTarget: (id: string, r: Rect) => void;
+  removeTarget: (id: string) => void;
   remeasure: () => void;
 }
 
@@ -40,7 +41,20 @@ export const useTourStore = create<TourStore>((set) => ({
   stop: () => set({ session: null }),
   targets: {},
   tick: 0,
-  setTarget: (id, r) => set((s) => ({ targets: { ...s.targets, [id]: r } })),
+  // only store real changes, so the overlay doesn't re-render (and stutter) on every measure
+  setTarget: (id, r) =>
+    set((s) => {
+      const o = s.targets[id];
+      if (o && Math.abs(o.x - r.x) < 1 && Math.abs(o.y - r.y) < 1 && Math.abs(o.w - r.w) < 1 && Math.abs(o.h - r.h) < 1) return s;
+      return { targets: { ...s.targets, [id]: r } };
+    }),
+  removeTarget: (id) =>
+    set((s) => {
+      if (!(id in s.targets)) return s;
+      const rest = { ...s.targets };
+      delete rest[id];
+      return { targets: rest };
+    }),
   remeasure: () => set((s) => ({ tick: s.tick + 1 })),
 }));
 
@@ -48,7 +62,9 @@ export const useTourStore = create<TourStore>((set) => ({
 export function TourTarget({ id, children, style }: { id: string; children: ReactNode; style?: ViewStyle }) {
   const ref = useRef<View>(null);
   const setTarget = useTourStore((s) => s.setTarget);
+  const removeTarget = useTourStore((s) => s.removeTarget);
   const tick = useTourStore((s) => s.tick);
+  const touring = useTourStore((s) => s.session !== null);
   const measure = () =>
     ref.current?.measureInWindow((x, y, w, h) => {
       if (w > 0 && h > 0) setTarget(id, { x, y, w, h });
@@ -58,6 +74,17 @@ export function TourTarget({ id, children, style }: { id: string; children: Reac
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tick]);
+  // While the tour runs, keep following the target: things above it can change height
+  // (the sloth's tip, data loading in) or the screen can scroll, which onLayout doesn't report.
+  useEffect(() => {
+    if (!touring) return;
+    measure();
+    const iv = setInterval(measure, 300);
+    return () => clearInterval(iv);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [touring]);
+  // a target that's gone (unmounted) must not leave a stale spotlight behind
+  useEffect(() => () => removeTarget(id), [id, removeTarget]);
   return (
     <View ref={ref} collapsable={false} onLayout={measure} style={style}>
       {children}
