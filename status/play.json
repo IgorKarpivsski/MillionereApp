@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-03T06:00:10.834Z",
+  "checked_at": "2026-11-03T07:00:08.416Z",
   "package": "com.haaluf.trivia",
   "tracks": [
     {
@@ -42,7 +42,8 @@
   ],
   "testers": {
     "alpha": {},
-    "beta": {}
+    "beta": {},
+    "internal": {}
   },
   "details": {
     "defaultLanguage": "iw-IL",
