@@ -147,7 +147,11 @@ function Tour({
   gender?: 'male' | 'female' | 'other' | null;
   onDone: () => void;
 }) {
-  const { width: W, height: H } = useWindowDimensions();
+  const win = useWindowDimensions();
+  // the overlay's real size (can differ from the window's: navigation bar, edge-to-edge)
+  const [box, setBox] = useState<{ w: number; h: number } | null>(null);
+  const W = box?.w ?? win.width;
+  const H = box?.h ?? win.height;
   const targets = useTourStore((s) => s.targets);
   const remeasure = useTourStore((s) => s.remeasure);
   const reduced = useReducedMotion();
@@ -189,7 +193,18 @@ function Tour({
   // targets are measured in window coordinates; shift them into this overlay's own
   const r = raw && origin ? { ...raw, x: raw.x - origin.x, y: raw.y - origin.y } : undefined;
   const pad = 8;
-  const hole = r ? { x: r.x - pad, y: r.y - pad, w: r.w + pad * 2, h: r.h + pad * 2 } : null;
+  // never let the spotlight run under the tab bar (a long list can reach past it)
+  const tabTops = Object.entries(targets)
+    .filter(([k]) => k.startsWith('tab-'))
+    .map(([, v]) => v.y - (origin?.y ?? 0));
+  const floor = tabTops.length ? Math.min(...tabTops) - 6 : Infinity;
+  const hole = r
+    ? (() => {
+        const y = r.y - pad;
+        const bottom = Math.min(r.y + r.h + pad, floor);
+        return { x: r.x - pad, y, w: r.w + pad * 2, h: Math.max(24, bottom - y) };
+      })()
+    : null;
   const below = hole ? hole.y + hole.h / 2 < H / 2 : false;
   const counter = fmt(t.stepOf, { n: i + 1, total: steps.length });
 
@@ -219,7 +234,11 @@ function Tour({
     <View
       ref={rootRef}
       collapsable={false}
-      onLayout={() => rootRef.current?.measureInWindow((x, y) => setOrigin({ x, y }))}
+      onLayout={(e) => {
+        const { width, height } = e.nativeEvent.layout;
+        setBox({ w: width, h: height });
+        rootRef.current?.measureInWindow((x, y) => setOrigin({ x, y }));
+      }}
       style={styles.root}
     >
       <View style={StyleSheet.absoluteFill}>
@@ -227,9 +246,11 @@ function Tour({
           <>
             {/* four panes around the spotlight */}
             <Pressable onPress={next} style={[styles.dim, { left: 0, top: 0, width: W, height: Math.max(0, hole.y) }]} />
-            <Pressable onPress={next} style={[styles.dim, { left: 0, top: hole.y + hole.h, width: W, height: Math.max(0, H - hole.y - hole.h) }]} />
+            {/* bottom and right panes run to the overlay's own edges: the window size can be
+                smaller than the screen (navigation bar), which left the tab bar undimmed */}
+            <Pressable onPress={next} style={[styles.dim, { left: 0, right: 0, top: hole.y + hole.h, bottom: 0 }]} />
             <Pressable onPress={next} style={[styles.dim, { left: 0, top: hole.y, width: Math.max(0, hole.x), height: hole.h }]} />
-            <Pressable onPress={next} style={[styles.dim, { left: hole.x + hole.w, top: hole.y, width: Math.max(0, W - hole.x - hole.w), height: hole.h }]} />
+            <Pressable onPress={next} style={[styles.dim, { left: hole.x + hole.w, right: 0, top: hole.y, height: hole.h }]} />
             {/* the spotlit thing itself isn't pressable during the tour */}
             <Pressable onPress={next} style={{ position: 'absolute', left: hole.x, top: hole.y, width: hole.w, height: hole.h }} />
             <Animated.View
