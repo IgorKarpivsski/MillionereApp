@@ -47,8 +47,8 @@ tap_text 'צא' && sleep 4
 go ""; sleep 2; shot 04_home
 
 for i in 1 2 3 4 5; do
-  sleep 9; shot "10_tour_$i"
-  tap_text 'הבא' || tap_text 'סיום' || true
+  sleep 5; shot "10_tour_$i"
+  tap 540 260
 done
 sleep 4; shot 19_after_tour
 adb logcat -d -s ReactNativeJS:* AndroidRuntime:E > shots/logcat.txt 2>/dev/null || true
