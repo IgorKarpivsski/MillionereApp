@@ -17,7 +17,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: IS_PROD ? APP_NAME : `${APP_NAME} (dev)`,
   slug: 'football-millionaire',
   scheme: 'footballmillionaire',
-  version: '0.1.1',
+  version: '0.1.2',
   orientation: 'portrait',
   icon: './assets/images/icon.png',
   userInterfaceStyle: 'dark',
