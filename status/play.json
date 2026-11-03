@@ -1,19 +1,19 @@
 {
-  "checked_at": "2026-11-03T03:52:36.463Z",
+  "checked_at": "2026-11-03T06:00:10.834Z",
   "package": "com.haaluf.trivia",
   "tracks": [
     {
       "track": "production",
       "releases": [
         {
-          "name": "0.1.0",
+          "name": "24 (0.1.1)",
           "versionCodes": [
-            "23"
+            "24"
           ],
           "releaseNotes": [
             {
               "language": "iw-IL",
-              "text": "ההשקה הרשמית של טריוויה - האלוף! אלפי שאלות בעברית, מאות שאלות עם תמונות, אתגר יומי, אלבום מדבקות ומשחק מול חברים."
+              "text": "הגרסה הראשונה של טריוויה - האלוף! אלפי שאלות טריוויה בעברית, אלבומי מדבקות, משחק מול חברים וליגה שבועית."
             }
           ],
           "status": "completed"
@@ -27,9 +27,9 @@
       "track": "alpha",
       "releases": [
         {
-          "name": "0.1.0",
+          "name": "0.1.1",
           "versionCodes": [
-            "23"
+            "24"
           ],
           "status": "completed",
           "inAppUpdatePriority": 2
@@ -42,8 +42,7 @@
   ],
   "testers": {
     "alpha": {},
-    "beta": {},
-    "internal": {}
+    "beta": {}
   },
   "details": {
     "defaultLanguage": "iw-IL",
