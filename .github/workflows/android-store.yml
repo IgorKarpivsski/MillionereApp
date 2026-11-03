@@ -14,6 +14,11 @@ on:
         description: 'Send the bundle straight to Google Play closed testing (Alpha)'
         type: boolean
         default: true
+      track:
+        description: 'Google Play track (alpha = closed testing, production = the store; production goes to review)'
+        type: choice
+        options: [alpha, production]
+        default: alpha
 
 permissions:
   contents: write
@@ -108,14 +113,14 @@ jobs:
             -in apps/mobile/signing/play-service-account.json.enc -out "$RUNNER_TEMP/play.json" -pass env:PW
           echo "ok=true" >> "$GITHUB_OUTPUT"
 
-      - name: Send to Google Play (closed testing)
+      - name: Send to Google Play
         if: steps.play.outputs.ok == 'true'
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: ${{ runner.temp }}/play.json
           packageName: com.haaluf.trivia
           releaseFiles: out/*.aab
-          tracks: alpha
+          tracks: ${{ inputs.track || 'alpha' }}
           status: completed
           inAppUpdatePriority: 2
 

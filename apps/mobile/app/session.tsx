@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { ReportReason } from '@fm/shared';
 import { router, useLocalSearchParams } from 'expo-router';
-import * as StoreReview from 'expo-store-review';
+import { maybeAskForRating } from '@/features/engage/RatePrompt';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, BackHandler, Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
@@ -207,16 +207,7 @@ function ResultView({
       return () => clearTimeout(id);
     }
     if (sum.correct < 7 || st.reviewAsked) return;
-    const id = setTimeout(async () => {
-      try {
-        if (await StoreReview.isAvailableAsync()) {
-          useSettingsStore.getState().set({ reviewAsked: true });
-          await StoreReview.requestReview();
-        }
-      } catch {
-        // ignore
-      }
-    }, 2200);
+    const id = setTimeout(maybeAskForRating, 2200);
     return () => clearTimeout(id);
   }, [sum.correct]);
   const title = quick ? t.quickDone : sum.stars === 3 ? t.perfect : sum.stars > 0 ? t.passed : t.failed;

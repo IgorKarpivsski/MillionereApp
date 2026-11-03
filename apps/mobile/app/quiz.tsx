@@ -7,7 +7,7 @@ import type { DailyStatus, LifelineKind, ReportReason } from '@fm/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, BackHandler, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
-import * as StoreReview from 'expo-store-review';
+import { maybeAskForRating } from '@/features/engage/RatePrompt';
 import { askForRemindersOnce } from '@/features/reminders/useReminders';
 import { gameFinished } from '@/features/store/interstitial';
 import { markModeSeen, useSettingsStore } from '@/features/settings/store';
@@ -149,16 +149,7 @@ function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => voi
     void askForRemindersOnce();
     const good = daily ? sum.correct >= 7 : sum.correct >= 6;
     if (!good || useSettingsStore.getState().reviewAsked) return;
-    const id = setTimeout(async () => {
-      try {
-        if (await StoreReview.isAvailableAsync()) {
-          useSettingsStore.getState().set({ reviewAsked: true });
-          await StoreReview.requestReview();
-        }
-      } catch {
-        // ignore
-      }
-    }, 1800);
+    const id = setTimeout(maybeAskForRating, 1800);
     return () => clearTimeout(id);
   }, [daily, sum.correct]);
   const shareResult = () =>

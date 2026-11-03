@@ -3,6 +3,7 @@ import * as Application from 'expo-application';
 import { router } from 'expo-router';
 import type React from 'react';
 import { useState } from 'react';
+import { openStorePage } from '@/features/engage/RatePrompt';
 import { Linking, Pressable, StyleSheet, Switch, View } from 'react-native';
 import { appAlert, AppText, Card, Screen, StickerButton, useToast } from '@/design-system/components';
 import { colors, palette, space } from '@/design-system/tokens';
@@ -191,6 +192,7 @@ export default function SettingsScreen() {
         <LinkRow label={t.terms} onPress={() => router.push('/legal/terms')} />
         <LinkRow icon="lock-closed" label={t.privacy} onPress={() => router.push('/legal/privacy')} />
         <LinkRow icon="mail" label={t.support} onPress={() => void Linking.openURL(`mailto:${brand.supportEmail}`)} />
+        <LinkRow icon="star" label={t.rateUs} onPress={openStorePage} />
       </Card>
 
       <StickerButton

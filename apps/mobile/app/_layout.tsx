@@ -32,6 +32,7 @@ import { PurchaseRecovery } from '@/features/store/PurchaseRecovery';
 import { RewardFlyHost } from '@/features/home/RewardFly';
 import { TourHost } from '@/features/tour/Tour';
 import { RemoveAdsUpsell } from '@/features/store/RemoveAdsUpsell';
+import { RatePromptHost } from '@/features/engage/RatePrompt';
 import { initAds } from '@/features/store/ads';
 import { useBackgroundMusic } from '@/design-system/feedback/music';
 import { EnergySheet } from '@/features/engage/EnergySheet';
@@ -134,6 +135,7 @@ function Gate() {
       <RewardFlyHost />
       <TourHost />
       <RemoveAdsUpsell />
+      <RatePromptHost />
     </>
   );
 }

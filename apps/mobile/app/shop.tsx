@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useIAP, type Purchase } from 'expo-iap';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ParentalGate } from '@/components/ParentalGate';
 import { AppText, Card, CoinIcon, GemIcon, Led, StickerButton, TrophyLogo, useToast, Backdrop } from '@/design-system/components';
@@ -20,6 +20,7 @@ import { useDeals } from '@/features/engage/hooks';
 import { formatNumber } from '@/lib/format';
 import { queryKeys } from '@/lib/queryClient';
 import { fmt, strings } from '@/lib/i18n';
+import { brand } from '@/lib/brand';
 
 const t = strings.store;
 const dateHe = (iso: string) => new Date(iso).toLocaleDateString('he-IL', { day: 'numeric', month: 'long' });
@@ -43,7 +44,7 @@ export default function ShopScreen() {
         for (const k of [queryKeys.store, queryKeys.myState]) void qc.invalidateQueries({ queryKey: k });
       } catch {
         // Not finishing lets Google refund automatically if we couldn't verify within 3 days.
-        toast(t.verifyFailed, 'error');
+        toast(fmt(t.verifyFailed, { email: brand.supportEmail }), 'error');
       } finally {
         setBuying(null);
       }
@@ -243,6 +244,19 @@ export default function ShopScreen() {
           </AppText>
         ) : null}
         <StickerButton label={t.restore} icon="refresh" tone="ghost" size="sm" loading={restoring} onPress={() => void restore()} />
+        <Card>
+          <AppText variant="label">{t.supportTitle}</AppText>
+          <AppText variant="caption" color={colors.textMuted} style={styles.supportBody}>
+            {fmt(t.supportBody, { email: brand.supportEmail })}
+          </AppText>
+          <StickerButton
+            label={t.supportCta}
+            icon="mail"
+            tone="ghost"
+            size="sm"
+            onPress={() => void Linking.openURL(`mailto:${brand.supportEmail}?subject=${encodeURIComponent('בעיה ברכישה - טריוויה האלוף')}`)}
+          />
+        </Card>
         <AppText variant="caption" color={colors.textDim} align="center">
           {t.legal}
         </AppText>
@@ -264,6 +278,7 @@ export default function ShopScreen() {
 }
 
 const styles = StyleSheet.create({
+  supportBody: { marginVertical: space.sm },
   root: { flex: 1, backgroundColor: colors.bgDeep },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: space.lg, paddingTop: space.sm },
   body: { padding: space.lg, gap: space.md },

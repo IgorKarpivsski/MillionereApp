@@ -22,7 +22,14 @@ interface SettingsState {
   remindersAsked: boolean;
   /** Last league week whose result popup was shown. */
   leagueSeenWeek: string | null;
+  /** The rating popup is done for good (rated, or asked twice). Device-only. */
   reviewAsked: boolean;
+  /** "Later" on the rating popup: don't ask again before this time (ms). Device-only. */
+  rateNextAt: number | null;
+  /** How many times the rating popup was shown. Device-only. */
+  rateShown: number;
+  /** Good results so far (the rating popup waits for a few). Device-only. */
+  rateGood: number;
   /** Age band from the neutral age screen (null = not asked yet → treated as a child). Device-only. */
   ageBand: 'under13' | '13to15' | '16plus' | null;
   /** The first-run screens (notifications, age, about you, nickname) are done. Device-only. */
@@ -52,6 +59,9 @@ export const useSettingsStore = create<SettingsState>()(
       remindersAsked: false,
       leagueSeenWeek: null,
       reviewAsked: false,
+      rateNextAt: null,
+      rateShown: 0,
+      rateGood: 0,
       ageBand: null,
       onboarded: false,
       tourDone: false,
@@ -75,7 +85,7 @@ export const useSettingsStore = create<SettingsState>()(
         }
         return p as unknown as SettingsState;
       },
-      partialize: ({ sound, music, haptics, reducedMotion, largeText, extendedTime, reminders, remindersAsked, leagueSeenWeek, reviewAsked, ageBand, onboarded, tourDone, seenModes, currencyHelpSeen, tomorrowDay }) => ({
+      partialize: ({ sound, music, haptics, reducedMotion, largeText, extendedTime, reminders, remindersAsked, leagueSeenWeek, reviewAsked, rateNextAt, rateShown, rateGood, ageBand, onboarded, tourDone, seenModes, currencyHelpSeen, tomorrowDay }) => ({
         sound,
         music,
         haptics,
@@ -86,6 +96,9 @@ export const useSettingsStore = create<SettingsState>()(
         remindersAsked,
         leagueSeenWeek,
         reviewAsked,
+        rateNextAt,
+        rateShown,
+        rateGood,
         ageBand,
         onboarded,
         tourDone,
