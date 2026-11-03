@@ -21,6 +21,7 @@ import { formatNumber } from '@/lib/format';
 import { queryKeys } from '@/lib/queryClient';
 import { fmt, strings } from '@/lib/i18n';
 import { brand } from '@/lib/brand';
+import { useSettingsStore } from '@/features/settings/store';
 
 const t = strings.store;
 const dateHe = (iso: string) => new Date(iso).toLocaleDateString('he-IL', { day: 'numeric', month: 'long' });
@@ -145,7 +146,8 @@ export default function ShopScreen() {
             tone={owned ? 'ghost' : 'primary'}
             disabled={owned || !price || !!buying}
             loading={buying === p.sku}
-            onPress={() => setGateFor(p)}
+            // Grown-ups (16+ on the age screen) buy straight away; younger players ask a parent first.
+            onPress={() => (useSettingsStore.getState().ageBand === '16plus' ? void buy(p) : setGateFor(p))}
           />
         </View>
       </Card>
