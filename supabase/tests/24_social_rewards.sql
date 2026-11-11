@@ -1,6 +1,8 @@
 -- Photos for everyone, online friends, gifts, multi-sticker trades, quick head-to-head,
 -- family invites + play again, combo points, perfect prize, double points, monthly table.
 begin;
+-- the random surprise chest has its own test (34_answer_rewards)
+update public.app_config set value = value - 'mid_chest' where key = 'session.rewards';
 
 do $$
 declare i int; qid text;

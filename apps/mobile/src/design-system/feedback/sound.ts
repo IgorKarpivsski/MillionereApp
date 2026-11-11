@@ -20,7 +20,12 @@ export type SoundCue =
   | 'level_up'
   | 'pick'
   | 'place'
-  | 'solved';
+  | 'solved'
+  | 'combo_2'
+  | 'combo_3'
+  | 'combo_4'
+  | 'combo_5'
+  | 'chest_open';
 
 const SOURCES: Record<SoundCue, number> = {
   tap: require('../../../assets/sounds/tap.wav'),
@@ -37,6 +42,11 @@ const SOURCES: Record<SoundCue, number> = {
   pick: require('../../../assets/sounds/pick.wav'),
   place: require('../../../assets/sounds/place.wav'),
   solved: require('../../../assets/sounds/solved.wav'),
+  combo_2: require('../../../assets/sounds/combo_2.wav'),
+  combo_3: require('../../../assets/sounds/combo_3.wav'),
+  combo_4: require('../../../assets/sounds/combo_4.wav'),
+  combo_5: require('../../../assets/sounds/combo_5.wav'),
+  chest_open: require('../../../assets/sounds/chest_open.wav'),
 };
 
 const players: Partial<Record<SoundCue, AudioPlayer>> = {};

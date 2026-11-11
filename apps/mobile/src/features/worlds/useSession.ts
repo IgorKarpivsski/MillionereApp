@@ -1,4 +1,4 @@
-import type { BoostKind, SessionPayload, SessionSummary } from '@fm/shared';
+import type { BoostKind, Reward, SessionPayload, SessionSummary } from '@fm/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { haptic } from '@/design-system/feedback/haptics';
@@ -21,6 +21,10 @@ export interface SessionReveal {
   combo: number;
   comboBonus: number;
   shielded: boolean;
+  /** coins this answer added to the run */
+  coins: number;
+  /** a surprise chest opened by this answer */
+  midChest: Reward | null;
 }
 
 export interface SessionState {
@@ -29,6 +33,8 @@ export interface SessionState {
   /** Per-question outcome so far (true = right), for the progress dots. */
   results: boolean[];
   score: number;
+  /** coins earned in this run so far (shown live; paid at the end) */
+  runCoins: number;
   picked: number | null;
   reveal: SessionReveal | null;
   summary: SessionSummary | null;
@@ -44,6 +50,7 @@ const initial: SessionState = {
   payload: null,
   results: [],
   score: 0,
+  runCoins: 0,
   picked: null,
   reveal: null,
   summary: null,
@@ -64,6 +71,15 @@ function withQuestion(s: SessionState, p: SessionPayload): SessionState {
     deadlineAt: p.question ? Date.now() + p.question.seconds_left * 1000 : null,
     notice: null,
   };
+}
+
+/** The "ding" climbs with every right answer in a row. */
+function comboCue(combo: number) {
+  if (combo >= 5) return 'combo_5' as const;
+  if (combo === 4) return 'combo_4' as const;
+  if (combo === 3) return 'combo_3' as const;
+  if (combo === 2) return 'combo_2' as const;
+  return 'answer_correct' as const;
 }
 
 /** Drives one session (10 questions). The server decides correctness, points and rewards. */
@@ -140,14 +156,27 @@ export function useSession(world: string, level: number | null, resumeRun?: stri
           const good = r.result === 'correct';
           const summary = r.summary ? finish(r.summary) : null;
           track('question_answered', { rung, correct: good, ms: 0, difficulty: cur.payload.question?.difficulty ?? 'unknown' });
-          playSound(good ? 'answer_correct' : 'answer_wrong');
-          haptic(good ? 'success' : 'error');
+          playSound(good ? comboCue(r.combo) : 'answer_wrong');
+          haptic(good ? (r.combo >= 3 ? 'heavy' : 'success') : 'error');
           set((x) => ({
             ...x,
             phase: 'reveal',
             score: r.score,
+            runCoins: x.runCoins + r.coins,
             results: [...x.results, good || r.shielded],
-            reveal: { result: r.result, correctSlot: r.correct_slot, pickedSlot: slot >= 0 ? slot : null, explanation: r.explanation, points: r.points, speedBonus: r.speed_bonus, combo: r.combo, comboBonus: r.combo_bonus, shielded: r.shielded },
+            reveal: {
+              result: r.result,
+              correctSlot: r.correct_slot,
+              pickedSlot: slot >= 0 ? slot : null,
+              explanation: r.explanation,
+              points: r.points,
+              speedBonus: r.speed_bonus,
+              combo: r.combo,
+              comboBonus: r.combo_bonus,
+              shielded: r.shielded,
+              coins: r.coins,
+              midChest: r.mid_chest ?? null,
+            },
             summary,
           }));
           return;

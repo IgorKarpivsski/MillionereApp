@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import type { ReportReason } from '@fm/shared';
+import type { ReportReason, Reward } from '@fm/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { maybeAskForRating } from '@/features/engage/RatePrompt';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -31,6 +31,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { championLevels, levelLabel, useWorldsConfig, worldBySlug } from '@/features/worlds/api';
 import { useSession, type SessionState } from '@/features/worlds/useSession';
 import { WorldBadge } from '@/features/worlds/WorldBadge';
+import { ComboFlame, MidChest, RunCoins, RunLadder, SlothCheer } from '@/features/worlds/RunJuice';
+import { useFly } from '@/features/home/RewardFly';
+import { XpGain } from '@/features/profile/XpBar';
+import { useMyState } from '@/features/profile/hooks';
 import { shade } from '@/features/worlds/worldArt';
 import { formatNumber, ltr } from '@/lib/format';
 import { goHome } from '@/lib/goHome';
@@ -91,22 +95,6 @@ function TimerBar({ deadlineAt, total, running, color }: { deadlineAt: number | 
   return (
     <View style={styles.timerTrack}>
       <Animated.View style={[styles.timerFill, { backgroundColor: color }, style]} />
-    </View>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Top bar: world, progress dots, score                                */
-/* ------------------------------------------------------------------ */
-
-function Dots({ results, total, current }: { results: boolean[]; total: number; current: number }) {
-  return (
-    <View style={styles.dots} accessible accessibilityLabel={fmt(t.questionOf, { n: current, total })}>
-      {Array.from({ length: total }, (_, i) => {
-        const r = results[i];
-        const bg = r === true ? colors.correct : r === false ? colors.danger : i === current - 1 ? colors.text : palette.night600;
-        return <View key={i} style={[styles.dot, { backgroundColor: bg }, i === current - 1 && r === undefined && styles.dotNow]} />;
-      })}
     </View>
   );
 }
@@ -178,7 +166,9 @@ function ResultView({
   onAgain,
   onNext,
   onContinue,
+  xpBefore,
 }: {
+  xpBefore: number | null;
   s: SessionState;
   world: string;
   color: string;
@@ -252,6 +242,7 @@ function ResultView({
             </AppText>
           </Animated.View>
         </View>
+        {xpBefore != null && sum.xp > 0 ? <XpGain before={xpBefore} gained={sum.xp} /> : null}
         {sum.coins_breakdown && sum.coins > 0 ? (
           <AppText variant="caption" color={colors.textMuted} align="center" style={styles.breakdown}>
             {coinsBreakdown(sum.coins_breakdown, sum.coins)}
@@ -275,7 +266,7 @@ function ResultView({
             </Pressable>
           </Animated.View>
         ) : null}
-        {sum.leveled_up ? (
+        {sum.leveled_up && xpBefore == null ? (
           <Animated.View entering={reduced ? undefined : ZoomIn.delay(700)} style={styles.levelUp}>
             <AppText variant="label" color={colors.textOnBright} align="center">
               {fmt(strings.quiz.levelUp, { n: sum.player_level })}
@@ -361,11 +352,21 @@ function DoubleCoins({ runId, coins }: { runId?: string; coins: number }) {
 export default function SessionScreen() {
   useEffect(() => markModeSeen('session'), []);
   const params = useLocalSearchParams<{ world?: string; level?: string; run?: string }>();
-  const { height: screenH } = useWindowDimensions();
+  const { height: screenH, width: screenW } = useWindowDimensions();
+  const launchFly = useFly((x) => x.launch);
+  const { data: me } = useMyState();
+  const xpAtStart = useRef<number | null>(null);
+  const [chest, setChest] = useState<Reward | null>(null);
+  const [chestOpened, setChestOpened] = useState(false);
   const [target, setTarget] = useState({ world: params.world ?? 'mix', level: params.level ? Number(params.level) : null });
   const worlds = useWorldsConfig();
   const w = worldBySlug(worlds, target.world);
   const { state: s, start, answer, timeUp, next, fifty, boost, hint, callFriend, continueRun, retry } = useSession(target.world, target.level, params.run);
+  useEffect(() => {
+    // the XP before this game, for the level bar on the result screen
+    if (s.phase === 'question' && s.payload?.rung === 1 && me) xpAtStart.current = me.profile.xp;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [s.phase, s.payload?.run_id]);
   const [friendPick, setFriendPick] = useState<FriendPick | null>(null);
   const { data: energy } = useEnergy();
   const showEnergy = useEnergySheet((x) => x.show);
@@ -376,7 +377,7 @@ export default function SessionScreen() {
   const qWorld = worldBySlug(worlds, s.payload?.question_world ?? target.world);
 
   useEffect(() => {
-    preloadSounds(['whistle', 'tick', 'answer_lock', 'answer_correct', 'answer_wrong', 'coins']);
+    preloadSounds(['whistle', 'tick', 'answer_lock', 'answer_correct', 'answer_wrong', 'coins', 'combo_2', 'combo_3', 'combo_4', 'combo_5', 'chest_open']);
     void start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -391,10 +392,23 @@ export default function SessionScreen() {
     if (s.reveal?.shielded) toast(strings.boosts.shieldSaved, 'success');
   }, [s.reveal, toast]);
 
-  // A right answer moves on by itself; a wrong one waits so the player can read the explanation.
+  // A right answer: its coins fly into the counter, and a surprise chest may pop.
   useEffect(() => {
-    if (s.phase !== 'reveal' || s.reveal?.result !== 'correct' || s.summary) return;
-    const id = setTimeout(() => void next(), 1500);
+    const r = s.reveal;
+    if (!r) return;
+    if (r.coins > 0) launchFly({ from: { x: screenW / 2, y: screenH * 0.62 }, kind: 'run', label: fmt(strings.juice.flyLabel, { n: r.coins }) });
+    if (r.midChest) {
+      setChestOpened(true);
+      const id = setTimeout(() => setChest(r.midChest), 900);
+      return () => clearTimeout(id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [s.reveal]);
+
+  // A right answer moves on by itself (after the chest, if one opened); a wrong one waits so the player can read the explanation.
+  useEffect(() => {
+    if (s.phase !== 'reveal' || s.reveal?.result !== 'correct' || s.summary || s.reveal.midChest) return;
+    const id = setTimeout(() => void next(), 1900);
     return () => clearTimeout(id);
   }, [s.phase, s.reveal, s.summary, next]);
 
@@ -429,6 +443,7 @@ export default function SessionScreen() {
       }
       const nextTarget = { world: target.world, level: lvl ?? target.level };
       setTarget(nextTarget);
+      setChestOpened(false);
       void start(nextTarget);
     },
     [energy, showEnergy, start, target],
@@ -460,7 +475,7 @@ export default function SessionScreen() {
     return (
       <SafeAreaView style={styles.root}>
         <Backdrop />
-        <ResultView s={s} world={w.name} color={w.color} levels={w.levels} onAgain={() => again()} onNext={canNext ? () => again(sum.level + 1) : null} onContinue={() => void continueRun()} />
+        <ResultView s={s} world={w.name} color={w.color} levels={w.levels} onAgain={() => again()} onNext={canNext ? () => again(sum.level + 1) : null} onContinue={() => void continueRun()} xpBefore={xpAtStart.current} />
       </SafeAreaView>
     );
   }
@@ -519,7 +534,7 @@ export default function SessionScreen() {
           <Ionicons name="close" size={26} color={colors.textMuted} />
         </Pressable>
         <View style={styles.topMid}>
-          <Dots results={s.results} total={total} current={rung} />
+          <RunLadder results={s.results} total={total} current={rung} chestAt={CHEST_AT} chestOpened={chestOpened} />
           <View style={styles.starGoal}>
             {STARS_AT.map((n) => (
               <Ionicons key={n} name="star" size={14} color={correctSoFar >= n ? colors.led : palette.night600} />
@@ -539,6 +554,8 @@ export default function SessionScreen() {
             {qWorld.name}
             {s.payload.level ? ` · ${levelLabel(s.payload.level, w.levels)}` : ''}
           </AppText>
+          <ComboFlame combo={reveal?.result === 'correct' ? reveal.combo : reveal ? 0 : comboNow(s.results)} />
+          <RunCoins coins={s.runCoins} />
           <Led size="ledM" color={secs <= 5 && answering ? colors.danger : colors.text}>
             {String(secs).padStart(2, '0')}
           </Led>
@@ -588,6 +605,7 @@ export default function SessionScreen() {
         {reveal ? (
           <Animated.View entering={reduced ? undefined : FadeInDown.springify().damping(16)} accessibilityLiveRegion="assertive">
             <Card kind="soft" padding={space.md} style={styles.explain}>
+              <SlothCheer key={`cheer-${rung}`} result={reveal.result} combo={reveal.combo} seed={rung * 7 + s.score} />
               <View style={styles.revealHead}>
                 <AppText variant="heading" color={reveal.result === 'correct' ? colors.correct : colors.danger} style={styles.flex}>
                   {reveal.result === 'correct' ? t.correct : reveal.result === 'timeout' ? t.timeout : t.wrong}
@@ -670,6 +688,14 @@ export default function SessionScreen() {
         )}
       </View>
 
+      <MidChest
+        reward={chest}
+        onClose={() => {
+          setChest(null);
+          if (s.phase === 'reveal' && !s.summary) void next();
+        }}
+      />
+
       <BottomSheet visible={reportOpen} onClose={() => setReportOpen(false)} title={strings.quiz.reportTitle}>
         {REPORT_REASONS.map((r) => (
           <StickerButton
@@ -690,6 +716,16 @@ export default function SessionScreen() {
       </BottomSheet>
     </SafeAreaView>
   );
+}
+
+/** Mirrors app_config 'session.rewards'.mid_chest_at on the server. */
+const CHEST_AT = 5;
+
+/** Right answers in a row at the end of the results so far. */
+function comboNow(results: boolean[]): number {
+  let n = 0;
+  for (let i = results.length - 1; i >= 0 && results[i]; i--) n++;
+  return n;
 }
 
 /** Mirrors app_config.session.points_per_second on the server. */
@@ -730,9 +766,6 @@ const styles = StyleSheet.create({
   pressed: { transform: [{ scale: 0.97 }] },
   top: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingHorizontal: space.md, paddingTop: space.sm },
   topMid: { flex: 1, alignItems: 'center', gap: 4 },
-  dots: { flexDirection: 'row', gap: 5 },
-  dot: { width: 14, height: 8, borderRadius: 4 },
-  dotNow: { width: 22 },
   starGoal: { flexDirection: 'row', gap: 2 },
   scoreBox: {
     minWidth: 64,

@@ -40,6 +40,6 @@ its source and license. Nothing goes into `apps/mobile/assets` without a row.
 
 | Asset | Source | License |
 | --- | --- | --- |
-| `apps/mobile/assets/sounds/*.wav` (tap, tick, whistle, answer_lock, answer_correct, answer_wrong, var, coins, level_up, pack_open, rare_reveal) | Synthesized by `tools/scripts/gen-sounds.py` from sine/square waves and filtered noise. No samples. | Original |
+| `apps/mobile/assets/sounds/*.wav` (tap, tick, whistle, answer_lock, answer_correct, answer_wrong, var, coins, level_up, pack_open, rare_reveal, pick, place, solved, combo_2–5, chest_open) | Synthesized by `tools/scripts/gen-sounds.py` from sine/square waves and filtered noise. No samples. | Original |
 
 Any new file must be original (commissioned or generated) or CC0 with its source URL here.

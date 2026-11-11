@@ -17,7 +17,8 @@ import { colors } from '@/design-system/tokens';
 import { RewardIcon } from '@/features/engage/rewards';
 
 type Point = { x: number; y: number };
-type Kind = 'coins' | 'gems' | 'other';
+/** 'run' is the live coin counter inside a game (separate from the wallet meter at home). */
+export type Kind = 'coins' | 'gems' | 'other' | 'run';
 
 interface Flight {
   id: number;
@@ -40,7 +41,7 @@ let seq = 1;
 export const useFly = create<FlyStore>((set) => ({
   targets: {},
   flights: [],
-  pulse: { coins: 0, gems: 0, other: 0 },
+  pulse: { coins: 0, gems: 0, other: 0, run: 0 },
   setTarget: (k, p) => set((s) => ({ targets: { ...s.targets, [k]: p } })),
   launch: (f) => set((s) => ({ flights: [...s.flights, { ...f, id: seq++ }] })),
   land: (id, k) => set((s) => ({ flights: s.flights.filter((x) => x.id !== id), pulse: { ...s.pulse, [k]: s.pulse[k] + 1 } })),
@@ -80,7 +81,7 @@ function Particle({ f, i, to }: { f: Flight; i: number; to: Point }) {
   });
   return (
     <Animated.View style={[styles.particle, style]}>
-      {f.kind === 'coins' ? <CoinIcon size={28} /> : f.kind === 'gems' ? <GemIcon size={28} /> : f.reward ? <RewardIcon r={f.reward} size={28} /> : <CoinIcon size={28} />}
+      {f.kind === 'coins' || f.kind === 'run' ? <CoinIcon size={28} /> : f.kind === 'gems' ? <GemIcon size={28} /> : f.reward ? <RewardIcon r={f.reward} size={28} /> : <CoinIcon size={28} />}
     </Animated.View>
   );
 }

@@ -1,18 +1,18 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { AppText, AvatarBadge, CoinIcon, GemIcon, GLASS_EDGE, GlassFill, Led, PlayerName, Skeleton, TicketIcon, TitleTag } from '@/design-system/components';
+import { AppText, AvatarBadge, CoinIcon, GemIcon, GLASS_EDGE, GlassFill, Led, PlayerName, Skeleton, TicketIcon } from '@/design-system/components';
 import { colors, radius, space } from '@/design-system/tokens';
 import { useEnergySheet } from '@/features/engage/EnergySheet';
 import { FlyTarget } from '@/features/home/RewardFly';
 import { TourTarget } from '@/features/tour/Tour';
+import { XpMini } from '@/features/profile/XpBar';
 import { useCountdownTo, useEnergy } from '@/features/engage/hooks';
 import { useMyState } from '@/features/profile/hooks';
 import { useToggleSetting } from '@/features/settings/hooks';
 import { useSettingsStore } from '@/features/settings/store';
 import { formatCompact, formatNumber } from '@/lib/format';
 import { fmt, strings } from '@/lib/i18n';
-import { rankTitle } from '@/lib/rank';
 import { showName } from '@/lib/names';
 
 function Meter({ kind, amount }: { kind: 'coins' | 'gems'; amount: number }) {
@@ -97,13 +97,7 @@ export function TopBar() {
           <AvatarBadge avatarId={data.profile.avatar_id} photo={data.profile.photo_url} frame={data.profile.frame} level={data.profile.level} size={40} />
           <View style={styles.whoText}>
             <PlayerName name={showName(data.profile.username)} color={data.profile.name_color} />
-            {data.profile.title ? (
-              <TitleTag title={data.profile.title} size="sm" />
-            ) : (
-              <AppText variant="caption" color={colors.textDim} numberOfLines={1}>
-                {fmt(strings.topBar.levelLine, { n: data.profile.level, rank: rankTitle(data.profile.level) })}
-              </AppText>
-            )}
+            <XpMini xp={data.profile.xp} />
           </View>
         </Pressable>
         </TourTarget>

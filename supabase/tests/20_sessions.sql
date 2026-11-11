@@ -2,6 +2,8 @@
 begin;
 -- only the fixed picture slots here (the random picture share is tested in 33_pictures)
 update public.app_config set value = '0'::jsonb where key = 'questions.image_share';
+-- the random surprise chest at 5 right answers has its own test (34_answer_rewards); keep coin sums exact here
+update public.app_config set value = value - 'mid_chest' where key = 'session.rewards';
 
 do $$
 declare i int; qid text; w text;

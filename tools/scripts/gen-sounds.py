@@ -127,4 +127,12 @@ save("rare_reveal", seq(*(bell(f, 0.09, 0.35) for f in (C6, E6, G6, C6 * 2)), be
 save("pick", seq(tone(900, 0.04, "sine", 0.4, 0.002, 0.03), tone(1300, 0.05, "sine", 0.4, 0.002, 0.04)), 0.3)
 save("place", mix(noise(0.05, 1500, 5000, 0.3) * env(int(SR * 0.05), 0.001, 0.04), tone(600, 0.06, "sine", 0.4, 0.001, 0.05)), 0.35)
 save("solved", mix(*(at(i * 0.08, mallet(f, 0.3)) for i, f in enumerate((C5, E5, G5, C6, E6, G6))), at(0.5, bell(C6 * 2, 1.0, 0.3))), 0.5)
+# Combo: the correct "ding" climbs a step with every answer in a row (2, 3, 4, 5+).
+for i, k in enumerate((2, 3, 4, 5)):
+    r = 2 ** ((i + 1) * 2 / 12)
+    save(f"combo_{k}", mix(at(0, mallet(G5 * r, 0.25)), at(0.08, mallet(C6 * r, 0.35)), at(0.08, bell(E6 * 2 * r, 0.55, 0.2)),
+                         at(0.16, bell(G6 * 2 * r, 0.5, 0.14 + 0.03 * i))), 0.5)
+# Mid-game chest: a rumble, a pop and a shower of bells.
+save("chest_open", mix(noise(0.35, 120, 900, 0.3) * env(int(SR * 0.35), 0.05, 0.1), at(0.33, noise(0.08, 1500, 7000, 0.4) * env(int(SR * 0.08), 0.001, 0.06)),
+                       *(at(0.38 + i * 0.06, bell(f, 0.5, 0.3)) for i, f in enumerate((C6, E6, G6, C6 * 2, E6 * 2)))), 0.5)
 print("sounds written to", OUT)

@@ -347,6 +347,10 @@ export const SessionAnswerSchema = z.object({
   combo_bonus: z.number().int().default(0),
   score: z.number().int(),
   correct_count: z.number().int(),
+  /** coins this answer adds to the run (paid together at the end) */
+  coins: z.number().int().default(0),
+  /** a surprise chest, paid right away, the first time the run reaches 5 correct answers */
+  mid_chest: z.lazy(() => RewardSchema).nullable().default(null),
   summary: SessionSummarySchema.nullable(),
 });
 export type SessionAnswer = z.infer<typeof SessionAnswerSchema>;
