@@ -1,0 +1,39 @@
+{
+    "project_info": {
+        "project_number": "298642826318",
+        "project_id": "trivia-haaluf",
+        "storage_bucket": "trivia-haaluf.firebasestorage.app"
+    },
+    "client": [
+        {
+            "client_info": {
+                "mobilesdk_app_id": "1:298642826318:android:888c53491d52d861174f1f",
+                "android_client_info": {
+                    "package_name": "com.haaluf.trivia"
+                }
+            },
+            "oauth_client": [
+                {
+                    "client_id": "298642826318-cr1i9uofurht9v0qbd6cqoj2u8dgf5al.apps.googleusercontent.com",
+                    "client_type": 3
+                }
+            ],
+            "api_key": [
+                {
+                    "current_key": "AIzaSyCRT9B9M_FO1jQDYQf92o2fp8l1MFcu4pI"
+                }
+            ],
+            "services": {
+                "appinvite_service": {
+                    "other_platform_oauth_client": [
+                        {
+                            "client_id": "298642826318-cr1i9uofurht9v0qbd6cqoj2u8dgf5al.apps.googleusercontent.com",
+                            "client_type": 3
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "configuration_version": "1"
+}
