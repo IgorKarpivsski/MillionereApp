@@ -22,7 +22,7 @@ import { playSound } from '@/design-system/feedback/sound';
 import { colors, palette } from '@/design-system/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useCollection } from '@/features/collection/hooks';
-import { useDeals, usePass, useRefreshEconomy, useWheel } from '@/features/engage/hooks';
+import { usePass, useRefreshEconomy, useWheel } from '@/features/engage/hooks';
 import { RewardIcon, rewardLabel } from '@/features/engage/rewards';
 import { RpcError, rpc } from '@/features/profile/api';
 import { useClaimWelcomeBonus, useMyState } from '@/features/profile/hooks';
@@ -122,7 +122,6 @@ export function useRewardBubbles(): BubbleDef[] {
   const welcome = useClaimWelcomeBonus();
   const { data: wheel } = useWheel();
   const { data: pass } = usePass();
-  const { data: deals } = useDeals();
   const { data: coll } = useCollection();
   const { data: store } = useStore();
   const ad = useAdReward();
@@ -246,19 +245,7 @@ export function useRewardBubbles(): BubbleDef[] {
     });
   }
 
-  if (deals && !deals.bought) {
-    const off = Math.round((1 - deals.deal.price.amount / deals.deal.was) * 100);
-    out.push({
-      key: 'deal',
-      label: t.deal,
-      colors: ['#FF6B6B', '#C2185B'],
-      icon: deals.deal.rewards[0] ? <RewardIcon r={deals.deal.rewards[0]} size={34} /> : <Icon name="deal" size={36} />,
-      ready: false,
-      badge: `-${off}%`,
-      onPress: () => router.push('/shop'),
-    });
-  }
-
+  // (the deal is an offer, not a prize: it lives in its own labeled banner, never among the prizes)
   return out;
 }
 

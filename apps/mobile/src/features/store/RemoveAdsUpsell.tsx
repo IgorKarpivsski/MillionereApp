@@ -7,12 +7,15 @@ import { strings } from '@/lib/i18n';
 import { useInterstitial } from './interstitial';
 import { useStore } from './hooks';
 
-/** Shown after a between-games ad now and then: one tap to the "no ads" offer. */
+const UPSELL_OFF = true;
+
+/** (Off.) Was shown after a between-games ad now and then: one tap to the "no ads" offer. */
 export function RemoveAdsUpsell() {
   const open = useInterstitial((s) => s.upsell);
   const hide = useInterstitial((s) => s.hideUpsell);
   const { data: store } = useStore();
-  if (store?.ad_free) return null;
+  // Google Play Families: no purchase offer popping up right after an ad. The offer stays in the shop.
+  if (store?.ad_free || UPSELL_OFF) return null;
   const t = strings.interstitial;
   return (
     <Modal visible={open} transparent animationType="fade" onRequestClose={hide} statusBarTranslucent>

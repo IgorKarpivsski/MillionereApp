@@ -24,9 +24,10 @@ export const useInterstitial = create<State>((set) => ({
 /** Call once when a game's results appear. Shows an ad when it's due. */
 export async function gameFinished(adFree: boolean): Promise<void> {
   if (adFree) return;
-  // No full-screen ads for children under 13 (or before the age question): only ads they choose to watch.
+  // Full-screen ads only for players 16 and up; younger players (or before the age question) only
+  // see ads they choose to watch, each clearly labeled as an ad (Google Play Families).
   const band = useSettingsStore.getState().ageBand;
-  if (band === null || band === 'under13') return;
+  if (band !== '16plus') return;
   const st = useInterstitial.getState();
   const games = st.games + 1;
   useInterstitial.setState({ games });
