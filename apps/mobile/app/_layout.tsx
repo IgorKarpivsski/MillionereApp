@@ -37,6 +37,7 @@ import { initAds } from '@/features/store/ads';
 import { useBackgroundMusic } from '@/design-system/feedback/music';
 import { EnergySheet } from '@/features/engage/EnergySheet';
 import { useReminders } from '@/features/reminders/useReminders';
+import { usePush } from '@/features/push/usePush';
 
 ensureRTL();
 initMonitoring();
@@ -73,6 +74,7 @@ function Gate() {
 
   useBackgroundMusic();
   useReminders();
+  usePush();
   if (!ready) return null;
 
   if (bootError) {

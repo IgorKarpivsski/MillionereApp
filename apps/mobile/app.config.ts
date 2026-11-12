@@ -1,4 +1,5 @@
 import type { ExpoConfig, ConfigContext } from 'expo/config';
+import { existsSync } from 'node:fs';
 
 /**
  * Product name: "טריוויה - האלוף" (chosen 2026-10-15). It still needs a formal trademark
@@ -8,6 +9,8 @@ import type { ExpoConfig, ConfigContext } from 'expo/config';
  */
 const APP_NAME = 'טריוויה - האלוף';
 const IS_PROD = process.env.APP_ENV === 'production';
+// Firebase client config for push notifications (public values; the app works without it, just no push).
+const GOOGLE_SERVICES = './google-services.json';
 // AdMob app ids (Android: the real app; iOS: Google's public test id until there is an iOS app).
 const ADMOB_ANDROID_APP_ID = process.env.ADMOB_ANDROID_APP_ID || 'ca-app-pub-4196315436564582~1233587313';
 const ADMOB_IOS_APP_ID = process.env.ADMOB_IOS_APP_ID || 'ca-app-pub-3940256099942544~1458002511';
@@ -17,7 +20,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: IS_PROD ? APP_NAME : `${APP_NAME} (dev)`,
   slug: 'football-millionaire',
   scheme: 'footballmillionaire',
-  version: '0.1.2',
+  version: '0.2.0',
   orientation: 'portrait',
   icon: './assets/images/icon.png',
   userInterfaceStyle: 'dark',
@@ -51,6 +54,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     // Every store upload needs a higher number; CI passes its run number.
     versionCode: Number(process.env.VERSION_CODE) || 1,
     adaptiveIcon: { foregroundImage: './assets/images/adaptive-icon.png', backgroundColor: '#5624A2' },
+    ...(IS_PROD && existsSync(GOOGLE_SERVICES) ? { googleServicesFile: GOOGLE_SERVICES } : {}),
     // Nothing in the app needs these; libraries add some by default. The profile photo uses the
     // system photo picker, which needs no storage permission.
     blockedPermissions: [
