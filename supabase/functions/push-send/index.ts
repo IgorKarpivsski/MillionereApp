@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
             token: d.push_token,
             notification: { title: r.title, body: r.body },
             data,
-            android: { priority: 'high', notification: { channel_id: 'friends', color: '#FFB000', icon: 'notification_icon' } },
+            android: { priority: 'high', notification: { channel_id: 'friends', color: '#FFB000' } },
           },
         }),
       });
