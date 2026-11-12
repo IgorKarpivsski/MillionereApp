@@ -35,7 +35,7 @@ export function Room({
   ].sort((a, b) => a.z - b.z);
   return (
     <View style={[styles.room, { width, height }]}>
-      <Image source={ROOM} style={StyleSheet.absoluteFill} resizeMode="cover" />
+      <Image source={ROOM} style={{ position: 'absolute', left: 0, top: 0, width, height }} resizeMode="stretch" />
       {layers.map(({ id }) => {
         if (id === '_sloth') {
           const w = (width * SLOTH_SPOT.w) / 100;
