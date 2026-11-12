@@ -18,7 +18,6 @@ import { appAlert, AppText,
 import { colors, rarityColors, space, type RarityKey } from '@/design-system/tokens';
 import { GlowingPack, PACK_GLOW, PACK_NAMES } from '@/features/collection/PackArt';
 import { useCollection } from '@/features/collection/hooks';
-import { useMarket } from '@/features/market/api';
 import { makePackTicket } from '@/features/collection/packIntent';
 import { useMyState } from '@/features/profile/hooks';
 import { TradeFriendSheet } from '@/features/social/FriendPicker';
@@ -51,7 +50,6 @@ function OddsTable({ pack }: { pack: PackCatalogEntry }) {
 
 export default function PacksScreen() {
   const [tradeOpen, setTradeOpen] = useState(false);
-  const { data: market } = useMarket();
   const { data, isLoading, isError, error, refetch, isRefetching } = useCollection();
   const { data: me } = useMyState();
   const [oddsFor, setOddsFor] = useState<PackCatalogEntry | null>(null);
@@ -86,13 +84,6 @@ export default function PacksScreen() {
         </AppText>
       ) : null}
       <StickerButton label={t.tradeDupes} icon="swap-horizontal" tone="outline" fullWidth onPress={() => setTradeOpen(true)} />
-      <StickerButton
-        label={market?.news ? `${strings.market.entry} (${market.news})` : strings.market.entry}
-        icon="storefront"
-        tone="gem"
-        fullWidth
-        onPress={() => router.push('/market')}
-      />
       {isLoading ? <Skeleton height={400} rounded={18} /> : null}
       {isError && !data ? (
         <Card padding={space.lg} style={styles.errorCard}>

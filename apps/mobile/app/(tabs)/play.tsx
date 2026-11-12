@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { TopBar } from '@/components/TopBar';
-import { AppText, Icon, Screen, Sheen, Sloth, StickerButton, useCountdownToMidnight } from '@/design-system/components';
+import { AppText, BottomSheet, Icon, Screen, Sheen, Sloth, StickerButton, useCountdownToMidnight } from '@/design-system/components';
 import { colors, space } from '@/design-system/tokens';
 import { useEnergySheet, usePlaySession } from '@/features/engage/EnergySheet';
 import { useEnergy } from '@/features/engage/hooks';
@@ -74,6 +75,7 @@ function WorldsDoor() {
 /** The "play" tab: every way to play, all in one place. */
 export default function PlayScreen() {
   const play = usePlaySession();
+  const [speedOpen, setSpeedOpen] = useState(false);
   const { data: daily } = useDailyStatus();
   const countdown = useCountdownToMidnight();
   const { data: blitz } = useBlitzInfo();
@@ -144,13 +146,13 @@ export default function PlayScreen() {
       <View style={styles.row}>
         <ModeTile
           index={3}
-          title={t.blitz}
-          body={t.blitzBody}
+          title={p.speed}
+          body={p.speedBody}
           icon="timer"
           colors={['#FF8A3D', '#E8463A']}
-          chip={blitz?.best ? fmt(t.blitzBest, { n: blitz.best }) : isNew('blitz') ? t.new : null}
-          chipTone={blitz?.best ? 'dark' : 'gold'}
-          onPress={needTicket(() => router.push('/blitz'))}
+          chip={blitz?.best || tf?.best ? fmt(t.blitzBest, { n: Math.max(blitz?.best ?? 0, tf?.best ?? 0) }) : isNew('blitz') ? t.new : null}
+          chipTone={blitz?.best || tf?.best ? 'dark' : 'gold'}
+          onPress={needTicket(() => setSpeedOpen(true))}
         />
         <ModeTile
           index={4}
@@ -163,28 +165,48 @@ export default function PlayScreen() {
           onPress={needTicket(() => router.push('/survival'))}
         />
       </View>
-      <View style={styles.row}>
-        <ModeTile
-          index={5}
-          title={t.tf}
-          body={t.tfBody}
-          icon="bolt"
-          colors={['#14B8A6', '#0E7490']}
-          chip={tf?.best ? fmt(t.blitzBest, { n: tf.best }) : isNew('tf') ? t.new : null}
-          chipTone={tf?.best ? 'dark' : 'gold'}
-          onPress={needTicket(() => router.push('/truefalse'))}
+      <ModeTile
+        wide
+        index={5}
+        title={t.daily}
+        body={dailyDone ? t.dailyDone : t.dailyBody}
+        icon="daily"
+        colors={['#3E8EF7', '#5C4CE0']}
+        chip={dailyDone ? countdown : strings.teen.free}
+        chipTone={dailyDone ? 'dark' : 'green'}
+        onPress={() => router.push({ pathname: '/quiz', params: { mode: 'daily' } })}
+      />
+
+      <BottomSheet visible={speedOpen} onClose={() => setSpeedOpen(false)} title={p.speed}>
+        <StickerButton
+          label={`⏱️ ${t.blitz} · ${t.blitzBody}`}
+          tone="prize"
+          fullWidth
+          onPress={() => {
+            setSpeedOpen(false);
+            router.push('/blitz');
+          }}
         />
-        <ModeTile
-          index={6}
-          title={t.daily}
-          body={dailyDone ? t.dailyDone : t.dailyBody}
-          icon="daily"
-          colors={['#3E8EF7', '#5C4CE0']}
-          chip={dailyDone ? countdown : strings.teen.free}
-          chipTone={dailyDone ? 'dark' : 'green'}
-          onPress={() => router.push({ pathname: '/quiz', params: { mode: 'daily' } })}
+        {blitz?.best ? (
+          <AppText variant="caption" color={colors.textMuted} align="center">
+            {fmt(t.blitzBest, { n: blitz.best })}
+          </AppText>
+        ) : null}
+        <StickerButton
+          label={`✅❌ ${t.tf} · ${t.tfBody}`}
+          tone="outline"
+          fullWidth
+          onPress={() => {
+            setSpeedOpen(false);
+            router.push('/truefalse');
+          }}
         />
-      </View>
+        {tf?.best ? (
+          <AppText variant="caption" color={colors.textMuted} align="center">
+            {fmt(t.blitzBest, { n: tf.best })}
+          </AppText>
+        ) : null}
+      </BottomSheet>
 
       <EventCard />
     </Screen>

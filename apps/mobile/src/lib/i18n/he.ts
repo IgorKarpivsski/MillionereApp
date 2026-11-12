@@ -191,6 +191,8 @@ export const he = {
     subtitle: 'כל מצבי המשחק במקום אחד',
     together: 'משחקים עם אחרים',
     solo: 'אתגרים לבד',
+    speed: 'מהירות ⚡',
+    speedBody: '60 שניות: נגד השעון או נכון/לא נכון',
     worldsCount: '{n} עולמות',
     starsCount: '⭐ {n} כוכבים',
   },

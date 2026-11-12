@@ -51,4 +51,19 @@ begin
   perform test.assert((s ->> 'just_completed')::boolean and (s ->> 'completed')::boolean and w.gems = 17, 'full room pays the prize');
 end $$;
 
+-- chat: ready phrases only for everyone (adults too) while free text is off
+reset role;
+create temp table cids as select test.new_user() as x, test.new_user() as y;
+grant select on cids to authenticated;
+insert into public.friendships (user_a, user_b, status, requested_by)
+select least(x, y), greatest(x, y), 'accepted', x from cids;
+set local role authenticated;
+do $$
+declare x uuid := (select cids.x from cids); y uuid := (select cids.y from cids);
+begin
+  perform test.login(x);
+  perform test.assert_raises(format('select public.chat_send(%L, %L)', y, 'טקסט חופשי'), 'quick_only', 'no free text');
+  perform public.chat_send(y, 'משחק מולי?');
+end $$;
+
 rollback;

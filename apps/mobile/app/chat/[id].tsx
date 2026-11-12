@@ -3,14 +3,13 @@ import type { ChatMessage, ChatReportReason } from '@fm/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText, BottomSheet, StickerButton, useToast, Backdrop } from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { RpcError } from '@/features/profile/api';
 import { socialApi } from '@/features/social/api';
-import { useIsKid } from '@/features/settings/kids';
 import { useChat } from '@/features/social/hooks';
 import { queryKeys } from '@/lib/queryClient';
 import { fmt, strings } from '@/lib/i18n';
@@ -43,9 +42,7 @@ export default function ChatScreen() {
   const { id, name } = useLocalSearchParams<{ id: string; name?: string }>();
   const { data } = useChat(id);
   const qc = useQueryClient();
-  const kid = useIsKid();
   const toast = useToast();
-  const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [report, setReport] = useState<ChatMessage | null>(null);
   const list = useRef<FlatList<ChatMessage>>(null);
@@ -61,7 +58,6 @@ export default function ChatScreen() {
     setSending(true);
     try {
       const r = await socialApi.send(id, b);
-      setText('');
       haptic('tap');
       if (r.masked) toast(t.masked, 'info');
       void qc.invalidateQueries({ queryKey: queryKeys.chat(id) });
@@ -121,44 +117,19 @@ export default function ChatScreen() {
           </AppText>
         ) : (
           <>
-            {kid ? (
-              // under 13: ready phrases only (no free text to or from children)
-              <View style={styles.kidBox}>
-                <AppText variant="caption" color={colors.textMuted} align="center">
-                  {t.kidQuickOnly}
-                </AppText>
-                <View style={styles.kidGrid}>
-                  {t.quick.map((q) => (
-                    <Pressable key={q} onPress={() => void send(q)} disabled={sending} style={styles.chip} accessibilityRole="button" accessibilityLabel={q}>
-                      <AppText variant="caption">{q}</AppText>
-                    </Pressable>
-                  ))}
-                </View>
+            {/* ready phrases only, for everyone: no free text in this game's chat */}
+            <View style={styles.kidBox}>
+              <AppText variant="caption" color={colors.textMuted} align="center">
+                {t.kidQuickOnly}
+              </AppText>
+              <View style={styles.kidGrid}>
+                {t.quick.map((q) => (
+                  <Pressable key={q} onPress={() => void send(q)} disabled={sending} style={styles.chip} accessibilityRole="button" accessibilityLabel={q}>
+                    <AppText variant="caption">{q}</AppText>
+                  </Pressable>
+                ))}
               </View>
-            ) : (
-            <>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickBar} contentContainerStyle={styles.quick} keyboardShouldPersistTaps="handled">
-              {t.quick.map((q) => (
-                <Pressable key={q} onPress={() => void send(q)} style={styles.chip} accessibilityRole="button" accessibilityLabel={q}>
-                  <AppText variant="caption">{q}</AppText>
-                </Pressable>
-              ))}
-            </ScrollView>
-            <View style={styles.composer}>
-              <TextInput
-                value={text}
-                onChangeText={setText}
-                placeholder={t.typeHere}
-                placeholderTextColor={colors.textDim}
-                style={styles.input}
-                maxLength={300}
-                multiline
-                accessibilityLabel={t.typeHere}
-              />
-              <StickerButton label={t.send} icon="send" size="sm" loading={sending} disabled={!text.trim()} onPress={() => void send(text)} />
             </View>
-            </>
-            )}
           </>
         )}
       </KeyboardAvoidingView>
@@ -187,22 +158,5 @@ const styles = StyleSheet.create({
   mine: { alignSelf: 'flex-start', backgroundColor: colors.led, borderBottomStartRadius: 4 },
   theirs: { alignSelf: 'flex-end', backgroundColor: colors.surfaceRaised, borderBottomEndRadius: 4 },
   time: { fontSize: 11 },
-  // a horizontal ScrollView grows to fill the screen unless told not to: keep the chips one line tall
-  quickBar: { flexGrow: 0, flexShrink: 0 },
-  quick: { paddingHorizontal: space.md, gap: space.sm, paddingBottom: space.sm, alignItems: 'center' },
   chip: { alignSelf: 'center', paddingHorizontal: space.md, paddingVertical: space.xs, borderRadius: radius.chip, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.board },
-  composer: { flexDirection: 'row', alignItems: 'flex-end', gap: space.sm, padding: space.md, borderTopWidth: 1, borderColor: colors.border },
-  input: {
-    flex: 1,
-    minHeight: 44,
-    maxHeight: 120,
-    borderRadius: radius.control,
-    backgroundColor: colors.board,
-    color: colors.text,
-    paddingHorizontal: space.md,
-    paddingVertical: space.sm,
-    fontSize: 16,
-    textAlign: 'right',
-    fontFamily: 'IBMPlexSansHebrew_400Regular',
-  },
 });

@@ -321,7 +321,6 @@ export default function ProfileScreen() {
       <StreakFreezeCard />
       <View style={styles.entries}>
         <StickerButton label={strings.teen.mistakesEntry} icon="refresh" tone="outline" fullWidth onPress={() => router.push('/mistakes')} />
-        <StickerButton label={strings.teen.submitEntry} icon="create" tone="outline" fullWidth onPress={() => router.push('/submit-question')} />
       </View>
 
       <StickerButton

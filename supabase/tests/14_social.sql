@@ -1,5 +1,7 @@
 -- Friends, trading duplicates, friends-only chat with filtering, report and block.
 begin;
+-- free text is off in 0.2.0 (ready phrases only); these checks cover the cleaning when it is on
+update public.app_config set value = 'true'::jsonb where key = 'chat.free_text';
 create temp table ids as select test.new_user() as a, test.new_user() as b, test.new_user() as c;
 grant select on ids to authenticated;
 -- a owns two duplicates; b owns one duplicate; one iconic duplicate for a.
