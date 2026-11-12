@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import { useEffect } from 'react';
-import { Image, StyleSheet, View, type ViewStyle } from 'react-native';
+import { Image, StyleSheet, View, type ImageSourcePropType, type ViewStyle } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -32,7 +32,10 @@ export function Sloth({
   bob = true,
   bubbleSide = 'top',
   style,
+  hat,
 }: {
+  /** a hat to wear (full sloth only): picture, height/width ratio, center x / bottom y on the sloth (fractions), width fraction */
+  hat?: { src: ImageSourcePropType; ratio: number; x: number; y: number; w: number } | null;
   /** width in px */
   size?: number;
   say?: string;
@@ -59,8 +62,21 @@ export function Sloth({
   return (
     <View style={[styles.wrap, bubbleSide === 'side' && styles.row, style]} importantForAccessibility="no-hide-descendants">
       {say ? <Speech text={say} side={bubbleSide} /> : null}
-      <Animated.View style={anim}>
+      <Animated.View style={[styles.ltr, anim]}>
         <Image source={head ? HEAD : FULL} style={{ width: size, height: h }} resizeMode="contain" />
+        {hat && !head ? (
+          <Image
+            source={hat.src}
+            resizeMode="contain"
+            style={{
+              position: 'absolute',
+              left: size * hat.x - (size * hat.w) / 2,
+              top: h * hat.y - size * hat.w * hat.ratio,
+              width: size * hat.w,
+              height: size * hat.w * hat.ratio,
+            }}
+          />
+        ) : null}
       </Animated.View>
     </View>
   );
@@ -94,6 +110,8 @@ export function SlothFace({ size = 32 }: { size?: number }) {
 }
 
 const styles = StyleSheet.create({
+  // physical positions for the hat (no RTL mirroring)
+  ltr: { direction: 'ltr' },
   wrap: { alignItems: 'center' },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.xs },
   bubble: {

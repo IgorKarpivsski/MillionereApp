@@ -18,6 +18,9 @@ import { useUnreadTotal } from '@/features/social/hooks';
 import { TourTarget, useTourStore } from '@/features/tour/Tour';
 import { useSettingsStore } from '@/features/settings/store';
 import { MissionsCard, NewbieBanner, NextGoal } from '@/features/teen/HomeCards';
+import { useHouse } from '@/features/house/api';
+import { HATS } from '@/features/house/art';
+import { HouseCard } from '@/features/house/HouseCard';
 import { fmt, gx, strings } from '@/lib/i18n';
 import { GenderPrompt } from '@/features/profile/gender';
 import { showName } from '@/lib/names';
@@ -40,6 +43,7 @@ function Breathe({ off, children }: { off: boolean; children: ReactNode }) {
 
 function Hero() {
   const { data } = useMyState();
+  const { data: house } = useHouse();
   const play = usePlaySession();
   const name = showName(data?.profile.username) ?? '';
   const gender = data?.profile.gender;
@@ -67,7 +71,7 @@ function Hero() {
         accessibilityLabel={`${gx(lines[i % lines.length]!, gender)}. ${h.tipA11y}`}
         style={styles.slothWrap}
       >
-        <Sloth size={124} say={gx(lines[i % lines.length]!, gender)} />
+        <Sloth size={124} say={gx(lines[i % lines.length]!, gender)} hat={house?.hat ? HATS[house.hat] : null} />
       </Pressable>
       <TourTarget id="play" style={styles.stretch}>
         <Breathe off={reduced}>
@@ -248,6 +252,7 @@ export default function HomeScreen() {
   return (
     <Screen header={<TopBar />} onRefresh={() => void refetch()} refreshing={isRefetching}>
       <Hero />
+      <HouseCard />
       <NewbieBanner />
       <Rewards />
       <MissionsCard />

@@ -1103,3 +1103,22 @@ export const ReferralStateSchema = z.object({
   can_redeem: z.boolean(),
 });
 export type ReferralState = z.infer<typeof ReferralStateSchema>;
+
+/** The sloth's treehouse: room items bought with coins, hats bought with gems. */
+export const HomeItemSchema = z.object({
+  id: z.string(),
+  price: z.number().int(),
+  currency: z.enum(['coins', 'gems']),
+});
+export type HomeItem = z.infer<typeof HomeItemSchema>;
+export const HomeStateSchema = z.object({
+  items: z.array(HomeItemSchema).default([]),
+  hats: z.array(HomeItemSchema).default([]),
+  complete_prize: z.array(RewardSchema).default([]),
+  owned: z.array(z.string()).default([]),
+  hat: z.string().nullable().default(null),
+  completed: z.boolean().default(false),
+  bought: z.string().optional(),
+  just_completed: z.boolean().optional(),
+});
+export type HomeState = z.infer<typeof HomeStateSchema>;
