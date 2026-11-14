@@ -280,6 +280,8 @@ function FlipCard({
   index,
   total,
   glow,
+  delay = 0,
+  quiet = false,
 }: {
   item: PackItem;
   revealed: boolean;
@@ -288,6 +290,10 @@ function FlipCard({
   index: number;
   total: number;
   glow: boolean;
+  /** ms to wait before turning (reveal-all turns the cards one after another) */
+  delay?: number;
+  /** no bursts on this card (reveal-all keeps them for the best card only, so the phone stays smooth) */
+  quiet?: boolean;
 }) {
   const reduced = useReducedMotion();
   const flip = useSharedValue(revealed ? 1 : 0);
@@ -304,11 +310,11 @@ function FlipCard({
       setFace(true);
       return;
     }
-    const wait = rank >= 4 ? 380 : rank >= 2 ? 180 : 0; // rarer cards take a breath first
+    const wait = delay + (quiet ? 0 : rank >= 4 ? 380 : rank >= 2 ? 180 : 0); // rarer cards take a breath first
     flip.value = withDelay(wait, withTiming(1, { duration: 480, easing: Easing.inOut(Easing.cubic) }));
     const id = setTimeout(() => setFace(true), wait + 240);
     return () => clearTimeout(id);
-  }, [revealed, reduced, flip, rank]);
+  }, [revealed, reduced, flip, rank, delay, quiet]);
 
   const style = useAnimatedStyle(() => {
     const deg = flip.value < 0.5 ? flip.value * 180 : (flip.value - 1) * 180;
@@ -320,7 +326,7 @@ function FlipCard({
 
   return (
     <Animated.View entering={reduced ? undefined : riseFromPack(index, total)} style={styles.cardSlot}>
-      {face && rank >= 2 && !reduced ? (
+      {face && rank >= 2 && !reduced && !quiet ? (
         <View pointerEvents="none" style={styles.fxCenter}>
           <Shockwave color={glow ? GLOW_GOLD : r.fill} size={width * 1.8} width={4} />
         </View>
@@ -337,7 +343,7 @@ function FlipCard({
           </AppText>
         </Animated.View>
       ) : null}
-      {face && rank >= 2 && !reduced ? (
+      {face && rank >= 2 && !reduced && !quiet ? (
         <View pointerEvents="none" style={styles.fxCenter}>
           <StarBurst colorsList={[r.fill, '#FFFFFF', GLOW_GOLD]} count={rank >= 3 ? 10 : 6} radius={width * 0.9} />
         </View>
@@ -446,6 +452,10 @@ export default function PackOpenScreen() {
   const [torn, setTorn] = useState(false);
   const [boom, setBoom] = useState(0);
   const [shown, setShown] = useState<boolean[]>([]);
+  // the live list (timers and quick taps must never read an old copy)
+  const shownRef = useRef<boolean[]>([]);
+  // reveal-all: per card, how long to wait before turning, and whether it skips the bursts
+  const [batch, setBatch] = useState<{ delay: number[]; quiet: boolean[] } | null>(null);
   const [hero, setHero] = useState<{ index: number; glow: boolean } | null>(null);
   const heroQueue = useRef<{ index: number; glow: boolean }[]>([]);
   const heroBusy = useRef(false);
@@ -473,7 +483,8 @@ export default function PackOpenScreen() {
       .then((r) => {
         r.items.sort((a, b) => RANK.indexOf(a.rarity as Rarity) - RANK.indexOf(b.rarity as Rarity)); // best card last
         setResult(r);
-        setShown(r.items.map(() => false));
+        shownRef.current = r.items.map(() => false);
+        setShown(shownRef.current);
         void qc.invalidateQueries({ queryKey: queryKeys.collection });
         void qc.invalidateQueries({ queryKey: queryKeys.myState });
       })
@@ -594,25 +605,58 @@ export default function PackOpenScreen() {
     }
   };
 
+  const markShown = (idx: number[]) => {
+    const next = shownRef.current.slice();
+    idx.forEach((i) => (next[i] = true));
+    shownRef.current = next;
+    setShown(next);
+  };
+
+  const queueHero = (i: number, glow: boolean, wait: number) => {
+    heroQueue.current.push({ index: i, glow });
+    if (!heroBusy.current) {
+      heroBusy.current = true;
+      setTimeout(showNextHero, reduced ? 0 : wait);
+    }
+  };
+
   const reveal = (i: number) => {
-    if (!result || i < 0 || shown[i]) return;
+    if (!result || i < 0 || shownRef.current[i]) return;
     const it = result.items[i]!;
     const rank = RANK.indexOf(it.rarity as Rarity);
     const glow = isGlow(it.id);
     playSound(rank >= 2 ? 'rare_reveal' : 'answer_lock');
     haptic(rank >= 2 ? 'heavy' : 'tap');
-    setShown((s) => s.map((v, k) => (k === i ? true : v)));
-    if (rank >= 3 || glow) {
-      heroQueue.current.push({ index: i, glow });
-      if (!heroBusy.current) {
-        heroBusy.current = true;
-        setTimeout(showNextHero, reduced ? 0 : rank >= 4 ? 750 : 600);
-      }
-    }
+    markShown([i]);
+    if (rank >= 3 || glow) queueHero(i, glow, rank >= 4 ? 750 : 600);
   };
 
+  // Turns every card left in one go: one state change, one sound, cards flip one after another,
+  // bursts only on the best card, and at most one big reveal (for the best card) at the end.
   const revealAll = () => {
-    shown.forEach((v, i) => !v && setTimeout(() => reveal(i), i * 220));
+    if (!result) return;
+    const left = shownRef.current.map((v, i) => (v ? -1 : i)).filter((i) => i >= 0);
+    if (left.length === 0) return;
+    const STEP = 140;
+    const delay = result.items.map(() => 0);
+    const quiet = result.items.map(() => false);
+    left.forEach((i, k) => {
+      delay[i] = reduced ? 0 : k * STEP;
+      quiet[i] = true;
+    });
+    // the best of the cards being turned (items are sorted, best last)
+    const top = left[left.length - 1]!;
+    quiet[top] = false;
+    const it = result.items[top]!;
+    const rank = RANK.indexOf(it.rarity as Rarity);
+    const glow = left.find((i) => isGlow(result.items[i]!.id));
+    setBatch({ delay, quiet });
+    markShown(left);
+    playSound(rank >= 2 ? 'rare_reveal' : 'answer_lock');
+    haptic(rank >= 2 ? 'heavy' : 'tap');
+    const end = (left.length - 1) * STEP + 700;
+    if (glow != null) queueHero(glow, true, end);
+    else if (rank >= 3) queueHero(top, false, end);
   };
 
   const allShown = shown.length > 0 && shown.every(Boolean);
@@ -694,17 +738,19 @@ export default function PackOpenScreen() {
                   width={cardW}
                   revealed={!!shown[i]}
                   glow={isGlow(it.id)}
+                  delay={batch?.delay[i] ?? 0}
+                  quiet={batch?.quiet[i] ?? false}
                   onPress={() => reveal(i)}
                 />
               ))}
             </View>
             {!allShown ? (
               <View style={styles.row}>
-                <StickerButton label={t.tapToFlip} tone="prize" style={styles.flex} onPress={() => reveal(shown.findIndex((v) => !v))} />
+                <StickerButton label={t.tapToFlip} tone="prize" style={styles.flex} onPress={() => reveal(shownRef.current.findIndex((v) => !v))} />
                 <StickerButton label={t.revealAll} tone="outline" onPress={revealAll} />
               </View>
             ) : (
-              <Animated.View entering={reduced ? undefined : FadeIn.duration(300)} style={styles.summary}>
+              <Animated.View entering={reduced ? undefined : FadeIn.delay(batch ? Math.max(...batch.delay) + 500 : 0).duration(300)} style={styles.summary}>
                 <View style={styles.pill}>
                   <AppText variant="heading" color="#FFFFFF" align="center" style={styles.bold}>
                     {newCount === 0 ? t.summaryNone : newCount === 1 ? t.summaryOne : fmt(t.summary, { n: newCount })}
