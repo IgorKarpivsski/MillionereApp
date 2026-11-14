@@ -38,11 +38,11 @@ shot 10_pack
 for k in 1 2 3; do tap 540 1150; sleep 1; done
 sleep 3
 shot 11_cards
-tapText 'חשוף הכל'
+tap 210 1785
 for k in 1 2 3 4 5 6; do sleep 0.4; shot "12_reveal_$k"; done
 sleep 3
 shot 13_after
-tap 540 1200; sleep 2
+sleep 2
 shot 14_end
 adb logcat -d -s ReactNativeJS:* AndroidRuntime:E > shots/logcat.txt 2>/dev/null || true
 exit 0
