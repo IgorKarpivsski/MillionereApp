@@ -7,10 +7,23 @@ import { strings } from '@/lib/i18n';
 import { showRewardedAd } from './ads';
 import { storeApi } from './api';
 import { afterAdVerified } from '@/features/profile/api';
+import { useSettingsStore } from '@/features/settings/store';
 
+/**
+ * Google Play Families: only players who said 16+ on the age screen ever see an ad. For everyone
+ * else (and before the age screen) the game behaves as ad-free: every "watch an ad" reward is a plain
+ * reward, and the server (ad_ssv_consume) grants it without an ad for the same players.
+ */
 export function useStore() {
   const { session } = useAuth();
-  return useQuery({ queryKey: queryKeys.store, queryFn: storeApi.state, enabled: !!session });
+  const ageBand = useSettingsStore((s) => s.ageBand);
+  const kidsNoAds = ageBand !== '16plus';
+  return useQuery({
+    queryKey: queryKeys.store,
+    queryFn: storeApi.state,
+    enabled: !!session,
+    select: (d) => (kidsNoAds && d && !d.ad_free ? { ...d, ad_free: true } : d),
+  });
 }
 
 /**

@@ -110,18 +110,7 @@ export function EnergySheet() {
           {`${fmt(t.adLeft, { n: data.ad_left })} · ${t.freeModes}`}
         </AppText>
       ) : null}
-      {!data.unlimited ? (
-        <StickerButton
-          label={t.goVip}
-          icon="star"
-          tone="ghost"
-          fullWidth
-          onPress={() => {
-            hide();
-            router.push('/shop');
-          }}
-        />
-      ) : null}
+      {/* Google Play Families: no paid offer (VIP) inside the game flow; it lives only in the shop. */}
     </BottomSheet>
   );
 }

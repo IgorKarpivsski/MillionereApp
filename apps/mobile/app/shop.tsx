@@ -21,6 +21,7 @@ import { formatNumber } from '@/lib/format';
 import { queryKeys } from '@/lib/queryClient';
 import { fmt, strings } from '@/lib/i18n';
 import { brand } from '@/lib/brand';
+import { useSettingsStore } from '@/features/settings/store';
 
 const t = strings.store;
 const dateHe = (iso: string) => new Date(iso).toLocaleDateString('he-IL', { day: 'numeric', month: 'long' });
@@ -34,6 +35,10 @@ export default function ShopScreen() {
   const ad = useAdReward();
   const [buying, setBuying] = useState<string | null>(null);
   const [gateFor, setGateFor] = useState<StoreProduct | null>(null);
+  const grownUp = useSettingsStore((x) => x.ageBand) === '16plus';
+  const [parentOpened, setParentOpened] = useState(false);
+  const [askParent, setAskParent] = useState(false);
+  const moneyOpen = grownUp || parentOpened;
 
   const { connected, products, subscriptions, fetchProducts, requestPurchase } = useIAP({
     onPurchaseSuccess: async (purchase: Purchase) => {
@@ -222,60 +227,82 @@ export default function ShopScreen() {
 
         <BoostShop />
 
-        <View style={styles.moneyHead}>
-          <View style={styles.sectionHead}>
-            <View style={[styles.chip, styles.moneyChip]}>
-              <AppText variant="caption" color="#FFFFFF" style={styles.bold}>
-                {t.moneyTag}
+        {/* Google Play Families: real-money offers are kept apart from the game. Under 16 (or before the
+            age screen) this part stays closed until a parent opens it with the parent check. */}
+        {moneyOpen ? (
+          <>
+          <View style={styles.moneyHead}>
+            <View style={styles.sectionHead}>
+              <View style={[styles.chip, styles.moneyChip]}>
+                <AppText variant="caption" color="#FFFFFF" style={styles.bold}>
+                  {t.moneyTag}
+                </AppText>
+              </View>
+              <AppText variant="heading" style={styles.flex}>
+                {t.moneySectionTitle}
               </AppText>
             </View>
-            <AppText variant="heading" style={styles.flex}>
-              {t.moneySectionTitle}
+            <AppText variant="caption" color={colors.textMuted}>
+              {t.moneySectionBody}
             </AppText>
           </View>
-          <AppText variant="caption" color={colors.textMuted}>
-            {t.moneySectionBody}
-          </AppText>
-        </View>
-        <AppText variant="heading">{t.vipTitle}</AppText>
-        {sub && (sub.state === 'grace' || sub.state === 'on_hold' || sub.state === 'paused') ? (
-          <Card kind="sticker" frame={colors.danger} padding={space.md} style={styles.item}>
-            <AppText variant="label" color={colors.text}>
-              {sub.state === 'grace' ? t.subGrace : sub.state === 'on_hold' ? t.subOnHold : t.subPaused}
+          <AppText variant="heading">{t.vipTitle}</AppText>
+          {sub && (sub.state === 'grace' || sub.state === 'on_hold' || sub.state === 'paused') ? (
+            <Card kind="sticker" frame={colors.danger} padding={space.md} style={styles.item}>
+              <AppText variant="label" color={colors.text}>
+                {sub.state === 'grace' ? t.subGrace : sub.state === 'on_hold' ? t.subOnHold : t.subPaused}
+              </AppText>
+              <StickerButton label={t.fixPayment} icon="card" tone="danger" size="sm" onPress={() => openManageSubscription(sub.sku)} />
+            </Card>
+          ) : null}
+          {store?.products.filter((p) => p.kind === 'vip').map((p) => <Item key={p.sku} p={p} />)}
+          <View style={styles.perks}>
+            {t.vipPerks.map((perk) => (
+              <AppText key={perk} variant="caption" color={colors.textMuted}>
+                {`✓ ${perk}`}
+              </AppText>
+            ))}
+          </View>
+          {sub && (sub.state === 'active' || sub.state === 'canceled') && sub.expires_at ? (
+            <AppText variant="label" color={colors.led}>
+              {fmt(sub.state === 'active' && sub.auto_renew ? t.subActive : t.subCanceled, { date: dateHe(sub.expires_at) })}
             </AppText>
-            <StickerButton label={t.fixPayment} icon="card" tone="danger" size="sm" onPress={() => openManageSubscription(sub.sku)} />
+          ) : vipActive && store?.vip_until && !sub ? (
+            <AppText variant="label" color={colors.led}>
+              {fmt(t.vipBonusNote, { date: dateHe(store.vip_until) })}
+            </AppText>
+          ) : null}
+          {vipPrice && !vipActive ? (
+            <AppText variant="caption" color={colors.textDim}>
+              {`${trialDays ? fmt(t.subTrialTerms, { price: vipPrice }) + ' ' : ''}${fmt(t.subTerms, { price: vipPrice })}`}
+            </AppText>
+          ) : null}
+          {sub ? <StickerButton label={t.manage} icon="settings" tone="ghost" size="sm" onPress={() => openManageSubscription(sub.sku)} /> : null}
+
+          <AppText variant="heading">{t.coinsTitle}</AppText>
+          {store?.products.filter((p) => p.kind === 'coins').map((p) => <Item key={p.sku} p={p} />)}
+          <AppText variant="heading">{t.gemsTitle}</AppText>
+          {store?.products.filter((p) => p.kind === 'gems').map((p) => <Item key={p.sku} p={p} />)}
+          {grownUp ? store?.products.filter((p) => p.kind === 'no_ads').map((p) => <Item key={p.sku} p={p} />) : null}
+          </>
+        ) : (
+          <Card kind="panel" padding={space.md} style={styles.item}>
+            <View style={styles.sectionHead}>
+              <View style={[styles.chip, styles.moneyChip]}>
+                <AppText variant="caption" color="#FFFFFF" style={styles.bold}>
+                  {t.moneyTag}
+                </AppText>
+              </View>
+              <AppText variant="heading" style={styles.flex}>
+                {t.parentsAreaTitle}
+              </AppText>
+            </View>
+            <AppText variant="caption" color={colors.textMuted}>
+              {t.parentsAreaBody}
+            </AppText>
+            <StickerButton label={t.parentsAreaCta} icon="lock-closed" tone="ghost" size="sm" onPress={() => setAskParent(true)} />
           </Card>
-        ) : null}
-        {store?.products.filter((p) => p.kind === 'vip').map((p) => <Item key={p.sku} p={p} />)}
-        <View style={styles.perks}>
-          {t.vipPerks.map((perk) => (
-            <AppText key={perk} variant="caption" color={colors.textMuted}>
-              {`✓ ${perk}`}
-            </AppText>
-          ))}
-        </View>
-        {sub && (sub.state === 'active' || sub.state === 'canceled') && sub.expires_at ? (
-          <AppText variant="label" color={colors.led}>
-            {fmt(sub.state === 'active' && sub.auto_renew ? t.subActive : t.subCanceled, { date: dateHe(sub.expires_at) })}
-          </AppText>
-        ) : vipActive && store?.vip_until && !sub ? (
-          <AppText variant="label" color={colors.led}>
-            {fmt(t.vipBonusNote, { date: dateHe(store.vip_until) })}
-          </AppText>
-        ) : null}
-        {vipPrice && !vipActive ? (
-          <AppText variant="caption" color={colors.textDim}>
-            {`${trialDays ? fmt(t.subTrialTerms, { price: vipPrice }) + ' ' : ''}${fmt(t.subTerms, { price: vipPrice })}`}
-          </AppText>
-        ) : null}
-        {sub ? <StickerButton label={t.manage} icon="settings" tone="ghost" size="sm" onPress={() => openManageSubscription(sub.sku)} /> : null}
-
-        <AppText variant="heading">{t.coinsTitle}</AppText>
-        {store?.products.filter((p) => p.kind === 'coins').map((p) => <Item key={p.sku} p={p} />)}
-        <AppText variant="heading">{t.gemsTitle}</AppText>
-        {store?.products.filter((p) => p.kind === 'gems').map((p) => <Item key={p.sku} p={p} />)}
-        {store?.products.filter((p) => p.kind === 'no_ads').map((p) => <Item key={p.sku} p={p} />)}
-
+        )}
         {!storeReady ? (
           <AppText variant="caption" color={colors.textDim} align="center">
             {t.notReady}
@@ -302,6 +329,14 @@ export default function ShopScreen() {
           {vipActive ? 'VIP' : ''}
         </Led>
       </ScrollView>
+      <ParentalGate
+        visible={askParent}
+        onClose={() => setAskParent(false)}
+        onPass={() => {
+          setAskParent(false);
+          setParentOpened(true);
+        }}
+      />
       <ParentalGate
         visible={!!gateFor}
         onClose={() => setGateFor(null)}
