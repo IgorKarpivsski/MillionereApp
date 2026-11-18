@@ -242,8 +242,9 @@ export function SessionTools({
       <BottomSheet visible={hintOpen} onClose={() => setHintOpen(false)} title={strings.hint.title}>
         <StickerButton
           label={store?.ad_free ? strings.hint.adFree : strings.hint.ad}
-          icon={store?.ad_free ? 'gift' : 'play-circle'}
-          tone="prize"
+          icon={store?.ad_free ? 'gift' : 'tv'}
+          tone={store?.ad_free ? 'prize' : 'ad'}
+          tag={store?.ad_free ? undefined : strings.store.adTag}
           fullWidth
           onPress={async () => {
             setHintOpen(false);

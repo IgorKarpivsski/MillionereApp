@@ -142,7 +142,9 @@ export default function ShopScreen() {
           <StickerButton
             label={owned ? t.owned : price ?? t.soon}
             size="sm"
-            tone={owned ? 'ghost' : 'primary'}
+            tone={owned ? 'ghost' : 'money'}
+            icon={owned ? undefined : 'card'}
+            tag={owned || !price ? undefined : t.moneyTag}
             disabled={owned || !price || !!buying}
             loading={buying === p.sku}
             // Grown-ups (16+ on the age screen) buy straight away; younger players ask a parent first.
@@ -163,7 +165,19 @@ export default function ShopScreen() {
       </View>
       <ScrollView contentContainerStyle={styles.body}>
         {store?.free_pack_today ? (
-          <Card kind="sticker" frame={colors.correct} padding={space.md}>
+          <Card kind="panel" padding={space.md} style={ad.adFree ? undefined : styles.adCard}>
+            {ad.adFree ? null : (
+              <View style={styles.sectionHead}>
+                <View style={[styles.chip, styles.adChip]}>
+                  <AppText variant="caption" color="#FFFFFF" style={styles.bold}>
+                    {t.adTag}
+                  </AppText>
+                </View>
+                <AppText variant="caption" color={colors.textMuted} style={styles.flex}>
+                  {t.adSectionBody}
+                </AppText>
+              </View>
+            )}
             <View style={styles.row}>
               <View style={styles.flex}>
                 <AppText variant="label">{t.freePack}</AppText>
@@ -173,7 +187,9 @@ export default function ShopScreen() {
               </View>
               <StickerButton
                 label={ad.adFree ? t.take : t.watch}
-                icon={ad.adFree ? 'gift' : 'play-circle'}
+                icon={ad.adFree ? 'gift' : 'tv'}
+                tone={ad.adFree ? 'primary' : 'ad'}
+                tag={ad.adFree ? undefined : t.adTag}
                 size="sm"
                 loading={ad.busy}
                 onPress={async () => {
@@ -196,10 +212,31 @@ export default function ShopScreen() {
           />
         ) : null}
 
+        <View style={styles.section}>
+          <AppText variant="heading">{t.virtualSectionTitle}</AppText>
+          <AppText variant="caption" color={colors.textMuted}>
+            {t.virtualSectionBody}
+          </AppText>
+        </View>
         {deals ? <DealCard state={deals} /> : null}
 
         <BoostShop />
 
+        <View style={styles.moneyHead}>
+          <View style={styles.sectionHead}>
+            <View style={[styles.chip, styles.moneyChip]}>
+              <AppText variant="caption" color="#FFFFFF" style={styles.bold}>
+                {t.moneyTag}
+              </AppText>
+            </View>
+            <AppText variant="heading" style={styles.flex}>
+              {t.moneySectionTitle}
+            </AppText>
+          </View>
+          <AppText variant="caption" color={colors.textMuted}>
+            {t.moneySectionBody}
+          </AppText>
+        </View>
         <AppText variant="heading">{t.vipTitle}</AppText>
         {sub && (sub.state === 'grace' || sub.state === 'on_hold' || sub.state === 'paused') ? (
           <Card kind="sticker" frame={colors.danger} padding={space.md} style={styles.item}>
@@ -298,4 +335,19 @@ const styles = StyleSheet.create({
   },
   bold: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
   perks: { gap: 2, paddingHorizontal: space.sm },
+  section: { gap: 2, marginTop: space.sm },
+  sectionHead: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginBottom: space.xs },
+  chip: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
+  adChip: { backgroundColor: '#1E1A2E', borderWidth: 1, borderColor: '#E4E1EC' },
+  moneyChip: { backgroundColor: '#1E7F4F' },
+  adCard: { borderWidth: 2, borderColor: '#E4E1EC', borderStyle: 'dashed' },
+  moneyHead: {
+    marginTop: space.lg,
+    padding: space.md,
+    gap: 2,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: '#2FAE6C',
+    backgroundColor: 'rgba(47,174,108,0.12)',
+  },
 });

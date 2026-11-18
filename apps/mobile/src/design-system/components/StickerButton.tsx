@@ -9,7 +9,7 @@ import { colors, hitTarget, lip as lipDepth, palette, radius, space, spring } fr
 import { AppText } from './AppText';
 import { useToast } from './Toast';
 
-type Tone = 'primary' | 'prize' | 'danger' | 'gem' | 'ghost' | 'outline';
+type Tone = 'primary' | 'prize' | 'danger' | 'gem' | 'ghost' | 'outline' | 'ad' | 'money';
 type Size = 'lg' | 'md' | 'sm';
 
 const tones: Record<Tone | 'locked', { face: string; lip: string; label: string; border?: string }> = {
@@ -20,6 +20,10 @@ const tones: Record<Tone | 'locked', { face: string; lip: string; label: string;
   locked: { face: '#4B4766', lip: '#26233A', label: '#B9B5CC' },
   ghost: { face: '#2A1C66', lip: '#0E0826', label: colors.text, border: 'rgba(255,214,140,0.28)' },
   outline: { face: '#211552', lip: '#0E0826', label: colors.led, border: colors.led },
+  // Google Play Families: an ad button never looks like a game button (plain light grey, dark text, an "ad" tag).
+  ad: { face: '#E4E1EC', lip: '#9C98AD', label: '#1E1A2E' },
+  // Real-money purchase: its own look (white with a green edge), never the game's coloured keys.
+  money: { face: '#FFFFFF', lip: '#1E7F4F', label: '#0F4D2E', border: '#2FAE6C' },
 };
 
 const heights: Record<Size, number> = { lg: 58, md: 50, sm: hitTarget };
@@ -37,6 +41,8 @@ export interface StickerButtonProps {
   /** Why the button is off (no coins, no tickets): tapping the grey button says so. */
   disabledReason?: string;
   style?: ViewStyle;
+  /** A small tag on the button's corner, e.g. "פרסומת" or "כסף אמיתי". */
+  tag?: string;
 }
 
 /**
@@ -55,6 +61,7 @@ export function StickerButton({
   accessibilityHint,
   disabledReason,
   style,
+  tag,
 }: StickerButtonProps) {
   // a disabled button is grey with a lock, so it never looks like it can be pressed
   const locked = disabled && !loading;
@@ -65,7 +72,7 @@ export function StickerButton({
   const reduced = useReducedMotion();
   const pressed = useSharedValue(0);
   const inactive = disabled || loading;
-  const bright = !locked && tone !== 'ghost' && tone !== 'outline';
+  const bright = !locked && tone !== 'ghost' && tone !== 'outline' && tone !== 'ad' && tone !== 'money';
   // Glow only where it's a pure shadow (iOS). Android elevation lifts the lip into its own
   // layer, and on some phones the face's label then disappears behind it.
   const glow = bright && !inactive && Platform.OS === 'ios';
@@ -79,7 +86,7 @@ export function StickerButton({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={tag ? `${tag}: ${label}` : label}
       accessibilityHint={locked && disabledReason ? disabledReason : accessibilityHint}
       accessibilityState={{ disabled: inactive, busy: loading }}
       disabled={loading || (locked && !disabledReason)}
@@ -126,6 +133,13 @@ export function StickerButton({
             <ActivityIndicator color={t.label} />
           ) : (
             <>
+              {tag ? (
+                <View style={[styles.tag, { backgroundColor: tone === 'money' ? '#1E7F4F' : '#1E1A2E' }]}>
+                  <AppText variant="caption" color="#FFFFFF" style={styles.tagText}>
+                    {tag}
+                  </AppText>
+                </View>
+              ) : null}
               {locked ? (
                 <Ionicons name="lock-closed" size={size === 'lg' ? 22 : 18} color={t.label} />
               ) : icon ? (
@@ -148,5 +162,7 @@ const styles = StyleSheet.create({
   lip: { position: 'absolute', start: 0, end: 0, borderRadius: radius.control },
   face: { borderRadius: radius.control },
   faceFill: { ...StyleSheet.absoluteFillObject, borderRadius: radius.control, overflow: 'hidden' },
+  tag: { paddingHorizontal: 6, borderRadius: 6, zIndex: 1 },
+  tagText: { fontSize: 11, lineHeight: 16, fontFamily: 'IBMPlexSansHebrew_700Bold' },
   content: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm },
 });

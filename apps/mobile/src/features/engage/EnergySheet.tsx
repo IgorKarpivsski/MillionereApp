@@ -91,8 +91,9 @@ export function EnergySheet() {
       {!data.unlimited && data.ad_left > 0 ? (
         <StickerButton
           label={t.refillAd}
-          icon="play-circle"
-          tone="outline"
+          icon="tv"
+          tone={store?.ad_free ? 'outline' : 'ad'}
+          tag={store?.ad_free ? undefined : strings.store.adTag}
           fullWidth
           loading={refill.isPending && refill.variables === 'ad'}
           onPress={async () => {

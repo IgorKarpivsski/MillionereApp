@@ -329,8 +329,9 @@ function DoubleCoins({ runId, coins }: { runId?: string; coins: number }) {
   return (
     <StickerButton
       label={fmt(ad.adFree ? strings.store.doubleNoAd : strings.store.double, { n: formatNumber(ad.adFree ? coins : coins * 2) })}
-      icon={ad.adFree ? 'gift' : 'play-circle'}
-      tone="outline"
+      icon={ad.adFree ? 'gift' : 'tv'}
+      tone={ad.adFree ? 'outline' : 'ad'}
+      tag={ad.adFree ? undefined : strings.store.adTag}
       fullWidth
       loading={ad.busy}
       onPress={async () => {

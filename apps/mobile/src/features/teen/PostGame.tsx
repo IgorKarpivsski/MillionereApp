@@ -62,8 +62,9 @@ export function PostGameRank({ runId, points, double: canDouble = true }: { runI
       {canDouble && runId && points > 0 && !doubled ? (
         <StickerButton
           label={fmt(ad.adFree ? t.doubleFree : t.double, { n: formatNumber(points) })}
-          icon={ad.adFree ? 'gift' : 'play-circle'}
-          tone="gem"
+          icon={ad.adFree ? 'gift' : 'tv'}
+          tone={ad.adFree ? 'gem' : 'ad'}
+          tag={ad.adFree ? undefined : strings.store.adTag}
           fullWidth
           loading={ad.busy}
           onPress={() => void double()}

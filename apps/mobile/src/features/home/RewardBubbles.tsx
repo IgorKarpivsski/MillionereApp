@@ -187,14 +187,16 @@ export function useRewardBubbles(): BubbleDef[] {
     });
   }
 
-  if (store?.free_pack_today) {
+  // Google Play Families: a pack that costs watching an ad is not a prize, so it never sits among the
+  // prizes here. It waits in the shop under its own "ad" heading; only ad-free players get it here.
+  if (store?.free_pack_today && ad.adFree) {
     out.push({
       key: 'freepack',
       label: t.freePack,
       colors: ['#3DDC84', '#14A3B8'],
       icon: <Icon name="packs" size={36} />,
       ready: true,
-      badge: ad.adFree ? t.free : '▶',
+      badge: t.free,
       onPress: async (at) => {
         const r = await ad.run('free_pack');
         if (r) {
