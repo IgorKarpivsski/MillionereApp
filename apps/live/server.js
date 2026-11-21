@@ -35,17 +35,13 @@ let lib = null;
 let retryTimer = null;
 let wantUser = '';
 
-let anonN = 0;
 function pickUser(u) {
   u = u || {};
   const real = (v) => (v && String(v) !== '0' ? String(v) : '');
   const id = real(u.uniqueId) || real(u.displayId) || real(u.id) || real(u.userId) || real(u.secUid);
   const avatar = u.avatarThumb?.urlList?.[0] || u.profilePicture?.url?.[0] || u.profilePictureUrl || '';
   if (id) return { id, name: u.nickname || id, avatar };
-  // anonymous / hidden viewers come without any id: keep them apart by nickname, or count each message on its own
-  if (u.nickname) return { id: 'anon:' + u.nickname, name: u.nickname, avatar };
-  anonN += 1;
-  return { id: 'anon:' + anonN, name: `צופה חסוי ${anonN}`, avatar: '' };
+  return null; // hidden / anonymous viewer: no id, so they don't play
 }
 
 async function connect(username) {
@@ -67,18 +63,18 @@ async function connect(username) {
 
   c.on(WebcastEvent.CHAT, (m) => {
     const u = pickUser(m.user);
-    send({ type: 'chat', ...u, text: String(m.content ?? m.comment ?? '') });
+    if (u) send({ type: 'chat', ...u, text: String(m.content ?? m.comment ?? '') });
   });
   c.on(WebcastEvent.GIFT, (m) => {
     // streakable gifts arrive many times; only the last one of a streak counts
     const streak = m.gift?.type === 1 || m.giftDetails?.giftType === 1;
     if (streak && !m.repeatEnd) return;
-    const u = pickUser(m.user);
+    const u = pickUser(m.user) || { id: '', name: 'צופה', avatar: '' };
     const gift = m.gift?.name || m.giftDetails?.giftName || 'מתנה';
     send({ type: 'gift', ...u, gift, count: m.repeatCount || 1 });
   });
-  c.on(WebcastEvent.MEMBER, (m) => send({ type: 'join', ...pickUser(m.user) }));
-  c.on(WebcastEvent.FOLLOW, (m) => send({ type: 'follow', ...pickUser(m.user) }));
+  c.on(WebcastEvent.MEMBER, (m) => { const u = pickUser(m.user); if (u) send({ type: 'join', ...u }); });
+  c.on(WebcastEvent.FOLLOW, (m) => { const u = pickUser(m.user); if (u) send({ type: 'follow', ...u }); });
   c.on(WebcastEvent.STREAM_END, () => setStatus('ended', 'השידור הסתיים'));
   c.on(ControlEvent?.DISCONNECTED || 'disconnected', () => {
     if (conn !== c) return;
