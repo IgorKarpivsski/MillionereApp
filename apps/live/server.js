@@ -35,10 +35,17 @@ let lib = null;
 let retryTimer = null;
 let wantUser = '';
 
-function pickUser(u = {}) {
-  const id = u.uniqueId || u.displayId || u.userId || '';
+let anonN = 0;
+function pickUser(u) {
+  u = u || {};
+  const real = (v) => (v && String(v) !== '0' ? String(v) : '');
+  const id = real(u.uniqueId) || real(u.displayId) || real(u.id) || real(u.userId) || real(u.secUid);
   const avatar = u.avatarThumb?.urlList?.[0] || u.profilePicture?.url?.[0] || u.profilePictureUrl || '';
-  return { id: String(id), name: u.nickname || String(id) || 'צופה', avatar };
+  if (id) return { id, name: u.nickname || id, avatar };
+  // anonymous / hidden viewers come without any id: keep them apart by nickname, or count each message on its own
+  if (u.nickname) return { id: 'anon:' + u.nickname, name: u.nickname, avatar };
+  anonN += 1;
+  return { id: 'anon:' + anonN, name: `צופה חסוי ${anonN}`, avatar: '' };
 }
 
 async function connect(username) {
@@ -86,7 +93,7 @@ async function connect(username) {
   } catch (e) {
     if (conn !== c) return;
     const raw = String(e?.message || e);
-    const offline = /offline|not.*live|UserOffline|Room ID/i.test(raw) || e?.name === 'UserOfflineError';
+    const offline = /offline|online|not.*live|UserOffline|Room ID/i.test(raw) || e?.name === 'UserOfflineError';
     setStatus('error', offline ? `לא מצאתי לייב פעיל של @${username}. ודא שאתה כבר בשידור חי ושהשם נכון, ונסה שוב.` : `לא הצלחתי להתחבר: ${raw.slice(0, 140)}`);
     conn = null;
   }
