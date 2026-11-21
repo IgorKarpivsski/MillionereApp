@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>טריוויה האלוף · לייב</title>
+<link rel="icon" href="assets/sloth_head.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="viewport">
+  <div id="stage">
+    <div class="bg-glow"></div>
+    <div class="stars"></div>
+
+    <!-- top bar -->
+    <header class="topbar">
+      <div class="brand">
+        <img src="assets/sloth_head.webp" alt="">
+        <div>
+          <div class="brand-name">טריוויה <span>האלוף</span></div>
+          <div class="brand-sub">משחקים יחד בלייב</div>
+        </div>
+      </div>
+      <div class="pills">
+        <div class="pill live" id="livePill"><i></i><span id="liveText">לא מחובר</span></div>
+        <div class="pill" id="roundPill">סבב <b id="roundNo">1</b></div>
+      </div>
+    </header>
+
+    <!-- ===== lobby ===== -->
+    <section class="screen" id="lobby">
+      <img class="lobby-sloth" src="assets/sloth.webp" alt="">
+      <h1 class="lobby-title">טריוויה <span>האלוף</span></h1>
+      <p class="lobby-sub">עונים בצ'אט ומטפסים בטבלה!</p>
+      <div class="howto">
+        <div class="howto-row"><b>1</b><span>מופיעה שאלה עם 4 תשובות</span></div>
+        <div class="howto-row"><b>2</b><span>כותבים בצ'אט את המספר: <em>1</em> <em>2</em> <em>3</em> <em>4</em></span></div>
+        <div class="howto-row"><b>3</b><span>מי שעונה נכון ומהר מקבל יותר נקודות</span></div>
+      </div>
+      <div class="lobby-count" id="lobbyCount">מתחילים עוד רגע…</div>
+    </section>
+
+    <!-- ===== question ===== -->
+    <section class="screen hidden" id="game">
+      <div class="world-row">
+        <div class="world-badge"><img id="worldImg" alt=""><span id="worldName"></span></div>
+        <div class="q-counter">שאלה <b id="qNo">1</b> מתוך <b id="qTotal">10</b></div>
+      </div>
+      <div class="timer"><div class="timer-fill" id="timerFill"></div><div class="timer-num" id="timerNum">20</div></div>
+
+      <div class="qcard">
+        <div class="qcard-meta" id="qMeta"></div>
+        <div class="qcard-text" id="qText"></div>
+      </div>
+      <div class="qimage hidden" id="qImageWrap"><img id="qImage" alt=""></div>
+
+      <div class="answers" id="answers"></div>
+
+      <div class="reveal hidden" id="reveal">
+        <div class="reveal-head">
+          <img src="assets/sloth_head.webp" alt="">
+          <div class="bubble" id="revealLine"></div>
+        </div>
+        <div class="explain" id="explain"></div>
+        <div class="fastest" id="fastest"></div>
+      </div>
+
+      <div class="answering" id="answering">
+        <div class="answering-count"><b id="answerCount">0</b> ענו</div>
+        <div class="answering-faces" id="faces"></div>
+      </div>
+    </section>
+
+    <!-- ===== round end ===== -->
+    <section class="screen hidden" id="roundEnd">
+      <div class="re-title">סוף הסבב!</div>
+      <div class="podium" id="podium"></div>
+      <div class="re-list" id="reList"></div>
+      <div class="re-next" id="reNext"></div>
+    </section>
+
+    <!-- bottom: how to answer + session leaderboard -->
+    <footer class="bottom">
+      <div class="hint" id="hint">כתבו בצ'אט <em>1</em> <em>2</em> <em>3</em> <em>4</em> כדי לענות</div>
+      <div class="board">
+        <div class="board-title">🏆 טבלת האלופים של הלייב</div>
+        <ol class="board-list" id="board"></ol>
+      </div>
+      <div class="store">משחקים גם בטלפון? חפשו בגוגל פליי: <b>טריוויה האלוף</b></div>
+    </footer>
+
+    <div class="toasts" id="toasts"></div>
+    <div class="paused hidden" id="pausedBadge">⏸ הפסקה</div>
+  </div>
+</div>
+
+<!-- ===== host panel (not part of the 9:16 stage) ===== -->
+<button id="panelBtn" title="הגדרות (H)">⚙️</button>
+<aside id="panel" class="open">
+  <div class="panel-head">
+    <b>לוח בקרה</b>
+    <button class="x" id="panelClose" title="סגירה (H)">✕</button>
+  </div>
+
+  <label class="f">שם המשתמש שלך בטיקטוק
+    <div class="row"><input id="ttUser" placeholder="לדוגמה: geodudex0" dir="ltr"><button id="connectBtn" class="primary">התחבר</button></div>
+  </label>
+  <div class="status" id="statusLine">לא מחובר לטיקטוק</div>
+
+  <div class="grid2">
+    <label class="f">עולם
+      <select id="optWorld"></select>
+    </label>
+    <label class="f">רמת קושי
+      <select id="optDiff">
+        <option value="mix">מעורב</option>
+        <option value="e">קל</option>
+        <option value="m">בינוני</option>
+      </select>
+    </label>
+    <label class="f">זמן לשאלה
+      <select id="optTime">
+        <option value="15">15 שניות</option>
+        <option value="20" selected>20 שניות</option>
+        <option value="25">25 שניות</option>
+        <option value="30">30 שניות</option>
+      </select>
+    </label>
+    <label class="f">שאלות בסבב
+      <select id="optCount">
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="15">15</option>
+        <option value="20">20</option>
+      </select>
+    </label>
+  </div>
+
+  <label class="chk"><input type="checkbox" id="optAuto" checked> מעבר אוטומטי לשאלה הבאה</label>
+  <label class="chk"><input type="checkbox" id="optRotate" checked> להחליף עולם בכל סבב (כשנבחר "הכל")</label>
+  <label class="chk"><input type="checkbox" id="optSound" checked> צלילים</label>
+  <label class="chk"><input type="checkbox" id="optMusic"> מוזיקת רקע</label>
+  <label class="chk"><input type="checkbox" id="optHost" checked> גם אני משחק (לחיצה על תשובה או מקשים 1–4)</label>
+  <label class="chk"><input type="checkbox" id="optDemo"> מצב בדיקה (צופים מדומים)</label>
+
+  <div class="btns">
+    <button class="primary big" id="startBtn">▶ התחל סבב</button>
+    <button id="nextBtn">⏭ הבא</button>
+    <button id="pauseBtn">⏸ הפסקה</button>
+  </div>
+  <div class="btns">
+    <button id="resetBtn" class="danger">איפוס הטבלה</button>
+    <button id="fullBtn">מסך מלא</button>
+  </div>
+
+  <div class="keys">
+    <b>מקשים:</b> רווח = התחל/הבא · P = הפסקה · H = הסתר לוח · F = מסך מלא · 1–4 = התשובה שלך
+  </div>
+  <div class="tip">טיפ לשידור: ב־TikTok LIVE Studio הוסף מקור <b>חלון</b> או <b>לכידת מסך</b> של הדפדפן הזה. כשהלוח סגור, נשאר רק מסך המשחק (9:16).</div>
+</aside>
+
+<script src="game.js"></script>
+</body>
+</html>

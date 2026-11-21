@@ -1,0 +1,17 @@
+{
+  "name": "haaluf-live",
+  "version": "1.0.0",
+  "private": true,
+  "description": "טריוויה - האלוף: מצב שידור לטיקטוק לייב. הצופים עונים בצ'אט.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "tiktok-live-connector": "2.5.0"
+  }
+}
