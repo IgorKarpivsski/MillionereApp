@@ -60,7 +60,7 @@ async function connect(username) {
 
   c.on(WebcastEvent.CHAT, (m) => {
     const u = pickUser(m.user);
-    send({ type: 'chat', ...u, text: String(m.comment || '') });
+    send({ type: 'chat', ...u, text: String(m.content ?? m.comment ?? '') });
   });
   c.on(WebcastEvent.GIFT, (m) => {
     // streakable gifts arrive many times; only the last one of a streak counts
