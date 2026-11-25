@@ -414,6 +414,13 @@ export default function SessionScreen() {
   }, [s.phase, s.reveal, s.summary, next]);
 
   const secs = useSecondsLeft(s.deadlineAt, s.phase === 'question', timeUp);
+  // the sloth's reaction and the explanation sit under the question; with a photo they'd be below the fold
+  const bodyScroll = useRef<ScrollView>(null);
+  useEffect(() => {
+    if (!s.reveal) return;
+    const id = setTimeout(() => bodyScroll.current?.scrollToEnd({ animated: true }), 380);
+    return () => clearTimeout(id);
+  }, [s.reveal]);
 
   const exit = useCallback(() => {
     if (s.phase === 'finished' || s.phase === 'error' || !s.payload) {
@@ -548,7 +555,7 @@ export default function SessionScreen() {
         </View>
       </View>
 
-      <ScrollView style={styles.flex} contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+      <ScrollView ref={bodyScroll} style={styles.flex} contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <View style={styles.qHead}>
           <WorldBadge icon={qWorld.icon} color={qWorld.color} size={34} />
           <AppText variant="label" color={colors.textMuted} style={styles.flex}>
@@ -583,7 +590,7 @@ export default function SessionScreen() {
           <AppText variant="question" color={colors.cardText}>
             {q.text}
           </AppText>
-          {q.image ? <QuestionImageView image={q.image} /> : null}
+          {q.image ? <QuestionImageView image={q.image} linkable={s.phase === 'reveal'} /> : null}
           {s.payload.question_author ? (
             <AppText variant="caption" color={colors.cardMuted}>
               {`✍️ ${fmt(strings.teen.questionBy, { name: s.payload.question_author })}`}

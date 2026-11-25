@@ -2,6 +2,7 @@ import type { QuestionImage as QImage } from '@fm/shared';
 import * as WebBrowser from 'expo-web-browser';
 import { memo, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { ParentalGate } from '@/components/ParentalGate';
 import { AppText } from '@/design-system/components';
 import { colors, radius } from '@/design-system/tokens';
 import { QuestionMap } from './QuestionMap';
@@ -13,8 +14,19 @@ const UA = 'HaAlufTrivia/1.0 (Android; https://github.com/IgorKarpivsski/Million
  * A Wikimedia Commons photo with its author/license credit underneath (required by the licenses).
  * The photo is always shown WHOLE: a soft, blurred copy fills the frame behind it, so a tall
  * portrait never loses its head to the frame's wide shape.
+ * The credit opens the source page only once the answer is shown (the page would give it away),
+ * and only after the parental gate (it leaves the app).
  */
-export const QuestionPhoto = memo(function QuestionPhoto({ image, height: fixed }: { image: Extract<QImage, { kind: 'photo' }>; height?: number }) {
+export const QuestionPhoto = memo(function QuestionPhoto({
+  image,
+  height: fixed,
+  linkable = false,
+}: {
+  image: Extract<QImage, { kind: 'photo' }>;
+  height?: number;
+  linkable?: boolean;
+}) {
+  const [gate, setGate] = useState(false);
   // big enough to recognise a face; on small phones the photo gives way first to keep the answers on screen
   const { height: screenH } = useWindowDimensions();
   const height = fixed ?? (screenH < 700 ? 150 : screenH < 800 ? 200 : 250);
@@ -46,16 +58,24 @@ export const QuestionPhoto = memo(function QuestionPhoto({ image, height: fixed 
         ) : null}
       </View>
       <Pressable
-        onPress={() => (image.page ? void WebBrowser.openBrowserAsync(image.page) : undefined)}
-        disabled={!image.page}
+        onPress={() => setGate(true)}
+        disabled={!image.page || !linkable}
         hitSlop={6}
-        accessibilityRole="link"
+        accessibilityRole={linkable && image.page ? 'link' : 'text'}
         accessibilityLabel={`קרדיט לתמונה: ${image.credit}`}
       >
         <AppText variant="caption" color={colors.cardMuted} numberOfLines={1} style={styles.credit}>
           {`📷 ${image.credit}`}
         </AppText>
       </Pressable>
+      <ParentalGate
+        visible={gate}
+        onClose={() => setGate(false)}
+        onPass={() => {
+          setGate(false);
+          if (image.page) void WebBrowser.openBrowserAsync(image.page);
+        }}
+      />
     </View>
   );
 });
@@ -71,8 +91,8 @@ export function PhotoCredits({ answers }: { answers: { image?: Extract<QImage, {
   );
 }
 
-export function QuestionImageView({ image }: { image: QImage }) {
-  return image.kind === 'map' ? <QuestionMap image={image} /> : <QuestionPhoto image={image} />;
+export function QuestionImageView({ image, linkable }: { image: QImage; linkable?: boolean }) {
+  return image.kind === 'map' ? <QuestionMap image={image} /> : <QuestionPhoto image={image} linkable={linkable} />;
 }
 
 const styles = StyleSheet.create({

@@ -7,6 +7,7 @@ import { PACK_NAMES, PackArt } from '@/features/collection/PackArt';
 import { formatNumber } from '@/lib/format';
 import { fmt, strings } from '@/lib/i18n';
 import { BoostIcon, boostName } from '@/features/boosts/meta';
+import { ItemThumb } from '@/features/wardrobe/SlothDoll';
 import type { BoostKind } from '@fm/shared';
 
 const t = strings.engage;
@@ -25,6 +26,7 @@ export function rewardLabel(r: Reward): string {
     case 'boost':
       return fmt(t.rewards.boost, { name: boostName(r.boost ?? ''), n: r.amount });
     case 'cosmetic':
+      if (r.item?.startsWith('w_')) return (strings.wardrobe.names as Record<string, string>)[r.item] ?? t.premium;
       return (t.cosmetics as Record<string, string>)[r.item ?? ''] ?? t.premium;
   }
 }
@@ -48,6 +50,7 @@ export function RewardIcon({ r, size = 28 }: { r: Reward; size?: number }) {
     case 'boost':
       return <BoostIcon boost={(r.boost ?? 'time') as BoostKind} size={size} />;
     case 'cosmetic':
+      if (r.item?.startsWith('w_')) return <ItemThumb id={r.item} size={size} />;
       return <Ionicons name={r.item?.startsWith('avatar') ? 'happy' : r.item?.startsWith('badge') ? 'ribbon' : 'square-outline'} size={size} color={colors.led} />;
   }
 }

@@ -1,0 +1,741 @@
+[
+ {
+  "id": "w_hat_cap_red",
+  "cat": "hat",
+  "name": "כובע מצחייה אדום",
+  "price": 400,
+  "currency": "coins"
+ },
+ {
+  "id": "w_hat_crown",
+  "cat": "hat",
+  "name": "כתר זהב",
+  "price": 150,
+  "currency": "gems"
+ },
+ {
+  "id": "w_hat_wizard",
+  "cat": "hat",
+  "name": "כובע קוסם",
+  "price": 400,
+  "currency": "coins"
+ },
+ {
+  "id": "w_hat_beanie",
+  "cat": "hat",
+  "name": "כובע צמר",
+  "price": 700,
+  "currency": "coins"
+ },
+ {
+  "id": "w_hat_cowboy",
+  "cat": "hat",
+  "name": "כובע בוקרים",
+  "price": 700,
+  "currency": "coins"
+ },
+ {
+  "id": "w_hat_pirate",
+  "cat": "hat",
+  "name": "כובע פיראטים",
+  "price": 1100,
+  "currency": "coins"
+ },
+ {
+  "id": "w_hat_chef",
+  "cat": "hat",
+  "name": "כובע שף",
+  "price": 1100,
+  "currency": "coins"
+ },
+ {
+  "id": "w_hat_party",
+  "cat": "hat",
+  "name": "כובע מסיבה",
+  "price": 1600,
+  "currency": "coins"
+ },
+ {
+  "id": "w_hat_tophat",
+  "cat": "hat",
+  "name": "מגבעת",
+  "price": 1600,
+  "currency": "coins"
+ },
+ {
+  "id": "w_hat_flowers",
+  "cat": "hat",
+  "name": "זר פרחים",
+  "price": 2400,
+  "currency": "coins"
+ },
+ {
+  "id": "w_hat_viking",
+  "cat": "hat",
+  "name": "קסדת ויקינגים",
+  "price": 80,
+  "currency": "gems"
+ },
+ {
+  "id": "w_hat_bucket",
+  "cat": "hat",
+  "name": "כובע טמבל",
+  "price": 2400,
+  "currency": "coins"
+ },
+ {
+  "id": "w_hat_grad",
+  "cat": "hat",
+  "name": "כובע סיום",
+  "price": 3300,
+  "currency": "coins"
+ },
+ {
+  "id": "w_hat_headphones",
+  "cat": "hat",
+  "name": "אוזניות",
+  "price": 3300,
+  "currency": "coins"
+ },
+ {
+  "id": "w_hat_bunny",
+  "cat": "hat",
+  "name": "אוזני ארנב",
+  "price": 4500,
+  "currency": "coins"
+ },
+ {
+  "id": "w_glasses_classic",
+  "cat": "glasses",
+  "name": "משקפיים קלאסיות",
+  "price": 0,
+  "currency": "coins"
+ },
+ {
+  "id": "w_glasses_aviator",
+  "cat": "glasses",
+  "name": "משקפי טייסים",
+  "price": 60,
+  "currency": "gems"
+ },
+ {
+  "id": "w_glasses_hearts",
+  "cat": "glasses",
+  "name": "משקפי לבבות",
+  "price": 300,
+  "currency": "coins"
+ },
+ {
+  "id": "w_glasses_stars",
+  "cat": "glasses",
+  "name": "משקפי כוכבים",
+  "price": 0,
+  "currency": "coins",
+  "streak": 7
+ },
+ {
+  "id": "w_glasses_3d",
+  "cat": "glasses",
+  "name": "משקפי תלת-ממד",
+  "price": 300,
+  "currency": "coins"
+ },
+ {
+  "id": "w_glasses_swim",
+  "cat": "glasses",
+  "name": "משקפי שחייה",
+  "price": 550,
+  "currency": "coins"
+ },
+ {
+  "id": "w_glasses_ski",
+  "cat": "glasses",
+  "name": "משקפי סקי",
+  "price": 550,
+  "currency": "coins"
+ },
+ {
+  "id": "w_glasses_monocle",
+  "cat": "glasses",
+  "name": "מונוקל",
+  "price": 900,
+  "currency": "coins"
+ },
+ {
+  "id": "w_glasses_cateye",
+  "cat": "glasses",
+  "name": "משקפי חתול",
+  "price": 900,
+  "currency": "coins"
+ },
+ {
+  "id": "w_glasses_rainbow",
+  "cat": "glasses",
+  "name": "משקפי קשת",
+  "price": 1300,
+  "currency": "coins"
+ },
+ {
+  "id": "w_glasses_shutter",
+  "cat": "glasses",
+  "name": "משקפי תריס",
+  "price": 1300,
+  "currency": "coins"
+ },
+ {
+  "id": "w_glasses_visor",
+  "cat": "glasses",
+  "name": "מגן עתידני",
+  "price": 80,
+  "currency": "gems"
+ },
+ {
+  "id": "w_glasses_pixel",
+  "cat": "glasses",
+  "name": "משקפי פיקסלים",
+  "price": 1900,
+  "currency": "coins"
+ },
+ {
+  "id": "w_glasses_roundgold",
+  "cat": "glasses",
+  "name": "משקפיים עגולות זהב",
+  "price": 1900,
+  "currency": "coins"
+ },
+ {
+  "id": "w_glasses_sport",
+  "cat": "glasses",
+  "name": "משקפי ספורט",
+  "price": 2650,
+  "currency": "coins"
+ },
+ {
+  "id": "w_earrings_hoops",
+  "cat": "earrings",
+  "name": "חישוקי זהב",
+  "price": 50,
+  "currency": "gems"
+ },
+ {
+  "id": "w_earrings_pearls",
+  "cat": "earrings",
+  "name": "עגילי פנינים",
+  "price": 250,
+  "currency": "coins"
+ },
+ {
+  "id": "w_earrings_stars",
+  "cat": "earrings",
+  "name": "עגילי כוכבים",
+  "price": 250,
+  "currency": "coins"
+ },
+ {
+  "id": "w_earrings_hearts",
+  "cat": "earrings",
+  "name": "עגילי לבבות",
+  "price": 400,
+  "currency": "coins"
+ },
+ {
+  "id": "w_earrings_bolt",
+  "cat": "earrings",
+  "name": "עגילי ברק",
+  "price": 400,
+  "currency": "coins"
+ },
+ {
+  "id": "w_earrings_diamonds",
+  "cat": "earrings",
+  "name": "עגילי יהלומים",
+  "price": 80,
+  "currency": "gems"
+ },
+ {
+  "id": "w_earrings_cherries",
+  "cat": "earrings",
+  "name": "עגילי דובדבנים",
+  "price": 650,
+  "currency": "coins"
+ },
+ {
+  "id": "w_earrings_moons",
+  "cat": "earrings",
+  "name": "עגילי ירח",
+  "price": 650,
+  "currency": "coins"
+ },
+ {
+  "id": "w_earrings_rainbow",
+  "cat": "earrings",
+  "name": "עגילי קשת",
+  "price": 950,
+  "currency": "coins"
+ },
+ {
+  "id": "w_earrings_feathers",
+  "cat": "earrings",
+  "name": "עגילי נוצות",
+  "price": 950,
+  "currency": "coins"
+ },
+ {
+  "id": "w_earrings_notes",
+  "cat": "earrings",
+  "name": "עגילי תווים",
+  "price": 1450,
+  "currency": "coins"
+ },
+ {
+  "id": "w_earrings_strawberry",
+  "cat": "earrings",
+  "name": "עגילי תותים",
+  "price": 1450,
+  "currency": "coins"
+ },
+ {
+  "id": "w_earrings_flowers",
+  "cat": "earrings",
+  "name": "עגילי פרחים",
+  "price": 2000,
+  "currency": "coins"
+ },
+ {
+  "id": "w_earrings_drops",
+  "cat": "earrings",
+  "name": "עגילי טיפה",
+  "price": 2000,
+  "currency": "coins"
+ },
+ {
+  "id": "w_earrings_balls",
+  "cat": "earrings",
+  "name": "עגילי כדורגל",
+  "price": 2700,
+  "currency": "coins"
+ },
+ {
+  "id": "w_bracelet_beads",
+  "cat": "bracelet",
+  "name": "צמיד חרוזים",
+  "price": 250,
+  "currency": "coins"
+ },
+ {
+  "id": "w_bracelet_bangles",
+  "cat": "bracelet",
+  "name": "צמידי זהב",
+  "price": 250,
+  "currency": "coins"
+ },
+ {
+  "id": "w_bracelet_smartwatch",
+  "cat": "bracelet",
+  "name": "שעון חכם",
+  "price": 400,
+  "currency": "coins"
+ },
+ {
+  "id": "w_bracelet_friendship",
+  "cat": "bracelet",
+  "name": "צמיד חברות",
+  "price": 400,
+  "currency": "coins"
+ },
+ {
+  "id": "w_bracelet_diamond",
+  "cat": "bracelet",
+  "name": "צמיד יהלומים",
+  "price": 100,
+  "currency": "gems"
+ },
+ {
+  "id": "w_bracelet_sweat",
+  "cat": "bracelet",
+  "name": "מגיני זיעה",
+  "price": 650,
+  "currency": "coins"
+ },
+ {
+  "id": "w_bracelet_silver",
+  "cat": "bracelet",
+  "name": "שרשרת כסף",
+  "price": 650,
+  "currency": "coins"
+ },
+ {
+  "id": "w_bracelet_charms",
+  "cat": "bracelet",
+  "name": "צמיד קמעות",
+  "price": 950,
+  "currency": "coins"
+ },
+ {
+  "id": "w_bracelet_neon",
+  "cat": "bracelet",
+  "name": "צמידים זוהרים",
+  "price": 950,
+  "currency": "coins"
+ },
+ {
+  "id": "w_bracelet_shells",
+  "cat": "bracelet",
+  "name": "צמיד צדפים",
+  "price": 1450,
+  "currency": "coins"
+ },
+ {
+  "id": "w_bracelet_rope",
+  "cat": "bracelet",
+  "name": "צמיד ימאים",
+  "price": 1450,
+  "currency": "coins"
+ },
+ {
+  "id": "w_bracelet_wood",
+  "cat": "bracelet",
+  "name": "חרוזי עץ",
+  "price": 2000,
+  "currency": "coins"
+ },
+ {
+  "id": "w_bracelet_goldwatch",
+  "cat": "bracelet",
+  "name": "שעון זהב",
+  "price": 80,
+  "currency": "gems"
+ },
+ {
+  "id": "w_bracelet_flowers",
+  "cat": "bracelet",
+  "name": "צמיד פרחים",
+  "price": 2000,
+  "currency": "coins"
+ },
+ {
+  "id": "w_bracelet_pearl",
+  "cat": "bracelet",
+  "name": "צמיד פנינים",
+  "price": 2700,
+  "currency": "coins"
+ },
+ {
+  "id": "w_necklace_medal",
+  "cat": "necklace",
+  "name": "מדליית זהב",
+  "price": 300,
+  "currency": "coins"
+ },
+ {
+  "id": "w_necklace_chain",
+  "cat": "necklace",
+  "name": "שרשרת זהב",
+  "price": 70,
+  "currency": "gems"
+ },
+ {
+  "id": "w_necklace_pearls",
+  "cat": "necklace",
+  "name": "מחרוזת פנינים",
+  "price": 300,
+  "currency": "coins"
+ },
+ {
+  "id": "w_necklace_sharktooth",
+  "cat": "necklace",
+  "name": "שן כריש",
+  "price": 550,
+  "currency": "coins"
+ },
+ {
+  "id": "w_necklace_diamond",
+  "cat": "necklace",
+  "name": "תליון יהלום",
+  "price": 100,
+  "currency": "gems"
+ },
+ {
+  "id": "w_necklace_locket",
+  "cat": "necklace",
+  "name": "תליון לב",
+  "price": 550,
+  "currency": "coins"
+ },
+ {
+  "id": "w_necklace_lei",
+  "cat": "necklace",
+  "name": "זר הוואי",
+  "price": 900,
+  "currency": "coins"
+ },
+ {
+  "id": "w_necklace_bowtie",
+  "cat": "necklace",
+  "name": "פפיון",
+  "price": 900,
+  "currency": "coins"
+ },
+ {
+  "id": "w_necklace_tie",
+  "cat": "necklace",
+  "name": "עניבה",
+  "price": 1300,
+  "currency": "coins"
+ },
+ {
+  "id": "w_necklace_scarf",
+  "cat": "necklace",
+  "name": "צעיף",
+  "price": 1300,
+  "currency": "coins"
+ },
+ {
+  "id": "w_necklace_whistle",
+  "cat": "necklace",
+  "name": "משרוקית",
+  "price": 1900,
+  "currency": "coins"
+ },
+ {
+  "id": "w_necklace_star",
+  "cat": "necklace",
+  "name": "תליון כוכב",
+  "price": 0,
+  "currency": "coins",
+  "streak": 14
+ },
+ {
+  "id": "w_necklace_bandana",
+  "cat": "necklace",
+  "name": "בנדנה",
+  "price": 1900,
+  "currency": "coins"
+ },
+ {
+  "id": "w_necklace_crystal",
+  "cat": "necklace",
+  "name": "תליון קריסטל",
+  "price": 2650,
+  "currency": "coins"
+ },
+ {
+  "id": "w_necklace_bulb",
+  "cat": "necklace",
+  "name": "תליון נורה",
+  "price": 2650,
+  "currency": "coins"
+ },
+ {
+  "id": "w_outfit_hoodie",
+  "cat": "outfit",
+  "name": "קפוצ'ון",
+  "price": 600,
+  "currency": "coins"
+ },
+ {
+  "id": "w_outfit_tux",
+  "cat": "outfit",
+  "name": "חליפה",
+  "price": 600,
+  "currency": "coins"
+ },
+ {
+  "id": "w_outfit_hero",
+  "cat": "outfit",
+  "name": "חליפת גיבור",
+  "price": 0,
+  "currency": "coins",
+  "streak": 30
+ },
+ {
+  "id": "w_outfit_jersey",
+  "cat": "outfit",
+  "name": "חולצת ספורט",
+  "price": 1050,
+  "currency": "coins"
+ },
+ {
+  "id": "w_outfit_stardress",
+  "cat": "outfit",
+  "name": "שמלת כוכבים",
+  "price": 1050,
+  "currency": "coins"
+ },
+ {
+  "id": "w_outfit_space",
+  "cat": "outfit",
+  "name": "חליפת חלל",
+  "price": 100,
+  "currency": "gems"
+ },
+ {
+  "id": "w_outfit_doctor",
+  "cat": "outfit",
+  "name": "חלוק רופא",
+  "price": 1650,
+  "currency": "coins"
+ },
+ {
+  "id": "w_outfit_chefcoat",
+  "cat": "outfit",
+  "name": "מעיל שף",
+  "price": 1650,
+  "currency": "coins"
+ },
+ {
+  "id": "w_outfit_pirate",
+  "cat": "outfit",
+  "name": "בגדי פיראט",
+  "price": 2400,
+  "currency": "coins"
+ },
+ {
+  "id": "w_outfit_robe",
+  "cat": "outfit",
+  "name": "גלימת קוסם",
+  "price": 2400,
+  "currency": "coins"
+ },
+ {
+  "id": "w_outfit_hawaii",
+  "cat": "outfit",
+  "name": "חולצת הוואי",
+  "price": 3600,
+  "currency": "coins"
+ },
+ {
+  "id": "w_outfit_puffer",
+  "cat": "outfit",
+  "name": "מעיל פוך",
+  "price": 3600,
+  "currency": "coins"
+ },
+ {
+  "id": "w_outfit_overalls",
+  "cat": "outfit",
+  "name": "סרבל ג'ינס",
+  "price": 4950,
+  "currency": "coins"
+ },
+ {
+  "id": "w_outfit_armor",
+  "cat": "outfit",
+  "name": "שריון אביר",
+  "price": 150,
+  "currency": "gems"
+ },
+ {
+  "id": "w_outfit_gown",
+  "cat": "outfit",
+  "name": "שמלת נסיכה",
+  "price": 120,
+  "currency": "gems"
+ },
+ {
+  "id": "w_shoes_sneakers",
+  "cat": "shoes",
+  "name": "סניקרס",
+  "price": 400,
+  "currency": "coins"
+ },
+ {
+  "id": "w_shoes_rainboots",
+  "cat": "shoes",
+  "name": "מגפי גשם",
+  "price": 400,
+  "currency": "coins"
+ },
+ {
+  "id": "w_shoes_flipflops",
+  "cat": "shoes",
+  "name": "כפכפים",
+  "price": 700,
+  "currency": "coins"
+ },
+ {
+  "id": "w_shoes_cowboy",
+  "cat": "shoes",
+  "name": "מגפי בוקרים",
+  "price": 700,
+  "currency": "coins"
+ },
+ {
+  "id": "w_shoes_ballet",
+  "cat": "shoes",
+  "name": "נעלי בלט",
+  "price": 1100,
+  "currency": "coins"
+ },
+ {
+  "id": "w_shoes_cleats",
+  "cat": "shoes",
+  "name": "נעלי כדורגל",
+  "price": 1100,
+  "currency": "coins"
+ },
+ {
+  "id": "w_shoes_space",
+  "cat": "shoes",
+  "name": "מגפי חלל",
+  "price": 1600,
+  "currency": "coins"
+ },
+ {
+  "id": "w_shoes_skates",
+  "cat": "shoes",
+  "name": "גלגיליות",
+  "price": 1600,
+  "currency": "coins"
+ },
+ {
+  "id": "w_shoes_slippers",
+  "cat": "shoes",
+  "name": "נעלי בית",
+  "price": 2400,
+  "currency": "coins"
+ },
+ {
+  "id": "w_shoes_curly",
+  "cat": "shoes",
+  "name": "נעלי קוסם",
+  "price": 2400,
+  "currency": "coins"
+ },
+ {
+  "id": "w_shoes_gold",
+  "cat": "shoes",
+  "name": "נעלי זהב",
+  "price": 100,
+  "currency": "gems"
+ },
+ {
+  "id": "w_shoes_hiking",
+  "cat": "shoes",
+  "name": "נעלי הליכה",
+  "price": 3300,
+  "currency": "coins"
+ },
+ {
+  "id": "w_shoes_lightup",
+  "cat": "shoes",
+  "name": "נעליים מאירות",
+  "price": 0,
+  "currency": "coins",
+  "streak": 21
+ },
+ {
+  "id": "w_shoes_clown",
+  "cat": "shoes",
+  "name": "נעלי ליצן",
+  "price": 3300,
+  "currency": "coins"
+ },
+ {
+  "id": "w_shoes_iceskates",
+  "cat": "shoes",
+  "name": "מחליקיים",
+  "price": 4500,
+  "currency": "coins"
+ }
+]

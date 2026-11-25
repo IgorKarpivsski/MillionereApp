@@ -82,7 +82,7 @@ export function Sloth({
   );
 }
 
-function Speech({ text, side }: { text: string; side: 'top' | 'side' }) {
+export function Speech({ text, side }: { text: string; side: 'top' | 'side' }) {
   const reduced = useReducedMotion();
   const pop = useSharedValue(reduced ? 1 : 0.6);
   useEffect(() => {

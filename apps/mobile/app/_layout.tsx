@@ -101,7 +101,6 @@ function Gate() {
         <Stack.Screen name="quiz" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="session" options={{ gestureEnabled: false, animation: 'fade' }} />
         <Stack.Screen name="worlds" />
-        <Stack.Screen name="house" />
         <Stack.Screen name="world/[slug]" />
         <Stack.Screen name="album/[slug]" />
         <Stack.Screen name="pack-open" options={{ gestureEnabled: false, animation: 'fade' }} />
@@ -118,6 +117,8 @@ function Gate() {
         <Stack.Screen name="event" />
         <Stack.Screen name="player/[id]" />
         <Stack.Screen name="shop" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="wardrobe" />
+        <Stack.Screen name="streak" />
         <Stack.Screen name="wheel" options={{ presentation: 'modal' }} />
         <Stack.Screen name="pass" />
         <Stack.Screen name="friends" />

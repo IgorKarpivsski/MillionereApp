@@ -5,7 +5,7 @@ import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import { TopBar } from '@/components/TopBar';
-import { AppText, Icon, Screen, Sheen, Sloth, StickerButton } from '@/design-system/components';
+import { AppText, Icon, Screen, Sheen, StickerButton } from '@/design-system/components';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { colors, space } from '@/design-system/tokens';
 import { usePlaySession } from '@/features/engage/EnergySheet';
@@ -18,9 +18,9 @@ import { useUnreadTotal } from '@/features/social/hooks';
 import { TourTarget, useTourStore } from '@/features/tour/Tour';
 import { useSettingsStore } from '@/features/settings/store';
 import { MissionsCard, NewbieBanner, NextGoal } from '@/features/teen/HomeCards';
-import { useHouse } from '@/features/house/api';
-import { HATS } from '@/features/house/art';
-import { HouseCard } from '@/features/house/HouseCard';
+import { useWardrobe } from '@/features/wardrobe/api';
+import { SlothDoll } from '@/features/wardrobe/SlothDoll';
+import { useStreak } from '../streak';
 import { fmt, gx, strings } from '@/lib/i18n';
 import { GenderPrompt } from '@/features/profile/gender';
 import { showName } from '@/lib/names';
@@ -43,7 +43,8 @@ function Breathe({ off, children }: { off: boolean; children: ReactNode }) {
 
 function Hero() {
   const { data } = useMyState();
-  const { data: house } = useHouse();
+  const { data: wardrobe } = useWardrobe();
+  const outfit = useMemo(() => wardrobe?.outfit ?? { glasses: 'w_glasses_classic' }, [wardrobe?.outfit]);
   const play = usePlaySession();
   const name = showName(data?.profile.username) ?? '';
   const gender = data?.profile.gender;
@@ -52,8 +53,23 @@ function Hero() {
   const lines = useMemo(() => {
     const hello = t.slothHello[Math.floor(Math.random() * t.slothHello.length)]!;
     const start = Math.floor(Math.random() * h.tips.length);
-    return [name ? fmt(hello, { name }) : t.slothHello[2]!, ...h.tips.slice(start), ...h.tips.slice(0, start)];
-  }, [name]);
+    // what it wears gets a line of its own now and then
+    const w = strings.wardrobe;
+    const lineOf = (id: string): string | undefined => (w.reactions as Record<string, string>)[id];
+    const worn: string[] = Object.values(outfit)
+      .filter((id) => id && id !== 'w_glasses_classic')
+      .map((id) => lineOf(id) ?? '')
+      .filter((x) => x.length > 0);
+    const slotLine = Object.entries(outfit).find(([, id]) => id && id !== 'w_glasses_classic' && !lineOf(id));
+    if (slotLine) worn.push(w.slotReactions[slotLine[0] as keyof typeof w.slotReactions]);
+    const tips = [...h.tips.slice(start), ...h.tips.slice(0, start)];
+    const mixed: string[] = [];
+    tips.forEach((tip, k) => {
+      mixed.push(tip);
+      if (k % 2 === 0 && worn.length) mixed.push(worn[(k / 2) % worn.length]!);
+    });
+    return [name ? fmt(hello, { name }) : t.slothHello[2]!, ...(worn.length ? [worn[0]!] : []), ...mixed];
+  }, [name, outfit]);
   const [i, setI] = useState(0);
   // the tip stays put during the guided tour, so the buttons under it don't move while spotlit
   const touring = useTourStore((st) => st.session !== null);
@@ -71,7 +87,17 @@ function Hero() {
         accessibilityLabel={`${gx(lines[i % lines.length]!, gender)}. ${h.tipA11y}`}
         style={styles.slothWrap}
       >
-        <Sloth size={124} say={gx(lines[i % lines.length]!, gender)} hat={house?.hat ? HATS[house.hat] : null} />
+        <SlothDoll width={112} outfit={outfit} say={gx(lines[i % lines.length]!, gender)} />
+      </Pressable>
+      <Pressable
+        onPress={() => router.push('/wardrobe')}
+        accessibilityRole="button"
+        accessibilityLabel={strings.wardrobe.open}
+        style={({ pressed }) => [styles.dressUp, pressed && styles.pressed]}
+      >
+        <AppText variant="label" style={styles.dressUpText}>
+          {strings.wardrobe.open}
+        </AppText>
       </Pressable>
       <TourTarget id="play" style={styles.stretch}>
         <Breathe off={reduced}>
@@ -103,6 +129,29 @@ function Rewards() {
       <SectionTitle>{`🎁 ${h.rewardsTitle}`}</SectionTitle>
       <RewardGrid bubbles={bubbles} empty={h.rewardsEmpty} />
     </View>
+  );
+}
+
+/** The login streak: how many days in a row, and the way to its prizes. */
+function StreakCard() {
+  const { data } = useStreak();
+  const s = strings.streak;
+  const n = data?.streak ?? 0;
+  return (
+    <Pressable
+      onPress={() => router.push('/streak')}
+      accessibilityRole="button"
+      accessibilityLabel={fmt(s.cardA11y, { n })}
+      style={({ pressed }) => [styles.streak, pressed && styles.pressed]}
+    >
+      <AppText variant="label" style={styles.streakText}>
+        {fmt(s.card, { n })}
+      </AppText>
+      <AppText variant="caption" color={colors.textMuted} style={styles.flex}>
+        {data?.claimed_today === false ? s.claimToday : s.title}
+      </AppText>
+      <Ionicons name="chevron-back" size={18} color={colors.textMuted} />
+    </Pressable>
   );
 }
 
@@ -252,8 +301,8 @@ export default function HomeScreen() {
   return (
     <Screen header={<TopBar />} onRefresh={() => void refetch()} refreshing={isRefetching}>
       <Hero />
-      <HouseCard />
       <NewbieBanner />
+      <StreakCard />
       <Rewards />
       <MissionsCard />
       <NextGoal />
@@ -287,6 +336,29 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   slothWrap: { alignSelf: 'stretch', alignItems: 'center' },
+  dressUp: {
+    alignSelf: 'center',
+    marginTop: -space.sm,
+    paddingHorizontal: space.md,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,176,0,0.16)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,176,0,0.5)',
+  },
+  streak: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    paddingHorizontal: space.md,
+    paddingVertical: space.sm,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,90,78,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,120,60,0.45)',
+  },
+  streakText: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
+  dressUpText: { fontFamily: 'IBMPlexSansHebrew_700Bold', color: colors.led },
   stretch: { alignSelf: 'stretch' },
   rewards: { gap: space.xs },
   section: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.xs },

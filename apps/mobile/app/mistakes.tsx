@@ -112,7 +112,7 @@ export default function MistakesScreen() {
               ) : null}
               <AppText variant="question">{q.text}</AppText>
             </Card>
-            {q.image ? <QuestionImageView image={q.image} /> : null}
+            {q.image ? <QuestionImageView image={q.image} linkable={true} /> : null}
             <View style={styles.answers}>
               {q.answers.map((a, i) => (
                 <AnswerTile key={`${q.id}${i}`} index={i} text={a.text} state={stateOf(i)} disabled={picked !== null} onPress={() => pick(i)} fill />
