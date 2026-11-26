@@ -2,8 +2,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming, ZoomIn } from 'react-native-reanimated';
+import { Image, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import Animated, {
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+  ZoomIn,
+} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { AppText, BottomSheet, StickerButton, Backdrop } from '@/design-system/components';
@@ -14,6 +22,7 @@ import { championLevels, levelLabel, useWorldsConfig, useWorldsState, worldBySlu
 import { shade } from '@/features/worlds/worldArt';
 import { WorldBadge } from '@/features/worlds/WorldBadge';
 import { LevelNode } from '@/features/worlds/LevelNode';
+import { PathDecor } from '@/features/worlds/PathDecor';
 import { PATH_IMAGES, WORLD_IMAGES } from '@/features/worlds/worldImages';
 import { fmt, strings } from '@/lib/i18n';
 import { physicalLeft } from '@/lib/rtl';
@@ -22,6 +31,8 @@ const t = strings.worlds;
 const STEP = 104; // vertical distance between level nodes
 const CHAMP_GAP = 90; // room for the champion-tier banner at the end of the road
 const NODE = 78;
+const PARALLAX = 0.3; // the map scrolls a bit slower than the road, for depth
+const OVERLAP = 0.14; // each map section fades in over the bottom of the one before it
 
 function Stars({ n, size = 14 }: { n: number; size?: number }) {
   return (
@@ -51,7 +62,12 @@ export default function WorldScreen() {
   const { data } = useWorldsState();
   const play = usePlaySession();
   const { width } = useWindowDimensions();
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<Animated.ScrollView>(null);
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler((e) => {
+    scrollY.value = e.contentOffset.y;
+  });
+  const parallax = useAnimatedStyle(() => ({ transform: [{ translateY: scrollY.value * PARALLAX }] }));
   const [sheet, setSheet] = useState<number | null>(null);
   const st = data?.worlds.find((x) => x.slug === slug);
   const unlocked = st?.unlocked ?? 1;
@@ -92,6 +108,9 @@ export default function WorldScreen() {
 
   const total = 40 + nodes * STEP + CHAMP_GAP + 40;
   const tileH = Math.round((width * 16) / 9);
+  const tileStep = Math.round(tileH * (1 - OVERLAP));
+  const sections = PATH_IMAGES[w.slug] ?? [];
+  const tiles = Math.ceil((total * (1 - PARALLAX) + tileH) / tileStep) + 1;
   const sheetStars = sheet ? (stars[String(sheet)] ?? 0) : 0;
 
   return (
@@ -115,17 +134,31 @@ export default function WorldScreen() {
         <View style={[styles.barFill, { width: `${(passed / Math.max(1, levels)) * 100}%`, backgroundColor: w.color }]} />
       </View>
 
-      <ScrollView ref={scroll} contentContainerStyle={{ height: total }} showsVerticalScrollIndicator={false}>
-        {PATH_IMAGES[w.slug]
-          ? Array.from({ length: Math.ceil(total / tileH) }, (_, k) => (
-              <Image
-                key={`bg${k}`}
-                source={PATH_IMAGES[w.slug]!}
-                resizeMode="cover"
-                style={[styles.tile, { top: k * tileH, width, height: tileH }, k % 2 === 1 ? styles.flip : null]}
-              />
-            ))
-          : null}
+      <View style={styles.flex}>
+      <Animated.ScrollView
+        ref={scroll}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={{ height: total }}
+        showsVerticalScrollIndicator={false}
+      >
+        <Animated.View style={[styles.mapLayer, { height: total }, parallax]} pointerEvents="none">
+          {sections.length
+            ? Array.from({ length: tiles }, (_, k) => {
+                const n = sections.length;
+                // every section once, then all again mirrored, so the map never looks the same twice in a row
+                const mirror = Math.floor(k / n) % 2 === 1;
+                return (
+                  <Image
+                    key={`bg${k}`}
+                    source={sections[k % n]!}
+                    resizeMode="cover"
+                    style={[styles.tile, { top: k * tileStep, width, height: tileH }, mirror ? styles.mirror : null]}
+                  />
+                );
+              })
+            : null}
+        </Animated.View>
         <View style={[styles.tileShade, { height: total }]} />
         <Svg width={width} height={total} style={StyleSheet.absoluteFill}>
           <Path d={road} stroke="rgba(0,0,0,0.25)" strokeWidth={40} strokeLinecap="round" fill="none" transform="translate(0 5)" />
@@ -181,7 +214,9 @@ export default function WorldScreen() {
             </View>
           );
         })}
-      </ScrollView>
+      </Animated.ScrollView>
+      <PathDecor slug={w.slug} />
+      </View>
 
       <BottomSheet visible={sheet !== null} onClose={() => setSheet(null)} title={sheet ? (sheet > levels ? levelLabel(sheet, levels) : fmt(t.levelOf, { n: sheet, total: levels })) : ''}>
         {sheet !== null ? (
@@ -230,7 +265,8 @@ const styles = StyleSheet.create({
   barFill: { height: 8, borderRadius: 4 },
   nodeWrap: { position: 'absolute', width: NODE, alignItems: 'center' },
   tile: { position: 'absolute', left: 0 },
-  flip: { transform: [{ scaleY: -1 }] },
+  mirror: { transform: [{ scaleX: -1 }] },
+  mapLayer: { position: 'absolute', top: 0, left: 0, right: 0, overflow: 'hidden' },
   tileShade: { position: 'absolute', left: 0, right: 0, top: 0, backgroundColor: 'rgba(20,10,60,0.18)' },
   pressed: { transform: [{ translateY: 3 }] },
   pulse: { position: 'absolute', top: -8, width: NODE + 16, height: NODE + 16, borderRadius: (NODE + 16) / 2, borderWidth: 5 },

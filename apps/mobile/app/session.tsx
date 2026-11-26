@@ -414,6 +414,8 @@ export default function SessionScreen() {
   }, [s.phase, s.reveal, s.summary, next]);
 
   const secs = useSecondsLeft(s.deadlineAt, s.phase === 'question', timeUp);
+  // האלוף ג'וניור: no clock on screen (the server gives an hour per question)
+  const junior = useSettingsStore((x) => x.junior);
   // the sloth's reaction and the explanation sit under the question; with a photo they'd be below the fold
   const bodyScroll = useRef<ScrollView>(null);
   useEffect(() => {
@@ -564,17 +566,19 @@ export default function SessionScreen() {
           </AppText>
           <ComboFlame combo={reveal?.result === 'correct' ? reveal.combo : reveal ? 0 : comboNow(s.results)} />
           <RunCoins coins={s.runCoins} />
-          <Led size="ledM" color={secs <= 5 && answering ? colors.danger : colors.text}>
-            {String(secs).padStart(2, '0')}
-          </Led>
+          {junior ? null : (
+            <Led size="ledM" color={secs <= 5 && answering ? colors.danger : colors.text}>
+              {String(secs).padStart(2, '0')}
+            </Led>
+          )}
         </View>
-        <TimerBar
+        {junior ? null : <TimerBar
           deadlineAt={s.deadlineAt}
           total={Math.max(q.seconds_left, 25)}
           running={answering}
           color={secs <= 5 ? colors.danger : qWorld.color}
-        />
-        {answering && !s.payload.frozen ? (
+        />}
+        {answering && !s.payload.frozen && !junior ? (
           <View style={styles.speedPill} accessible accessibilityLabel={fmt(t.speedA11y, { n: secs * POINTS_PER_SECOND })}>
             <Ionicons name="flash" size={14} color={colors.led} />
             <AppText variant="caption" color={colors.led} style={styles.bold}>
@@ -616,7 +620,7 @@ export default function SessionScreen() {
               <SlothCheer key={`cheer-${rung}`} result={reveal.result} combo={reveal.combo} seed={rung * 7 + s.score} />
               <View style={styles.revealHead}>
                 <AppText variant="heading" color={reveal.result === 'correct' ? colors.correct : colors.danger} style={styles.flex}>
-                  {reveal.result === 'correct' ? t.correct : reveal.result === 'timeout' ? t.timeout : t.wrong}
+                  {reveal.result === 'correct' ? t.correct : reveal.result === 'timeout' ? t.timeout : junior ? t.wrongJunior : t.wrong}
                 </AppText>
                 {reveal.points > 0 ? (
                   <Animated.View entering={reduced ? undefined : ZoomIn.springify()}>

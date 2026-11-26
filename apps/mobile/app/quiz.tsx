@@ -324,6 +324,7 @@ export default function QuizScreen() {
   }, [s.notice, toast]);
 
   const secs = useSecondsLeft(s.deadlineAt, s.phase === 'question', whistle);
+  const junior = useSettingsStore((x) => x.junior);
 
   const exit = useCallback(() => {
     if (s.phase === 'finished' || s.phase === 'error' || !s.payload) {
@@ -482,14 +483,16 @@ export default function QuizScreen() {
               </AppText>
             )}
           </AppText>
-          <View style={styles.clock}>
-            <Led size="ledM" color={secs <= 10 && answering ? colors.danger : colors.text}>
-              {String(secs).padStart(2, '0')}
-            </Led>
-            <AppText variant="caption" color={colors.textDim}>
-              {t.seconds}
-            </AppText>
-          </View>
+          {junior ? null : (
+            <View style={styles.clock}>
+              <Led size="ledM" color={secs <= 10 && answering ? colors.danger : colors.text}>
+                {String(secs).padStart(2, '0')}
+              </Led>
+              <AppText variant="caption" color={colors.textDim}>
+                {t.seconds}
+              </AppText>
+            </View>
+          )}
         </View>
 
         <Animated.View key={q.id} entering={reduced ? undefined : FadeIn.duration(250)} style={styles.qCard}>

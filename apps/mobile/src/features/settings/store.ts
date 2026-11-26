@@ -17,6 +17,8 @@ interface SettingsState {
   largeText: boolean;
   /** Accessibility: 1.5x answer time (stored on the server, which enforces it). */
   extendedTime: boolean;
+  /** האלוף ג'וניור: no clock, easier questions, bigger text (enforced on the server). */
+  junior: boolean;
   /** Local reminder notifications (wheel, streak, tickets). Device-only. */
   reminders: boolean;
   remindersAsked: boolean;
@@ -55,6 +57,7 @@ export const useSettingsStore = create<SettingsState>()(
       reducedMotion: false,
       largeText: false,
       extendedTime: false,
+      junior: false,
       reminders: true,
       remindersAsked: false,
       leagueSeenWeek: null,
@@ -70,7 +73,7 @@ export const useSettingsStore = create<SettingsState>()(
       tomorrowDay: null,
       set: (patch) => set(patch),
       hydrateFromServer: (s) =>
-        set({ sound: s.sound, music: s.music, haptics: s.haptics, reducedMotion: s.reduced_motion, extendedTime: s.extended_time }),
+        set({ sound: s.sound, music: s.music, haptics: s.haptics, reducedMotion: s.reduced_motion, extendedTime: s.extended_time, junior: s.junior }),
     }),
     {
       name: 'fm.settings.v1',
@@ -85,13 +88,14 @@ export const useSettingsStore = create<SettingsState>()(
         }
         return p as unknown as SettingsState;
       },
-      partialize: ({ sound, music, haptics, reducedMotion, largeText, extendedTime, reminders, remindersAsked, leagueSeenWeek, reviewAsked, rateNextAt, rateShown, rateGood, ageBand, onboarded, tourDone, seenModes, currencyHelpSeen, tomorrowDay }) => ({
+      partialize: ({ sound, music, haptics, reducedMotion, largeText, extendedTime, junior, reminders, remindersAsked, leagueSeenWeek, reviewAsked, rateNextAt, rateShown, rateGood, ageBand, onboarded, tourDone, seenModes, currencyHelpSeen, tomorrowDay }) => ({
         sound,
         music,
         haptics,
         reducedMotion,
         largeText,
         extendedTime,
+        junior,
         reminders,
         remindersAsked,
         leagueSeenWeek,

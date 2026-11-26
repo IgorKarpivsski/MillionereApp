@@ -82,6 +82,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ['expo-image-picker', { photosPermission: 'כדי לבחור תמונת פרופיל מהתמונות שלך', cameraPermission: false, microphonePermission: false }],
     './plugins/withoutAudioServices',
     './plugins/withGradleHeap',
+    './plugins/withOptionalFeatures',
     [
       'expo-build-properties',
       {

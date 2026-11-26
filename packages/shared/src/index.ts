@@ -52,6 +52,7 @@ export const SettingsSchema = z.object({
   reduced_motion: z.boolean(),
   notif_prefs: z.record(z.string(), z.boolean()),
   extended_time: z.boolean().default(false),
+  junior: z.boolean().default(false),
 });
 export type Settings = z.infer<typeof SettingsSchema>;
 

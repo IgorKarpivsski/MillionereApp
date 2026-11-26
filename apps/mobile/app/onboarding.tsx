@@ -22,6 +22,7 @@ import { colors, fontFamily, palette, radius, space } from '@/design-system/toke
 import { rpc, RpcError } from '@/features/profile/api';
 import { useUpdateProfile } from '@/features/profile/hooks';
 import { requestReminderPermission } from '@/features/reminders/useReminders';
+import { useToggleSetting } from '@/features/settings/hooks';
 import { useSettingsStore } from '@/features/settings/store';
 import { refreshAdAudience } from '@/features/store/ads';
 import { useWorldsConfig } from '@/features/worlds/api';
@@ -158,6 +159,7 @@ function AgeWheel({ value, onChange }: { value: number | null; onChange: (a: num
 
 export default function OnboardingScreen() {
   const set = useSettingsStore((s) => s.set);
+  const toggleSetting = useToggleSetting();
   const qc = useQueryClient();
   const toast = useToast();
   const worlds = useWorldsConfig();
@@ -266,6 +268,8 @@ export default function OnboardingScreen() {
             onPress={() => {
               if (age === null) return;
               set({ ageBand: age < 13 ? 'under13' : age < 16 ? '13to15' : '16plus' });
+              // young kids start in האלוף ג'וניור (no clock, easier questions); it can be turned off in settings
+              if (age <= 8) toggleSetting.mutate({ key: 'junior', value: true });
               refreshAdAudience();
               go('about');
             }}

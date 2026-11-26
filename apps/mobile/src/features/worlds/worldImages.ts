@@ -1,4 +1,5 @@
 import type { ImageSourcePropType } from 'react-native';
+import { PATH_SECTIONS } from './pathSections';
 
 /** Illustrated cover for each knowledge world, keyed by the world's icon id. */
 export const WORLD_IMAGES: Record<string, ImageSourcePropType> = {
@@ -21,23 +22,10 @@ export const WORLD_IMAGES: Record<string, ImageSourcePropType> = {
   gamepad: require('../../../assets/worlds/gaming.webp'),
 };
 
-/** Tall level-map background behind each world's path, keyed by world slug. */
-export const PATH_IMAGES: Record<string, ImageSourcePropType> = {
-  geography: require('../../../assets/paths/geography.webp'),
-  history: require('../../../assets/paths/history.webp'),
-  science: require('../../../assets/paths/science.webp'),
-  nature: require('../../../assets/paths/nature.webp'),
-  space: require('../../../assets/paths/space.webp'),
-  culture: require('../../../assets/paths/culture.webp'),
-  screen: require('../../../assets/paths/screen.webp'),
-  music: require('../../../assets/paths/music.webp'),
-  people: require('../../../assets/paths/people.webp'),
-  israel: require('../../../assets/paths/israel.webp'),
-  sport: require('../../../assets/paths/sport.webp'),
-  food: require('../../../assets/paths/food.webp'),
-  football: require('../../../assets/paths/football.webp'),
-  tech: require('../../../assets/paths/tech.webp'),
-  gaming: require('../../../assets/paths/gaming.webp'),
-};
+/**
+ * Level-map background sections behind each world's path, keyed by world slug, in order from the bottom of the road up.
+ * Sections after the first have a transparent top edge, so each one fades into the one below it.
+ */
+export const PATH_IMAGES: Record<string, ImageSourcePropType[]> = PATH_SECTIONS;
 
 export const CHEST_IMAGE: ImageSourcePropType = require('../../../assets/paths/chest.webp');

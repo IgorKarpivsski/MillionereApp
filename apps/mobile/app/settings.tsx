@@ -20,7 +20,7 @@ import { GenderChoice, useSaveGender } from '@/features/profile/gender';
 import { useMyState } from '@/features/profile/hooks';
 
 const t = strings.settings;
-type ToggleKey = 'sound' | 'music' | 'haptics' | 'reducedMotion' | 'extendedTime';
+type ToggleKey = 'sound' | 'music' | 'haptics' | 'reducedMotion' | 'extendedTime' | 'junior';
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
 const ROW_ICONS: Record<string, IconName> = {
@@ -29,6 +29,7 @@ const ROW_ICONS: Record<string, IconName> = {
   haptics: 'phone-portrait',
   reducedMotion: 'pause-circle',
   extendedTime: 'time',
+  junior: 'happy',
   largeText: 'text',
   reminders: 'notifications',
 };
@@ -162,6 +163,10 @@ export default function SettingsScreen() {
       }
     >
       <GenderCard />
+
+      <Card>
+        <ToggleRow k="junior" label={t.junior} hint={t.juniorHint} />
+      </Card>
 
       <Card>
         <ToggleRow k="sound" label={t.sound} />

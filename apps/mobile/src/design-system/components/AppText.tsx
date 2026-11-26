@@ -18,7 +18,7 @@ const SHADOW = { textShadowColor: 'rgba(8,4,24,0.65)', textShadowOffset: { width
  */
 export function AppText({ variant = 'body', color = colors.text, align, style, ...rest }: AppTextProps) {
   const { maxScale, ...type } = textStyles[variant];
-  const large = useSettingsStore((s) => s.largeText);
+  const large = useSettingsStore((s) => s.largeText || s.junior);
   const boost = large
     ? { fontSize: Math.round((type.fontSize ?? 16) * 1.2), lineHeight: type.lineHeight ? Math.round(type.lineHeight * 1.2) : undefined }
     : null;
