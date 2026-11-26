@@ -11,11 +11,31 @@ OUT = ROOT / 'apps/mobile/assets/wardrobe'
 cat = json.load(open(ROOT / 'content/wardrobe/catalog.json'))
 SCALE = 1.0
 
-base = Image.open(HERE / 'raw/base.png').convert('RGB')
-cut = Image.open(HERE / 'raw/cut.png').convert('RGBA').resize(base.size)
+base0 = Image.open(HERE / 'raw/base.png').convert('RGB')
+# Everything is placed in the padded frame (base_pad.png: the base with room above the head and at the sides),
+# so tall hats are never cut off. Items edited on base_pad.png are raw/pad_<n>.png; older ones on base.png.
+PAD = (86, 256)
+base = Image.open(HERE / 'base_pad.png').convert('RGB')
+def padded(im):
+    out = Image.new('RGBA', base.size, (0, 0, 0, 0)); out.paste(im, PAD); return out
+cut = padded(Image.open(HERE / 'raw/cut.png').convert('RGBA').resize(base0.size))
+# hats stay above the eyebrows, necklaces between the chin and the belly (frame of base.png)
+CLIP = {'hat': (0, 205), 'necklace': (300, 760)}
 layers = {}
 for i, it in enumerate(cat):
-    lay, frac = extract(base, HERE / f'raw/{i}.png')
+    if (HERE / f'raw/pad_{i}.png').exists():
+        lay, frac = extract(base, HERE / f'raw/pad_{i}.png')
+        clip = CLIP.get(it['cat'])
+        if clip:
+            a = lay.getchannel('A')
+            lo, hi = clip[0] + PAD[1], clip[1] + PAD[1]
+            m = Image.new('L', base.size, 0); m.paste(255, (0, 0 if it['cat'] == 'hat' else lo, base.width, hi))
+            from PIL import ImageChops, ImageFilter
+            m = m.filter(ImageFilter.GaussianBlur(4))
+            lay.putalpha(ImageChops.multiply(a, m))
+    else:
+        lay0, frac = extract(base0, HERE / f'raw/{i}.png')
+        lay = padded(lay0)
     if frac > 0.33: print('BAD', it['id'], frac)
     layers[it['id']] = lay
 
