@@ -30,6 +30,14 @@ IMAGES = Path(__file__).parents[2] / "data" / "kids-images"
 OK_LICENSE = re.compile(r"(CC0|Public domain|PD|CC BY|CC-BY|GFDL|Attribution|FAL|Free Art)", re.I)
 
 
+def legacy_world(f):
+    """The world named in a file's "# legacy: <world>" line: where its "~" lines came from."""
+    for l in f.read_text(encoding="utf-8").splitlines():
+        if l.startswith("# legacy:"):
+            return l.split(":", 1)[1].strip()
+    raise SystemExit(f"{f.name}: '~' lines need a '# legacy: <world>' header line")
+
+
 def photo(c, title):
     """Commons metadata (from fetch-kids-images.mjs) -> the app's photo object, or None."""
     if not c or c.get("missing") or c.get("thumbErr") or not c.get("thumb"):
@@ -65,6 +73,10 @@ def photo_rows(seen, errors):
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
+            # "~" = moved here from another world (named in the file's "# legacy: <world>" line);
+            # the question keeps its old id (hash) so player history stays valid
+            legacy = legacy_world(f) if line.startswith("~") else None
+            line = line.lstrip("~")
             hard = line.startswith("*")
             parts = [p.strip() for p in line.lstrip("*").split("|")]
             if len(parts) != 7 or any(not p for p in parts[:5]) or not parts[6]:
@@ -84,7 +96,7 @@ def photo_rows(seen, errors):
             img = photo(meta.get(title), title)
             if img is None or title in rejects:
                 skipped += 1; continue
-            h = hashlib.sha1(f"kids-photo|{world}|{title}|{c}".encode()).hexdigest()[:16]
+            h = hashlib.sha1(f"kids-photo|{legacy or world}|{title}|{c}".encode()).hexdigest()[:16]
             rows.append({
                 "id": f"q_{h}", "text_he": q, "answers_he": opts, "explanation_he": expl or f"התשובה הנכונה: {c}.",
                 "category": world if world != "football" else "legends", "topic": "kids", "difficulty": "medium" if hard else "easy",
@@ -107,6 +119,10 @@ def main():
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
+            # "~" = moved here from another world (named in the file's "# legacy: <world>" line);
+            # the question keeps its old id (hash) so player history stays valid
+            legacy = legacy_world(f) if line.startswith("~") else None
+            line = line.lstrip("~")
             hard = line.startswith("*")
             parts = [p.strip() for p in line.lstrip("*").split("|")]
             if len(parts) < 5 or any(not p for p in parts[:5]):
@@ -125,7 +141,7 @@ def main():
             if norm(q) in seen:
                 errors.append(f"{f.name}:{n} duplicate question"); continue
             seen.add(norm(q))
-            h = hashlib.sha1(f"kids|{world}|{q}|{c}".encode()).hexdigest()[:16]
+            h = hashlib.sha1(f"kids|{legacy or world}|{q}|{c}".encode()).hexdigest()[:16]
             rows.append({
                 "id": f"q_{h}", "text_he": q, "answers_he": opts, "explanation_he": expl,
                 "category": world if world != "football" else "legends", "topic": "kids", "difficulty": "medium" if hard else "easy",

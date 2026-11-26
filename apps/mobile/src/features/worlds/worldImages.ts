@@ -17,6 +17,8 @@ export const WORLD_IMAGES: Record<string, ImageSourcePropType> = {
   ball: require('../../../assets/worlds/football.webp'),
   bolt: require('../../../assets/worlds/mix.webp'),
   menorah: require('../../../assets/worlds/hanukkah.webp'),
+  chip: require('../../../assets/worlds/tech.webp'),
+  gamepad: require('../../../assets/worlds/gaming.webp'),
 };
 
 /** Tall level-map background behind each world's path, keyed by world slug. */
@@ -34,6 +36,8 @@ export const PATH_IMAGES: Record<string, ImageSourcePropType> = {
   sport: require('../../../assets/paths/sport.webp'),
   food: require('../../../assets/paths/food.webp'),
   football: require('../../../assets/paths/football.webp'),
+  tech: require('../../../assets/paths/tech.webp'),
+  gaming: require('../../../assets/paths/gaming.webp'),
 };
 
 export const CHEST_IMAGE: ImageSourcePropType = require('../../../assets/paths/chest.webp');

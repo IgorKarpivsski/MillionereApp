@@ -43,6 +43,8 @@ export const DEFAULT_WORLDS: WorldConfig[] = [
   { slug: 'food', name: 'אוכל', icon: 'food', color: '#EE8A2E', levels: 10 },
   { slug: 'football', name: 'כדורגל', icon: 'ball', color: '#1E9E4A', levels: 25 },
   { slug: 'hanukkah', name: 'חנוכה', icon: 'menorah', color: '#2F6FE0', levels: 6 },
+  { slug: 'tech', name: 'טכנולוגיה', icon: 'chip', color: '#1FA8D8', levels: 8 },
+  { slug: 'gaming', name: 'גיימינג', icon: 'gamepad', color: '#9B4DF0', levels: 8 },
 ];
 
 export const MIX_WORLD: WorldConfig = { slug: 'mix', name: 'משחק מהיר', icon: 'bolt', color: '#FFB000', levels: 0 };

@@ -40,7 +40,7 @@ def main():
             earlier += sorted(d.glob("*.txt"))
     for f in earlier:
         for n, l in lines(f):
-            parts = [p.strip() for p in l.lstrip("*").split("|")]
+            parts = [p.strip() for p in l.lstrip("~*").split("|")]
             seen_q.setdefault(norm(parts[0]) + ("|" + parts[6] if f.name.endswith(".img.txt") and len(parts) > 6 else ""), f"{f.name}:{n}")
             if f.name.endswith(".img.txt") and len(parts) > 6:
                 seen_t.setdefault(parts[6], f"{f.name}:{n}")
