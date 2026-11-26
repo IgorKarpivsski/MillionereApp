@@ -123,6 +123,7 @@ jobs:
           tracks: ${{ inputs.track || 'alpha' }}
           status: completed
           inAppUpdatePriority: 2
+          whatsNewDirectory: apps/mobile/whatsnew
           # Changes go to review automatically (Play refuses changesNotSentForReview when auto-send is on).
 
       - name: Remove the Play key
