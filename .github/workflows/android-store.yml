@@ -123,8 +123,7 @@ jobs:
           tracks: ${{ inputs.track || 'alpha' }}
           status: completed
           inAppUpdatePriority: 2
-          # Play refuses to auto-send after a rejection; the release is then sent from Play Console.
-          changesNotSentForReview: true
+          # Changes go to review automatically (Play refuses changesNotSentForReview when auto-send is on).
 
       - name: Remove the Play key
         if: always()
