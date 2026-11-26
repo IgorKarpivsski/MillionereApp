@@ -5,7 +5,14 @@ import type React from 'react';
 import { useState } from 'react';
 import { openStorePage } from '@/features/engage/RatePrompt';
 import { Linking, Pressable, StyleSheet, Switch, View } from 'react-native';
-import { appAlert, AppText, Card, Screen, StickerButton, useToast } from '@/design-system/components';
+import {
+  appAlert,
+  AppText,
+  Card,
+  Screen,
+  StickerButton,
+  useToast,
+} from '@/design-system/components';
 import { colors, palette, space } from '@/design-system/tokens';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useToggleSetting } from '@/features/settings/hooks';
@@ -80,7 +87,15 @@ function ToggleRow({ k, label, hint }: { k: ToggleKey; label: string; hint?: str
 }
 
 /** Device-only switches (not synced to the server). */
-function LocalToggleRow({ k, label, hint }: { k: 'largeText' | 'reminders'; label: string; hint: string }) {
+function LocalToggleRow({
+  k,
+  label,
+  hint,
+}: {
+  k: 'largeText' | 'reminders';
+  label: string;
+  hint: string;
+}) {
   const value = useSettingsStore((s) => s[k]);
   const set = useSettingsStore((s) => s.set);
   return (
@@ -111,9 +126,21 @@ function LocalToggleRow({ k, label, hint }: { k: 'largeText' | 'reminders'; labe
   );
 }
 
-function LinkRow({ label, onPress, icon = 'document-text' }: { label: string; onPress: () => void; icon?: IconName }) {
+function LinkRow({
+  label,
+  onPress,
+  icon = 'document-text',
+}: {
+  label: string;
+  onPress: () => void;
+  icon?: IconName;
+}) {
   return (
-    <Pressable onPress={onPress} accessibilityRole="link" style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="link"
+      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+    >
       <RowIcon name={icon} />
       <AppText variant="bodyStrong" style={styles.flex}>
         {label}
@@ -158,7 +185,12 @@ export default function SettingsScreen() {
       header={
         <View style={styles.header}>
           <AppText variant="title">{t.title}</AppText>
-          <StickerButton label={strings.common.close} size="sm" tone="ghost" onPress={() => router.back()} />
+          <StickerButton
+            label={strings.common.close}
+            size="sm"
+            tone="ghost"
+            onPress={() => router.back()}
+          />
         </View>
       }
     >
@@ -182,12 +214,22 @@ export default function SettingsScreen() {
         <ToggleRow k="reducedMotion" label={t.reducedMotion} hint={t.reducedMotionHint} />
         <LocalToggleRow k="largeText" label={t.largeText} hint={t.largeTextHint} />
         <ToggleRow k="extendedTime" label={t.extendedTime} hint={t.extendedTimeHint} />
-        <LinkRow icon="accessibility" label={t.a11yStatement} onPress={() => router.push('/legal/accessibility')} />
+        <LinkRow
+          icon="accessibility"
+          label={t.a11yStatement}
+          onPress={() => router.push('/legal/accessibility')}
+        />
       </Card>
 
       <Card>
         <LinkRow icon="gift" label={strings.redeem.entry} onPress={() => setRedeemOpen(true)} />
-        {admin.data?.admin ? <LinkRow icon="shield-checkmark" label={strings.admin.entry} onPress={() => router.push('/admin')} /> : null}
+        {admin.data?.admin ? (
+          <LinkRow
+            icon="shield-checkmark"
+            label={strings.admin.entry}
+            onPress={() => router.push('/admin')}
+          />
+        ) : null}
       </Card>
 
       <Card>
@@ -195,8 +237,16 @@ export default function SettingsScreen() {
           {t.legal}
         </AppText>
         <LinkRow label={t.terms} onPress={() => router.push('/legal/terms')} />
-        <LinkRow icon="lock-closed" label={t.privacy} onPress={() => router.push('/legal/privacy')} />
-        <LinkRow icon="mail" label={t.support} onPress={() => void Linking.openURL(`mailto:${brand.supportEmail}`)} />
+        <LinkRow
+          icon="lock-closed"
+          label={t.privacy}
+          onPress={() => router.push('/legal/privacy')}
+        />
+        <LinkRow
+          icon="mail"
+          label={t.support}
+          onPress={() => void Linking.openURL(`mailto:${brand.supportEmail}`)}
+        />
         <LinkRow icon="star" label={t.rateUs} onPress={openStorePage} />
       </Card>
 

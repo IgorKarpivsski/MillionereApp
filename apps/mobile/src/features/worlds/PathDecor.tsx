@@ -1,6 +1,13 @@
 import { useEffect, useMemo } from 'react';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withTiming } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 
 /** Little things that float up the level map, themed per world, so the map feels alive. */
@@ -24,7 +31,21 @@ const DECOR: Record<string, string[]> = {
 };
 const COUNT = 9;
 
-function Floater({ glyph, x, size, delay, duration, height }: { glyph: string; x: number; size: number; delay: number; duration: number; height: number }) {
+function Floater({
+  glyph,
+  x,
+  size,
+  delay,
+  duration,
+  height,
+}: {
+  glyph: string;
+  x: number;
+  size: number;
+  delay: number;
+  duration: number;
+  height: number;
+}) {
   const t = useSharedValue(0);
   useEffect(() => {
     t.value = withDelay(delay, withRepeat(withTiming(1, { duration, easing: Easing.linear }), -1));
@@ -55,10 +76,17 @@ export function PathDecor({ slug }: { slug: string }) {
   const items = useMemo(
     () =>
       Array.from({ length: COUNT }, (_, i) => {
-        const r = (n: number) => ((Math.sin((i + 1) * 12.9898 + n * 78.233 + slug.length) * 43758.5453) % 1 + 1) % 1;
+        const r = (n: number) =>
+          (((Math.sin((i + 1) * 12.9898 + n * 78.233 + slug.length) * 43758.5453) % 1) + 1) % 1;
         // mostly along the edges, where the scenery is, so the road stays clear
         const side = i % 2 === 0 ? r(1) * 0.22 : 0.78 + r(1) * 0.16;
-        return { glyph: glyphs[i % glyphs.length]!, x: side * width, size: 16 + r(2) * 14, delay: i * 1400, duration: 11000 + r(3) * 7000 };
+        return {
+          glyph: glyphs[i % glyphs.length]!,
+          x: side * width,
+          size: 16 + r(2) * 14,
+          delay: i * 1400,
+          duration: 11000 + r(3) * 7000,
+        };
       }),
     [glyphs, width, slug],
   );

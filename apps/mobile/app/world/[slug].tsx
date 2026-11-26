@@ -18,7 +18,13 @@ import { AppText, BottomSheet, StickerButton, Backdrop } from '@/design-system/c
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { colors, palette, radius, space } from '@/design-system/tokens';
 import { usePlaySession } from '@/features/engage/EnergySheet';
-import { championLevels, levelLabel, useWorldsConfig, useWorldsState, worldBySlug } from '@/features/worlds/api';
+import {
+  championLevels,
+  levelLabel,
+  useWorldsConfig,
+  useWorldsState,
+  worldBySlug,
+} from '@/features/worlds/api';
 import { shade } from '@/features/worlds/worldArt';
 import { WorldBadge } from '@/features/worlds/WorldBadge';
 import { LevelNode } from '@/features/worlds/LevelNode';
@@ -49,9 +55,15 @@ function Pulse({ color }: { color: string }) {
   const v = useSharedValue(1);
   useEffect(() => {
     if (reduced) return;
-    v.value = withRepeat(withSequence(withTiming(1.18, { duration: 700 }), withTiming(1, { duration: 700 })), -1);
+    v.value = withRepeat(
+      withSequence(withTiming(1.18, { duration: 700 }), withTiming(1, { duration: 700 })),
+      -1,
+    );
   }, [reduced, v]);
-  const st = useAnimatedStyle(() => ({ transform: [{ scale: v.value }], opacity: 2 - v.value * 1.2 }));
+  const st = useAnimatedStyle(() => ({
+    transform: [{ scale: v.value }],
+    opacity: 2 - v.value * 1.2,
+  }));
   return <Animated.View style={[styles.pulse, { borderColor: color }, st]} />;
 }
 
@@ -67,7 +79,9 @@ export default function WorldScreen() {
   const onScroll = useAnimatedScrollHandler((e) => {
     scrollY.value = e.contentOffset.y;
   });
-  const parallax = useAnimatedStyle(() => ({ transform: [{ translateY: scrollY.value * PARALLAX }] }));
+  const parallax = useAnimatedStyle(() => ({
+    transform: [{ translateY: scrollY.value * PARALLAX }],
+  }));
   const [sheet, setSheet] = useState<number | null>(null);
   const st = data?.worlds.find((x) => x.slug === slug);
   const unlocked = st?.unlocked ?? 1;
@@ -92,7 +106,8 @@ export default function WorldScreen() {
     const pts = pos.map((p) => ({ x: p.x + NODE / 2, y: p.y + NODE / 2 }));
     let d = `M${pts[0]!.x} ${pts[0]!.y}`;
     for (let i = 1; i < pts.length; i++) {
-      const a = pts[i - 1]!, b = pts[i]!;
+      const a = pts[i - 1]!,
+        b = pts[i]!;
       const my = (a.y + b.y) / 2;
       d += ` C${a.x} ${my} ${b.x} ${my} ${b.x} ${b.y}`;
     }
@@ -116,109 +131,179 @@ export default function WorldScreen() {
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <Backdrop />
-      {WORLD_IMAGES[w.icon] ? <Image source={WORLD_IMAGES[w.icon]!} style={[styles.glow, styles.glowArt]} resizeMode="cover" blurRadius={2} /> : null}
-      <LinearGradient colors={[shade(w.color, -0.35) + '99', 'rgba(26,16,66,0.55)', 'rgba(26,16,66,0)']} locations={[0, 0.7, 1]} style={styles.glow} />
+      {WORLD_IMAGES[w.icon] ? (
+        <Image
+          source={WORLD_IMAGES[w.icon]!}
+          style={[styles.glow, styles.glowArt]}
+          resizeMode="cover"
+          blurRadius={2}
+        />
+      ) : null}
+      <LinearGradient
+        colors={[shade(w.color, -0.35) + '99', 'rgba(26,16,66,0.55)', 'rgba(26,16,66,0)']}
+        locations={[0, 0.7, 1]}
+        style={styles.glow}
+      />
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button" accessibilityLabel={strings.common.back}>
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel={strings.common.back}
+        >
           <Ionicons name="arrow-forward" size={26} color={colors.text} />
         </Pressable>
         <WorldBadge icon={w.icon} color={w.color} size={52} />
         <View style={styles.flex}>
           <AppText variant="heading">{w.name}</AppText>
           <AppText variant="caption" color={colors.textMuted}>
-            {fmt(t.progress, { n: passed })} · {fmt(t.starsOf, { n: st?.total_stars ?? 0, total: levels * 3 })}
+            {fmt(t.progress, { n: passed })} ·{' '}
+            {fmt(t.starsOf, { n: st?.total_stars ?? 0, total: levels * 3 })}
           </AppText>
         </View>
       </View>
       <View style={styles.barTrack}>
-        <View style={[styles.barFill, { width: `${(passed / Math.max(1, levels)) * 100}%`, backgroundColor: w.color }]} />
+        <View
+          style={[
+            styles.barFill,
+            { width: `${(passed / Math.max(1, levels)) * 100}%`, backgroundColor: w.color },
+          ]}
+        />
       </View>
 
       <View style={styles.flex}>
-      <Animated.ScrollView
-        ref={scroll}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        contentContainerStyle={{ height: total }}
-        showsVerticalScrollIndicator={false}
-      >
-        <Animated.View style={[styles.mapLayer, { height: total }, parallax]} pointerEvents="none">
-          {sections.length
-            ? Array.from({ length: tiles }, (_, k) => {
-                const n = sections.length;
-                // every section once, then all again mirrored, so the map never looks the same twice in a row
-                const mirror = Math.floor(k / n) % 2 === 1;
-                return (
-                  <Image
-                    key={`bg${k}`}
-                    source={sections[k % n]!}
-                    resizeMode="cover"
-                    style={[styles.tile, { top: k * tileStep, width, height: tileH }, mirror ? styles.mirror : null]}
-                  />
-                );
-              })
-            : null}
-        </Animated.View>
-        <View style={[styles.tileShade, { height: total }]} />
-        <Svg width={width} height={total} style={StyleSheet.absoluteFill}>
-          <Path d={road} stroke="rgba(0,0,0,0.25)" strokeWidth={40} strokeLinecap="round" fill="none" transform="translate(0 5)" />
-          <Path d={road} stroke={shade(w.color, -0.4)} strokeWidth={38} strokeLinecap="round" fill="none" />
-          <Path d={road} stroke="#FFF3D6" strokeWidth={28} strokeLinecap="round" fill="none" />
-          <Path d={road} stroke={shade(w.color, 0.25)} strokeWidth={5} strokeLinecap="round" strokeDasharray="12 16" fill="none" />
-        </Svg>
-        {champ > 0 ? (
-          <View style={[styles.champBanner, { top: 40 + nodes * STEP - 6 }]} pointerEvents="none">
-            <LinearGradient colors={['#FFD46B', '#E08A00']} style={StyleSheet.absoluteFill} />
-            <AppText variant="heading" color={colors.textOnBright} align="center">
-              {`👑 ${strings.champion.title}`}
-            </AppText>
-            <AppText variant="caption" color={colors.textOnBright} align="center" style={styles.bold}>
-              {unlocked > levels ? strings.champion.body : strings.champion.locked}
-            </AppText>
-          </View>
-        ) : null}
-        {pos.map((p, i) => {
-          const lvl = i + 1;
-          const s = stars[String(lvl)] ?? 0;
-          const open = lvl <= unlocked;
-          const current = lvl === unlocked && s === 0;
-          const champion = lvl > levels;
-          const chest = !champion && lvl % 5 === 0;
-          return (
-            <View key={lvl} style={[styles.nodeWrap, { top: p.y }, physicalLeft(p.x, NODE, width)]}>
-              {current ? <Pulse color={w.color} /> : null}
-              <Pressable
-                onPress={() => setSheet(lvl)}
-                accessibilityRole="button"
-                accessibilityLabel={`${levelLabel(lvl, levels)}${open ? `, ${s} כוכבים` : ', נעול'}`}
-                style={({ pressed }) => [pressed && styles.pressed]}
+        <Animated.ScrollView
+          ref={scroll}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
+          contentContainerStyle={{ height: total }}
+          showsVerticalScrollIndicator={false}
+        >
+          <Animated.View
+            style={[styles.mapLayer, { height: total }, parallax]}
+            pointerEvents="none"
+          >
+            {sections.length
+              ? Array.from({ length: tiles }, (_, k) => {
+                  const n = sections.length;
+                  // every section once, then all again mirrored, so the map never looks the same twice in a row
+                  const mirror = Math.floor(k / n) % 2 === 1;
+                  return (
+                    <Image
+                      key={`bg${k}`}
+                      source={sections[k % n]!}
+                      resizeMode="cover"
+                      style={[
+                        styles.tile,
+                        { top: k * tileStep, width, height: tileH },
+                        mirror ? styles.mirror : null,
+                      ]}
+                    />
+                  );
+                })
+              : null}
+          </Animated.View>
+          <View style={[styles.tileShade, { height: total }]} />
+          <Svg width={width} height={total} style={StyleSheet.absoluteFill}>
+            <Path
+              d={road}
+              stroke="rgba(0,0,0,0.25)"
+              strokeWidth={40}
+              strokeLinecap="round"
+              fill="none"
+              transform="translate(0 5)"
+            />
+            <Path
+              d={road}
+              stroke={shade(w.color, -0.4)}
+              strokeWidth={38}
+              strokeLinecap="round"
+              fill="none"
+            />
+            <Path d={road} stroke="#FFF3D6" strokeWidth={28} strokeLinecap="round" fill="none" />
+            <Path
+              d={road}
+              stroke={shade(w.color, 0.25)}
+              strokeWidth={5}
+              strokeLinecap="round"
+              strokeDasharray="12 16"
+              fill="none"
+            />
+          </Svg>
+          {champ > 0 ? (
+            <View style={[styles.champBanner, { top: 40 + nodes * STEP - 6 }]} pointerEvents="none">
+              <LinearGradient colors={['#FFD46B', '#E08A00']} style={StyleSheet.absoluteFill} />
+              <AppText variant="heading" color={colors.textOnBright} align="center">
+                {`👑 ${strings.champion.title}`}
+              </AppText>
+              <AppText
+                variant="caption"
+                color={colors.textOnBright}
+                align="center"
+                style={styles.bold}
               >
-                <LevelNode
-                  size={NODE}
-                  level={lvl}
-                  label={champion ? lvl - levels : lvl}
-                  crown={champion}
-                  color={champion ? champColor : w.color}
-                  chest={chest}
-                  state={!open ? 'locked' : current ? 'current' : s > 0 ? 'done' : 'open'}
-                />
-              </Pressable>
-              {open && !current ? <Stars n={s} /> : null}
-              {current ? (
-                <Animated.View entering={ZoomIn} style={[styles.here, { backgroundColor: colors.led }]}>
-                  <AppText variant="caption" color={colors.textOnBright} style={styles.bold}>
-                    {t.play}
-                  </AppText>
-                </Animated.View>
-              ) : null}
+                {unlocked > levels ? strings.champion.body : strings.champion.locked}
+              </AppText>
             </View>
-          );
-        })}
-      </Animated.ScrollView>
-      <PathDecor slug={w.slug} />
+          ) : null}
+          {pos.map((p, i) => {
+            const lvl = i + 1;
+            const s = stars[String(lvl)] ?? 0;
+            const open = lvl <= unlocked;
+            const current = lvl === unlocked && s === 0;
+            const champion = lvl > levels;
+            const chest = !champion && lvl % 5 === 0;
+            return (
+              <View
+                key={lvl}
+                style={[styles.nodeWrap, { top: p.y }, physicalLeft(p.x, NODE, width)]}
+              >
+                {current ? <Pulse color={w.color} /> : null}
+                <Pressable
+                  onPress={() => setSheet(lvl)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${levelLabel(lvl, levels)}${open ? `, ${s} כוכבים` : ', נעול'}`}
+                  style={({ pressed }) => [pressed && styles.pressed]}
+                >
+                  <LevelNode
+                    size={NODE}
+                    level={lvl}
+                    label={champion ? lvl - levels : lvl}
+                    crown={champion}
+                    color={champion ? champColor : w.color}
+                    chest={chest}
+                    state={!open ? 'locked' : current ? 'current' : s > 0 ? 'done' : 'open'}
+                  />
+                </Pressable>
+                {open && !current ? <Stars n={s} /> : null}
+                {current ? (
+                  <Animated.View
+                    entering={ZoomIn}
+                    style={[styles.here, { backgroundColor: colors.led }]}
+                  >
+                    <AppText variant="caption" color={colors.textOnBright} style={styles.bold}>
+                      {t.play}
+                    </AppText>
+                  </Animated.View>
+                ) : null}
+              </View>
+            );
+          })}
+        </Animated.ScrollView>
+        <PathDecor slug={w.slug} />
       </View>
 
-      <BottomSheet visible={sheet !== null} onClose={() => setSheet(null)} title={sheet ? (sheet > levels ? levelLabel(sheet, levels) : fmt(t.levelOf, { n: sheet, total: levels })) : ''}>
+      <BottomSheet
+        visible={sheet !== null}
+        onClose={() => setSheet(null)}
+        title={
+          sheet
+            ? sheet > levels
+              ? levelLabel(sheet, levels)
+              : fmt(t.levelOf, { n: sheet, total: levels })
+            : ''
+        }
+      >
         {sheet !== null ? (
           <View style={styles.sheet}>
             <Stars n={sheetStars} size={30} />
@@ -260,18 +345,57 @@ const styles = StyleSheet.create({
   glowArt: { opacity: 0.4 },
   flex: { flex: 1 },
   bold: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
-  header: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingHorizontal: space.md, paddingTop: space.sm },
-  barTrack: { height: 8, borderRadius: 4, backgroundColor: palette.night950, marginHorizontal: space.md, marginTop: space.sm, overflow: 'hidden' },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    paddingHorizontal: space.md,
+    paddingTop: space.sm,
+  },
+  barTrack: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: palette.night950,
+    marginHorizontal: space.md,
+    marginTop: space.sm,
+    overflow: 'hidden',
+  },
   barFill: { height: 8, borderRadius: 4 },
   nodeWrap: { position: 'absolute', width: NODE, alignItems: 'center' },
   tile: { position: 'absolute', left: 0 },
   mirror: { transform: [{ scaleX: -1 }] },
   mapLayer: { position: 'absolute', top: 0, left: 0, right: 0, overflow: 'hidden' },
-  tileShade: { position: 'absolute', left: 0, right: 0, top: 0, backgroundColor: 'rgba(20,10,60,0.18)' },
+  tileShade: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    backgroundColor: 'rgba(20,10,60,0.18)',
+  },
   pressed: { transform: [{ translateY: 3 }] },
-  pulse: { position: 'absolute', top: -8, width: NODE + 16, height: NODE + 16, borderRadius: (NODE + 16) / 2, borderWidth: 5 },
-  stars: { flexDirection: 'row', gap: 1, marginTop: -2, paddingHorizontal: 6, paddingVertical: 1, borderRadius: 10, backgroundColor: 'rgba(0,0,0,0.45)' },
-  here: { marginTop: 4, paddingHorizontal: space.md, paddingVertical: 2, borderRadius: radius.chip },
+  pulse: {
+    position: 'absolute',
+    top: -8,
+    width: NODE + 16,
+    height: NODE + 16,
+    borderRadius: (NODE + 16) / 2,
+    borderWidth: 5,
+  },
+  stars: {
+    flexDirection: 'row',
+    gap: 1,
+    marginTop: -2,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+  },
+  here: {
+    marginTop: 4,
+    paddingHorizontal: space.md,
+    paddingVertical: 2,
+    borderRadius: radius.chip,
+  },
   sheet: { alignItems: 'center', gap: space.md },
   champBanner: {
     position: 'absolute',

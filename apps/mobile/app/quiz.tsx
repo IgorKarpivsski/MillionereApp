@@ -6,14 +6,24 @@ import { LADDER } from '@fm/economy-config';
 import type { DailyStatus, LifelineKind, ReportReason } from '@fm/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, BackHandler, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  BackHandler,
+  Pressable,
+  ScrollView,
+  Share,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { maybeAskForRating } from '@/features/engage/RatePrompt';
 import { askForRemindersOnce } from '@/features/reminders/useReminders';
 import { gameFinished } from '@/features/store/interstitial';
 import { markModeSeen, useSettingsStore } from '@/features/settings/store';
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { appAlert, AppText,
+import {
+  appAlert,
+  AppText,
   BottomSheet,
   Card,
   EmptyState,
@@ -21,7 +31,10 @@ import { appAlert, AppText,
   ProgressBar,
   StickerButton,
   TrophyLogo,
-  useToast, Backdrop, Sloth } from '@/design-system/components';
+  useToast,
+  Backdrop,
+  Sloth,
+} from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound, preloadSounds } from '@/design-system/feedback/sound';
@@ -39,7 +52,11 @@ import { PostGameRank } from '@/features/teen/PostGame';
 
 const t = strings.quiz;
 
-const LIFELINES: ReadonlyArray<{ kind: LifelineKind; label: string; icon: 'contrast-outline' | 'mic-outline' | 'people-outline' | 'tv-outline' }> = [
+const LIFELINES: ReadonlyArray<{
+  kind: LifelineKind;
+  label: string;
+  icon: 'contrast-outline' | 'mic-outline' | 'people-outline' | 'tv-outline';
+}> = [
   { kind: 'fifty', label: '50:50', icon: 'contrast-outline' },
   { kind: 'expert', label: t.lifelines.expert, icon: 'mic-outline' },
   { kind: 'fans', label: t.lifelines.fans, icon: 'people-outline' },
@@ -103,17 +120,32 @@ function Board({ s, onExit, daily }: { s: QuizRunState; onExit: () => void; dail
   const rival = daily ? s.misses : s.reveal && s.reveal.result !== 'correct' ? 1 : 0;
   return (
     <View style={styles.board}>
-      <Pressable onPress={onExit} hitSlop={12} accessibilityRole="button" accessibilityLabel={t.exit}>
+      <Pressable
+        onPress={onExit}
+        hitSlop={12}
+        accessibilityRole="button"
+        accessibilityLabel={t.exit}
+      >
         <Ionicons name="close" size={24} color={colors.textDim} />
       </Pressable>
-      <View style={styles.boardScore} accessible accessibilityLabel={`${t.you} ${s.score}, ${t.rival} ${rival}`}>
+      <View
+        style={styles.boardScore}
+        accessible
+        accessibilityLabel={`${t.you} ${s.score}, ${t.rival} ${rival}`}
+      >
         <AppText variant="label">{t.you}</AppText>
         <View style={styles.digits}>
-          <Animated.View key={`y${s.score}`} entering={reduced || s.score === 0 ? undefined : ZoomIn.springify().damping(9)}>
+          <Animated.View
+            key={`y${s.score}`}
+            entering={reduced || s.score === 0 ? undefined : ZoomIn.springify().damping(9)}
+          >
             <Led size="ledL">{s.score}</Led>
           </Animated.View>
           <Led size="ledL">:</Led>
-          <Animated.View key={`r${rival}`} entering={reduced || rival === 0 ? undefined : ZoomIn.springify().damping(9)}>
+          <Animated.View
+            key={`r${rival}`}
+            entering={reduced || rival === 0 ? undefined : ZoomIn.springify().damping(9)}
+          >
             <Led size="ledL" color={rival ? colors.danger : colors.led}>
               {rival}
             </Led>
@@ -121,7 +153,9 @@ function Board({ s, onExit, daily }: { s: QuizRunState; onExit: () => void; dail
         </View>
         <AppText variant="label">{t.rival}</AppText>
       </View>
-      <Led size="number" color={colors.correct}>{ltr(`${Math.min(rung, 10)}/10`)}</Led>
+      <Led size="number" color={colors.correct}>
+        {ltr(`${Math.min(rung, 10)}/10`)}
+      </Led>
     </View>
   );
 }
@@ -130,11 +164,23 @@ function Board({ s, onExit, daily }: { s: QuizRunState; onExit: () => void; dail
 /* Result                                                              */
 /* ------------------------------------------------------------------ */
 
-function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => void; daily: boolean }) {
+function ResultView({
+  s,
+  onAgain,
+  daily,
+}: {
+  s: QuizRunState;
+  onAgain: () => void;
+  daily: boolean;
+}) {
   const reduced = useReducedMotion();
   const sum = s.summary!;
   const won = daily ? sum.correct >= 6 : sum.status === 'won';
-  const rival = daily ? 10 - sum.correct : sum.status === 'lost' || sum.status === 'timed_out' ? 1 : 0;
+  const rival = daily
+    ? 10 - sum.correct
+    : sum.status === 'lost' || sum.status === 'timed_out'
+      ? 1
+      : 0;
   const { data: store } = useStore();
   useEffect(() => {
     const id = setTimeout(() => {
@@ -154,7 +200,9 @@ function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => voi
   }, [daily, sum.correct]);
   const shareResult = () =>
     void Share.share({
-      message: daily ? fmt(strings.share.daily, { n: sum.correct }) : fmt(strings.share.classic, { n: sum.correct, p: formatNumber(sum.prize_points) }),
+      message: daily
+        ? fmt(strings.share.daily, { n: sum.correct })
+        : fmt(strings.share.classic, { n: sum.correct, p: formatNumber(sum.prize_points) }),
     });
   return (
     <ScrollView contentContainerStyle={styles.result}>
@@ -190,13 +238,19 @@ function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => voi
           <AppText variant="label">{t.rival}</AppText>
         </View>
         <View style={styles.earned}>
-          <Animated.View entering={reduced ? undefined : FadeInDown.delay(200)} style={styles.earnedTile}>
+          <Animated.View
+            entering={reduced ? undefined : FadeInDown.delay(200)}
+            style={styles.earnedTile}
+          >
             <Led size="ledM">{ltr(`+${formatNumber(sum.coins)}`)}</Led>
             <AppText variant="caption" color={colors.textDim}>
               {t.earnedCoins}
             </AppText>
           </Animated.View>
-          <Animated.View entering={reduced ? undefined : FadeInDown.delay(320)} style={styles.earnedTile}>
+          <Animated.View
+            entering={reduced ? undefined : FadeInDown.delay(320)}
+            style={styles.earnedTile}
+          >
             <Led size="ledM" color={colors.text}>
               {formatNumber(sum.prize_points)}
             </Led>
@@ -204,8 +258,13 @@ function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => voi
               {t.earnedPoints}
             </AppText>
           </Animated.View>
-          <Animated.View entering={reduced ? undefined : FadeInDown.delay(440)} style={styles.earnedTile}>
-            <Led size="ledM" color={colors.correct}>{ltr(`+${sum.xp}`)}</Led>
+          <Animated.View
+            entering={reduced ? undefined : FadeInDown.delay(440)}
+            style={styles.earnedTile}
+          >
+            <Led size="ledM" color={colors.correct}>
+              {ltr(`+${sum.xp}`)}
+            </Led>
             <AppText variant="caption" color={colors.textDim}>
               {t.earnedXp}
             </AppText>
@@ -220,9 +279,21 @@ function ResultView({ s, onAgain, daily }: { s: QuizRunState; onAgain: () => voi
         ) : null}
       </Card>
 
-      <StickerButton label={strings.share.cta} icon="share-social" tone="outline" fullWidth onPress={shareResult} />
+      <StickerButton
+        label={strings.share.cta}
+        icon="share-social"
+        tone="outline"
+        fullWidth
+        onPress={shareResult}
+      />
       {daily ? (
-        <StickerButton label={t.toClassic} icon="flash" size="lg" fullWidth onPress={() => router.replace({ pathname: '/session', params: { world: 'mix' } })} />
+        <StickerButton
+          label={t.toClassic}
+          icon="flash"
+          size="lg"
+          fullWidth
+          onPress={() => router.replace({ pathname: '/session', params: { world: 'mix' } })}
+        />
       ) : (
         <StickerButton label={t.again} icon="refresh" size="lg" fullWidth onPress={onAgain} />
       )}
@@ -240,7 +311,9 @@ function DoubleCoins({ runId, coins }: { runId?: string; coins: number }) {
   if (!runId || coins <= 0 || done) return null;
   return (
     <StickerButton
-      label={fmt(ad.adFree ? strings.store.doubleNoAd : strings.store.double, { n: formatNumber(ad.adFree ? coins : coins * 2) })}
+      label={fmt(ad.adFree ? strings.store.doubleNoAd : strings.store.double, {
+        n: formatNumber(ad.adFree ? coins : coins * 2),
+      })}
       icon={ad.adFree ? 'gift' : 'tv'}
       tone={ad.adFree ? 'outline' : 'ad'}
       tag={ad.adFree ? undefined : strings.store.adTag}
@@ -264,7 +337,10 @@ function DoubleCoins({ runId, coins }: { runId?: string; coins: number }) {
 
 /** Already played today: when the next challenge opens, and today's result. */
 function DailyCountdown({ status }: { status: DailyStatus }) {
-  const ends = useMemo(() => new Date(Date.now() + status.seconds_to_reset * 1000).toISOString(), [status.seconds_to_reset]);
+  const ends = useMemo(
+    () => new Date(Date.now() + status.seconds_to_reset * 1000).toISOString(),
+    [status.seconds_to_reset],
+  );
   const left = useCountdownTo(ends);
   return (
     <SafeAreaView style={styles.root}>
@@ -285,7 +361,13 @@ function DailyCountdown({ status }: { status: DailyStatus }) {
             {`🔥 ${fmt(t.streakNow, { n: status.streak })}`}
           </AppText>
         ) : null}
-        <StickerButton label={strings.modes.quick} icon="play" tone="prize" fullWidth onPress={() => router.replace({ pathname: '/session', params: { world: 'mix' } })} />
+        <StickerButton
+          label={strings.modes.quick}
+          icon="play"
+          tone="prize"
+          fullWidth
+          onPress={() => router.replace({ pathname: '/session', params: { world: 'mix' } })}
+        />
         <StickerButton label={t.home} tone="ghost" fullWidth onPress={() => router.back()} />
       </View>
     </SafeAreaView>
@@ -297,7 +379,16 @@ export default function QuizScreen() {
   const params = useLocalSearchParams<{ mode?: string }>();
   const daily = params.mode === 'daily';
   const total = daily ? 10 : 12;
-  const { state: s, start, pick, next, lifeline, cashOut, whistle, retry } = useQuizRun(daily ? 'daily' : 'classic');
+  const {
+    state: s,
+    start,
+    pick,
+    next,
+    lifeline,
+    cashOut,
+    whistle,
+    retry,
+  } = useQuizRun(daily ? 'daily' : 'classic');
   const { data: energy } = useEnergy();
   const showEnergy = useEnergySheet((x) => x.show);
   const toast = useToast();
@@ -311,7 +402,15 @@ export default function QuizScreen() {
   const dailyKnown = !daily || !!dailySt || dailyErr;
   const started = useRef(false);
   useEffect(() => {
-    preloadSounds(['whistle', 'tick', 'answer_lock', 'answer_correct', 'answer_wrong', 'var', 'coins']);
+    preloadSounds([
+      'whistle',
+      'tick',
+      'answer_lock',
+      'answer_correct',
+      'answer_wrong',
+      'var',
+      'coins',
+    ]);
   }, []);
   useEffect(() => {
     if (!dailyKnown || dailyDone || started.current) return;
@@ -418,7 +517,9 @@ export default function QuizScreen() {
         <ResultView
           s={s}
           daily={daily}
-          onAgain={() => (energy && !energy.unlimited && energy.tickets < 1 ? showEnergy() : void start())}
+          onAgain={() =>
+            energy && !energy.unlimited && energy.tickets < 1 ? showEnergy() : void start()
+          }
         />
       </SafeAreaView>
     );
@@ -452,7 +553,8 @@ export default function QuizScreen() {
     if (q.removed.includes(slot)) return 'removed';
     if (q.wrong_slots.includes(slot)) return 'overturned';
     if (reveal) {
-      if (slot === reveal.correctSlot) return reveal.pickedSlot === slot ? 'correctPicked' : 'correctMissed';
+      if (slot === reveal.correctSlot)
+        return reveal.pickedSlot === slot ? 'correctPicked' : 'correctMissed';
       if (slot === reveal.pickedSlot) return 'wrongPicked';
       return 'dim';
     }
@@ -462,9 +564,16 @@ export default function QuizScreen() {
   };
 
   const expertLine = expert
-    ? fmt(expert.confidence === 'sure' ? t.expertSure : expert.confidence === 'think' ? t.expertThink : t.expertGuess, {
-        a: q.answers.find((a) => a.slot === expert.slot)?.text ?? '',
-      })
+    ? fmt(
+        expert.confidence === 'sure'
+          ? t.expertSure
+          : expert.confidence === 'think'
+            ? t.expertThink
+            : t.expertGuess,
+        {
+          a: q.answers.find((a) => a.slot === expert.slot)?.text ?? '',
+        },
+      )
     : null;
 
   return (
@@ -472,8 +581,15 @@ export default function QuizScreen() {
       <Backdrop />
       <Board s={s} daily={daily} onExit={exit} />
 
-      <ScrollView style={styles.scrollArea} contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-        <ProgressBar value={(rung - 1 + (reveal ? 1 : 0)) / total} accessibilityLabel={fmt(t.questionOf, { n: rung, total })} />
+      <ScrollView
+        style={styles.scrollArea}
+        contentContainerStyle={styles.body}
+        showsVerticalScrollIndicator={false}
+      >
+        <ProgressBar
+          value={(rung - 1 + (reveal ? 1 : 0)) / total}
+          accessibilityLabel={fmt(t.questionOf, { n: rung, total })}
+        />
         <View style={styles.infoRow}>
           <AppText variant="caption" color={colors.textDim}>
             {fmt(t.questionOf, { n: rung, total })} · {daily ? t.dailyTag : t.onTheLine}{' '}
@@ -495,7 +611,11 @@ export default function QuizScreen() {
           )}
         </View>
 
-        <Animated.View key={q.id} entering={reduced ? undefined : FadeIn.duration(250)} style={styles.qCard}>
+        <Animated.View
+          key={q.id}
+          entering={reduced ? undefined : FadeIn.duration(250)}
+          style={styles.qCard}
+        >
           <View style={styles.chips}>
             {q.category_name ? (
               <View style={styles.chip}>
@@ -513,7 +633,6 @@ export default function QuizScreen() {
           </AppText>
           {q.image ? <QuestionImageView image={q.image} /> : null}
         </Animated.View>
-
 
         {expertLine && !reveal ? (
           <View style={styles.hint}>
@@ -533,13 +652,20 @@ export default function QuizScreen() {
         ) : null}
 
         {reveal ? (
-          <Animated.View entering={reduced ? undefined : FadeInDown.springify().damping(16)} accessibilityLiveRegion="assertive">
+          <Animated.View
+            entering={reduced ? undefined : FadeInDown.springify().damping(16)}
+            accessibilityLiveRegion="assertive"
+          >
             <Card kind="soft" padding={space.md} style={styles.explain}>
               <AppText
                 variant="heading"
                 color={reveal.result === 'correct' ? colors.correct : colors.danger}
               >
-                {reveal.result === 'correct' ? t.correctTitle : reveal.result === 'timeout' ? t.timeoutTitle : t.wrongTitle}
+                {reveal.result === 'correct'
+                  ? t.correctTitle
+                  : reveal.result === 'timeout'
+                    ? t.timeoutTitle
+                    : t.wrongTitle}
               </AppText>
               <AppText color={colors.textMuted}>{reveal.explanation}</AppText>
               <Pressable onPress={() => setReportOpen(true)} accessibilityRole="button" hitSlop={8}>
@@ -553,21 +679,21 @@ export default function QuizScreen() {
       </ScrollView>
       {/* answers stay pinned under the question: always on screen, even on small phones */}
       <View style={styles.answersDock}>
-          <View style={styles.grid}>
-            {q.answers.map((a, i) => (
-              <AnswerTile
-                key={`${q.id}-${a.slot}`}
-                index={i}
-                text={a.text}
-                image={a.image}
-                state={stateFor(a.slot)}
-                fansPct={fans ? fans[a.slot] : undefined}
-                expertPick={expert?.slot === a.slot && !reveal}
-                disabled={!answering}
-                onPress={() => void pick(a.slot)}
-              />
-            ))}
-          </View>
+        <View style={styles.grid}>
+          {q.answers.map((a, i) => (
+            <AnswerTile
+              key={`${q.id}-${a.slot}`}
+              index={i}
+              text={a.text}
+              image={a.image}
+              state={stateFor(a.slot)}
+              fansPct={fans ? fans[a.slot] : undefined}
+              expertPick={expert?.slot === a.slot && !reveal}
+              disabled={!answering}
+              onPress={() => void pick(a.slot)}
+            />
+          ))}
+        </View>
       </View>
 
       <View style={styles.footer}>
@@ -612,8 +738,6 @@ export default function QuizScreen() {
         )}
       </View>
 
-
-
       <BottomSheet visible={reportOpen} onClose={() => setReportOpen(false)} title={t.reportTitle}>
         {REPORT_REASONS.map((r) => (
           <StickerButton
@@ -641,7 +765,13 @@ const styles = StyleSheet.create({
   scrollArea: { flex: 1 },
   answersDock: { paddingHorizontal: space.md, paddingTop: space.xs, paddingBottom: space.sm },
   root: { flex: 1, backgroundColor: colors.bgDeep },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, padding: space.xl },
+  center: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space.lg,
+    padding: space.xl,
+  },
   flex: { flex: 1 },
   bold: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
   board: {
@@ -659,7 +789,12 @@ const styles = StyleSheet.create({
   },
   boardScore: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   digits: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  body: { paddingHorizontal: space.md, paddingTop: space.md, paddingBottom: space.lg, gap: space.md },
+  body: {
+    paddingHorizontal: space.md,
+    paddingTop: space.md,
+    paddingBottom: space.lg,
+    gap: space.md,
+  },
   infoRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   clock: { flexDirection: 'row', alignItems: 'baseline', gap: 4 },
   qCard: {
@@ -669,8 +804,18 @@ const styles = StyleSheet.create({
     gap: space.sm,
   },
   chips: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  chip: { paddingHorizontal: space.sm, paddingVertical: 2, borderRadius: 6, backgroundColor: colors.board },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: space.sm },
+  chip: {
+    paddingHorizontal: space.sm,
+    paddingVertical: 2,
+    borderRadius: 6,
+    backgroundColor: colors.board,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    rowGap: space.sm,
+  },
   hint: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -682,7 +827,12 @@ const styles = StyleSheet.create({
   hintVar: { borderWidth: 1, borderColor: colors.led },
   explain: { gap: space.xs },
   link: { textDecorationLine: 'underline', marginTop: space.xs },
-  footer: { paddingHorizontal: space.md, paddingBottom: space.sm, paddingTop: space.xs, gap: space.sm },
+  footer: {
+    paddingHorizontal: space.md,
+    paddingBottom: space.sm,
+    paddingTop: space.xs,
+    gap: space.sm,
+  },
   lifelines: { flexDirection: 'row', gap: space.sm },
   hidden: { display: 'none' },
   streakRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
@@ -699,7 +849,12 @@ const styles = StyleSheet.create({
   },
   result: { padding: space.xl, gap: space.lg, alignItems: 'center' },
   finalCard: { alignSelf: 'stretch', gap: space.lg },
-  finalScore: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.md },
+  finalScore: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space.md,
+  },
   earned: { flexDirection: 'row', gap: space.sm },
   earnedTile: {
     flex: 1,
@@ -708,5 +863,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.board,
     backgroundColor: colors.surfaceRaised,
   },
-  levelUp: { alignSelf: 'center', paddingHorizontal: space.lg, paddingVertical: space.xs, borderRadius: radius.chip, backgroundColor: colors.correct },
+  levelUp: {
+    alignSelf: 'center',
+    paddingHorizontal: space.lg,
+    paddingVertical: space.xs,
+    borderRadius: radius.chip,
+    backgroundColor: colors.correct,
+  },
 });

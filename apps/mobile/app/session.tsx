@@ -4,10 +4,39 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { maybeAskForRating } from '@/features/engage/RatePrompt';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, BackHandler, Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
-import Animated, { FadeIn, FadeInDown, FadeInUp, ZoomIn, useAnimatedStyle, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
+import {
+  ActivityIndicator,
+  BackHandler,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+} from 'react-native';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+  ZoomIn,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  Easing,
+} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { appAlert, AppText, BottomSheet, Card, Confetti, EmptyState, Led, SparkBurst, StickerButton, useToast, Backdrop } from '@/design-system/components';
+import {
+  appAlert,
+  AppText,
+  BottomSheet,
+  Card,
+  Confetti,
+  EmptyState,
+  Led,
+  SparkBurst,
+  StickerButton,
+  useToast,
+  Backdrop,
+} from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { playSound, preloadSounds } from '@/design-system/feedback/sound';
@@ -83,7 +112,17 @@ function useSecondsLeft(deadlineAt: number | null, running: boolean, onZero: () 
   return secs;
 }
 
-function TimerBar({ deadlineAt, total, running, color }: { deadlineAt: number | null; total: number; running: boolean; color: string }) {
+function TimerBar({
+  deadlineAt,
+  total,
+  running,
+  color,
+}: {
+  deadlineAt: number | null;
+  total: number;
+  running: boolean;
+  color: string;
+}) {
   const w = useSharedValue(1);
   useEffect(() => {
     if (!deadlineAt) return;
@@ -115,7 +154,14 @@ function BigStar({ lit, delay, size }: { lit: boolean; delay: number; size: numb
   }, [lit, delay]);
   return (
     <Animated.View entering={reduced ? undefined : ZoomIn.delay(delay).springify().damping(8)}>
-      {lit ? <SparkBurst count={9} radius={size * 1.1} delay={delay + 120} colorsList={['#FFC93C', '#FFFFFF', '#FFE08A']} /> : null}
+      {lit ? (
+        <SparkBurst
+          count={9}
+          radius={size * 1.1}
+          delay={delay + 120}
+          colorsList={['#FFC93C', '#FFFFFF', '#FFE08A']}
+        />
+      ) : null}
       <Ionicons name="star" size={size} color={lit ? colors.led : palette.night600} />
     </Animated.View>
   );
@@ -146,7 +192,12 @@ function ContinueOffer({ hearts, onContinue }: { hearts: number; onContinue: () 
                 void qc.invalidateQueries({ queryKey: queryKeys.myState });
               } catch (e) {
                 setBusy(false);
-                toast((e as Error).message.includes('insufficient') ? strings.boosts.noCoins : strings.errors.generic, 'error');
+                toast(
+                  (e as Error).message.includes('insufficient')
+                    ? strings.boosts.noCoins
+                    : strings.errors.generic,
+                  'error',
+                );
                 return;
               }
             }
@@ -200,10 +251,19 @@ function ResultView({
     const id = setTimeout(maybeAskForRating, 2200);
     return () => clearTimeout(id);
   }, [sum.correct]);
-  const title = quick ? t.quickDone : sum.stars === 3 ? t.perfect : sum.stars > 0 ? t.passed : t.failed;
+  const title = quick
+    ? t.quickDone
+    : sum.stars === 3
+      ? t.perfect
+      : sum.stars > 0
+        ? t.passed
+        : t.failed;
   return (
     <ScrollView contentContainerStyle={styles.result}>
-      <LinearGradient colors={[shade(color, -0.2) + 'CC', shade(color, -0.5) + '00']} style={styles.resultGlow} />
+      <LinearGradient
+        colors={[shade(color, -0.2) + 'CC', shade(color, -0.5) + '00']}
+        style={styles.resultGlow}
+      />
       {sum.stars === 3 || sum.correct === sum.total || sum.leveled_up ? <Confetti /> : null}
       <View style={styles.starsRow}>
         <BigStar lit={sum.stars >= 1} delay={250} size={64} />
@@ -216,18 +276,26 @@ function ResultView({
         {title}
       </AppText>
       <AppText color={colors.textMuted} align="center">
-        {quick ? fmt(t.correctOf, { n: sum.correct, total: sum.total }) : `${world} · ${levelLabel(sum.level, levels)} · ${fmt(t.correctOf, { n: sum.correct, total: sum.total })}`}
+        {quick
+          ? fmt(t.correctOf, { n: sum.correct, total: sum.total })
+          : `${world} · ${levelLabel(sum.level, levels)} · ${fmt(t.correctOf, { n: sum.correct, total: sum.total })}`}
       </AppText>
 
       <Card kind="sticker" style={styles.finalCard}>
         <View style={styles.earned}>
-          <Animated.View entering={reduced ? undefined : FadeInDown.delay(300)} style={styles.earnedTile}>
+          <Animated.View
+            entering={reduced ? undefined : FadeInDown.delay(300)}
+            style={styles.earnedTile}
+          >
             <Led size="ledM">{ltr(`+${formatNumber(sum.coins)}`)}</Led>
             <AppText variant="caption" color={colors.textDim}>
               {strings.quiz.earnedCoins}
             </AppText>
           </Animated.View>
-          <Animated.View entering={reduced ? undefined : FadeInDown.delay(420)} style={styles.earnedTile}>
+          <Animated.View
+            entering={reduced ? undefined : FadeInDown.delay(420)}
+            style={styles.earnedTile}
+          >
             <Led size="ledM" color={colors.text}>
               {formatNumber(sum.prize_points)}
             </Led>
@@ -235,8 +303,13 @@ function ResultView({
               {t.score}
             </AppText>
           </Animated.View>
-          <Animated.View entering={reduced ? undefined : FadeInDown.delay(540)} style={styles.earnedTile}>
-            <Led size="ledM" color={colors.correct}>{ltr(`+${sum.xp}`)}</Led>
+          <Animated.View
+            entering={reduced ? undefined : FadeInDown.delay(540)}
+            style={styles.earnedTile}
+          >
+            <Led size="ledM" color={colors.correct}>
+              {ltr(`+${sum.xp}`)}
+            </Led>
             <AppText variant="caption" color={colors.textDim}>
               {strings.quiz.earnedXp}
             </AppText>
@@ -244,7 +317,12 @@ function ResultView({
         </View>
         {xpBefore != null && sum.xp > 0 ? <XpGain before={xpBefore} gained={sum.xp} /> : null}
         {sum.coins_breakdown && sum.coins > 0 ? (
-          <AppText variant="caption" color={colors.textMuted} align="center" style={styles.breakdown}>
+          <AppText
+            variant="caption"
+            color={colors.textMuted}
+            align="center"
+            style={styles.breakdown}
+          >
             {coinsBreakdown(sum.coins_breakdown, sum.coins)}
           </AppText>
         ) : null}
@@ -260,7 +338,11 @@ function ResultView({
             >
               <Ionicons name="gift" size={22} color={colors.textOnBright} />
               <AppText variant="label" color={colors.textOnBright} style={styles.flex}>
-                {sum.first_win ? t.chestFirst : sum.chest === 'gold' ? fmt(t.chestGold, { n: sum.level }) : t.chestSilver}
+                {sum.first_win
+                  ? t.chestFirst
+                  : sum.chest === 'gold'
+                    ? fmt(t.chestGold, { n: sum.level })
+                    : t.chestSilver}
               </AppText>
               <Ionicons name="chevron-back" size={18} color={colors.textOnBright} />
             </Pressable>
@@ -289,7 +371,9 @@ function ResultView({
         </Card>
       ) : null}
       {sum.can_continue ? <ContinueOffer hearts={sum.hearts} onContinue={onContinue} /> : null}
-      {onNext ? <StickerButton label={t.nextLevel} icon="arrow-back" size="lg" fullWidth onPress={onNext} /> : null}
+      {onNext ? (
+        <StickerButton label={t.nextLevel} icon="arrow-back" size="lg" fullWidth onPress={onNext} />
+      ) : null}
       <StickerButton
         label={quick ? t.playAgain : sum.stars > 0 ? strings.worlds.replay : t.again}
         icon="refresh"
@@ -302,19 +386,42 @@ function ResultView({
       <PostGameRank runId={s.payload?.run_id} points={sum.prize_points} double={false} />
       <ShareResultButton
         big={quick ? `${sum.correct}/${sum.total}` : '⭐'.repeat(Math.max(1, sum.stars))}
-        line={quick ? fmt(t.share, { n: sum.correct, w: t.quickDone }) : fmt(strings.teen.shareSession, { stars: sum.stars, level: sum.level, world })}
+        line={
+          quick
+            ? fmt(t.share, { n: sum.correct, w: t.quickDone })
+            : fmt(strings.teen.shareSession, { stars: sum.stars, level: sum.level, world })
+        }
       />
       <View style={styles.endRow}>
-        {quick ? null : <StickerButton label={t.toMap} icon="map" tone="ghost" style={styles.flex} onPress={() => router.back()} />}
-        <StickerButton label={t.home} icon="home" tone="ghost" style={styles.flex} onPress={goHome} />
+        {quick ? null : (
+          <StickerButton
+            label={t.toMap}
+            icon="map"
+            tone="ghost"
+            style={styles.flex}
+            onPress={() => router.back()}
+          />
+        )}
+        <StickerButton
+          label={t.home}
+          icon="home"
+          tone="ghost"
+          style={styles.flex}
+          onPress={goHome}
+        />
       </View>
     </ScrollView>
   );
 }
 
 /** "7 נכונות × 12 = 84 · בונוס כוכבים +120 · ×2 = 408": where the coins came from. */
-function coinsBreakdown(b: { correct: number; per: number; stars: number; mult: number }, total: number): string {
-  const parts = [fmt(t.coinsCorrect, { n: b.correct, per: b.per, sum: formatNumber(b.correct * b.per) })];
+function coinsBreakdown(
+  b: { correct: number; per: number; stars: number; mult: number },
+  total: number,
+): string {
+  const parts = [
+    fmt(t.coinsCorrect, { n: b.correct, per: b.per, sum: formatNumber(b.correct * b.per) }),
+  ];
   if (b.stars > 0) parts.push(fmt(t.coinsStars, { n: formatNumber(b.stars) }));
   if (b.mult > 1) parts.push(`×${b.mult}`);
   // with nothing but correct answers the first part already ends in the total
@@ -328,7 +435,9 @@ function DoubleCoins({ runId, coins }: { runId?: string; coins: number }) {
   if (!runId || coins <= 0 || done) return null;
   return (
     <StickerButton
-      label={fmt(ad.adFree ? strings.store.doubleNoAd : strings.store.double, { n: formatNumber(ad.adFree ? coins : coins * 2) })}
+      label={fmt(ad.adFree ? strings.store.doubleNoAd : strings.store.double, {
+        n: formatNumber(ad.adFree ? coins : coins * 2),
+      })}
       icon={ad.adFree ? 'gift' : 'tv'}
       tone={ad.adFree ? 'outline' : 'ad'}
       tag={ad.adFree ? undefined : strings.store.adTag}
@@ -359,10 +468,25 @@ export default function SessionScreen() {
   const xpAtStart = useRef<number | null>(null);
   const [chest, setChest] = useState<Reward | null>(null);
   const [chestOpened, setChestOpened] = useState(false);
-  const [target, setTarget] = useState({ world: params.world ?? 'mix', level: params.level ? Number(params.level) : null });
+  const [target, setTarget] = useState({
+    world: params.world ?? 'mix',
+    level: params.level ? Number(params.level) : null,
+  });
   const worlds = useWorldsConfig();
   const w = worldBySlug(worlds, target.world);
-  const { state: s, start, answer, timeUp, next, fifty, boost, hint, callFriend, continueRun, retry } = useSession(target.world, target.level, params.run);
+  const {
+    state: s,
+    start,
+    answer,
+    timeUp,
+    next,
+    fifty,
+    boost,
+    hint,
+    callFriend,
+    continueRun,
+    retry,
+  } = useSession(target.world, target.level, params.run);
   useEffect(() => {
     // the XP before this game, for the level bar on the result screen
     if (s.phase === 'question' && s.payload?.rung === 1 && me) xpAtStart.current = me.profile.xp;
@@ -378,7 +502,19 @@ export default function SessionScreen() {
   const qWorld = worldBySlug(worlds, s.payload?.question_world ?? target.world);
 
   useEffect(() => {
-    preloadSounds(['whistle', 'tick', 'answer_lock', 'answer_correct', 'answer_wrong', 'coins', 'combo_2', 'combo_3', 'combo_4', 'combo_5', 'chest_open']);
+    preloadSounds([
+      'whistle',
+      'tick',
+      'answer_lock',
+      'answer_correct',
+      'answer_wrong',
+      'coins',
+      'combo_2',
+      'combo_3',
+      'combo_4',
+      'combo_5',
+      'chest_open',
+    ]);
     void start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -397,7 +533,12 @@ export default function SessionScreen() {
   useEffect(() => {
     const r = s.reveal;
     if (!r) return;
-    if (r.coins > 0) launchFly({ from: { x: screenW / 2, y: screenH * 0.62 }, kind: 'run', label: fmt(strings.juice.flyLabel, { n: r.coins }) });
+    if (r.coins > 0)
+      launchFly({
+        from: { x: screenW / 2, y: screenH * 0.62 },
+        kind: 'run',
+        label: fmt(strings.juice.flyLabel, { n: r.coins }),
+      });
     if (r.midChest) {
       setChestOpened(true);
       const id = setTimeout(() => setChest(r.midChest), 900);
@@ -408,7 +549,8 @@ export default function SessionScreen() {
 
   // A right answer moves on by itself (after the chest, if one opened); a wrong one waits so the player can read the explanation.
   useEffect(() => {
-    if (s.phase !== 'reveal' || s.reveal?.result !== 'correct' || s.summary || s.reveal.midChest) return;
+    if (s.phase !== 'reveal' || s.reveal?.result !== 'correct' || s.summary || s.reveal.midChest)
+      return;
     const id = setTimeout(() => void next(), 1900);
     return () => clearTimeout(id);
   }, [s.phase, s.reveal, s.summary, next]);
@@ -467,13 +609,31 @@ export default function SessionScreen() {
         <Backdrop />
         <View style={styles.center}>
           <EmptyState
-            icon={noEnergy ? 'ticket-outline' : s.notice === 'locked' ? 'lock-closed-outline' : 'cloud-offline-outline'}
-            title={noEnergy ? strings.engage.outTitle : s.notice === 'locked' ? t.lockedErr : strings.quiz.error}
-            body={noEnergy ? strings.engage.freeModes : locked ? t.lockedBody : strings.errors.network}
-            actionLabel={noEnergy ? strings.engage.refillNow : locked ? t.toMap : strings.common.retry}
+            icon={
+              noEnergy
+                ? 'ticket-outline'
+                : s.notice === 'locked'
+                  ? 'lock-closed-outline'
+                  : 'cloud-offline-outline'
+            }
+            title={
+              noEnergy
+                ? strings.engage.outTitle
+                : s.notice === 'locked'
+                  ? t.lockedErr
+                  : strings.quiz.error
+            }
+            body={
+              noEnergy ? strings.engage.freeModes : locked ? t.lockedBody : strings.errors.network
+            }
+            actionLabel={
+              noEnergy ? strings.engage.refillNow : locked ? t.toMap : strings.common.retry
+            }
             onAction={noEnergy ? showEnergy : locked ? () => router.back() : () => void retry()}
           />
-          {locked ? null : <StickerButton label={t.home} tone="ghost" onPress={() => router.back()} />}
+          {locked ? null : (
+            <StickerButton label={t.home} tone="ghost" onPress={() => router.back()} />
+          )}
         </View>
       </SafeAreaView>
     );
@@ -481,11 +641,21 @@ export default function SessionScreen() {
 
   if (s.phase === 'finished' && s.summary) {
     const sum = s.summary;
-    const canNext = sum.world !== 'mix' && sum.stars > 0 && sum.level < w.levels + championLevels(w.levels);
+    const canNext =
+      sum.world !== 'mix' && sum.stars > 0 && sum.level < w.levels + championLevels(w.levels);
     return (
       <SafeAreaView style={styles.root}>
         <Backdrop />
-        <ResultView s={s} world={w.name} color={w.color} levels={w.levels} onAgain={() => again()} onNext={canNext ? () => again(sum.level + 1) : null} onContinue={() => void continueRun()} xpBefore={xpAtStart.current} />
+        <ResultView
+          s={s}
+          world={w.name}
+          color={w.color}
+          levels={w.levels}
+          onAgain={() => again()}
+          onNext={canNext ? () => again(sum.level + 1) : null}
+          onContinue={() => void continueRun()}
+          xpBefore={xpAtStart.current}
+        />
       </SafeAreaView>
     );
   }
@@ -500,7 +670,9 @@ export default function SessionScreen() {
             <WorldBadge icon={w.icon} color={w.color} size={110} />
           </Animated.View>
           <AppText variant="title">{w.name}</AppText>
-          {target.level ? <AppText color={colors.textMuted}>{levelLabel(target.level, w.levels)}</AppText> : null}
+          {target.level ? (
+            <AppText color={colors.textMuted}>{levelLabel(target.level, w.levels)}</AppText>
+          ) : null}
           <AppText color={colors.textMuted}>{t.starting}</AppText>
           <View style={styles.tip}>
             <Ionicons name="flash" size={16} color={colors.led} />
@@ -526,7 +698,8 @@ export default function SessionScreen() {
   const stateFor = (slot: number): AnswerState => {
     if (q.removed.includes(slot)) return 'removed';
     if (reveal) {
-      if (slot === reveal.correctSlot) return reveal.pickedSlot === slot ? 'correctPicked' : 'correctMissed';
+      if (slot === reveal.correctSlot)
+        return reveal.pickedSlot === slot ? 'correctPicked' : 'correctMissed';
       if (slot === reveal.pickedSlot) return 'wrongPicked';
       return 'dim';
     }
@@ -538,16 +711,35 @@ export default function SessionScreen() {
   return (
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
       <Backdrop />
-      <LinearGradient colors={[shade(qWorld.color, -0.45) + 'CC', shade(qWorld.color, -0.6) + '00']} style={styles.bgGlow} />
+      <LinearGradient
+        colors={[shade(qWorld.color, -0.45) + 'CC', shade(qWorld.color, -0.6) + '00']}
+        style={styles.bgGlow}
+      />
       <View style={styles.top}>
-        <Pressable onPress={exit} hitSlop={12} accessibilityRole="button" accessibilityLabel={t.exit}>
+        <Pressable
+          onPress={exit}
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel={t.exit}
+        >
           <Ionicons name="close" size={26} color={colors.textMuted} />
         </Pressable>
         <View style={styles.topMid}>
-          <RunLadder results={s.results} total={total} current={rung} chestAt={CHEST_AT} chestOpened={chestOpened} />
+          <RunLadder
+            results={s.results}
+            total={total}
+            current={rung}
+            chestAt={CHEST_AT}
+            chestOpened={chestOpened}
+          />
           <View style={styles.starGoal}>
             {STARS_AT.map((n) => (
-              <Ionicons key={n} name="star" size={14} color={correctSoFar >= n ? colors.led : palette.night600} />
+              <Ionicons
+                key={n}
+                name="star"
+                size={14}
+                color={correctSoFar >= n ? colors.led : palette.night600}
+              />
             ))}
           </View>
         </View>
@@ -557,14 +749,21 @@ export default function SessionScreen() {
         </View>
       </View>
 
-      <ScrollView ref={bodyScroll} style={styles.flex} contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        ref={bodyScroll}
+        style={styles.flex}
+        contentContainerStyle={styles.body}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.qHead}>
           <WorldBadge icon={qWorld.icon} color={qWorld.color} size={34} />
           <AppText variant="label" color={colors.textMuted} style={styles.flex}>
             {qWorld.name}
             {s.payload.level ? ` · ${levelLabel(s.payload.level, w.levels)}` : ''}
           </AppText>
-          <ComboFlame combo={reveal?.result === 'correct' ? reveal.combo : reveal ? 0 : comboNow(s.results)} />
+          <ComboFlame
+            combo={reveal?.result === 'correct' ? reveal.combo : reveal ? 0 : comboNow(s.results)}
+          />
           <RunCoins coins={s.runCoins} />
           {junior ? null : (
             <Led size="ledM" color={secs <= 5 && answering ? colors.danger : colors.text}>
@@ -572,14 +771,20 @@ export default function SessionScreen() {
             </Led>
           )}
         </View>
-        {junior ? null : <TimerBar
-          deadlineAt={s.deadlineAt}
-          total={Math.max(q.seconds_left, 25)}
-          running={answering}
-          color={secs <= 5 ? colors.danger : qWorld.color}
-        />}
+        {junior ? null : (
+          <TimerBar
+            deadlineAt={s.deadlineAt}
+            total={Math.max(q.seconds_left, 25)}
+            running={answering}
+            color={secs <= 5 ? colors.danger : qWorld.color}
+          />
+        )}
         {answering && !s.payload.frozen && !junior ? (
-          <View style={styles.speedPill} accessible accessibilityLabel={fmt(t.speedA11y, { n: secs * POINTS_PER_SECOND })}>
+          <View
+            style={styles.speedPill}
+            accessible
+            accessibilityLabel={fmt(t.speedA11y, { n: secs * POINTS_PER_SECOND })}
+          >
             <Ionicons name="flash" size={14} color={colors.led} />
             <AppText variant="caption" color={colors.led} style={styles.bold}>
               {fmt(t.speedLive, { n: secs * POINTS_PER_SECOND })}
@@ -587,7 +792,11 @@ export default function SessionScreen() {
           </View>
         ) : null}
 
-        <Animated.View key={q.id} entering={reduced ? undefined : FadeInUp.duration(280)} style={styles.qCard}>
+        <Animated.View
+          key={q.id}
+          entering={reduced ? undefined : FadeInUp.duration(280)}
+          style={styles.qCard}
+        >
           <AppText variant="caption" color={colors.cardMuted} style={styles.bold}>
             {fmt(t.questionOf, { n: rung, total })} · {strings.quiz.difficulty[q.difficulty]}
           </AppText>
@@ -615,12 +824,30 @@ export default function SessionScreen() {
         ) : null}
 
         {reveal ? (
-          <Animated.View entering={reduced ? undefined : FadeInDown.springify().damping(16)} accessibilityLiveRegion="assertive">
+          <Animated.View
+            entering={reduced ? undefined : FadeInDown.springify().damping(16)}
+            accessibilityLiveRegion="assertive"
+          >
             <Card kind="soft" padding={space.md} style={styles.explain}>
-              <SlothCheer key={`cheer-${rung}`} result={reveal.result} combo={reveal.combo} seed={rung * 7 + s.score} />
+              <SlothCheer
+                key={`cheer-${rung}`}
+                result={reveal.result}
+                combo={reveal.combo}
+                seed={rung * 7 + s.score}
+              />
               <View style={styles.revealHead}>
-                <AppText variant="heading" color={reveal.result === 'correct' ? colors.correct : colors.danger} style={styles.flex}>
-                  {reveal.result === 'correct' ? t.correct : reveal.result === 'timeout' ? t.timeout : junior ? t.wrongJunior : t.wrong}
+                <AppText
+                  variant="heading"
+                  color={reveal.result === 'correct' ? colors.correct : colors.danger}
+                  style={styles.flex}
+                >
+                  {reveal.result === 'correct'
+                    ? t.correct
+                    : reveal.result === 'timeout'
+                      ? t.timeout
+                      : junior
+                        ? t.wrongJunior
+                        : t.wrong}
                 </AppText>
                 {reveal.points > 0 ? (
                   <Animated.View entering={reduced ? undefined : ZoomIn.springify()}>
@@ -655,22 +882,22 @@ export default function SessionScreen() {
       </ScrollView>
       {/* answers stay pinned above the tools: always on screen, even on small phones with a photo */}
       <View style={styles.answersDock}>
-          <View style={compact ? styles.grid : styles.answers}>
-            {q.answers.map((a, i) => (
-              <AnswerTile
-                key={`${q.id}-${a.slot}`}
-                index={i}
-                text={a.text}
-                image={a.image}
-                state={stateFor(a.slot)}
-                disabled={!answering}
-                expertPick={friendPick?.slot === a.slot}
-                fill={!compact}
-                onPress={() => void answer(a.slot)}
-              />
-            ))}
-          </View>
-          {picAnswers ? <PhotoCredits answers={q.answers} /> : null}
+        <View style={compact ? styles.grid : styles.answers}>
+          {q.answers.map((a, i) => (
+            <AnswerTile
+              key={`${q.id}-${a.slot}`}
+              index={i}
+              text={a.text}
+              image={a.image}
+              state={stateFor(a.slot)}
+              disabled={!answering}
+              expertPick={friendPick?.slot === a.slot}
+              fill={!compact}
+              onPress={() => void answer(a.slot)}
+            />
+          ))}
+        </View>
+        {picAnswers ? <PhotoCredits answers={q.answers} /> : null}
       </View>
 
       <View style={styles.footer}>
@@ -708,7 +935,11 @@ export default function SessionScreen() {
         }}
       />
 
-      <BottomSheet visible={reportOpen} onClose={() => setReportOpen(false)} title={strings.quiz.reportTitle}>
+      <BottomSheet
+        visible={reportOpen}
+        onClose={() => setReportOpen(false)}
+        title={strings.quiz.reportTitle}
+      >
         {REPORT_REASONS.map((r) => (
           <StickerButton
             key={r}
@@ -772,11 +1003,23 @@ const styles = StyleSheet.create({
   },
   root: { flex: 1, backgroundColor: colors.bgDeep },
   bgGlow: { position: 'absolute', top: 0, left: 0, right: 0, height: 320 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.md, padding: space.xl },
+  center: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space.md,
+    padding: space.xl,
+  },
   flex: { flex: 1 },
   bold: { fontFamily: 'IBMPlexSansHebrew_700Bold' },
   pressed: { transform: [{ scale: 0.97 }] },
-  top: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingHorizontal: space.md, paddingTop: space.sm },
+  top: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    paddingHorizontal: space.md,
+    paddingTop: space.sm,
+  },
   topMid: { flex: 1, alignItems: 'center', gap: 4 },
   starGoal: { flexDirection: 'row', gap: 2 },
   scoreBox: {
@@ -789,7 +1032,12 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.border,
   },
-  body: { paddingHorizontal: space.md, paddingTop: space.md, paddingBottom: space.lg, gap: space.md },
+  body: {
+    paddingHorizontal: space.md,
+    paddingTop: space.md,
+    paddingBottom: space.lg,
+    gap: space.md,
+  },
   qHead: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   timerTrack: { height: 8, borderRadius: 4, backgroundColor: palette.night950, overflow: 'hidden' },
   timerFill: { height: 8, borderRadius: 4 },
@@ -803,7 +1051,12 @@ const styles = StyleSheet.create({
   },
   answers: { gap: space.sm },
   answersDock: { paddingHorizontal: space.md, paddingTop: space.xs },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: space.sm },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    rowGap: space.sm,
+  },
   explain: { gap: space.xs },
   revealHead: { flexDirection: 'row', alignItems: 'center' },
   link: { textDecorationLine: 'underline', marginTop: space.xs },
@@ -840,7 +1093,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.board,
   },
   fiftyOff: { opacity: 0.45 },
-  fiftyTag: { paddingHorizontal: space.sm, paddingVertical: 1, borderRadius: radius.chip, backgroundColor: colors.correct },
+  fiftyTag: {
+    paddingHorizontal: space.sm,
+    paddingVertical: 1,
+    borderRadius: radius.chip,
+    backgroundColor: colors.correct,
+  },
   fiftyTagPaid: { backgroundColor: colors.led },
   result: { padding: space.xl, gap: space.lg, alignItems: 'center' },
   resultGlow: { position: 'absolute', top: 0, left: 0, right: 0, height: 360 },
@@ -848,8 +1106,27 @@ const styles = StyleSheet.create({
   starMid: { marginBottom: 18 },
   finalCard: { alignSelf: 'stretch', gap: space.lg },
   earned: { flexDirection: 'row', gap: space.sm },
-  earnedTile: { flex: 1, alignItems: 'center', paddingVertical: space.md, borderRadius: radius.board, backgroundColor: colors.surfaceRaised },
+  earnedTile: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: space.md,
+    borderRadius: radius.board,
+    backgroundColor: colors.surfaceRaised,
+  },
   breakdown: { marginTop: space.xs },
-  chest: { flexDirection: 'row', alignItems: 'center', gap: space.sm, padding: space.md, borderRadius: radius.board, backgroundColor: colors.led },
-  levelUp: { alignSelf: 'center', paddingHorizontal: space.lg, paddingVertical: space.xs, borderRadius: radius.chip, backgroundColor: colors.correct },
+  chest: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    padding: space.md,
+    borderRadius: radius.board,
+    backgroundColor: colors.led,
+  },
+  levelUp: {
+    alignSelf: 'center',
+    paddingHorizontal: space.lg,
+    paddingVertical: space.xs,
+    borderRadius: radius.chip,
+    backgroundColor: colors.correct,
+  },
 });

@@ -15,7 +15,16 @@ import {
 } from 'react-native';
 import Animated, { FadeInDown, SlideInLeft, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText, Backdrop, Card, GlassFill, Icon, Sloth, StickerButton, useToast } from '@/design-system/components';
+import {
+  AppText,
+  Backdrop,
+  Card,
+  GlassFill,
+  Icon,
+  Sloth,
+  StickerButton,
+  useToast,
+} from '@/design-system/components';
 import { haptic } from '@/design-system/feedback/haptics';
 import { useReducedMotion } from '@/design-system/feedback/reducedMotion';
 import { colors, fontFamily, palette, radius, space } from '@/design-system/tokens';
@@ -44,7 +53,11 @@ const STEPS: Step[] = ['age', 'about', 'nick'];
 function Dots({ step }: { step: Step }) {
   const i = STEPS.indexOf(step);
   return (
-    <View style={styles.dots} accessible accessibilityLabel={fmt(t.stepOf, { n: i + 1, total: STEPS.length })}>
+    <View
+      style={styles.dots}
+      accessible
+      accessibilityLabel={fmt(t.stepOf, { n: i + 1, total: STEPS.length })}
+    >
       {STEPS.map((s, k) => (
         <View key={s} style={[styles.dot, k <= i && styles.dotOn, k === i && styles.dotNow]} />
       ))}
@@ -85,9 +98,16 @@ function Frame({
           <View style={styles.skip} />
         )}
       </View>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.flex}
+      >
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
-          <Animated.View key={step} entering={reduced ? undefined : SlideInLeft.springify().damping(18)} style={styles.head}>
+          <Animated.View
+            key={step}
+            entering={reduced ? undefined : SlideInLeft.springify().damping(18)}
+            style={styles.head}
+          >
             <Sloth size={step === 'about' ? 96 : 124} say={say} />
             <AppText variant="title" align="center">
               {title}
@@ -111,10 +131,19 @@ function Frame({
 const ROW = 56;
 const AGES: (number | null)[] = [null, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
 
-function AgeWheel({ value, onChange }: { value: number | null; onChange: (a: number | null) => void }) {
+function AgeWheel({
+  value,
+  onChange,
+}: {
+  value: number | null;
+  onChange: (a: number | null) => void;
+}) {
   const last = useRef(-1);
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const i = Math.max(0, Math.min(AGES.length - 1, Math.round(e.nativeEvent.contentOffset.y / ROW)));
+    const i = Math.max(
+      0,
+      Math.min(AGES.length - 1, Math.round(e.nativeEvent.contentOffset.y / ROW)),
+    );
     if (i !== last.current) {
       last.current = i;
       haptic('select');
@@ -122,7 +151,12 @@ function AgeWheel({ value, onChange }: { value: number | null; onChange: (a: num
     }
   };
   return (
-    <View style={styles.wheel} accessibilityRole="adjustable" accessibilityLabel={t.ageTitle} accessibilityValue={{ text: value ? String(value) : t.agePick }}>
+    <View
+      style={styles.wheel}
+      accessibilityRole="adjustable"
+      accessibilityLabel={t.ageTitle}
+      accessibilityValue={{ text: value ? String(value) : t.agePick }}
+    >
       <GlassFill />
       <View pointerEvents="none" style={styles.wheelBand} />
       <ScrollView
@@ -174,7 +208,9 @@ export default function OnboardingScreen() {
   /** Three free nicknames from the server (local ones if it can't be reached). */
   const loadSugs = useCallback(async () => {
     try {
-      const xs = await rpc('username_suggestions', undefined, (x) => (Array.isArray(x) ? x.map(String) : []));
+      const xs = await rpc('username_suggestions', undefined, (x) =>
+        Array.isArray(x) ? x.map(String) : [],
+      );
       if (xs.length) return setSugs(xs.slice(0, 3));
     } catch {
       // fall through to the local list
@@ -199,7 +235,9 @@ export default function OnboardingScreen() {
 
   const savePrefs = async (g: typeof gender, w: string[] | null) => {
     try {
-      const st = await rpc('save_preferences', { p_gender: g, p_worlds: w }, (x) => MyStateSchema.parse(x));
+      const st = await rpc('save_preferences', { p_gender: g, p_worlds: w }, (x) =>
+        MyStateSchema.parse(x),
+      );
       qc.setQueryData(queryKeys.myState, st);
     } catch {
       // preferences are a nicety; never block the first run on them
@@ -306,7 +344,8 @@ export default function OnboardingScreen() {
             loading={busy}
             onPress={async () => {
               setBusy(true);
-              if (gender !== null || topics.length > 0) await savePrefs(gender, topics.length ? topics : null);
+              if (gender !== null || topics.length > 0)
+                await savePrefs(gender, topics.length ? topics : null);
               setBusy(false);
               go('nick');
             }}
@@ -329,7 +368,9 @@ export default function OnboardingScreen() {
                   accessibilityState={{ checked: on }}
                   style={[styles.gender, on && styles.genderOn]}
                 >
-                  <AppText style={styles.emoji}>{g === 'male' ? '👦' : g === 'female' ? '👧' : '🙂'}</AppText>
+                  <AppText style={styles.emoji}>
+                    {g === 'male' ? '👦' : g === 'female' ? '👧' : '🙂'}
+                  </AppText>
                   <AppText variant="label" color={on ? palette.night950 : colors.text}>
                     {t[g]}
                   </AppText>
@@ -341,7 +382,11 @@ export default function OnboardingScreen() {
         <Card padding={space.md} style={styles.block}>
           <View style={styles.rowBetween}>
             <AppText variant="label">{t.topicsTitle}</AppText>
-            <AppText variant="caption" color={topics.length > 0 ? colors.correct : colors.textMuted} style={styles.bold}>
+            <AppText
+              variant="caption"
+              color={topics.length > 0 ? colors.correct : colors.textMuted}
+              style={styles.bold}
+            >
               {topics.length > 0 ? fmt(t.topicsDone, { n: topics.length }) : t.topicsOptional}
             </AppText>
           </View>
@@ -356,7 +401,10 @@ export default function OnboardingScreen() {
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked: on }}
                   accessibilityLabel={w.name}
-                  style={[styles.topic, on && { borderColor: colors.led, backgroundColor: `${w.color}55` }]}
+                  style={[
+                    styles.topic,
+                    on && { borderColor: colors.led, backgroundColor: `${w.color}55` },
+                  ]}
                 >
                   {img ? <Image source={img} style={styles.topicImg} /> : null}
                   <AppText variant="caption" numberOfLines={1} style={styles.bold}>
@@ -403,7 +451,12 @@ export default function OnboardingScreen() {
               {
                 onSuccess: finish,
                 onError: (e) =>
-                  toast(e instanceof RpcError && e.code === 'username_taken' ? t.nickTaken : t.nickInvalid, 'error'),
+                  toast(
+                    e instanceof RpcError && e.code === 'username_taken'
+                      ? t.nickTaken
+                      : t.nickInvalid,
+                    'error',
+                  ),
               },
             )
           }
@@ -423,7 +476,11 @@ export default function OnboardingScreen() {
           accessibilityLabel={t.nickTitle}
           returnKeyType="done"
         />
-        <AppText variant="caption" color={nick.length > 0 && !valid ? colors.danger : colors.textDim} align="center">
+        <AppText
+          variant="caption"
+          color={nick.length > 0 && !valid ? colors.danger : colors.textDim}
+          align="center"
+        >
           {t.nickInvalid}
         </AppText>
         <AppText variant="label" align="center" color={colors.textMuted}>
@@ -465,7 +522,13 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bgDeep },
   flex: { flex: 1 },
-  top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: space.lg, paddingTop: space.sm },
+  top: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: space.lg,
+    paddingTop: space.sm,
+  },
   skip: { minWidth: 48, alignItems: 'flex-end' },
   dots: { flexDirection: 'row', gap: 6 },
   dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: 'rgba(255,255,255,0.2)' },
