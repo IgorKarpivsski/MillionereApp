@@ -1124,22 +1124,3 @@ export const HomeStateSchema = z.object({
 });
 export type HomeState = z.infer<typeof HomeStateSchema>;
 
-/** The sloth's wardrobe: 105 items in 7 slots, bought with coins or gems; what the sloth wears per slot. */
-export const WARDROBE_SLOTS = ['hat', 'glasses', 'earrings', 'necklace', 'bracelet', 'outfit', 'shoes'] as const;
-export type WardrobeSlot = (typeof WARDROBE_SLOTS)[number];
-export const WardrobeItemSchema = z.object({
-  id: z.string(),
-  cat: z.enum(WARDROBE_SLOTS),
-  price: z.number().int(),
-  currency: z.enum(['coins', 'gems']),
-  /** only from the login streak: reached on this day */
-  streak: z.number().int().optional(),
-});
-export type WardrobeItem = z.infer<typeof WardrobeItemSchema>;
-export const WardrobeStateSchema = z.object({
-  items: z.array(WardrobeItemSchema).default([]),
-  owned: z.array(z.string()).default([]),
-  outfit: z.record(z.string(), z.string()).default({}),
-  bought: z.string().optional(),
-});
-export type WardrobeState = z.infer<typeof WardrobeStateSchema>;

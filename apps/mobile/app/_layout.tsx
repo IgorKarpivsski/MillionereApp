@@ -117,7 +117,6 @@ function Gate() {
         <Stack.Screen name="event" />
         <Stack.Screen name="player/[id]" />
         <Stack.Screen name="shop" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="wardrobe" />
         <Stack.Screen name="streak" />
         <Stack.Screen name="wheel" options={{ presentation: 'modal' }} />
         <Stack.Screen name="pass" />

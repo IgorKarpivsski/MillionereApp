@@ -36,7 +36,7 @@ export function useStreak() {
   });
 }
 
-/** "רצף ימים": come back every day, the prizes grow (some wardrobe items only come from here). */
+/** "רצף ימים": come back every day, the prizes grow. */
 export default function StreakScreen() {
   const { data } = useStreak();
   const qc = useQueryClient();
@@ -62,7 +62,6 @@ export default function StreakScreen() {
       refresh();
       void qc.invalidateQueries({ queryKey: ['streak'] });
       void qc.invalidateQueries({ queryKey: ['login-calendar'] });
-      void qc.invalidateQueries({ queryKey: queryKeys.wardrobe });
     } catch {
       void qc.invalidateQueries({ queryKey: ['streak'] });
     } finally {
