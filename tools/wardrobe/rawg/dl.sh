@@ -1,0 +1,1 @@
+cd /home/claude/millionereapp/tools/wardrobe/rawg; while read i s; do [ -f $i.png ] || curl -s -o $i.png "https://d8j0ntlcm91z4.cloudfront.net/user_2x1UegQvignkIVXKpKcIQL2jkLf/hf_20261126_$s.png"; done < urls.txt; ls [0-9]*.png | wc -l
